@@ -1329,8 +1329,9 @@ ACT.players=()=>{save();modal(`<h2>Who is playing?</h2><div class="players">${PR
 const _rh3=renderHome;renderHome=function(){_rh3();if(S.name&&!S.hero&&$('#modal').hidden)setTimeout(()=>{if(!S.hero&&$('#modal').hidden)ACT.heroes()},250)};
 
 /* ================= V12: family sync (Netlify) ================= */
-const SYNC={key:'kk-family',api:'/api/keystone-sync',t:null,busy:false,ok:null};
+const SYNC={key:'kk-family',shortKey:'kk-family-short',api:'/api/keystone-sync',codeApi:'/api/keystone-family-code',t:null,busy:false,ok:null};
 const famCode=()=>{try{return localStorage.getItem(SYNC.key)||''}catch(e){return ''}};
+const famShort=()=>{try{return strongFamCode(famCode())?localStorage.getItem(SYNC.shortKey)||'':''}catch(e){return ''}};
 const newFamCode=()=>{const b=crypto.getRandomValues(new Uint8Array(16));return [...b].map(x=>x.toString(16).padStart(2,'0')).join('')};
 const strongFamCode=c=>/^[0-9a-f]{32}$/.test(c);
 const syncHeaders=c=>({'x-keystone-code':c});
@@ -1348,13 +1349,48 @@ async function syncPush(now){const c=famCode();if(!c||SYNC.busy)return;clearTime
  if(now)return go();SYNC.t=setTimeout(go,2500)}
 const _save0=save;save=function(){S.upd=Date.now();_save0();syncPush()};
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&famCode()){clearTimeout(SYNC.t);try{fetch(SYNC.api,{method:'PUT',headers:{'content-type':'application/json',...syncHeaders(famCode())},body:JSON.stringify(localBundle()),keepalive:true})}catch(e){}}else if(document.visibilityState==='visible')syncPull()});
-const _set0=ACT.settings;ACT.settings=()=>{_set0();const c=famCode();const box=$('#modal .mbox')||$('#modal');const done=box.querySelector('[data-act=close]');
- done.insertAdjacentHTML('beforebegin',`<div class="setrow sync"><span>Play on more than one device?<small class="muted">${c?(SYNC.revoked?'Your code was changed on another device. Turn sync off here, then enter the new code.':SYNC.ok===false?'Can’t connect right now. Your progress is still saved on this device.':'Copy this code to use your saves on another device: <b>'+esc(c)+'</b>'+(strongFamCode(c)?'':' · This code is easy to guess. Make a safer one to protect your saves.')):'Make a code here, then enter it on your other device to share your progress. Keep the code private.'}</small></span>${c?`<span class="namebox">${!SYNC.revoked?'<button class="btn sm volt" data-act="syncCopy">Copy code</button><button class="btn sm volt" data-act="syncUpgradeAsk">Change code</button>':''}<button class="btn sm alt" data-act="syncOff">Turn off</button></span>`:`<span class="namebox"><input id="fam" maxlength="40" placeholder="Code from another device" autocomplete="off"><button class="btn sm volt" data-act="syncGenerate">Make a code</button><button class="btn sm volt" data-act="syncOn">Use code</button></span>`}</div>`)};
- ACT.syncGenerate=()=>{$('#fam').value=newFamCode();toast('New code ready! Select Use code to turn on sync.')};
-ACT.syncCopy=async()=>{try{await navigator.clipboard.writeText(famCode());toast('Family code copied! Keep it private.')}catch(e){toast('Could not copy the code')}};
+const _set0=ACT.settings;ACT.settings=()=>{_set0();const c=famCode(),short=famShort(),box=$('#modal .mbox')||$('#modal'),done=box.querySelector('[data-act=close]');
+ const message=!c?'Make a family code here, or enter one from another device. Keep it private.':
+  SYNC.revoked?'This family code was changed on another device. Turn sync off here, then enter the new code.':
+  SYNC.ok===false?'Can’t connect right now. Your progress is still saved on this device.':
+  !strongFamCode(c)?'This older code is easy to guess. Change it to get a safer family link.':
+  short?'Your family code is <b>'+esc(short)+'</b>. Type it on another device to share your saves. Keep it private.':
+  'Your saves are ready. Make a short family code to use them on another device.';
+ const actions=!c?'<input id="fam" maxlength="40" placeholder="FOX482" autocomplete="off"><button class="btn sm volt" data-act="syncGenerate">Make a code</button><button class="btn sm volt" data-act="syncOn">Use code</button>':
+  SYNC.revoked?'<button class="btn sm alt" data-act="syncOff">Turn off</button>':
+  !strongFamCode(c)?'<button class="btn sm volt" data-act="syncUpgradeAsk">Change code</button><button class="btn sm alt" data-act="syncOff">Turn off</button>':
+  `${short?'<button class="btn sm volt" data-act="syncCopy">Copy code</button>':'<button class="btn sm volt" data-act="syncGenerate">Make a code</button>'}<button class="btn sm volt" data-act="syncUpgradeAsk">Change code</button><button class="btn sm alt" data-act="syncOff">Turn off</button>`;
+ done.insertAdjacentHTML('beforebegin',`<div class="setrow sync"><span>Play on more than one device?<small class="muted">${message}</small></span><span class="namebox">${actions}</span></div>`)};
+ACT.syncGenerate=async()=>{
+ let secret=famCode();
+ if(secret&&!strongFamCode(secret)){toast('Change your old code first');return}
+ if(!secret){
+  secret=newFamCode();
+  try{localStorage.setItem(SYNC.key,secret)}catch(e){toast('Could not save the code');return}
+  await syncPush(true);
+  if(!SYNC.ok){toast('Can’t connect right now. Try again later.');ACT.settings();return}
+ }
+ try{
+  const response=await fetch(SYNC.codeApi,{method:'POST',headers:syncHeaders(secret)});
+  const body=await response.json();
+  if(!response.ok||!body.code)throw 0;
+  localStorage.setItem(SYNC.shortKey,body.code);
+  toast('Your family code is ready!');
+  ACT.settings();
+ }catch(e){toast('Could not make a code. Try again.')}
+};
+ACT.syncCopy=async()=>{try{await navigator.clipboard.writeText(famShort());toast('Family code copied! Keep it private.')}catch(e){toast('Could not copy the code')}};
 ACT.syncOn=async()=>{const v=($('#fam').value||'').trim().toLowerCase();if(v.length<6){toast('Enter a valid family code');return}
- if(!strongFamCode(v)){try{const r=await fetch(SYNC.api,{cache:'no-store',headers:syncHeaders(v)});const j=await r.json();if(!r.ok||!j.data){toast('That short code has no saves. Create a new code instead.');return}}catch(e){toast('Can’t check that code right now');return}}
- try{localStorage.setItem(SYNC.key,v)}catch(e){}await syncPull();toast(SYNC.ok?'Family sync on!':'Can’t reach the server');ACT.settings()};
+ let secret=v,short='';
+ if(/^[a-z]{3}[0-9]{3}$/.test(v)){
+  try{const r=await fetch(SYNC.codeApi,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({code:v})});const j=await r.json();if(!r.ok||!strongFamCode(j.secret)){toast(j.error||'That code was not found');return}secret=j.secret;short=v.toUpperCase()}
+  catch(e){toast('Can’t check that code right now');return}
+ }else if(!strongFamCode(v)){
+  try{const r=await fetch(SYNC.api,{cache:'no-store',headers:syncHeaders(v)});const j=await r.json();if(!r.ok||!j.data){toast('That code was not found');return}}
+  catch(e){toast('Can’t check that code right now');return}
+ }
+ try{localStorage.setItem(SYNC.key,secret);if(short)localStorage.setItem(SYNC.shortKey,short)}catch(e){}
+ await syncPull();toast(SYNC.ok?'Family sync on!':'Can’t reach the server');ACT.settings()};
 ACT.syncUpgradeAsk=()=>modal(`<h2>Change your family code?</h2><p>We’ll make a new code for everyone on this computer. The old code will stop working. If you play on other devices, enter the new code there too.</p><div class="rbtns"><button class="btn" data-act="syncUpgrade">Change code</button><button class="btn alt" data-act="settings">Cancel</button></div>`);
 ACT.syncUpgrade=async()=>{const old=famCode();if(!old)return;const pendingKey='kk-family-upgrade';let next;
  try{const pending=JSON.parse(localStorage.getItem(pendingKey)||'null');next=pending?.old===old&&strongFamCode(pending.code)?pending.code:newFamCode();localStorage.setItem(pendingKey,JSON.stringify({old,code:next}))}catch(e){toast('Could not save the new code');return}
@@ -1363,14 +1399,14 @@ ACT.syncUpgrade=async()=>{const old=famCode();if(!old)return;const pendingKey='k
   if(data){const oldState=await fetch(SYNC.api,{cache:'no-store',headers:syncHeaders(old)});if(oldState.status!==410)throw 0}
   if(!data){await syncPull();if(!SYNC.ok)throw 0;SYNC.busy=true;clearTimeout(SYNC.t);const r=await fetch(SYNC.api,{method:'POST',headers:{'content-type':'application/json',...syncHeaders(old)},body:JSON.stringify({newCode:next,bundle:localBundle()})});if(!r.ok)throw 0;data=(await r.json()).data}
   SYNC.busy=true;
-  localStorage.setItem(SYNC.key,next);localStorage.removeItem(pendingKey);mergeBundle(data);SYNC.ok=true;SYNC.revoked=false;SYNC.busy=false;save();await syncPush(true);toast('New code ready! Use it on your other devices.');ACT.settings()}
+  localStorage.setItem(SYNC.key,next);localStorage.removeItem(SYNC.shortKey);localStorage.removeItem(pendingKey);mergeBundle(data);SYNC.ok=true;SYNC.revoked=false;SYNC.busy=false;save();await syncPush(true);await ACT.syncGenerate()}
  catch(e){SYNC.busy=false;toast('Could not replace the code. Try again.')}};
-ACT.syncOff=()=>{try{localStorage.removeItem(SYNC.key)}catch(e){}SYNC.ok=null;SYNC.revoked=false;toast('Sync off');ACT.settings()};
+ACT.syncOff=()=>{try{localStorage.removeItem(SYNC.key);localStorage.removeItem(SYNC.shortKey)}catch(e){}SYNC.ok=null;SYNC.revoked=false;toast('Sync off');ACT.settings()};
 setTimeout(syncPull,400);
 
 /* ================= V13: arcade diamonds + progress trackers ================= */
-let runShareText='';
-function shareRunHTML(game,stats){const challenge=!!G.challengeData;runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${challenge?'Can you beat my arcade ghost?':'Think you can beat my result? Give it a try!'}`;return `<button class="btn alt" data-act="copyRun">${challenge?'Copy challenge':'Copy result'}</button>`}
+let runShareText='',runShareChallenge=null;
+function shareRunHTML(game,stats){const arcadeGame={ 'Meteor Zap':'meteor','Scrambler Attack':'glitch','Keylori Race':'race' }[game];runShareChallenge=arcadeGame&&G.challengeData?.g===arcadeGame?G.challengeData:null;const challenge=!!runShareChallenge;runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${challenge?'Can you beat my arcade ghost?':'Come explore Keyloria Kingdom and try it yourself!'}`;return `<button class="btn alt" data-act="copyRun">${challenge?'Copy challenge':'Copy result'}</button>`}
 ACT.copyRun=async()=>{try{await navigator.clipboard.writeText(runShareText);toast('Result copied!')}catch(e){toast('Could not copy the result')}};
 let ARC_X=()=>({easy:.75,medium:1,hard:1.5})[S.set.arcd]||1;
 function arcReward(parts){const x=ARC_X();let tot=0;const rows=parts.filter(p=>p[1]>0).map(([t,n])=>{tot+=n;return `<div><span>${t}</span><b>+${n}</b></div>`});

@@ -233,9 +233,9 @@ ACT.copyRun=async()=>{
  if(button)button.disabled=true;
  try{
   let link='https://keystone-kingdom.netlify.app/';
-  if(G.challengeData){
+  if(runShareChallenge){
    if(!G.challengeCode){
-    const response=await fetch('/api/arcade-challenge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(G.challengeData)});
+    const response=await fetch('/api/arcade-challenge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(runShareChallenge)});
     const body=await response.json();
     if(!response.ok||!body.id)throw new Error(body.error||'Could not create challenge');
     G.challengeCode=body.id;
@@ -243,8 +243,8 @@ ACT.copyRun=async()=>{
    const url=new URL(location.href);url.search='';url.hash='';url.searchParams.set('c',G.challengeCode);link=url.href;
   }
   await navigator.clipboard.writeText(runShareText+'\n'+link);
-  toast(G.challengeData?'Short challenge link copied!':'Result copied!');
- }catch(e){toast('Could not copy the challenge. Please try again.')}
+  toast(runShareChallenge?'Short challenge link copied!':'Result copied!');
+ }catch(e){toast('Could not copy the result. Please try again.')}
  finally{if(button)button.disabled=false}
 };
 function ghostInviteModal(data){
