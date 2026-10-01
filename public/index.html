@@ -770,6 +770,7 @@ svg.zk,svg.zk image{pointer-events:none}
 .btn,.btn *,.arena .intro button.btn,.arena .intro .btn *{text-shadow:none!important}.arena .intro .btn{font-size:24px!important;padding:8px 22px!important}.arena .intro .linkbtn{font-size:22px!important}
 #mbox .rbtns .btn[data-to=map],#mbox .rbtns .btn[data-to=arcade]{background:var(--volt)!important;color:#00303a!important;box-shadow:0 5px 0 #1a9fb3!important}#mbox .rbtns .btn[data-to=binder],#mbox .rbtns .btn[data-to=shop]{background:#b8a0e8!important;color:#2a1d3e!important;box-shadow:0 5px 0 #6a58a8!important}#mbox .rbtns .btn[data-act=practice],#mbox .rbtns .btn[data-act=meteor],#mbox .rbtns .btn[data-act=race],#mbox .rbtns .btn[data-act=glitch],#mbox .rbtns .btn[data-act=petPlay],#mbox .rbtns .btn.alt[data-act=play]{background:#f0a070!important;color:#3a1a0a!important;box-shadow:0 5px 0 #b8603a!important}
 #nm.nmbad{animation:shake .3s;border-color:#e8584f!important}
+.footbtns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:18px}#fbmsg,#fbmail{width:100%;box-sizing:border-box;font:20px var(--body);padding:10px;background:#1b1626;color:var(--ink);border:3px solid var(--line)}
 @media (max-width:820px){
   .home-grid,.shop-top{grid-template-columns:1fr}
   .hero-big{min-height:220px}
@@ -3333,8 +3334,30 @@ function cleanText(txt){if(typeof txt!=='string')return txt;return txt.split(' '
  for(let k=0;k<30;k++){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}const s=a.join('');if(!tokBad(s))return s}return ''}).filter((t,i,arr)=>t!==''||false).join(' ')}
 const _gt39=genText;genText=function(){return cleanText(_gt39.apply(this,arguments))};
 if(typeof comboText==='function'){const _ct39=comboText;comboText=function(){return cleanText(_ct39.apply(this,arguments))}}
+/* ================= V41: feedback + about ================= */
+const _rh41=renderHome;renderHome=function(){_rh41();const g=$('#s-home .home-grid');if(g&&!$('#s-home .footbtns'))g.insertAdjacentHTML('afterend','<div class="footbtns"><button class="btn alt sm" data-act="feedback">Feedback / Report a bug</button><button class="btn alt sm" data-act="about">About</button></div>')};
+ACT.feedback=()=>{modal(`<h2>Feedback</h2><p class="muted" style="margin:0">Found a bug or have an idea? Tell us!</p>
+ <div class="seg fbtype" style="justify-content:center"><button class="on" data-act="fbType" data-v="Bug">Bug</button><button data-act="fbType" data-v="Idea">Idea</button><button data-act="fbType" data-v="Other">Other</button></div>
+ <textarea id="fbmsg" rows="5" maxlength="2000" placeholder="What happened?"></textarea>
+ <input id="fbmail" type="email" maxlength="120" placeholder="Grown-up email (optional)">
+ <div class="rbtns"><button class="btn" data-act="fbSend">Send</button><button class="btn alt" data-act="close">Cancel</button></div>`);setTimeout(()=>$('#fbmsg')?.focus(),50)};
+ACT.fbType=d=>{document.querySelectorAll('.fbtype button').forEach(b=>b.classList.toggle('on',b.dataset.v===d.v))};
+ACT.fbSend=async()=>{const msg=($('#fbmsg')?.value||'').trim();if(msg.length<3){toast('Type a little more first!');return}
+ const type=document.querySelector('.fbtype .on')?.dataset.v||'Other';
+ const body=new URLSearchParams({'form-name':'feedback',type,message:msg,email:$('#fbmail')?.value||'',player:S.name||'',info:`${navigator.userAgent} | ${innerWidth}x${innerHeight} | lvl ${levelOf(S.xp)} | stage ${nextStage()}`}).toString();
+ try{const r=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});if(!r.ok)throw 0;
+  modal(`<h2>Thank you!</h2><p style="margin:0">Your message was sent.</p><div class="rbtns"><button class="btn" data-act="close">OK</button></div>`)}
+ catch(e){toast('Could not send. Try again on the website.')}};
+ACT.about=()=>{modal(`<h2>About</h2><div class="hero-mini">${zookSVG()}</div>
+ <p style="margin:0;font-size:22px">KEYSTONE KINGDOM</p>
+ <p style="margin:0">A typing adventure made by<br><b>Andy Tsang</b> &amp; <b>Claude</b> (AI by Anthropic)</p>
+ <p class="muted" style="margin:0">© ${Math.max(2026,new Date().getFullYear())} Andy Tsang. All rights reserved.</p>
+ <div class="rbtns"><button class="btn" data-act="close">Close</button></div>`)};
+addEventListener('keydown',e=>{if(e.target&&(e.target.id==='fbmsg'||e.target.id==='fbmail'))e.stopImmediatePropagation()},true);
 let UID=0;function uniq(svg){const u='_'+(++UID);return svg.replace(/id="([^"]+)"/g,`id="$1${u}"`).replace(/url\(#([^)]+)\)/g,`url(#$1${u})`)}
 [['zookSVG'],['creatureSVG'],['glitchSVG'],['sceneSVG'],['pathScene']].forEach(()=>{});
 zookSVG=(f=>(...a)=>uniq(f(...a)))(zookSVG);creatureSVG=(f=>(...a)=>uniq(f(...a)))(creatureSVG);glitchSVG=(f=>(...a)=>uniq(f(...a)))(glitchSVG);sceneSVG=(f=>(...a)=>uniq(f(...a)))(sceneSVG);pathScene=(f=>(...a)=>uniq(f(...a)))(pathScene);
 load();buildKB();initHands();show('home');
 </script>
+
+<form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="type"><textarea name="message"></textarea><input name="email"><input name="player"><input name="info"><input name="bot-field"></form>
