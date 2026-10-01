@@ -1,1 +1,1 @@
-{ "name": "keystone-kingdom", "private": true, "type": "module", "dependencies": { "@netlify/blobs": "^8.1.0" } }
+{ "name": "keyloria-kingdom", "private": true, "type": "module", "dependencies": { "@netlify/blobs": "^8.1.0" } }

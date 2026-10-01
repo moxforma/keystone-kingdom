@@ -5,6 +5,11 @@ const hash = async (s) => {
   return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 };
 
+const validBundle = (data) => data && data.saves && typeof data.saves === "object" &&
+  !Array.isArray(data.saves) && data.prof && Array.isArray(data.prof.list) &&
+  (data.prof.del === undefined || Array.isArray(data.prof.del));
+const emptyBundle = () => ({ prof: { list: [], del: [] }, saves: {} });
+
 // keep the newest copy of each player, never drop players
 export const mergeBundles = (old, inc) => {
   const saves = { ...(old.saves || {}) };
@@ -19,22 +24,37 @@ export const mergeBundles = (old, inc) => {
 };
 
 export default async (req) => {
-  const code = (new URL(req.url).searchParams.get("code") || "").trim().toLowerCase();
+  // Query fallback keeps existing deployed clients working during an update.
+  const code = (req.headers.get("x-keystone-code") || new URL(req.url).searchParams.get("code") || "").trim().toLowerCase();
   if (code.length < 6 || code.length > 40) return Response.json({ error: "bad code" }, { status: 400 });
   const store = getStore({ name: "keystone-family-saves", consistency: "strong" });
   const key = await hash(code);
+  const old = await store.get(key, { type: "json" });
+  if (old?.revoked) return Response.json({ error: "This family code was replaced" }, { status: 410 });
   if (req.method === "GET") {
-    const data = await store.get(key, { type: "json" });
-    return Response.json({ data: data || null });
+    return Response.json({ data: old || null });
   }
-  if (req.method === "PUT") {
+  if (req.method === "PUT" || req.method === "POST") {
     const body = await req.text();
     if (body.length > 1_000_000) return Response.json({ error: "too big" }, { status: 413 });
     let data;
     try { data = JSON.parse(body); } catch { return Response.json({ error: "bad json" }, { status: 400 }); }
-    if (!data || typeof data.saves !== "object") return Response.json({ error: "bad data" }, { status: 400 });
-    const old = (await store.get(key, { type: "json" })) || { prof: { list: [] }, saves: {} };
-    const merged = mergeBundles(old, data);
+    if (req.method === "POST") {
+      const newCode = String(data?.newCode || "").trim().toLowerCase();
+      if (!/^[0-9a-f]{32}$/.test(newCode) || newCode === code || !validBundle(data.bundle))
+        return Response.json({ error: "bad upgrade" }, { status: 400 });
+      const newKey = await hash(newCode);
+      if (await store.get(newKey, { type: "json" }))
+        return Response.json({ error: "new code in use" }, { status: 409 });
+      const merged = mergeBundles(old || emptyBundle(), data.bundle);
+      await store.setJSON(newKey, merged);
+      await store.setJSON(key, { revoked: true, t: Date.now() });
+      return Response.json({ ok: true, data: merged });
+    }
+    if (!validBundle(data)) return Response.json({ error: "bad data" }, { status: 400 });
+    if (!old && !/^[0-9a-f]{32}$/.test(code))
+      return Response.json({ error: "Create a new family code" }, { status: 400 });
+    const merged = mergeBundles(old || emptyBundle(), data);
     await store.setJSON(key, merged);
     return Response.json({ ok: true, data: merged });
   }
