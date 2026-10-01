@@ -41,7 +41,7 @@ renderArcade=function(){
   arcadeStat('Wins',S.arc.race)+arcadeStat('Best WPM',S.arc.raceBest||0)+arcadeStat('Highest level beaten',arcadeHighest('race'),'level')
  ];
  panels.forEach((panel,index)=>{panel.querySelector('.note')?.remove();panel.querySelector('[data-act]')?.insertAdjacentHTML('beforebegin',`<div class="arcade-stats">${stats[index]}</div>`)});
- bar.insertAdjacentHTML('afterend',`<div class="arcade-options panel"><b>Include in arcade:</b>${[['arcNumbers','Numbers'],['arcSymbols','Symbols']].map(([key,label])=>`<div class="seg"><span>${label}</span><button class="${S.set[key]===true?'on':''}" data-act="arcadeChars" data-key="${key}" aria-pressed="${S.set[key]===true}">${S.set[key]===true?'On':'Off'}</button></div>`).join('')}<span class="muted">Applies to all three games, including BEAST mode.</span></div>`);
+ bar.querySelector('.seg')?.insertAdjacentHTML('beforeend',`${[['arcNumbers','Numbers'],['arcSymbols','Symbols']].map(([key,label])=>`<button class="${S.set[key]===true?'on':''}" data-act="arcadeChars" data-key="${key}" aria-label="Include ${label.toLowerCase()} in arcade games" aria-pressed="${S.set[key]===true}">${label}</button>`).join('')}`);
 };
 ACT.arcadeChars=d=>{if(!['arcNumbers','arcSymbols'].includes(d.key))return;S.set[d.key]=S.set[d.key]!==true;save();renderArcade()};
 

@@ -322,7 +322,7 @@ function cardHTML(i,f,o={}){
  const sp=SPECIES[i];
  return `<div class="cw ${o.cls||''}"><div class="card ${o.holo?'holo':''} ${o.tier||''}" style="--tc:${TYPES[sp.t]}"><div class="c-top"><span class="c-no">${String(i*3+f+1).padStart(3,'0')}</span><span class="c-name">${sp.n[f]}</span><span class="c-form">${['Hatchling','Champion','Mythic'][f]}</span></div>
  <div class="c-art">${creatureSVG(i,f,'fit big',o.tier)}</div><div class="c-type"><span class="tpill">${sp.t}</span><span class="c-rar">${'★'.repeat(f+1)}</span></div>
- <p class="c-flav">${sp.fl}</p><div class="c-foot">No. ${String(i*3+f+1).padStart(3,'0')} · ${o.tier==='diamond'?'Diamond ':o.tier==='gold'?'Gold ':''}${o.holo?'Holo':'Keylori'}</div></div></div>`;
+ <p class="c-flav">${f===0?sp.fl:EVOLUTION_FLAVOR[i]?.[f-1]||sp.fl}</p><div class="c-foot">No. ${String(i*3+f+1).padStart(3,'0')} · ${o.tier==='diamond'?'Diamond ':o.tier==='gold'?'Gold ':''}${o.holo?'Holo':'Keylori'}</div></div></div>`;
 }
 function renderBinder(){
  const c=Object.keys(S.cards).length,holo=Object.values(S.cards).filter(x=>x.holo).length,gold=Object.values(S.cards).filter(x=>x.tier==='gold').length,dia=Object.values(S.cards).filter(x=>x.tier==='diamond').length;
@@ -1334,13 +1334,13 @@ async function syncPush(now){const c=famCode();if(!c||SYNC.busy)return;clearTime
 const _save0=save;save=function(){S.upd=Date.now();_save0();syncPush()};
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&famCode()){clearTimeout(SYNC.t);try{fetch(SYNC.api,{method:'PUT',headers:{'content-type':'application/json',...syncHeaders(famCode())},body:JSON.stringify(localBundle()),keepalive:true})}catch(e){}}else if(document.visibilityState==='visible')syncPull()});
 const _set0=ACT.settings;ACT.settings=()=>{_set0();const c=famCode();const box=$('#modal .mbox')||$('#modal');const done=box.querySelector('[data-act=close]');
- done.insertAdjacentHTML('beforebegin',`<div class="setrow sync"><span>Family sync<small class="muted">${c?(SYNC.revoked?'This code was replaced on another device. Turn off sync, then connect with the new code.':SYNC.ok===false?'Can’t reach the server right now':'On · your code: <b>'+esc(c)+'</b>'+(strongFamCode(c)?'':' · Short code: replace it to protect your saves.')):'Create a private code, then enter it on your other computers. Anyone with the code can access these saves.'}</small></span>${c?`<span class="namebox">${!SYNC.revoked?'<button class="btn sm volt" data-act="syncCopy">Copy code</button><button class="btn sm volt" data-act="syncUpgradeAsk">Replace code</button>':''}<button class="btn sm alt" data-act="syncOff">Turn off</button></span>`:`<span class="namebox"><input id="fam" maxlength="40" placeholder="Code from another device" autocomplete="off"><button class="btn sm volt" data-act="syncGenerate">Create code</button><button class="btn sm volt" data-act="syncOn">Connect</button></span>`}</div>`)};
-ACT.syncGenerate=()=>{$('#fam').value=newFamCode();toast('New private code ready. Connect to use it.')};
+ done.insertAdjacentHTML('beforebegin',`<div class="setrow sync"><span>Play on more than one device?<small class="muted">${c?(SYNC.revoked?'Your code was changed on another device. Turn sync off here, then enter the new code.':SYNC.ok===false?'Can’t connect right now. Your progress is still saved on this device.':'Copy this code to use your saves on another device: <b>'+esc(c)+'</b>'+(strongFamCode(c)?'':' · This code is easy to guess. Make a safer one to protect your saves.')):'Make a code here, then enter it on your other device to share your progress. Keep the code private.'}</small></span>${c?`<span class="namebox">${!SYNC.revoked?'<button class="btn sm volt" data-act="syncCopy">Copy code</button><button class="btn sm volt" data-act="syncUpgradeAsk">Change code</button>':''}<button class="btn sm alt" data-act="syncOff">Turn off</button></span>`:`<span class="namebox"><input id="fam" maxlength="40" placeholder="Code from another device" autocomplete="off"><button class="btn sm volt" data-act="syncGenerate">Make a code</button><button class="btn sm volt" data-act="syncOn">Use code</button></span>`}</div>`)};
+ ACT.syncGenerate=()=>{$('#fam').value=newFamCode();toast('New code ready! Select Use code to turn on sync.')};
 ACT.syncCopy=async()=>{try{await navigator.clipboard.writeText(famCode());toast('Family code copied! Keep it private.')}catch(e){toast('Could not copy the code')}};
 ACT.syncOn=async()=>{const v=($('#fam').value||'').trim().toLowerCase();if(v.length<6){toast('Enter a valid family code');return}
  if(!strongFamCode(v)){try{const r=await fetch(SYNC.api,{cache:'no-store',headers:syncHeaders(v)});const j=await r.json();if(!r.ok||!j.data){toast('That short code has no saves. Create a new code instead.');return}}catch(e){toast('Can’t check that code right now');return}}
  try{localStorage.setItem(SYNC.key,v)}catch(e){}await syncPull();toast(SYNC.ok?'Family sync on!':'Can’t reach the server');ACT.settings()};
-ACT.syncUpgradeAsk=()=>modal(`<h2>Replace family code?</h2><p>All players on this computer will move to a new private code. The old code will stop working. Enter the new code on your other computers to keep syncing.</p><div class="rbtns"><button class="btn" data-act="syncUpgrade">Replace code</button><button class="btn alt" data-act="settings">Cancel</button></div>`);
+ACT.syncUpgradeAsk=()=>modal(`<h2>Change your family code?</h2><p>We’ll make a new code for everyone on this computer. The old code will stop working. If you play on other devices, enter the new code there too.</p><div class="rbtns"><button class="btn" data-act="syncUpgrade">Change code</button><button class="btn alt" data-act="settings">Cancel</button></div>`);
 ACT.syncUpgrade=async()=>{const old=famCode();if(!old)return;const pendingKey='kk-family-upgrade';let next;
  try{const pending=JSON.parse(localStorage.getItem(pendingKey)||'null');next=pending?.old===old&&strongFamCode(pending.code)?pending.code:newFamCode();localStorage.setItem(pendingKey,JSON.stringify({old,code:next}))}catch(e){toast('Could not save the new code');return}
  clearTimeout(SYNC.t);
@@ -1348,14 +1348,14 @@ ACT.syncUpgrade=async()=>{const old=famCode();if(!old)return;const pendingKey='k
   if(data){const oldState=await fetch(SYNC.api,{cache:'no-store',headers:syncHeaders(old)});if(oldState.status!==410)throw 0}
   if(!data){await syncPull();if(!SYNC.ok)throw 0;SYNC.busy=true;clearTimeout(SYNC.t);const r=await fetch(SYNC.api,{method:'POST',headers:{'content-type':'application/json',...syncHeaders(old)},body:JSON.stringify({newCode:next,bundle:localBundle()})});if(!r.ok)throw 0;data=(await r.json()).data}
   SYNC.busy=true;
-  localStorage.setItem(SYNC.key,next);localStorage.removeItem(pendingKey);mergeBundle(data);SYNC.ok=true;SYNC.revoked=false;SYNC.busy=false;save();await syncPush(true);toast('New code ready. Add it on your other computers.');ACT.settings()}
+  localStorage.setItem(SYNC.key,next);localStorage.removeItem(pendingKey);mergeBundle(data);SYNC.ok=true;SYNC.revoked=false;SYNC.busy=false;save();await syncPush(true);toast('New code ready! Use it on your other devices.');ACT.settings()}
  catch(e){SYNC.busy=false;toast('Could not replace the code. Try again.')}};
 ACT.syncOff=()=>{try{localStorage.removeItem(SYNC.key)}catch(e){}SYNC.ok=null;SYNC.revoked=false;toast('Sync off');ACT.settings()};
 setTimeout(syncPull,400);
 
 /* ================= V13: arcade diamonds + progress trackers ================= */
 let runShareText='';
-function shareRunHTML(game,stats){runShareText=`Keyloria Kingdom — ${game}\n${stats}\nhttps://keystone-kingdom.netlify.app/`;return '<button class="btn alt" data-act="copyRun">Copy result</button>'}
+function shareRunHTML(game,stats){runShareText=`Keyloria Kingdom — ${game}\n${stats}\nThink you can beat my result? Give it a try!\nhttps://keystone-kingdom.netlify.app/`;return '<button class="btn alt" data-act="copyRun">Copy result</button>'}
 ACT.copyRun=async()=>{try{await navigator.clipboard.writeText(runShareText);toast('Result copied!')}catch(e){toast('Could not copy the result')}};
 let ARC_X=()=>({easy:.75,medium:1,hard:1.5})[S.set.arcd]||1;
 function arcReward(parts){const x=ARC_X();let tot=0;const rows=parts.filter(p=>p[1]>0).map(([t,n])=>{tot+=n;return `<div><span>${t}</span><b>+${n}</b></div>`});
@@ -1937,8 +1937,8 @@ const _rb19=renderBinder;renderBinder=function(){_rb19();const sv=true;
 ACT.bview=d=>{S.set.bview=d.v;save();renderBinder()};
 const _card19=ACT.card;ACT.card=d=>{_card19(d);const [i,f]=d.k.split('-').map(Number),bc=$('#mbox .bigcard');if(!bc)return;
  if(false){bc.innerHTML=`<div class="bigsprite">${creatureSVG(i,f,'fit big',(S.cards[d.k]||{}).tier)}</div><h3 class="bsname">${SPECIES[i].n[f]}</h3>`}
- const fr=(S.fr&&S.fr[i])||0,cl=$('#mbox [data-act=close]');
- cl&&cl.insertAdjacentHTML('beforebegin',`<div class="rbtns"><button class="btn volt" data-act="petPlay" data-k="${d.k}">Play with ${SPECIES[i].n[f]}</button>${fr?`<span class="frnd">♥ ${fr}</span>`:''}</div>`);
+ const cl=$('#mbox [data-act=close]');
+ cl&&cl.insertAdjacentHTML('beforebegin',`<div class="rbtns"><button class="btn volt" data-act="petPlay" data-k="${d.k}">Play with ${SPECIES[i].n[f]}</button></div>`);
  $('#mbox .rb.dia')&&($('#mbox .rbadges').nextElementSibling.textContent=$('#mbox .rbadges').nextElementSibling.textContent.replace('1 in 40','1 in 80'));
  const pp=$('#mbox .rbadges')?.nextElementSibling;if(pp)pp.textContent=pp.textContent.replace('1 in 40','1 in 80').replace('1 in 8','1 in 20');fitModal()};
 /* ---- pet play: type the lesson's keys to make your Keylori do tricks ---- */
@@ -1946,8 +1946,8 @@ let PET=null;const TRICKS=['hop','spin','wiggle','flip'];
 ACT.petPlay=d=>{const [i,f]=d.k.split('-').map(Number);let words=genText(i,1,false).split(' ').filter(Boolean);
  if(words.length<6)words=words.concat(genText(i,2,false).split(' ').filter(Boolean));PET={i,f,words:words.slice(0,8),w:0,c:0,miss:0};petDraw(true)};
 function petDraw(first){const p=PET;if(!p)return;const w=p.words[p.w]||'',name=SPECIES[p.i].n[p.f];
- const html=`<h2>Play with ${name}</h2><div class="petstage"><div class="petspr" id="petspr">${creatureSVG(p.i,p.f,'fit big',(S.cards[p.i+'-'+p.f]||{}).tier)}</div><div class="pethearts" id="pethearts"></div></div>
-  <p class="muted petsay" id="petsay">${first?`Type to make ${name} do tricks!`:''}</p>
+ const html=`<h2>Play with ${name}</h2><div class="petstage"><div class="petspr" id="petspr">${creatureSVG(p.i,p.f,'fit big',(S.cards[p.i+'-'+p.f]||{}).tier)}</div><div class="petcheer" id="petcheer"></div></div>
+  <p class="muted petsay" id="petsay">${first?`Type all the words to earn 10 XP and 1 diamond!`:''}</p>
   <div class="petword">${[...w].map((ch,k)=>`<span class="${k<p.c?'ok':k===p.c?'cur':''}" style="--fc:${fcol(keyInfo(ch).f)}">${ch===' '?'·':esc(ch)}</span>`).join('')}</div>
   <div class="petprog">${p.words.map((_,k)=>`<i class="${k<p.w?'on':''}"></i>`).join('')}</div>
   <div class="rbtns"><button class="btn alt" data-act="petStop">Done</button></div>`;
@@ -1956,12 +1956,12 @@ function petDraw(first){const p=PET;if(!p)return;const w=p.words[p.w]||'',name=S
 ACT.petStop=()=>{PET=null;setTarget(null);closeModal()};
 function petKey(ch){const p=PET,w=p.words[p.w],t=w[p.c];
  if(ch===t){p.c++;sfx.ok(p.c);
-  if(p.c>=w.length){p.w++;p.c=0;const tr=rand(TRICKS);petDraw();const s=$('#petspr');if(s){s.classList.add(tr)}const h=$('#pethearts');if(h){h.innerHTML='<span>♥</span>';}
+  if(p.c>=w.length){p.w++;p.c=0;const tr=rand(TRICKS);petDraw();const s=$('#petspr');if(s){s.classList.add(tr)}const cheer=$('#petcheer');if(cheer){cheer.innerHTML='<span>★</span>';}
    sfx.win&&tone(660+p.w*40,.12,'square',.05);
    if(p.w>=p.words.length)return petDone();}else petDraw()}
  else{p.miss++;sfx.bad();const s=$('#petspr');if(s){s.classList.remove('tilt');void s.offsetWidth;s.classList.add('tilt')}const say=$('#petsay');if(say)say.innerHTML=`Oops! Look for <b class="pk" style="--fc:${fcol(keyInfo(t).f)}">${t===' '?'space':esc(t)}</b>`}}
-function petDone(){const p=PET;PET=null;setTarget(null);S.fr=S.fr||{};S.fr[p.i]=(S.fr[p.i]||0)+1;S.xp+=10;save();sfx.win();const name=SPECIES[p.i].n[p.f];
- modal(`<h2>${name} had so much fun!</h2><div class="petstage"><div class="petspr flip">${creatureSVG(p.i,p.f,'fit big',(S.cards[p.i+'-'+p.f]||{}).tier)}</div></div><p style="margin:0">Friendship ♥ ${S.fr[p.i]} · +10 XP</p>
+function petDone(){const p=PET;PET=null;setTarget(null);S.xp+=10;S.gems+=1;save();sfx.win();const name=SPECIES[p.i].n[p.f];
+ modal(`<h2>${name} had so much fun!</h2><div class="petstage"><div class="petspr flip">${creatureSVG(p.i,p.f,'fit big',(S.cards[p.i+'-'+p.f]||{}).tier)}</div></div><h3>Your rewards</h3><div class="rstats"><div><b>+10</b><span>XP</span></div><div><b>+1</b><span>Diamond</span></div></div>
   <div class="rbtns"><button class="btn" data-act="petPlay" data-k="${p.i}-${p.f}">Play again</button><button class="btn alt" data-act="go" data-to="binder">Binder</button></div>`)}
 addEventListener('keydown',e=>{if(!PET||$('#modal').hidden)return;if(e.ctrlKey||e.metaKey||e.altKey)return;
  if(e.key==='Escape'){ACT.petStop();e.preventDefault();e.stopImmediatePropagation();return}
