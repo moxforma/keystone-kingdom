@@ -1490,11 +1490,8 @@ const _mb=mergeBundle;mergeBundle=function(r){if(r&&r.prof&&r.prof.del&&r.prof.d
 
 
 /* ================= V15: modal always fits the window ================= */
-function fitModal(){const m=$('#mbox');if(!m||$('#modal').hidden)return;m.style.zoom=1;m.style.maxHeight='none';m.style.overflow='visible';
- const pad=24,h=m.scrollHeight,w=m.scrollWidth,z=Math.min(1,(innerHeight-pad)/h,(innerWidth-pad)/w);m.style.zoom=z<1?z.toFixed(3):1}
-const _modal0=modal;modal=function(h){_modal0(h);requestAnimationFrame(fitModal);setTimeout(fitModal,120)};
-addEventListener('resize',fitModal);
-try{new ResizeObserver(()=>{if(!fitModal._busy){fitModal._busy=1;requestAnimationFrame(()=>{fitModal();fitModal._busy=0})}}).observe(document.getElementById('mbox'))}catch(e){}
+function fitModal(){const m=$('#mbox');if(!m||$('#modal').hidden)return;m.style.removeProperty('zoom');m.style.removeProperty('max-height');m.style.removeProperty('overflow')}
+const _modal0=modal;modal=function(h){_modal0(h);fitModal();$('#mbox').scrollTop=0};
 
 /* ================= V16: BEAST MODE ================= */
 const BEAST={

@@ -209,8 +209,8 @@ button{font-family:inherit;color:inherit}
 .item .slot{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .item.eq{border-color:var(--gold)}
 /* ---------- MODAL ---------- */
-.modal{position:fixed;inset:0;background:rgba(5,8,30,.72);display:grid;place-items:center;z-index:1000;padding:12px;overflow:hidden}
-.mbox{background:var(--panel);border:3px solid var(--line);border-radius:24px;padding:22px;width:min(560px,100%);max-height:calc(100% - 20px);overflow:auto;text-align:center;display:grid;gap:14px;animation:popin .35s cubic-bezier(.3,1.5,.5,1)}
+.modal{position:fixed;inset:0;height:100dvh;box-sizing:border-box;background:rgba(5,8,30,.72);display:grid;place-items:center;z-index:1000;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));overflow:hidden}
+.mbox{background:var(--panel);border:3px solid var(--line);border-radius:24px;padding:22px;width:min(560px,100%);box-sizing:border-box;max-height:100%;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;text-align:center;display:grid;gap:14px;animation:popin .35s cubic-bezier(.3,1.5,.5,1)}
 @keyframes popin{from{transform:scale(.85);opacity:0}}
 .mbox h2{font-size:32px}
 .bigstars{display:flex;justify-content:center;gap:8px}
@@ -225,6 +225,7 @@ button{font-family:inherit;color:inherit}
 .banner{border-radius:14px;padding:10px 14px;font-family:var(--display);font-size:20px;background:linear-gradient(90deg,#7c5cff,#3ee6ff);color:#fff}
 .banner.gold{background:linear-gradient(90deg,#ff9f45,#ffc93c);color:#2a1d00}
 .rbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.mbox>.rbtns:last-child{position:sticky;bottom:0;z-index:2;background:var(--panel);padding:12px 0 5px;border-top:2px solid var(--line)}
 .setrow{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;padding:10px 0;border-bottom:1px solid var(--line)}
 .seg{display:flex;gap:6px}
 .seg button{border:2px solid var(--line);background:#0c1238;border-radius:10px;padding:6px 12px;cursor:pointer;font-weight:600}
