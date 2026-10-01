@@ -438,7 +438,7 @@ function updateStrip(){
 function stat(c,hit){const b=c.toLowerCase();if(b===' ')return;const k=S.ks[b]||(S.ks[b]={h:0,m:0});hit?k.h++:k.m++}
 function zap(color,big){const a=$('#arena');laser(a,$('#hero'),$('#vil'),color,big);kick($('#vil'),'hit');kick($('#hero'),'recoil');if(big){kick(a,'quake');burst(a,$('#vil'),color,8)}}
 function pressFx(id){const el=keyEls.get(id);if(!el)return;el.classList.add('press');setTimeout(()=>el.classList.remove('press'),120)}
-const PRAISE=['Nice!','Zap!','Great finger!','You got it!','Awesome!','Keep going!','Super!','Wow!'];
+const PRAISE=['Nice!','Zap!','Great typing!','You got it!','Awesome!','Keep going!','Super!','Wow!'];
 function matchKey(ch,t,caps){return ch===t||(caps&&ch.toLowerCase()===t.toLowerCase()&&/[a-z]/i.test(t))}
 function input(ch,caps){
  if(screen==='game')return gameInput(ch,caps);
@@ -1369,7 +1369,7 @@ setTimeout(syncPull,400);
 
 /* ================= V13: arcade diamonds + progress trackers ================= */
 let runShareText='';
-function shareRunHTML(game,stats){const challenge=game==='Keylori Race'&&G.ghostLink;runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${challenge?'Race my typing ghost!':'Think you can beat my result? Give it a try!'}\n${challenge||'https://keystone-kingdom.netlify.app/'}`;return `<button class="btn alt" data-act="copyRun">${challenge?'Copy challenge':'Copy result'}</button>`}
+function shareRunHTML(game,stats){const challenge=!!G.challengeData;runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${challenge?'Can you beat my arcade ghost?':'Think you can beat my result? Give it a try!'}`;return `<button class="btn alt" data-act="copyRun">${challenge?'Copy challenge':'Copy result'}</button>`}
 ACT.copyRun=async()=>{try{await navigator.clipboard.writeText(runShareText);toast('Result copied!')}catch(e){toast('Could not copy the result')}};
 let ARC_X=()=>({easy:.75,medium:1,hard:1.5})[S.set.arcd]||1;
 function arcReward(parts){const x=ARC_X();let tot=0;const rows=parts.filter(p=>p[1]>0).map(([t,n])=>{tot+=n;return `<div><span>${t}</span><b>+${n}</b></div>`});
@@ -1385,7 +1385,7 @@ endMeteor=function(){G.done=true;setTarget(null);const acc=G.hits+G.errs?Math.ro
  const r=arcReward([['Meteors zapped',Math.floor(G.zapped/4)],['Accuracy',accPts(acc)],['Shields left',G.shields],['New best',best?2:0]]);S.xp+=G.hits;const egg=G.zapped?dailyEgg():null;save();sfx.win();
  modal(`<h2>${G.shields>0?'You win!':'Nice try!'}</h2><div class="hero-mini">${zookSVG()}</div>${best?'<div class="banner gold">New best score!</div>':''}${eggBanner(egg)}
  <h3>Your run</h3><div class="rstats"><div><b>${G.score}</b><span>Score</span></div><div><b>${wpm}</b><span>Words per minute</span></div><div><b>${acc}%</b><span>Accuracy</span></div><div><b>${G.zapped}/${G.total}</b><span>Zapped</span></div></div>${r.html}
- <div class="rbtns"><button class="btn" data-act="meteor">Play again</button>${shareRunHTML('Meteor Zap',`${G.score} points · ${wpm} WPM · ${acc}% accuracy`)}<button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`)};
+ ${typeof ghostArcadeSummary==='function'?ghostArcadeSummary():''}<div class="rbtns"><button class="btn" data-act="meteor">Play again</button>${shareRunHTML('Meteor Zap',`${G.score} points · ${wpm} WPM · ${acc}% accuracy`)}<button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`)};
 endRace=function(){G.done=true;setTarget(null);const secs=(performance.now()-G.start)/1000,len=G.text.length,wpm=Math.round(len/5/Math.max(secs/60,1/60)),acc=Math.round((len-G.mist.size)/len*100),pl=1+G.racers.filter(r=>r.fin).length;
  const r=arcReward([['Place',[5,3,2,1][pl-1]],['Speed',Math.floor(wpm/8)],['Accuracy',accPts(acc)]]);S.xp+=len;if(pl===1)S.arc.race++;S.hist.push({t:Date.now(),w:wpm,a:acc});if(S.hist.length>80)S.hist.shift();S.time+=Math.round(secs);sessionSecs+=secs;const egg=dailyEgg();save();sfx.win();
  setTimeout(()=>modal(`<h2>${pl===1?'You won the race!':ORD[pl-1]+' place!'}</h2><div class="hero-mini">${zookSVG()}</div>${eggBanner(egg)}
@@ -1397,7 +1397,7 @@ endGlitch=function(win){G.done=true;setTarget(null);const acc=G.hits+G.errs?Math
  const r=arcReward([['Scramblers zapped',Math.floor(G.kills/2)],['Keylori saved',G.rescued*2],['Beat the boss',win?4:0],['Grade '+grade,{S:5,A:3,B:2,C:0}[grade]],['New best',best?2:0]]);S.xp+=G.hits;const egg=G.hits>10?dailyEgg():null;save();
  modal(`<h2>${win?'You win!':'Try again!'}</h2><div class="grade g${grade}">${grade}</div>${best?'<div class="banner gold">New best score!</div>':''}${eggBanner(egg)}
  <h3>Your run</h3><div class="rstats"><div><b>${G.score}</b><span>Score</span></div><div><b>${wpm}</b><span>Words per minute</span></div><div><b>${acc}%</b><span>Accuracy</span></div><div><b>${G.maxCombo}</b><span>Best combo</span></div></div>${r.html}
- <div class="rbtns"><button class="btn" data-act="glitch">Play again</button>${shareRunHTML('Scrambler Attack',`${G.score} points · ${wpm} WPM · ${acc}% accuracy`)}<button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`)};
+ ${typeof ghostArcadeSummary==='function'?ghostArcadeSummary():''}<div class="rbtns"><button class="btn" data-act="glitch">Play again</button>${shareRunHTML('Scrambler Attack',`${G.score} points · ${wpm} WPM · ${acc}% accuracy`)}<button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`)};
 /* --- level tracker: hero walks to the flag --- */
 const FLAG=["oo......","oRRRRo..","oRrRRRRo","oRRRRRRo","oRRRro..","oo......","o.......","o.......","o.......","oo......"];
 const flagURL=()=>PXU.flag||(PXU.flag=PXG(FLAG,{o:'#2a1d3e',R:'#e8584f',r:'#f6a09a'}).toDataURL());

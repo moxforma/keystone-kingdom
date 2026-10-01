@@ -41,7 +41,7 @@ renderArcade=function(){
   arcadeStat('Wins',S.arc.race)+arcadeStat('Best WPM',S.arc.raceBest||0)+arcadeStat('Highest level beaten',arcadeHighest('race'),'level')
  ];
  panels.forEach((panel,index)=>{panel.querySelector('.note')?.remove();panel.querySelector('[data-act]')?.insertAdjacentHTML('beforebegin',`<div class="arcade-stats">${stats[index]}</div>`)});
- bar.querySelector('.arcade-toggles').innerHTML=[['arcNumbers','Numbers'],['arcSymbols','Symbols']].map(([key,label])=>{const on=S.set[key]===true;return `<button class="arcade-switch ${on?'on':''}" data-act="arcadeChars" data-key="${key}" role="switch" aria-label="${label} in arcade games" aria-checked="${on}"><span>${label}</span><span class="switch-track"><span class="switch-thumb"></span></span><span class="switch-state">${on?'On':'Off'}</span></button>`}).join('');
+ bar.querySelector('.arcade-toggles').innerHTML=[['arcNumbers','NUMBERS'],['arcSymbols','SYMBOLS']].map(([key,label])=>{const on=S.set[key]===true;return `<button class="arcade-switch ${on?'on':''}" data-act="arcadeChars" data-key="${key}" role="switch" aria-label="${label} in arcade games" aria-checked="${on}"><span>${label}</span><span class="switch-track"><span class="switch-thumb"></span></span><span class="switch-state">${on?'ON':'OFF'}</span></button>`}).join('');
 };
 ACT.arcadeChars=d=>{if(!['arcNumbers','arcSymbols'].includes(d.key))return;S.set[d.key]=S.set[d.key]!==true;save();renderArcade()};
 

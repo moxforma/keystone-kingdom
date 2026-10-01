@@ -1,4 +1,4 @@
-/* A race challenge carries the text and a small replay in its link. */
+/* Arcade ghost challenges replay a friend's progress from a short link. */
 const ghostEncode=value=>{
  const bytes=new TextEncoder().encode(JSON.stringify(value));
  return btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -23,6 +23,56 @@ const ghostDecode=value=>{
 };
 const ghostIncoming=ghostDecode(new URLSearchParams(location.search).get('ghost'));
 let ghostToStart=null;
+let challengeToStart=ghostIncoming;
+const ghostSettings=()=>({d:(S.set.arcd||'auto').startsWith('beast')?'beast':S.set.arcd||'auto',n:S.set.arcNumbers===true,s:S.set.arcSymbols===true,l:S.set.len});
+const ghostElapsed=()=>Math.max(1,Math.round((performance.now()-G.ghostStartTime)/100));
+function ghostScoreAt(frames,time){
+ let score=0;
+ for(const [points,at] of frames){if(at>time)break;score=points}
+ return score;
+}
+function ghostTrackScore(){
+ if(!G||!['meteor','glitch'].includes(G.type)||!G.ghostTimeline)return;
+ const score=G.score||0,track=G.ghostTimeline;
+ if(track.at(-1)[0]!==score)track.push([score,ghostElapsed()]);
+}
+function ghostScoreBar(){
+ $('#ghud').insertAdjacentHTML('afterend','<div class="ghost-scorebar" id="ghostScore"><span>You: <b id="ghostYou">0</b></span><strong>Ghost score challenge</strong><span>Friend: <b id="ghostFriend">0</b></span></div>');
+}
+function ghostScoreTick(now){
+ if(!G.ghostInvite||G.ghostInvite.g==='race'||!G.ghostStartTime)return;
+ const friend=ghostScoreAt(G.ghostInvite.f,Math.max(0,Math.round((now-G.ghostStartTime)/100)));
+ const you=$('#ghostYou'),them=$('#ghostFriend');
+ if(you)you.textContent=G.score;
+ if(them)them.textContent=friend;
+}
+
+const regularStartMeteor=startMeteor;
+startMeteor=function(){
+ regularStartMeteor();
+ $('#ghostScore')?.remove();
+ G.ghostStartTime=performance.now();
+ G.ghostTimeline=[[0,0]];
+ if(ghostToStart?.g==='meteor'){G.ghostInvite=ghostToStart;ghostScoreBar()}
+};
+const regularStartGlitch=startGlitch;
+startGlitch=function(){
+ regularStartGlitch();
+ $('#ghostScore')?.remove();
+ G.ghostStartTime=performance.now();
+ G.ghostTimeline=[[0,0]];
+ if(ghostToStart?.g==='glitch'){G.ghostInvite=ghostToStart;ghostScoreBar()}
+};
+const regularGameInput=gameInput;
+gameInput=function(ch,caps){
+ const result=regularGameInput(ch,caps);
+ ghostTrackScore();
+ return result;
+};
+const regularMeteorTick=mTick;
+mTick=function(now){ghostScoreTick(now);return regularMeteorTick(now)};
+const regularGlitchTick=gTick;
+gTick=function(now){ghostScoreTick(now);return regularGlitchTick(now)};
 
 function ghostProgress(pos){
  if(G.type!=='race'||!G.ghostTrack||!G.start)return;
@@ -40,8 +90,9 @@ function ghostPosition(frames,time){
 const regularStartRace=startRace;
 startRace=function(){
  regularStartRace();
+ $('#ghostScore')?.remove();
  G.ghostTrack=[];
- if(!ghostToStart)return;
+ if(!ghostToStart||ghostToStart.g&&ghostToStart.g!=='race')return;
  const invite=ghostToStart;
  G.ghostInvite=invite;
  G.arcLevel=invite.d;
@@ -83,12 +134,36 @@ endRace=function(){
   if(frames.at(-1)[0]!==G.text.length)frames.push([G.text.length,elapsed]);
   else frames.at(-1)[1]=Math.max(frames.at(-1)[1],elapsed);
   const accuracy=Math.max(0,Math.min(100,Math.round((G.text.length-G.mist.size)/G.text.length*100)));
-  const url=new URL(location.href);url.search='';url.hash='';
-  url.searchParams.set('ghost',ghostEncode({v:1,t:G.text,d:G.arcLevel||'auto',a:accuracy,f:frames}));
-  G.ghostLink=url.href;
+  G.challengeData={v:2,g:'race',...ghostSettings(),t:G.text,a:accuracy,f:frames};
  }
  regularEndRace();
 };
+const regularEndMeteor=endMeteor;
+endMeteor=function(){
+ ghostTrackScore();
+ const frames=[...G.ghostTimeline];
+ const end=ghostElapsed(),score=G.score;
+ if(frames.at(-1)[1]<end)frames.push([score,end]);
+ G.challengeData={v:2,g:'meteor',...ghostSettings(),r:score,w:G.shields>0,f:frames};
+ return regularEndMeteor();
+};
+const regularEndGlitch=endGlitch;
+endGlitch=function(win){
+ ghostTrackScore();
+ const frames=[...G.ghostTimeline];
+ const end=ghostElapsed(),score=G.score;
+ if(frames.at(-1)[1]<end)frames.push([score,end]);
+ G.challengeData={v:2,g:'glitch',...ghostSettings(),r:score,w:!!win,f:frames};
+ return regularEndGlitch(win);
+};
+function ghostArcadeSummary(){
+ const friend=G.ghostInvite;
+ if(!friend||friend.g==='race')return '';
+ const yourWin=G.type==='meteor'?G.shields>0:G.boss?.dead===true;
+ const beat=yourWin!==friend.w?yourWin:G.score>friend.r;
+ const tied=yourWin===friend.w&&G.score===friend.r;
+ return `<div class="ghost-summary"><b>${tied?'A tie with your friend!':beat?'You beat your friend’s ghost!':'Your friend’s ghost won this time!'}</b><span>Your score: ${G.score} · Friend’s score: ${friend.r}</span></div>`;
+}
 function ghostRaceSummary(){
  if(!G.ghostInvite)return '';
  const friendSeconds=G.ghostInvite.f.at(-1)[1]/10;
@@ -96,17 +171,59 @@ function ghostRaceSummary(){
  return `<div class="ghost-summary"><b>${G.racers[0].fin?'Your friend finished first!':'You beat your friend’s ghost!'}</b><span>You: ${yours}s · Friend: ${friendSeconds.toFixed(1)}s (${G.ghostInvite.a}% accuracy)</span></div>`;
 }
 ACT.ghostStart=()=>{
- if(!ghostIncoming)return;
- ghostToStart=ghostIncoming;
+ const challenge=challengeToStart;
+ if(!challenge)return;
+ if(challenge.v===2){
+  S.set.arcd=challenge.d;
+  S.set.arcNumbers=challenge.n;
+  S.set.arcSymbols=challenge.s;
+  S.set.len=challenge.l;
+  save();
+ }
+ ghostToStart=challenge;
  closeModal();
- try{startRace()}finally{ghostToStart=null}
+ try{({race:startRace,meteor:startMeteor,glitch:startGlitch})[challenge.g||'race']()}finally{ghostToStart=null}
 };
 ACT.ghostDismiss=()=>{
  closeModal();
- const url=new URL(location.href);url.searchParams.delete('ghost');
+ const url=new URL(location.href);url.searchParams.delete('ghost');url.searchParams.delete('c');
  history.replaceState(history.state,'',url.href);
 };
+ACT.copyRun=async()=>{
+ const button=$('#mbox [data-act=copyRun]');
+ if(button)button.disabled=true;
+ try{
+  let link='https://keystone-kingdom.netlify.app/';
+  if(G.challengeData){
+   if(!G.challengeCode){
+    const response=await fetch('/api/arcade-challenge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(G.challengeData)});
+    const body=await response.json();
+    if(!response.ok||!body.id)throw new Error(body.error||'Could not create challenge');
+    G.challengeCode=body.id;
+   }
+   const url=new URL(location.href);url.search='';url.hash='';url.searchParams.set('c',G.challengeCode);link=url.href;
+  }
+  await navigator.clipboard.writeText(runShareText+'\n'+link);
+  toast(G.challengeData?'Short challenge link copied!':'Result copied!');
+ }catch(e){toast('Could not copy the challenge. Please try again.')}
+ finally{if(button)button.disabled=false}
+};
+function ghostInviteModal(data){
+ challengeToStart=data;
+ const name={race:'Keylori Race',meteor:'Meteor Zap',glitch:'Scrambler Attack'}[data.g||'race'];
+ const description=data.g==='race'||!data.g?'Race your friend’s typing ghost on the same words.':
+  'Watch your friend’s score replay while you play at the same Arcade settings.';
+ modal(`<h2>A friend challenged you!</h2><p><b>${name}</b>: ${description}</p><div class="rbtns"><button class="btn" data-act="ghostStart">Play the challenge</button><button class="btn alt" data-act="ghostDismiss">Maybe later</button></div>`);
+}
+const shortCode=new URLSearchParams(location.search).get('c');
+if(shortCode){
+ modal('<h2>Loading your challenge…</h2>');
+ fetch('/api/arcade-challenge?id='+encodeURIComponent(shortCode))
+  .then(response=>response.ok?response.json():Promise.reject())
+  .then(body=>{if(!body.data||body.data.v!==2)throw Error('Invalid challenge');ghostInviteModal(body.data)})
+  .catch(()=>modal('<h2>Challenge link not found</h2><p>Ask your friend to copy the challenge again.</p><div class="rbtns"><button class="btn" data-act="ghostDismiss">Play normally</button></div>'));
+}
 if(new URLSearchParams(location.search).has('ghost')){
- if(ghostIncoming)modal(`<h2>A friend challenged you!</h2><p>Race their typing ghost on the same words. Can you finish first?</p><div class="rbtns"><button class="btn" data-act="ghostStart">Race the ghost</button><button class="btn alt" data-act="ghostDismiss">Maybe later</button></div>`);
+ if(ghostIncoming)ghostInviteModal(ghostIncoming);
  else modal('<h2>Challenge link not found</h2><p>This race link may be incomplete. Ask your friend to copy the challenge again.</p><div class="rbtns"><button class="btn" data-act="ghostDismiss">Play normally</button></div>');
 }
