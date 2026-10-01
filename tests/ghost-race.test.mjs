@@ -13,11 +13,11 @@ test('a copied race link carries a playable, timed replay', () => {
   ACT: {}, G: {}, S: {set:{arcd:'medium',arcNumbers:false,arcSymbols:false,len:1}},
   performance: { now: () => 1000 },
   startRace() {}, rTick() {}, endRace() {},
-  startMeteor() {}, startGlitch() {}, gameInput() {}, mTick() {}, gTick() {},
+  startMeteor() {}, startGlitch() {}, bossPhrase() {}, gameInput() {}, mTick() {}, gTick() {},
   endMeteor() {}, endGlitch() {},
   glitchProgress() {return {fraction:(context.G.waveWordsTyped||0)/24,wave:1,done:context.G.waveWordsTyped||0,total:6}}
  };
- runInNewContext(source + '\nglobalThis.ghostApi={ghostEncode,ghostDecode,ghostPosition,ghostScoreAt,ghostArcadeSummary,ghostTrackWave,ghostWaveFrameAt}', context);
+ runInNewContext(source + '\nglobalThis.ghostApi={ghostEncode,ghostDecode,ghostPosition,ghostScoreAt,ghostArcadeSummary,ghostRematchWon,ghostTrackWave,ghostWaveFrameAt}', context);
  const replay = { v: 1, t: 'race me', d: 'medium', a: 96, f: [[0,0],[4,20],[7,40]] };
  const code = context.ghostApi.ghostEncode(replay);
  const decoded = context.ghostApi.ghostDecode(code);
@@ -28,13 +28,20 @@ test('a copied race link carries a playable, timed replay', () => {
  assert.equal(context.ghostApi.ghostScoreAt([[0,0],[100,10],[250,24]], 15), 100);
  context.G = {type:'meteor',score:250,shields:3,ghostStartTime:0,
   ghostTimeline:[[0,0],[250,8]],
+  wordDeck:['cat','dog'],words:['cat','dog'],
   ghostInvite:{g:'meteor',r:300,w:false,f:[[0,0],[300,24]]}};
  context.endMeteor();
  assert.equal(context.G.challengeData.g, 'meteor');
  assert.equal(context.G.challengeData.f.at(-1)[0], 250);
  assert.match(context.ghostApi.ghostArcadeSummary(), /You beat/);
+ assert.match(context.ghostApi.ghostArcadeSummary(), /Your time: 1\.0s · Friend’s time: 2\.4s/);
+ assert.equal(context.ghostApi.ghostRematchWon(),false);
+ context.G.score=301;
+ assert.equal(context.ghostApi.ghostRematchWon(),true);
  context.G={type:'glitch',score:100,ghostStartTime:0,ghostTimeline:[[0,0],[100,8]],
-  ghostWaveTimeline:[[0,0,1,0,6]],waveWordsTyped:0};
+  ghostWaveTimeline:[[0,0,1,0,6]],waveWordsTyped:0,
+  waveDecks:[[{kind:'bad',size:'s',txt:'cat'}],[{kind:'bad',size:'m',txt:'tree'}],[{kind:'bad',size:'l',txt:'stone'}]],
+  bossWords:['one','two','three']};
  context.G.waveWordsTyped=1;
  context.ghostApi.ghostTrackWave();
  assert.deepEqual(Array.from(context.G.ghostWaveTimeline[1]),[42,10,1,1,6]);
@@ -42,4 +49,6 @@ test('a copied race link carries a playable, timed replay', () => {
  assert.equal(context.ghostApi.ghostWaveFrameAt(context.G.ghostWaveTimeline,10)[0],42);
  context.endGlitch(false);
  assert.equal(context.G.challengeData.p[1][0],42);
+ assert.equal(context.G.challengeData.q[0][0][2],'cat');
+ assert.equal(context.G.challengeData.b[0],'one');
 });

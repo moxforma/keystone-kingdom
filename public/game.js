@@ -598,7 +598,7 @@ function startMeteor(){
  $('#garena').innerHTML=`${cityHTML()}<div class="gz">${zookSVG()}</div>`;
  gUpdate();G.last=performance.now();G.raf=requestAnimationFrame(mTick);
 }
-function spawnMeteor(){const txt=arcadeBonus(G.spawned,5)||(G.words&&Math.random()<.6?rand(G.words):rand(G.set)),el=document.createElement('div');el.className='met';el.style.left=(10+Math.random()*74)+'%';
+function spawnMeteor(){const txt=G.wordDeck?.[G.spawned]||arcadeBonus(G.spawned,5)||(G.words&&Math.random()<.6?rand(G.words):rand(G.set)),el=document.createElement('div');el.className='met';el.style.left=(10+Math.random()*74)+'%';
  el.innerHTML=`<span class="rock"></span><span class="mt">${[...txt].map(c=>`<i>${esc(c)}</i>`).join('')}</span>`;$('#garena').appendChild(el);G.m.push({txt,typed:0,y:-70,el});G.spawned++;mHint()}
 function mTick(now){
  if(G.done||G.type!=='meteor')return;const dt=Math.min(.05,(now-G.last)/1000);G.last=now;
@@ -769,9 +769,9 @@ function gw(size){if(G.ok.length>=8){const f=G.ok.filter(w=>size==='s'?w.length<
  return groups(()=>rand(G.letters),1,size==='s'?1:size==='m'?2:3,size==='s'?2:size==='m'?3:4)}
 function gmsg(t,cls=''){const m=$('#gmsg');if(!m)return;m.className='gmsg '+cls;m.innerHTML=t;kick(m,'show')}
 function nextWave(){G.wave++;const n=Math.round([5,6,7][G.wave-1]*S.set.len);const sz=[['s','s','m'],['s','m','m'],['m','m','l']][G.wave-1];
- G.queue=Array.from({length:n},()=>({kind:'bad',size:rand(sz)}));G.queue.splice(Math.floor(n/2),0,{kind:'friend',size:'m'});G.waveWordsTyped=0;G.waveWordsTotal=G.queue.length;G.spawnT=2.6;gmsg(`Wave ${G.wave}`,'big');sfx.lvl()}
+ G.queue=G.waveDecks?.[G.wave-1]?.map(sp=>({...sp}))||Array.from({length:n},()=>({kind:'bad',size:rand(sz)}));if(!G.waveDecks?.[G.wave-1])G.queue.splice(Math.floor(n/2),0,{kind:'friend',size:'m'});G.waveWordsTyped=0;G.waveWordsTotal=G.queue.length;G.spawnT=2.6;gmsg(`Wave ${G.wave}`,'big');sfx.lvl()}
 function spawnEnt(sp){
- const A=$('#garena'),e={kind:sp.kind,txt:gw(sp.size),typed:0,z:sp.kind==='friend'?.42+Math.random()*.15:0,lane:(Math.random()*1.6-.8),v:{s:1/12,m:1/15,l:1/18}[sp.size],dead:false};
+ const A=$('#garena'),e={kind:sp.kind,txt:sp.txt||gw(sp.size),typed:0,z:sp.kind==='friend'?.42+Math.random()*.15:0,lane:(Math.random()*1.6-.8),v:{s:1/12,m:1/15,l:1/18}[sp.size],dead:false};
  if(e.kind==='friend'){e.dir=Math.random()<.5?1:-1;e.lane=-1.25*e.dir;const [a,b]=(G.met.length?rand(G.met):rand(['0-0','1-0','2-0','4-0'])).split('-').map(Number);e.name=SPECIES[a].n[b];e.art=creatureSVG(a,b)}
  e.sp=document.createElement('div');e.sp.className='ent '+e.kind;e.sp.innerHTML=e.kind==='bad'?villainArc(Math.floor(Math.random()*5),false):e.art;
  e.lb=document.createElement('div');e.lb.className='elab '+e.kind;
@@ -785,7 +785,7 @@ function removeEnt(e){e.dead=true;G.ents=G.ents.filter(x=>x!==e);if(G.tgt===e)G.
 function gTick(now){
  if(G.done||G.type!=='glitch')return;const dt=Math.min(.05,(now-G.last)/1000);G.last=now;const A=$('#garena'),W=A.clientWidth,H=A.clientHeight;
  if(G.phase==='wave'){G.spawnT-=dt;const bads=G.ents.filter(e=>e.kind==='bad').length;
-  if(G.spawnT<=0&&G.queue.length&&bads<1+G.wave){spawnEnt(G.queue.shift());G.spawnT=2.6/G.speed;gHint()}
+  if(G.spawnT<=0&&G.queue.length&&bads<1+G.wave){const next=G.queue[0];next.txt=next.txt||gw(next.size);if(!G.ents.some(e=>!e.dead&&e.txt[0]===next.txt[0])){spawnEnt(G.queue.shift());G.spawnT=2.6/G.speed;gHint()}}
   if(!G.queue.length&&!G.ents.length){G.wave<G.waves?nextWave():startBoss()}}
  for(const e of [...G.ents]){if(e.boss)continue;if(e.kind==='bad'){e.z+=e.v*G.speed*dt;if(e.z>=1){gAttack(e);continue}}else{e.lane+=e.dir*dt*.2;if(Math.abs(e.lane)>1.3){removeEnt(e);gHint();continue}}placeEnt(e,W,H)}
  const b=G.boss;if(b&&!b.dead){b.t+=dt;const bb=$('#bossbar');if(bb)bb.style.width=Math.min(100,b.t/b.lim*100)+'%';if(b.t>=b.lim)bossAttack();placeEnt(b,W,H)}
@@ -1406,7 +1406,7 @@ setTimeout(syncPull,400);
 
 /* ================= V13: arcade diamonds + progress trackers ================= */
 let runShareText='',runShareChallenge=null;
-function shareRunHTML(game,stats){const arcadeGame={ 'Meteor Zap':'meteor','Scrambler Attack':'glitch','Keylori Race':'race' }[game];runShareChallenge=arcadeGame&&G.challengeData?.g===arcadeGame?G.challengeData:null;const challenge=!!runShareChallenge;runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${challenge?'Can you beat my arcade ghost?':'Come explore Keyloria Kingdom and try it yourself!'}`;return `<button class="btn alt" data-act="copyRun">${challenge?'Copy challenge':'Copy result'}</button>`}
+function shareRunHTML(game,stats){const arcadeGame={ 'Meteor Zap':'meteor','Scrambler Attack':'glitch','Keylori Race':'race' }[game];runShareChallenge=arcadeGame&&G.challengeData?.g===arcadeGame?G.challengeData:null;const challenge=!!runShareChallenge,rematch=challenge&&typeof ghostRematchWon==='function'&&ghostRematchWon();runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${rematch?'I beat your ghost! Can you beat mine?':challenge?'Can you beat my arcade ghost?':'Come explore Keyloria Kingdom and try it yourself!'}`;return `<button class="btn alt" data-act="copyRun">${rematch?'Copy rematch challenge':challenge?'Copy challenge':'Copy result'}</button>`}
 ACT.copyRun=async()=>{try{await navigator.clipboard.writeText(runShareText);toast('Result copied!')}catch(e){toast('Could not copy the result')}};
 let ARC_X=()=>({easy:.75,medium:1,hard:1.5})[S.set.arcd]||1;
 function arcReward(parts){const x=ARC_X();let tot=0;const rows=parts.filter(p=>p[1]>0).map(([t,n])=>{tot+=n;return `<div><span>${t}</span><b>+${n}</b></div>`});
@@ -2368,7 +2368,7 @@ ACT.fbSend=async()=>{const msg=($('#fbmsg')?.value||'').trim();if(msg.length<3){
  catch(e){toast('Could not send. Try again on the website.')}};
 ACT.about=()=>{modal(`<h2>About</h2><div class="hero-mini">${zookSVG()}</div>
  <p style="margin:0;font-size:22px">KEYLORIA KINGDOM</p>
- <p style="margin:0">A typing adventure made by<br><b>Andy Tsang</b> &amp; <b>Claude</b> (AI by Anthropic)</p>
+ <p style="margin:0">A typing adventure made by<br><b>Andy Tsang</b></p>
  <p class="muted" style="margin:0">© ${Math.max(2026,new Date().getFullYear())} Andy Tsang. All rights reserved.</p>
  <div class="rbtns"><button class="btn" data-act="close">Close</button></div>`)};
 addEventListener('keydown',e=>{if(e.target&&(e.target.id==='fbmsg'||e.target.id==='fbmail'))e.stopImmediatePropagation()},true);

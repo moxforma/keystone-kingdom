@@ -11,6 +11,7 @@ const copySource = ghost.slice(ghost.indexOf('ACT.copyRun=async()=>{'), ghost.in
 test('only Arcade result links open ghost challenges', async () => {
  const copied = [];
  const posted = [];
+ let won=false;
  const context = {
   G: {challengeData:{g:'meteor',v:2,r:100}},
   ACT: {},
@@ -19,6 +20,7 @@ test('only Arcade result links open ghost challenges', async () => {
   navigator:{clipboard:{writeText:async text=>copied.push(text)}},
   fetch:async (_url,options)=>{posted.push(JSON.parse(options.body));return {ok:true,json:async()=>({id:'ABC123'})}},
   $:()=>null,
+  ghostRematchWon:()=>won,
   toast:()=>{}
  };
  runInNewContext(shareSource+'\n'+copySource+'\nglobalThis.share=shareRunHTML',context);
@@ -37,4 +39,10 @@ test('only Arcade result links open ghost challenges', async () => {
   assert.match(copied.at(-1), /\?c=ABC123$/);
  }
  assert.equal(posted.length,3);
+ won=true;
+ context.G={challengeData:{g:'meteor',v:2,r:200}};
+ assert.match(context.share('Meteor Zap','200 points'),/Copy rematch challenge/);
+ await context.ACT.copyRun();
+ assert.match(copied.at(-1),/I beat your ghost! Can you beat mine\?/);
+ assert.equal(posted.at(-1).r,200);
 });
