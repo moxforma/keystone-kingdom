@@ -1,10 +1,10 @@
 /* Arcade typing options. Keep these separate from Adventure's lesson text. */
 const ARCADE_NUMBERS='0123456789';
 const ARCADE_SYMBOLS='!?@#$%&*+-=/';
-const ARCADE_LEVELS={auto:[0,'Auto'],easy:[1,'Easy'],medium:[2,'Medium'],hard:[3,'Hard'],'beast-easy':[4,'BEAST · Easy'],'beast-medium':[5,'BEAST · Medium'],'beast-hard':[6,'BEAST · Hard']};
+const ARCADE_LEVELS={auto:[0,'Auto'],easy:[1,'Easy'],medium:[2,'Medium'],hard:[3,'Hard'],beast:[4,'BEAST MODE'],'beast-easy':[4,'BEAST MODE'],'beast-medium':[4,'BEAST MODE'],'beast-hard':[4,'BEAST MODE']};
 const arcadeNumberOn=()=>S.set.arcNumbers===true;
 const arcadeSymbolOn=()=>S.set.arcSymbols===true;
-const arcadeLevelNow=()=>S.set.arcd==='beast'?'beast-'+(S.set.blvl||'medium'):S.set.arcd||'auto';
+const arcadeLevelNow=()=>S.set.arcd||'auto';
 const arcadeHighest=type=>ARCADE_LEVELS[S.arc.high?.[type]]?.[1]||'None yet';
 const arcadeStat=(label,value,cls='')=>`<div class="arcade-stat ${cls}"><b>${value}</b><span>${label}</span></div>`;
 function arcadeRecordWin(type,won){
@@ -41,7 +41,7 @@ renderArcade=function(){
   arcadeStat('Wins',S.arc.race)+arcadeStat('Best WPM',S.arc.raceBest||0)+arcadeStat('Highest level beaten',arcadeHighest('race'),'level')
  ];
  panels.forEach((panel,index)=>{panel.querySelector('.note')?.remove();panel.querySelector('[data-act]')?.insertAdjacentHTML('beforebegin',`<div class="arcade-stats">${stats[index]}</div>`)});
- bar.querySelector('.seg')?.insertAdjacentHTML('beforeend',`${[['arcNumbers','Numbers'],['arcSymbols','Symbols']].map(([key,label])=>`<button class="${S.set[key]===true?'on':''}" data-act="arcadeChars" data-key="${key}" aria-label="Include ${label.toLowerCase()} in arcade games" aria-pressed="${S.set[key]===true}">${label}</button>`).join('')}`);
+ bar.querySelector('.arcade-toggles').innerHTML=[['arcNumbers','Numbers'],['arcSymbols','Symbols']].map(([key,label])=>{const on=S.set[key]===true;return `<button class="arcade-switch ${on?'on':''}" data-act="arcadeChars" data-key="${key}" role="switch" aria-label="${label} in arcade games" aria-checked="${on}"><span>${label}</span><span class="switch-track"><span class="switch-thumb"></span></span><span class="switch-state">${on?'On':'Off'}</span></button>`}).join('');
 };
 ACT.arcadeChars=d=>{if(!['arcNumbers','arcSymbols'].includes(d.key))return;S.set[d.key]=S.set[d.key]!==true;save();renderArcade()};
 

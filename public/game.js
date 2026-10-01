@@ -177,8 +177,22 @@ const ICON={
 };
 
 /* ================= AUDIO + VOICE ================= */
-let AC;
-function tone(f,d=.1,type='sine',v=.12,w=0){if(!S.set.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime+w,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+let AC,audioResume;
+function tone(f,d=.1,type='sine',v=.12,w=0){
+ if(!S.set.sound)return;
+ try{
+  if(!AC||AC.state==='closed')AC=new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state!=='running'&&!audioResume){
+   audioResume=AC.resume().catch(()=>{}).finally(()=>{audioResume=null});
+  }
+  const t=AC.currentTime+w,o=AC.createOscillator(),g=AC.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
+  o.connect(g).connect(AC.destination);
+  o.onended=()=>{o.disconnect();g.disconnect()};
+  o.start(t);o.stop(t+d+.02);
+ }catch(e){}
+}
 const sfx={
  ok:c=>tone(520+Math.min(c,24)*18,.08,'triangle',.1),
  bad:()=>tone(170,.18,'sine',.14),
@@ -636,7 +650,7 @@ function raceStrip(){const box=$('#gstripIn'),sp=box.children,t=G.text[G.pos];
  if(t!=null){const el=sp[G.pos];el.classList.add('cur');el.style.setProperty('--fc',fcol(keyInfo(t).f));box.style.transform=`translateX(${$('#gstrip').clientWidth/2-(el.offsetLeft+el.offsetWidth/2)}px)`;setTarget(t);G.next=t;$('#ghint').innerHTML=fingerHTML(t)}}
 function raceInput(ch,caps){
  const t=G.text[G.pos];if(!G.start)G.start=performance.now();
- if(matchKey(ch,t,caps)){G.pos++;sfx.ok(G.pos%20);$('#rn0').style.left=(G.pos/G.text.length*84)+'%';if(G.pos>=G.text.length)return endRace();raceStrip()}
+ if(matchKey(ch,t,caps)){G.pos++;if(typeof ghostProgress==='function')ghostProgress(G.pos);sfx.ok(G.pos%20);$('#rn0').style.left=(G.pos/G.text.length*84)+'%';if(G.pos>=G.text.length)return endRace();raceStrip()}
  else{G.mist.add(G.pos);sfx.bad();const r=$('#rn0');r.classList.remove('trip');void r.offsetWidth;r.classList.add('trip');$('#ghint').innerHTML=`Oops, that was ${esc(disp(ch))}. ${fingerHTML(t)}`}
 }
 const ORD=['1st','2nd','3rd','4th'];
@@ -1135,7 +1149,7 @@ meteorArt=function(){const fire=['#ffe27a','#ff9a3a','#e8582a'];let tr='';for(le
 const DIFF={auto:'Auto',easy:'Easy',medium:'Medium',hard:'Hard'};
 let diffMult=()=>({easy:.65,medium:1,hard:1.45})[S.set.arcd]||Math.min(1.6,Math.max(.6,avgWpm()/8));
 const _ra=renderArcade;renderArcade=function(){_ra();const t=$('#s-arcade .topbar');if(!t)return;
- t.insertAdjacentHTML('afterend',`<div class="diffbar"><span>Speed:</span><div class="seg">${Object.entries(DIFF).map(([k,v])=>`<button class="${(S.set.arcd||'auto')===k?'on':''}" data-act="diff" data-v="${k}">${v}</button>`).join('')}</div><span class="muted">${(S.set.arcd||'auto')==='auto'?'Auto matches your typing speed.':''}</span></div>`)};
+ t.insertAdjacentHTML('afterend',`<div class="diffbar"><span>Speed:</span><div class="seg">${Object.entries(DIFF).map(([k,v])=>`<button class="${(S.set.arcd||'auto')===k?'on':''}" data-act="diff" data-v="${k}">${v}</button>`).join('')}</div><div class="arcade-toggles"></div></div>`)};
 ACT.diff=d=>{S.set.arcd=d.v;save();renderArcade()};
 const _sm=startMeteor;startMeteor=function(){_sm();G.speed=diffMult()};
 const _sg=startGlitch;startGlitch=function(){_sg();G.speed=diffMult()};
@@ -1355,7 +1369,7 @@ setTimeout(syncPull,400);
 
 /* ================= V13: arcade diamonds + progress trackers ================= */
 let runShareText='';
-function shareRunHTML(game,stats){runShareText=`Keyloria Kingdom — ${game}\n${stats}\nThink you can beat my result? Give it a try!\nhttps://keystone-kingdom.netlify.app/`;return '<button class="btn alt" data-act="copyRun">Copy result</button>'}
+function shareRunHTML(game,stats){const challenge=game==='Keylori Race'&&G.ghostLink;runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${challenge?'Race my typing ghost!':'Think you can beat my result? Give it a try!'}\n${challenge||'https://keystone-kingdom.netlify.app/'}`;return `<button class="btn alt" data-act="copyRun">${challenge?'Copy challenge':'Copy result'}</button>`}
 ACT.copyRun=async()=>{try{await navigator.clipboard.writeText(runShareText);toast('Result copied!')}catch(e){toast('Could not copy the result')}};
 let ARC_X=()=>({easy:.75,medium:1,hard:1.5})[S.set.arcd]||1;
 function arcReward(parts){const x=ARC_X();let tot=0;const rows=parts.filter(p=>p[1]>0).map(([t,n])=>{tot+=n;return `<div><span>${t}</span><b>+${n}</b></div>`});
@@ -1375,7 +1389,7 @@ endMeteor=function(){G.done=true;setTarget(null);const acc=G.hits+G.errs?Math.ro
 endRace=function(){G.done=true;setTarget(null);const secs=(performance.now()-G.start)/1000,len=G.text.length,wpm=Math.round(len/5/Math.max(secs/60,1/60)),acc=Math.round((len-G.mist.size)/len*100),pl=1+G.racers.filter(r=>r.fin).length;
  const r=arcReward([['Place',[5,3,2,1][pl-1]],['Speed',Math.floor(wpm/8)],['Accuracy',accPts(acc)]]);S.xp+=len;if(pl===1)S.arc.race++;S.hist.push({t:Date.now(),w:wpm,a:acc});if(S.hist.length>80)S.hist.shift();S.time+=Math.round(secs);sessionSecs+=secs;const egg=dailyEgg();save();sfx.win();
  setTimeout(()=>modal(`<h2>${pl===1?'You won the race!':ORD[pl-1]+' place!'}</h2><div class="hero-mini">${zookSVG()}</div>${eggBanner(egg)}
- <h3>Your run</h3><div class="rstats"><div><b>${ORD[pl-1]}</b><span>Place</span></div><div><b>${wpm}</b><span>Words per minute</span></div><div><b>${acc}%</b><span>Accuracy</span></div></div>${r.html}
+ <h3>Your run</h3><div class="rstats"><div><b>${ORD[pl-1]}</b><span>Place</span></div><div><b>${wpm}</b><span>Words per minute</span></div><div><b>${acc}%</b><span>Accuracy</span></div></div>${typeof ghostRaceSummary==='function'?ghostRaceSummary():''}${r.html}
  <div class="rbtns"><button class="btn" data-act="race">Race again</button>${shareRunHTML('Keylori Race',`${ORD[pl-1]} place · ${wpm} WPM · ${acc}% accuracy`)}<button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`),600)};
 endGlitch=function(win){G.done=true;setTarget(null);const acc=G.hits+G.errs?Math.round(G.hits/(G.hits+G.errs)*100):100;const grade=win&&acc>=95&&G.hearts>=4?'S':acc>=90&&win?'A':acc>=80?'B':'C';
  const mins=Math.max((performance.now()-(G.runStart||G.t0||performance.now()))/60000,1/60),wpm=Math.round(G.hits/5/mins);
@@ -1439,17 +1453,16 @@ const BEAST_SENT=['The quixotic jazz pianist vexed the bourgeois judge.','The bi
  'Worcestershire sauce costs $4.99 & ketchup is ~$2.50.','Onomatopoeia: buzz, hiss, kerplunk, and zap!','An idiosyncratic bureaucracy accommodates no one\'s schedule.',
  'Pack my box with five dozen liquor jugs... or juice jugs?','Mississippi, Massachusetts, and Connecticut are U.S. states.','The chrysanthemum\'s rendezvous was at 6:00 a.m. on the 21st.'];
 DIFF.beast='BEAST MODE';
-const _dm0=diffMult;diffMult=()=>S.set.arcd==='beast'?[2.6,3.4,4.3][BLI()]:_dm0();
+const _dm0=diffMult;diffMult=()=>S.set.arcd==='beast'?3.4:_dm0();
 const isBeast=()=>S.set.arcd==='beast';
 function beastKeys(){setAvail(new Set([...keyEls.keys()]),true);applyLabels()}
 const _gw0=gw;gw=size=>isBeast()&&G.beast?rand(BEAST[size]):_gw0(size);
-const _bp0=bossPhrase;bossPhrase=function(){if(!(isBeast()&&G.beast))return _bp0();const b=G.boss;b.txt=rand(BEAST_SENT);b.typed=0;b.t=0;b.lim=b.txt.length/[5,7,9][BLI()]+2.5;paintLab(b);gHint()};
-const _sg2=startGlitch;startGlitch=function(){_sg2();if(isBeast()){G.beast=true;G.speed=[2.6,3.4,4.3][BLI()];beastKeys()}};
-const _sm2=startMeteor;startMeteor=function(){_sm2();if(isBeast()){G.beast=true;G.speed=[3.2,4.2,5.4][BLI()];G.words=[...BEAST.s,...BEAST.m];G.set=[...BEAST.s];G.total=Math.round(30*S.set.len);beastKeys()}};
+const _bp0=bossPhrase;bossPhrase=function(){if(!(isBeast()&&G.beast))return _bp0();const b=G.boss;b.txt=rand(BEAST_SENT);b.typed=0;b.t=0;b.lim=b.txt.length/7+2.5;paintLab(b);gHint()};
+const _sg2=startGlitch;startGlitch=function(){_sg2();if(isBeast()){G.beast=true;G.speed=3.4;beastKeys()}};
+const _sm2=startMeteor;startMeteor=function(){_sm2();if(isBeast()){G.beast=true;G.speed=4.2;G.words=[...BEAST.s,...BEAST.m];G.set=[...BEAST.s];G.total=Math.round(30*S.set.len);beastKeys()}};
 const _sr2=startRace;startRace=function(){_sr2();if(isBeast()){G.beast=true;G.text=fillSent(BEAST_SENT,Math.round(240*S.set.len));G.pos=0;G.mist=new Set();
- [[70,80,92],[95,105,118],[120,132,148]][BLI()].forEach((w,k)=>G.racers[k].w=w);beastKeys();try{const box=$('#gstripIn');if(box){box.innerHTML=[...G.text].map(c=>`<span class="${c===' '?'sp':''}">${c===' '?'·':esc(c)}</span>`).join('')}}catch(e){}if(typeof raceStrip==='function')raceStrip()}};
-const _ax0=ARC_X;ARC_X=()=>isBeast()?[1.5,2,2.5][BLI()]:_ax0();
-const _ra2=renderArcade;renderArcade=function(){_ra2();const m=$('#s-arcade .diffbar .muted');if(m&&isBeast())m.textContent='For super fast typists. Grown-ups, try it!'};
+ [95,105,118].forEach((w,k)=>G.racers[k].w=w);beastKeys();try{const box=$('#gstripIn');if(box){box.innerHTML=[...G.text].map(c=>`<span class="${c===' '?'sp':''}">${c===' '?'·':esc(c)}</span>`).join('')}}catch(e){}if(typeof raceStrip==='function')raceStrip()}};
+const _ax0=ARC_X;ARC_X=()=>isBeast()?2:_ax0();
 
 
 /* ================= V17: home menu always fits the window ================= */
@@ -1467,9 +1480,9 @@ addEventListener('resize',()=>{fitHome();fitModal()});
 
 
 function beastBeat(){if(typeof G==='undefined'||!G||!G.beast||S.set.arcd!=='beast')return null;
- const BX=[.6,1,1.6][BLI()],BN=['BEAST (Easy) beaten!','BEAST MODE beaten!','BEAST (Hard) beaten!'][BLI()];if(G.type==='glitch')return G.boss&&G.boss.dead&&G.hearts>0?[BN,Math.round(30*BX)]:null;
- if(G.type==='meteor')return G.shields>0?[BN,Math.round(25*BX)]:null;
- if(G.type==='race'){const pl=1+G.racers.filter(r=>r.fin).length;return pl===1?['Beat the BEAST racers!',Math.round(30*BX)]:pl===2?['BEAST race finish',Math.round(10*BX)]:null}return null}
+ const BN='BEAST MODE beaten!';if(G.type==='glitch')return G.boss&&G.boss.dead&&G.hearts>0?[BN,30]:null;
+ if(G.type==='meteor')return G.shields>0?[BN,25]:null;
+ if(G.type==='race'){const pl=1+G.racers.filter(r=>r.fin).length;return pl===1?['Beat the BEAST racers!',30]:pl===2?['BEAST race finish',10]:null}return null}
 
 /* ================= V18: 8 levels per lesson, points evolution, rare finds ================= */
 const NST=8,STAGES8=['Warm-up','Practice','Mix-up','Mix-up 2','Word Hunt','Word Battle','Speed Battle','Final Battle'];
@@ -2028,10 +2041,6 @@ ACT.fwDone=()=>{const v=($('#fw')?.value||'').trim(),words=(v.match(/\S+/g)||[])
  <div class="rbtns"><button class="btn" data-act="pr" data-m="free">Write more</button><button class="btn alt" data-act="close">Done</button></div>`)};
 
 /* ================= V21: placement into any world, BEAST levels ================= */
-const BL=()=>S.set.blvl||'medium',BLI=()=>({easy:0,medium:1,hard:2})[BL()];
-ACT.blvl=d=>{S.set.blvl=d.v;save();renderArcade()};
-const _ra21=renderArcade;renderArcade=function(){_ra21();if(S.set.arcd!=='beast')return;const db=$('#s-arcade .diffbar');
- db&&db.insertAdjacentHTML('beforeend',`<div class="seg blvl"><span>BEAST level:</span>${['easy','medium','hard'].map(v=>`<button class="${BL()===v?'on':''}" data-act="blvl" data-v="${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join('')}</div>`)};
 /* --- placement test, part 2 --- */
 function segAcc(){return P.segs.map(([a,b])=>{let m=0;P.mist.forEach(x=>{if(x>=a&&x<b)m++});return Math.round((b-a-m)/(b-a)*100)})}
 let PLACE1=null;

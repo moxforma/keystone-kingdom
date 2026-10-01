@@ -607,7 +607,6 @@ body.homewide .app{max-width:100%}
 .fwp{font-size:24px;margin:0;color:#f0c860}
 #fw{width:100%;min-height:150px;background:#1b1626;color:#f0eaf8;border:3px solid #3a2f4e;font:400 26px 'Jersey 10',monospace;padding:10px;resize:vertical;box-sizing:border-box}
 #fw:focus{outline:none;border-color:#7fe8ff}.fwc{margin:0}
-.blvl{display:flex;align-items:center;gap:6px}.blvl span{color:#ff8a6a}.blvl button.on{background:#c8382e!important;color:#fff6e0!important}
 
 /* ---------- V23 logo, key box ---------- */
 .pxlogo{width:clamp(320px,58vw,700px);height:auto;image-rendering:pixelated;display:block;margin:0 auto}
@@ -783,11 +782,33 @@ svg.zk,svg.zk image{pointer-events:none}
 }
 @media (prefers-reduced-motion:reduce){.zap{display:none}}
 #s-arcade .diffbar .seg{flex-wrap:wrap}
-#s-arcade .game{justify-items:center;text-align:center}
+#s-arcade .arcade-toggles{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#s-arcade .arcade-switch{display:inline-flex;align-items:center;gap:7px;border:2px solid #8862b6;border-radius:10px;background:#2a1d3e;color:#e9dcfa;padding:6px 9px;min-height:36px;cursor:pointer;font:600 16px var(--body)}
+#s-arcade .arcade-switch.on{background:#6e3f9d;color:#fff;border-color:#c9a4f1}
+#s-arcade .switch-track{position:relative;display:inline-block;width:37px;height:19px;border-radius:20px;background:#766887;border:2px solid #d4bfec;box-sizing:border-box}
+#s-arcade .switch-thumb{position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:#fff;transition:left .15s}
+#s-arcade .arcade-switch.on .switch-track{background:#bce984}
+#s-arcade .arcade-switch.on .switch-thumb{left:20px;background:#294014}
+#s-arcade .switch-state{min-width:24px;text-align:left}
+#s-arcade .game{display:flex;flex-direction:column;align-items:center;text-align:center}
 #s-arcade .game .gart{justify-content:center}
-#s-arcade .game .arcade-stats{width:100%}
+#s-arcade .game .arcade-stats{width:100%;margin-top:auto}
 .arcade-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px}
 .arcade-stat{padding:8px 10px;border:2px solid var(--line);border-radius:10px;background:var(--panel2);text-align:center}
 .arcade-stat b{display:block;color:var(--gold);font-size:28px;line-height:1.1}
 .arcade-stat span{display:block;color:var(--ink);font-size:17px}
 .arcade-stat.level{grid-column:1/-1}.arcade-stat.level b{font-size:22px}
+
+/* Keep every card's picture, type and stars on the same rows. */
+.card:not(.back){aspect-ratio:5/8;display:grid;grid-template-rows:22cqi 62cqi 12cqi minmax(0,1fr) 7cqi;row-gap:1.5cqi}
+.card:not(.back) .c-top{min-height:0;align-content:start;overflow:hidden}
+.card:not(.back) .c-art{width:100%;height:100%;min-height:0;box-sizing:border-box;aspect-ratio:auto}
+.card:not(.back) .c-type{width:100%;min-height:0;align-self:center}
+.card:not(.back) .c-flav{min-height:0;overflow:hidden;font-size:6cqi;line-height:1.15}
+.card:not(.back) .c-foot{align-self:end}
+#mbox .rbtns .btn[data-act=copyRun]{background:#b8a0e8!important;color:#2a1d3e!important;box-shadow:0 5px 0 #6a58a8!important}
+.ghost-arena .lane{height:50%}
+.ghost-runner{opacity:.72;filter:hue-rotate(95deg) saturate(1.25)}
+.ghost-label{position:absolute;top:4px;right:10px;z-index:2;color:#fff6e0;font-size:18px;text-shadow:1px 1px #1b1626}
+.ghost-summary{display:grid;gap:4px;padding:10px;border:2px solid #b8a0e8;background:#2a1d3e;color:#fff6e0}
+.ghost-summary b{color:#f0c860}

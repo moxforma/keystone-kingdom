@@ -47,21 +47,21 @@ test('each game remembers the hardest arcade difficulty it won', () => {
  assert.equal(api.arcadeHighest('meteor'), 'Hard');
  state.G.arcLevel = 'beast-easy';
  api.arcadeRecordWin('meteor', true);
- assert.equal(api.arcadeHighest('meteor'), 'BEAST · Easy');
+ assert.equal(api.arcadeHighest('meteor'), 'BEAST MODE');
  assert.equal(api.arcadeHighest('race'), 'None yet');
 });
 
 test('only wins raise the saved arcade level', () => {
- const { context, state, api } = arcade({ arcd: 'beast', blvl: 'easy' });
+ const { context, state, api } = arcade({ arcd: 'beast' });
  context.startMeteor();
  context.endMeteor();
  assert.equal(state.S.arc.mwin, 1);
- assert.equal(api.arcadeHighest('meteor'), 'BEAST · Easy');
+ assert.equal(api.arcadeHighest('meteor'), 'BEAST MODE');
  context.startGlitch();
  context.endGlitch(false);
  assert.equal(api.arcadeHighest('glitch'), 'None yet');
  context.endGlitch(true);
- assert.equal(api.arcadeHighest('glitch'), 'BEAST · Easy');
+ assert.equal(api.arcadeHighest('glitch'), 'BEAST MODE');
  context.startRace();
  state.G.racers[0].fin = 1;
  context.endRace();
