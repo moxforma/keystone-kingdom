@@ -816,3 +816,15 @@ svg.zk,svg.zk image{pointer-events:none}
 .ghost-scorebar b{color:#f0c860;font:400 22px var(--title)}
 .ghost-scorebar strong{font:400 12px var(--title);text-align:center;color:#d8c0f4}
 @media(max-width:560px){.ghost-scorebar{flex-wrap:wrap}.ghost-scorebar strong{order:-1;width:100%}}
+.trk.ghost-self,.trk.ghost-friend{height:50px}
+.ghost-owner{position:absolute;left:42px;top:0;font:400 11px var(--title);color:#f0c860}
+.ghost-friend{margin-top:-4px}
+.ghost-friend .ghost-owner{color:#d4b8fa}
+.ghost-friend .trk-bar i{background:repeating-linear-gradient(90deg,#b8a0e8 0 10px,#70599f 10px 12px)}
+.ghost-friend .trk-hero{opacity:.78;filter:hue-rotate(95deg) saturate(1.25)}
+.ghost-home{display:grid;justify-items:center;gap:3px;width:min(100%,300px);margin:18px auto 0;padding:10px;border:2px solid #a585cc;border-radius:12px;background:#2a1d3e;color:#fff6e0;text-align:center;text-decoration:none}
+.ghost-home img{display:block;width:min(200px,100%);height:auto;image-rendering:pixelated}
+.ghost-home span{font:400 13px var(--title)}
+.ghost-home small{display:block;margin-top:5px;font:400 16px var(--body);color:#e9dcfa}
+.ghost-home:hover,.ghost-home:focus-visible{background:#4a2d66;border-color:#f0c860}
+#s-game>.ghost-home{margin-bottom:14px}

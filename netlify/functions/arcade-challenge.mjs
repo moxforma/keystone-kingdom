@@ -12,6 +12,19 @@ const validFrames = (frames, maxPosition) => {
  }
  return frames[0][0] === 0 && frames[0][1] === 0 && position === maxPosition && time > 0;
 };
+const validProgress = frames => {
+ if (!Array.isArray(frames) || frames.length < 2 || frames.length > 1000) return false;
+ let position = -1, time = -1;
+ for (const frame of frames) {
+  if (!Array.isArray(frame) || frame.length !== 5 || frame.some(value => !Number.isInteger(value)) ||
+      frame[0] < 0 || frame[0] > 1000 || frame[0] < position ||
+      frame[1] < 0 || frame[1] > 36000 || frame[1] < time ||
+      frame[2] < 1 || frame[2] > 4 || frame[4] < 1 || frame[4] > 1000 ||
+      frame[3] < 0 || frame[3] > frame[4]) return false;
+  [position, time] = frame;
+ }
+ return frames[0][0] === 0 && frames[0][1] === 0;
+};
 
 export const validChallenge = data => {
  if (!data || data.v !== 2 || !["race", "meteor", "glitch"].includes(data.g) ||
@@ -24,7 +37,8 @@ export const validChallenge = data => {
    validFrames(data.f, data.t.length);
  }
  return Number.isInteger(data.r) && data.r >= 0 && data.r <= 1000000 &&
-  typeof data.w === "boolean" && validFrames(data.f, data.r);
+  typeof data.w === "boolean" && validFrames(data.f, data.r) &&
+  (data.g !== "glitch" || data.p === undefined || validProgress(data.p));
 };
 
 export default async req => {

@@ -25,11 +25,40 @@ const ghostIncoming=ghostDecode(new URLSearchParams(location.search).get('ghost'
 let ghostToStart=null;
 let challengeToStart=ghostIncoming;
 const ghostSettings=()=>({d:(S.set.arcd||'auto').startsWith('beast')?'beast':S.set.arcd||'auto',n:S.set.arcNumbers===true,s:S.set.arcSymbols===true,l:S.set.len});
+const ghostFooterHTML=()=>`<a class="ghost-home" href="/"><img src="${LOGO_URL}" alt="Keyloria Kingdom"><span>Explore the kingdom<small>More typing adventures await.</small></span></a>`;
+function ghostFooterMount(){ $('#s-game > .ghost-home')?.remove();if(G.ghostInvite)$('#s-game').insertAdjacentHTML('beforeend',ghostFooterHTML()) }
 const ghostElapsed=()=>Math.max(1,Math.round((performance.now()-G.ghostStartTime)/100));
 function ghostScoreAt(frames,time){
  let score=0;
  for(const [points,at] of frames){if(at>time)break;score=points}
  return score;
+}
+function ghostWaveFrameAt(frames,time){
+ let current=frames[0];
+ for(const frame of frames){if(frame[1]>time)break;current=frame}
+ return current;
+}
+function ghostTrackWave(){
+ if(G?.type!=='glitch'||!G.ghostWaveTimeline)return;
+ const progress=glitchProgress(),position=Math.round(progress.fraction*1000),track=G.ghostWaveTimeline;
+ if(track.at(-1)[0]!==position)track.push([position,ghostElapsed(),progress.wave,progress.done,progress.total]);
+}
+function ghostWaveDisplay(){
+ const self=$('#trkG'),invite=G?.ghostInvite;
+ if(!self||G?.type!=='glitch'||!invite?.p){$('#trkFriend')?.remove();self?.classList.remove('ghost-self');self?.querySelector('.ghost-owner')?.remove();return}
+ if(!self.classList.contains('ghost-self')){
+  self.classList.add('ghost-self');self.insertAdjacentHTML('afterbegin','<span class="ghost-owner">YOU</span>');
+ }
+ let friend=$('#trkFriend');
+ if(!friend){
+  self.insertAdjacentHTML('afterend',trackerHTML('trkFriend'));
+  friend=$('#trkFriend');friend.classList.add('ghost-friend');
+  friend.insertAdjacentHTML('afterbegin','<span class="ghost-owner">FRIEND’S GHOST</span>');
+ }
+ const elapsed=Math.max(0,Math.round((performance.now()-G.ghostStartTime)/100));
+ const frame=ghostWaveFrameAt(invite.p,elapsed);
+ const label=frame[2]>G.waves?(frame[0]===1000?'Boss beaten!':`Boss · ${frame[3]}/${frame[4]} words`):`Wave ${frame[2]} · ${frame[3]}/${frame[4]}`;
+ setTrk(friend,frame[0]/1000,label);
 }
 function ghostTrackScore(){
  if(!G||!['meteor','glitch'].includes(G.type)||!G.ghostTimeline)return;
@@ -51,28 +80,33 @@ const regularStartMeteor=startMeteor;
 startMeteor=function(){
  regularStartMeteor();
  $('#ghostScore')?.remove();
+ $('#s-game > .ghost-home')?.remove();
  G.ghostStartTime=performance.now();
  G.ghostTimeline=[[0,0]];
- if(ghostToStart?.g==='meteor'){G.ghostInvite=ghostToStart;ghostScoreBar()}
+ if(ghostToStart?.g==='meteor'){G.ghostInvite=ghostToStart;ghostScoreBar();ghostFooterMount()}
 };
 const regularStartGlitch=startGlitch;
 startGlitch=function(){
  regularStartGlitch();
  $('#ghostScore')?.remove();
+ $('#s-game > .ghost-home')?.remove();
  G.ghostStartTime=performance.now();
  G.ghostTimeline=[[0,0]];
- if(ghostToStart?.g==='glitch'){G.ghostInvite=ghostToStart;ghostScoreBar()}
+ const progress=glitchProgress();
+ G.ghostWaveTimeline=[[0,0,progress.wave,progress.done,progress.total]];
+ if(ghostToStart?.g==='glitch'){G.ghostInvite=ghostToStart;ghostScoreBar();ghostFooterMount()}
 };
 const regularGameInput=gameInput;
 gameInput=function(ch,caps){
  const result=regularGameInput(ch,caps);
  ghostTrackScore();
+ ghostTrackWave();
  return result;
 };
 const regularMeteorTick=mTick;
 mTick=function(now){ghostScoreTick(now);return regularMeteorTick(now)};
 const regularGlitchTick=gTick;
-gTick=function(now){ghostScoreTick(now);return regularGlitchTick(now)};
+gTick=function(now){ghostScoreTick(now);const result=regularGlitchTick(now);ghostTrackWave();return result};
 
 function ghostProgress(pos){
  if(G.type!=='race'||!G.ghostTrack||!G.start)return;
@@ -91,10 +125,12 @@ const regularStartRace=startRace;
 startRace=function(){
  regularStartRace();
  $('#ghostScore')?.remove();
+ $('#s-game > .ghost-home')?.remove();
  G.ghostTrack=[];
  if(!ghostToStart||ghostToStart.g&&ghostToStart.g!=='race')return;
  const invite=ghostToStart;
  G.ghostInvite=invite;
+ ghostFooterMount();
  G.arcLevel=invite.d;
  G.text=invite.t;
  G.pos=0;
@@ -150,10 +186,13 @@ endMeteor=function(){
 const regularEndGlitch=endGlitch;
 endGlitch=function(win){
  ghostTrackScore();
+ ghostTrackWave();
  const frames=[...G.ghostTimeline];
  const end=ghostElapsed(),score=G.score;
  if(frames.at(-1)[1]<end)frames.push([score,end]);
- G.challengeData={v:2,g:'glitch',...ghostSettings(),r:score,w:!!win,f:frames};
+ const progress=glitchProgress(),waveFrames=[...G.ghostWaveTimeline];
+ if(waveFrames.at(-1)[1]<end)waveFrames.push([Math.round(progress.fraction*1000),end,progress.wave,progress.done,progress.total]);
+ G.challengeData={v:2,g:'glitch',...ghostSettings(),r:score,w:!!win,f:frames,p:waveFrames};
  return regularEndGlitch(win);
 };
 function ghostArcadeSummary(){
@@ -162,13 +201,13 @@ function ghostArcadeSummary(){
  const yourWin=G.type==='meteor'?G.shields>0:G.boss?.dead===true;
  const beat=yourWin!==friend.w?yourWin:G.score>friend.r;
  const tied=yourWin===friend.w&&G.score===friend.r;
- return `<div class="ghost-summary"><b>${tied?'A tie with your friend!':beat?'You beat your friend’s ghost!':'Your friend’s ghost won this time!'}</b><span>Your score: ${G.score} · Friend’s score: ${friend.r}</span></div>`;
+ return `<div class="ghost-summary"><b>${tied?'A tie with your friend!':beat?'You beat your friend’s ghost!':'Your friend’s ghost won this time!'}</b><span>Your score: ${G.score} · Friend’s score: ${friend.r}</span></div>${ghostFooterHTML()}`;
 }
 function ghostRaceSummary(){
  if(!G.ghostInvite)return '';
  const friendSeconds=G.ghostInvite.f.at(-1)[1]/10;
  const yours=(G.ghostFinishMs/1000).toFixed(1);
- return `<div class="ghost-summary"><b>${G.racers[0].fin?'Your friend finished first!':'You beat your friend’s ghost!'}</b><span>You: ${yours}s · Friend: ${friendSeconds.toFixed(1)}s (${G.ghostInvite.a}% accuracy)</span></div>`;
+ return `<div class="ghost-summary"><b>${G.racers[0].fin?'Your friend finished first!':'You beat your friend’s ghost!'}</b><span>You: ${yours}s · Friend: ${friendSeconds.toFixed(1)}s (${G.ghostInvite.a}% accuracy)</span></div>${ghostFooterHTML()}`;
 }
 ACT.ghostStart=()=>{
  const challenge=challengeToStart;
@@ -212,8 +251,9 @@ function ghostInviteModal(data){
  challengeToStart=data;
  const name={race:'Keylori Race',meteor:'Meteor Zap',glitch:'Scrambler Attack'}[data.g||'race'];
  const description=data.g==='race'||!data.g?'Race your friend’s typing ghost on the same words.':
+  data.g==='glitch'&&data.p?'Watch your friend’s score and wave bar replay as you type.':
   'Watch your friend’s score replay while you play at the same Arcade settings.';
- modal(`<h2>A friend challenged you!</h2><p><b>${name}</b>: ${description}</p><div class="rbtns"><button class="btn" data-act="ghostStart">Play the challenge</button><button class="btn alt" data-act="ghostDismiss">Maybe later</button></div>`);
+ modal(`<h2>A friend challenged you!</h2><p><b>${name}</b>: ${description}</p><div class="rbtns"><button class="btn" data-act="ghostStart">Play the challenge</button><button class="btn alt" data-act="ghostDismiss">Maybe later</button></div>${ghostFooterHTML()}`);
 }
 const shortCode=new URLSearchParams(location.search).get('c');
 if(shortCode){

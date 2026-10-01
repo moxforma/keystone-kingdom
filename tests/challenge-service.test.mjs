@@ -26,6 +26,7 @@ test('short codes save and load each arcade ghost', async () => {
   const data = { v: 2, g: game, d: 'medium', n: false, s: false, l: 1,
    ...(game === 'race' ? { t: 'race me', a: 95, f: [[0,0],[7,24]] } :
     { r: 250, w: true, f: [[0,0],[100,10],[250,24]] }) };
+  if(game==='glitch')data.p=[[0,0,1,0,6],[42,10,1,1,6],[250,24,2,0,7]];
   const saved = await handler(new Request('https://example.com/api/arcade-challenge', {
    method: 'POST', body: JSON.stringify(data)
   }));
@@ -35,6 +36,10 @@ test('short codes save and load each arcade ghost', async () => {
   const loaded = await handler(new Request('https://example.com/api/arcade-challenge?id=' + id));
   assert.equal(loaded.status, 200);
   assert.deepEqual((await loaded.json()).data.f, data.f);
+  if(game==='glitch'){
+   const replay=await handler(new Request('https://example.com/api/arcade-challenge?id=' + id));
+   assert.deepEqual((await replay.json()).data.p,data.p);
+  }
  }
 });
 
@@ -46,4 +51,10 @@ test('invalid or oversized ghost data is rejected', async () => {
   method: 'POST', body: JSON.stringify(bad)
  }));
  assert.equal(result.status, 400);
+ const malformed = {v:2,g:'glitch',d:'easy',n:false,s:false,l:1,r:100,w:false,
+  f:[[0,0],[100,10]],p:[[0,0,1,0,6],[1200,10,1,1,6]]};
+ const badWave=await handler(new Request('https://example.com/api/arcade-challenge',{
+  method:'POST',body:JSON.stringify(malformed)
+ }));
+ assert.equal(badWave.status,400);
 });

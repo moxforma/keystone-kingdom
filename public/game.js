@@ -760,7 +760,7 @@ function startGlitch(){
  const i=arcadeLesson(),ls=learned(i),letters=[...ls].filter(c=>/[a-z]/.test(c)),ok=WORDS.filter(w=>w.length<=7&&[...w].every(c=>ls.has(c)));
  mountGame('Scrambler Attack','Type the words!','Score','Hearts');
  const mult=S.set.len,met=Object.keys(S.cards);
- G={type:'glitch',i,letters,ok,ents:[],hearts:5,score:0,combo:0,maxCombo:0,hits:0,errs:0,wave:0,waves:3,queue:[],spawnT:2.5,speed:Math.min(1.5,Math.max(.62,avgWpm()/8)),tgt:null,done:false,next:null,rescued:0,kills:0,boss:null,phase:'wave',met};
+ G={type:'glitch',i,letters,ok,ents:[],hearts:5,score:0,combo:0,maxCombo:0,hits:0,errs:0,wave:0,waves:3,waveWordsTyped:0,waveWordsTotal:0,queue:[],spawnT:2.5,speed:Math.min(1.5,Math.max(.62,avgWpm()/8)),tgt:null,done:false,next:null,rescued:0,kills:0,boss:null,phase:'wave',met};
  $('#gsw').hidden=true;$('#garena').className='garena glitch-arena';
  $('#garena').innerHTML=`${pathScene()}<div class="gz gz-l" id="gzk">${zookSVG()}</div><div class="gcombo" id="gcombo"></div><div class="gmsg" id="gmsg"></div><div class="gflash" id="gflash"></div>`;
  gUp();nextWave();G.last=performance.now();G.raf=requestAnimationFrame(gTick);
@@ -769,7 +769,7 @@ function gw(size){if(G.ok.length>=8){const f=G.ok.filter(w=>size==='s'?w.length<
  return groups(()=>rand(G.letters),1,size==='s'?1:size==='m'?2:3,size==='s'?2:size==='m'?3:4)}
 function gmsg(t,cls=''){const m=$('#gmsg');if(!m)return;m.className='gmsg '+cls;m.innerHTML=t;kick(m,'show')}
 function nextWave(){G.wave++;const n=Math.round([5,6,7][G.wave-1]*S.set.len);const sz=[['s','s','m'],['s','m','m'],['m','m','l']][G.wave-1];
- G.queue=Array.from({length:n},()=>({kind:'bad',size:rand(sz)}));G.queue.splice(Math.floor(n/2),0,{kind:'friend',size:'m'});G.spawnT=2.6;gmsg(`Wave ${G.wave}`,'big');sfx.lvl()}
+ G.queue=Array.from({length:n},()=>({kind:'bad',size:rand(sz)}));G.queue.splice(Math.floor(n/2),0,{kind:'friend',size:'m'});G.waveWordsTyped=0;G.waveWordsTotal=G.queue.length;G.spawnT=2.6;gmsg(`Wave ${G.wave}`,'big');sfx.lvl()}
 function spawnEnt(sp){
  const A=$('#garena'),e={kind:sp.kind,txt:gw(sp.size),typed:0,z:sp.kind==='friend'?.42+Math.random()*.15:0,lane:(Math.random()*1.6-.8),v:{s:1/12,m:1/15,l:1/18}[sp.size],dead:false};
  if(e.kind==='friend'){e.dir=Math.random()<.5?1:-1;e.lane=-1.25*e.dir;const [a,b]=(G.met.length?rand(G.met):rand(['0-0','1-0','2-0','4-0'])).split('-').map(Number);e.name=SPECIES[a].n[b];e.art=creatureSVG(a,b)}
@@ -808,6 +808,7 @@ function glitchInput(ch,caps){
   if(e.kind==='bad'&&!e.boss)e.z=Math.max(0,e.z-.012);
   paintLab(e);
   if(e.typed>=e.txt.length){
+   if(!e.boss)G.waveWordsTyped=Math.min(G.waveWordsTotal,G.waveWordsTyped+1);
    if(e.boss){e.hp--;G.score+=100;burst($('#garena'),e.sp,GV[0],18);kick($('#garena'),'quake');sfx.win();if(e.hp<=0){e.dead=true;e.sp.classList.remove('locked');e.sp.classList.add('pop');setTimeout(()=>e.sp.remove(),500);burst($('#garena'),e.sp,'#ffc93c',30);e.lb.remove();G.score+=300;setTimeout(()=>endGlitch(true),900);gUp();setTarget(null);return}gmsg('Hit!');bossPhrase()}
    else if(e.kind==='bad'){G.kills++;G.score+=e.txt.length*10*(1+Math.floor(G.combo/10));e.sp.classList.add('pop');burst($('#garena'),e.sp,GV[Math.floor(Math.random()*5)]);removeEnt(e)}
    else{G.rescued++;G.score+=50;G.hearts=Math.min(5,G.hearts+1);e.sp.classList.add('saved');gmsg(`Saved! +1 ♥`,'good');sfx.win();removeEnt(e)}
@@ -1403,15 +1404,31 @@ const FLAG=["oo......","oRRRRo..","oRrRRRRo","oRRRRRRo","oRRRro..","oo......","o
 const flagURL=()=>PXU.flag||(PXU.flag=PXG(FLAG,{o:'#2a1d3e',R:'#e8584f',r:'#f6a09a'}).toDataURL());
 function trackerHTML(id){return `<div class="trk" id="${id}"><div class="trk-bar"><i></i></div><div class="trk-hero">${zookSVG()}</div><img class="trk-flag" src="${flagURL()}" alt=""><span class="trk-pct">0%</span></div>`}
 function ensureTrackers(){if(!$('#trkP')){$('#strip').parentElement.insertAdjacentHTML('afterbegin',trackerHTML('trkP'))}if(!$('#trkG')){$('#garena').insertAdjacentHTML('beforebegin',trackerHTML('trkG'))}}
-function setTrk(el,f,label){if(!el)return;f=Math.max(0,Math.min(1,f||0));const segs=20,n=Math.round(f*segs);el.querySelector('.trk-bar i').style.width=(n/segs*100)+'%';el.querySelector('.trk-hero').style.left=`calc((100% - 170px) * ${n/segs} - ${n/segs*34}px)`;el.querySelector('.trk-pct').textContent=label||Math.round(f*100)+'%'}
+function setTrk(el,f,label){if(!el)return;f=Math.max(0,Math.min(1,f||0));el.querySelector('.trk-bar i').style.width=(f*100)+'%';el.querySelector('.trk-hero').style.left=`calc((100% - 170px) * ${f} - ${f*34}px)`;el.querySelector('.trk-pct').textContent=label||Math.round(f*100)+'%'}
+function glitchProgress(){
+ const W=G.waves+1;
+ if(G.boss?.dead&&G.hearts>0)return {fraction:1,label:'Boss beaten!',wave:W,done:G.bmax||3,total:G.bmax||3};
+ if(G.boss&&!G.boss.dead){
+  const boss=G.boss;G.bmax=G.bmax||boss.hp;
+  const text=String(boss.txt||''),words=Math.max(1,text.trim().split(/\s+/).length);
+  const typed=text.slice(0,boss.typed||0);
+  const done=Math.min(words,(typed.match(/\S+\s+/g)||[]).length+(text.length&&(boss.typed||0)>=text.length?1:0));
+  const hits=G.bmax-boss.hp;
+  const fraction=(G.waves+(hits+done/words)/G.bmax)/W;
+  G.bossProgressPeak=Math.max(G.bossProgressPeak||0,fraction);
+  return {fraction:G.bossProgressPeak,label:`Boss · ${done}/${words} words`,wave:W,done,total:words};
+ }
+ const wave=Math.min(Math.max(G.wave,1),G.waves),done=Math.min(G.waveWordsTyped||0,G.waveWordsTotal||0),total=G.waveWordsTotal||1;
+ return {fraction:(wave-1+done/total)/W,label:`Wave ${wave} · ${done}/${total}`,wave,done,total};
+}
 let trkHero='';
 setInterval(()=>{ensureTrackers();const hk=(S.hero||'')+(S.color||'')+JSON.stringify(S.equip);if(hk!==trkHero){trkHero=hk;document.querySelectorAll('.trk-hero').forEach(h=>h.innerHTML=zookSVG())}
  const tp=$('#trkP');if(tp){const on=typeof P!=='undefined'&&P.text&&(P.phase==='play'||P.phase==='done'||P.phase==='end');tp.style.visibility=on?'visible':'hidden';if(on){const left=P.text.slice(P.pos).split(' ').filter(Boolean).length;setTrk(tp,P.pos/P.text.length,left?`${left} word${left>1?'s':''} left`:'Done!')}}
  const tg=$('#trkG');if(tg&&typeof G!=='undefined'&&G&&G.type){let f=0,lab='';
   if(G.type==='meteor'){f=(G.spawned-G.m.length)/G.total;lab=`${Math.max(0,G.total-(G.spawned-G.m.length))} left`}
   else if(G.type==='race'){f=G.pos/G.text.length;lab=Math.round(f*100)+'%'}
-  else if(G.type==='glitch'){const W=G.waves+1;if(G.boss&&!G.boss.dead){G.bmax=G.bmax||G.boss.hp;f=(G.waves+(1-G.boss.hp/G.bmax))/W;lab='Boss!'}else{const wv=Math.min(Math.max(G.wave,1),G.waves);f=(wv-1)/W;lab=`Wave ${wv} of ${G.waves}`}if(G.done&&G.hearts>0)f=1}
-  if(G.done&&G.type!=='glitch')f=1;setTrk(tg,f,lab)}},150);
+  else if(G.type==='glitch'){const progress=glitchProgress();f=progress.fraction;lab=progress.label}
+  if(G.done&&G.type!=='glitch')f=1;setTrk(tg,f,lab);if(typeof ghostWaveDisplay==='function')ghostWaveDisplay()}},150);
 /* --- whole-game progress on home --- */
 const _rh4=renderHome;renderHome=function(){_rh4();const xb=$('#s-home .trow');if(!xb||!S.name)return;const tot=LESSONS.length*8,done=Object.keys(S.best).length,pc=Math.round(done/tot*100);
  xb.insertAdjacentHTML('afterend',`<div class="gprog"><div class="gp-top"><span>Whole game</span><b>${pc}% done</b></div><div class="gp-bar"><i style="width:${pc}%"></i></div><small>${done} of ${tot} levels · World ${worldOf(Math.min(LESSONS.length-1,Math.floor(nextStage()/8)))} of ${WORLDS.length}</small></div>`)};
