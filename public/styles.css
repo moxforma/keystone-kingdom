@@ -1290,3 +1290,6 @@ body.lines2 .strip{position:relative}body.lines2 .strip::before{content:"";posit
 .kp-pet{--grow:1}.kp-pet svg{transform:scale(var(--grow));transform-origin:50% 100%;transition:transform .3s steps(4)}
 
 .fcol-l .flipwrap.multi{flex-wrap:nowrap;--cw:170px}.fcol-l .flipwrap.multi .kbubble{flex:none;flex-basis:auto;height:auto}.fcol-l .flipwrap.multi .reward-cards{flex-direction:column;align-items:center}.fcol-l .flipwrap.multi .reward-cards .cw{width:var(--cw)!important;max-width:none}
+/* headers stay put while scrolling */
+.screen>.topbar{position:sticky;top:0;z-index:30;background:#1b1626;margin-top:-6px;padding-top:6px;padding-bottom:8px;box-shadow:0 6px 0 -2px rgba(0,0,0,.25)}
+#s-map .wpick{position:sticky;top:var(--tbh,64px);z-index:29;background:#1b1626;padding:4px 0 8px;margin-bottom:6px}

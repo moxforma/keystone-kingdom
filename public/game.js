@@ -1572,6 +1572,9 @@ const PROPS={bow:{n:'Red Bow',side:1,r:["oo...oo","oRo.oRo","oRRoRRo","oRo.oRo",
  tophat:{n:'Top Hat',side:0,r:[".oooooo.",".oKKKKo.",".oKKKKo.",".oRRRRo.","oooooooo"],p:{o:'#120c18',K:'#3a3248',R:'#d8483a'}},
  party:{n:'Party Hat',side:0,r:["..y..","..o..",".oCo.",".oCo.","oCyCo","oCCCo","ooooo"],p:{o:'#1a2a3a',C:'#6cc8e0',y:'#f0c860'}},
  sprout:{n:'Lucky Sprout',side:1,r:["oo..","oLo.",".oLo","..o.","..o."],p:{o:'#14240f',L:'#7fc858'}}};
+/* outlines: a deep shade of the Keylori's own color instead of hard black (dark Keylori keep their dark outline) */
+function softOutline(pal,tier){if(tier||!pal.o)return pal;const base=pal.D||pal.B;if(!base||!/^#[0-9a-f]{6}$/i.test(base))return pal;
+ const l=lum(base);if(l<62)return pal;const [h,s0]=hex2hsl(base);const o=hsl2hex(h,Math.min(.55,s0*.9),Math.max(.13,Math.min(.2,l/255*.32)));return Object.assign({},pal,{o})}
 /* head anchors: find eyes, head top contour and head width so accessories sit ON the head */
 const ANCH={};
 function kAnchor(k){if(ANCH[k])return ANCH[k];const rows=KKDATA.spr[k],w=rows[0].length,h=rows.length,at=(x,y)=>(rows[y]||'')[x]||'.';
@@ -1582,10 +1585,13 @@ function kAnchor(k){if(ANCH[k])return ANCH[k];const rows=KKDATA.spr[k],w=rows[0]
  if(eyes.length){const xs=eyes.map(e=>e[0]).sort((a,b)=>a-b);hx=Math.round((xs[0]+xs[xs.length-1])/2);ey=Math.min(...eyes.map(e=>e[1]))}
  let hl=hx,hr=hx;const row=rows[ey]||'';for(let x=hx;x>=0&&row[x]&&row[x]!=='.'&&row[x]!=='o';x--)hl=x;for(let x=hx;x<w&&row[x]&&row[x]!=='.'&&row[x]!=='o';x++)hr=x;
  if(eyes.length){const xs=eyes.map(e=>e[0]);hl=Math.min(hl,Math.min(...xs)-1);hr=Math.max(hr,Math.max(...xs)+1)}
+ let chin=-1;for(let y=ey;y<=Math.min(h-1,ey+14);y++)for(let x=hl;x<=hr;x++)if("Mm".includes(at(x,y)))chin=Math.max(chin,y);
+ if(chin<0){for(let y=ey;y<=Math.min(h-1,ey+7);y++)for(let x=hl;x<=hr;x++)if(at(x,y)==='n')chin=Math.max(chin,y+1)}if(chin<0)chin=ey+5;
  const med=(a,b)=>{const v=[];for(let x=a;x<=b;x++)if(tops[x]>=0)v.push(tops[x]);if(!v.length)return Y0;v.sort((m,n)=>m-n);return v[Math.floor(v.length/2)]};
- return ANCH[k]={tops,hx,ey,hl,hr,X0,X1,Y0,Y1,med,top:x=>{const t=tops[Math.max(0,Math.min(w-1,x))];return t<0?med(x-2,x+2):t},med2:(a,b)=>med(a,b)}}
+ return ANCH[k]={tops,hx,ey,chin,hl,hr,X0,X1,Y0,Y1,med,top:x=>{const t=tops[Math.max(0,Math.min(w-1,x))];return t<0?med(x-2,x+2):t},med2:(a,b)=>med(a,b)}}
 /* --- evolution art: baby soft, teen marked, grown bold --- */
 function evolvedV(i,f,tier,v={}){const D=KKDATA,k=D.order[i],rows=D.spr[k],w=rows[0].length;let pal=tierPal(cwPal(D.pal[k],v.cw),tier);
+ pal=softOutline(pal,tier);
  if(f===0){const p=Object.assign({},pal);if(pal.L&&pal.H)p.L=pal.H;if(pal.B&&pal.L)p.B=pal.L;if(pal.D&&pal.B)p.D=pal.B;pal=p}
  const Wd=w+16,H=w+8,ox=8,oy=8,c=document.createElement('canvas');c.width=Wd;c.height=H;const g=c.getContext('2d');
  const put=(x,y,col)=>{if(col){g.fillStyle=col;g.fillRect(x,y,1,1)}};
@@ -1601,9 +1607,11 @@ function evolvedV(i,f,tier,v={}){const D=KKDATA,k=D.order[i],rows=D.spr[k],w=row
  rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch==='.')return;let col=pal[ch];
   if(f===1&&(ch==='B'||ch==='L'||ch==='H')&&y>=Y0+2&&y<=mid&&(x-cx+40)%4===1&&row[x-1]!=='o'&&row[x+1]!=='o')col=pal.D||col;
   put(ox+x,oy+y,col)}));
- if(f===1){const sc=(TYPES[SPECIES[i].t]||'#e8584f');let [hh,ss,ll]=hex2hsl(sc);if(hh>280&&hh<345)hh=8;const S1=hsl2hex(hh,Math.min(.75,ss),.55),S2=hsl2hex(hh,Math.min(.75,ss),.36),O=pal.o||'#1b1626',ty=Math.min(Y1-3,Math.max(Math.round(Y0+(Y1-Y0)*.7),AN.ey+6));
+ if(f===1){const sc=(TYPES[SPECIES[i].t]||'#e8584f');let [hh,ss,ll]=hex2hsl(sc);if(hh>280&&hh<345)hh=8;const S1=hsl2hex(hh,Math.min(.75,ss),.55),S2=hsl2hex(hh,Math.min(.75,ss),.36),O=pal.o||'#1b1626',ty=Math.min(Y1-2,AN.chin+4);
   let xa=99,xb=-1;for(let yy=ty;yy<=ty+1;yy++){const r=rows[yy];if(!r)continue;for(let x=0;x<r.length;x++)if(r[x]!=='.'&&r[x]!=='o'){xa=Math.min(xa,x);xb=Math.max(xb,x)}}
-  if(xb>xa){const by=ty-2,half=Math.max(3,Math.min(5,Math.floor((xb-xa)/4)));
+  const onBody=(by,hf)=>{for(let r=-1;r<=hf;r++){const q=rows[by+r]||'';if(!q[cx]||q[cx]==='.')return false;const ww=hf-Math.max(0,r);if(q[cx-ww]==='.'||q[cx+ww]==='.')return false}return true};
+  const half0=Math.max(3,Math.min(5,Math.floor((xb-xa)/4)));
+  if(xb>xa&&AN.chin+3<=Y1-4&&onBody(AN.chin+3,half0)){const by=AN.chin+3,half=half0;
    // bandana: a triangle hanging from the neck, knot on top, shaded + outlined
    for(let r=0;r<=half;r++){const w=half-r;for(let x=-w;x<=w;x++){const edge=x===-w||x===w;put(ox+cx+x,oy+by+r,edge?O:(x>0?S2:S1))}}
    put(ox+cx,oy+by+half+1,O);for(let x=-half-1;x<=half+1;x++){put(ox+cx+x,oy+by-1,O)}for(let x=-half;x<=half;x++)put(ox+cx+x,oy+by,x>0?S2:S1);
@@ -1615,7 +1623,7 @@ function evolvedV(i,f,tier,v={}){const D=KKDATA,k=D.order[i],rows=D.spr[k],w=row
  if(f===2||tier||v.cw){const sp=tier==='diamond'?['#ffffff','#bfe2f6']:v.cw&&!tier?['#ffffff','#c8e8f0']:['#fff4c8','#f6d050'];[[2,3],[Wd-4,6],[1,H-12],[Wd-2,H-8],[Wd-10,1]].forEach(([x,y])=>{put(x,y,sp[0]);put(x-1,y,sp[1]);put(x+1,y,sp[1]);put(x,y-1,sp[1]);put(x,y+1,sp[1])})}
  return c}
 function creatureSVG(i,form,cls='',tier){const k=KKDATA.order[i],w=KKDATA.spr[k][0].length,Wd=w+16,H=w+8,px=/\bpx\b/.test(cls),s=px||/\bbig\b/.test(cls)?1:[.6,.8,1][form],fit=/\bfit\b/.test(cls);
- const v=(S.kv&&S.kv[i])||{},unit=fit?Math.min(5,200/Wd)*(w/24>1&&!/\bbig\b/.test(cls)?24/w*1.05:1):px?5*Math.min(1,30/w):5,iw=Wd*unit*s,ih=H*unit*s,u=kku('e9'+i+'-'+form+(tier||'')+(v.cw||'')+(v.prop||''),()=>evolvedV(i,form,tier,v));
+ const v=(S.kv&&S.kv[i])||{},unit=fit?Math.min(5,200/Wd)*(w/24>1&&!/\bbig\b/.test(cls)?24/w*1.05:1):px?5*Math.min(1,30/w):5,iw=Wd*unit*s,ih=H*unit*s,u=kku('e10'+i+'-'+form+(tier||'')+(v.cw||'')+(v.prop||''),()=>evolvedV(i,form,tier,v));
  const y=fit?(200-ih)/2+ih*.06:200-ih;
  return `<svg class="cr ${cls} ${tier||''}" viewBox="0 0 200 200" aria-hidden="true" style="overflow:visible"><image href="${u}" x="${(200-iw)/2}" y="${y}" width="${iw}" height="${ih}"/></svg>`}
 /* --- rare finds --- */

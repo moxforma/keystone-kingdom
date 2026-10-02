@@ -105,3 +105,6 @@ const _gt=genText;genText=function(i,s,pr){const L=LESSONS[i];if(pr||!L||!PARA.h
  const list=TXT[L.sp],len=Math.round((40+s*8)*(S.set.len||1.4)*(isBoss(i,s)?1.25:1));let out=[],k=s%list.length;while(out.join(' ').length<len){out.push(list[k%list.length]);k++}return out.join(' ')};
 try{if(screen==='home')renderHome()}catch(e){}
 })();
+/* sticky header: keep the map's world picker right under the header */
+(function(){const set=()=>{try{const t=document.querySelector('.screen:not([hidden])>.topbar');if(t)document.documentElement.style.setProperty('--tbh',Math.round(t.getBoundingClientRect().height)+'px')}catch(e){}};
+ const _sh=show;show=function(){const r=_sh.apply(this,arguments);requestAnimationFrame(set);return r};addEventListener('resize',set);setTimeout(set,300)})();
