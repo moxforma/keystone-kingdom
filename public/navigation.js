@@ -16,3 +16,9 @@ addEventListener('popstate',event=>{
  restoringScreen=true;
  try{closeModal();show(saved==='game'?'arcade':saved==='play'?'map':saved)}finally{restoringScreen=false}
 });
+/* Backspace never navigates away (only edits text fields). */
+addEventListener('keydown',event=>{
+ if(event.key!=='Backspace')return;
+ const t=event.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
+ event.preventDefault();
+},true);
