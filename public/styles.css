@@ -1293,3 +1293,8 @@ body.lines2 .strip{position:relative}body.lines2 .strip::before{content:"";posit
 /* headers stay put while scrolling */
 .screen>.topbar{position:sticky;top:0;z-index:30;background:#1b1626;margin-top:-6px;padding-top:6px;padding-bottom:8px;box-shadow:0 6px 0 -2px rgba(0,0,0,.25)}
 #s-map .wpick{position:sticky;top:var(--tbh,64px);z-index:29;background:#1b1626;padding:4px 0 8px;margin-bottom:6px}
+#s-binder .wpages{position:sticky;top:var(--tbh,56px);z-index:29;background:#1b1626;margin:0;padding:4px 0 6px}
+#s-binder .wpage{cursor:pointer}#s-binder .wpage:hover{filter:brightness(1.2)}
+#s-binder .trophy{position:sticky;top:calc(var(--tbh,56px) + var(--wph,64px));z-index:28;background:#1b1626;margin-top:0;padding-top:6px}
+#s-binder .sprtile{scroll-margin-top:calc(var(--tbh,56px) + var(--wph,64px) + var(--trh,180px) + 20px)}
+@media (max-height:640px){#s-binder .trophy{position:static}#s-binder .sprtile{scroll-margin-top:calc(var(--tbh,56px) + var(--wph,64px) + 8px)}}

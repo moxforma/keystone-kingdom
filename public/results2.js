@@ -3,7 +3,7 @@
 /* clearer tips */
 if(typeof TIPS!=='undefined'){const NEW=['Keep your eyes on the screen, not your hands!','Sit up tall and relax your shoulders!','After each key, rest your fingers on A S D F and J K L ;','Slow is OK! Getting it right comes first.'];TIPS.length=0;NEW.forEach(t=>TIPS.push(t))}
 const HOME=PXG(["....oooo....","...oRRRRo...","..oRRRRRRo..",".oRRRRRRRRo.","oRRRRRRRRRRo","oooWWWWWWooo","..oWWBBWWo..","..oWWBBWWo..","..oWWBBWWo..","..oooooooo.."],{o:'#2a1d3e',R:'#e8584f',W:'#fff6e0',B:'#8a5a2a'}).toDataURL();
-const ICON_FOR={map:['map','Map'],arcade:['pad','Arcade'],binder:['cards','Card binder'],home:[null,'Main menu']};
+const ICON_FOR={map:['map','Map'],arcade:['pad','Arcade'],binder:['cards','Keylori Collection'],home:[null,'Main menu']};
 function fitRows(rb){rb.classList.remove('tight','tighter');const rows=()=>new Set([...rb.children].filter(c=>c.offsetParent).map(c=>c.offsetTop)).size;
  requestAnimationFrame(()=>{if(rows()>2){rb.classList.add('tight');if(rows()>2){rb.classList.remove('tight');rb.classList.add('tighter')}}})}
 function tidy(){const box=$('#mbox');if(!box||!box.querySelector('.rstats'))return;

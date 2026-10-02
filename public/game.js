@@ -319,7 +319,7 @@ function renderHome(){
   <div class="trow"><div><b>${S.xp}</b>XP</div><div><b>${cards}/${TOTAL}</b>Keylori</div><div><b>${holo}</b>Holo cards</div><div><b>${Object.values(S.best).reduce((a,b)=>a+b,0)}</b>Stars</div></div>
   <div class="badges">${REGIONS.map((r,k)=>`<div class="badge ${S.badges.includes(k)?'got':''}" style="--bc:${r.color}" title="${r.name} badge">${k+1}</div>`).join('')}</div>
   <div class="hbtns"><button class="btn big" data-act="play" data-n="${n}">${S.xp?'Continue':'Start adventure'}: ${lessonTitle(Math.floor(n/8))} · ${stageName(Math.floor(n/8),n%8)}</button>
-   <button class="btn volt" data-act="go" data-to="map">Adventure Map</button><button class="btn volt" data-act="go" data-to="arcade">Arcade Mode</button><button class="btn alt" data-act="go" data-to="binder">Card Binder</button><button class="btn alt" data-act="go" data-to="shop">Hero Closet</button></div>
+   <button class="btn volt" data-act="go" data-to="map">Adventure Map</button><button class="btn volt" data-act="go" data-to="arcade">Arcade Mode</button><button class="btn alt" data-act="go" data-to="binder">Keylori Collection</button><button class="btn alt" data-act="go" data-to="shop">Hero Closet</button></div>
   <div class="eggrow">${eggSVG(S.egg.w)}<div><b>Daily Egg · ${S.egg.w} of 3 warm</b><span class="note">${S.egg.day===new Date().toDateString()?'Come back tomorrow!':'Play today to warm it.'}</span></div></div>
   ${!S.placed&&S.xp<200?`<p class="note" style="margin:0"><button class="linkbtn" data-act="place">Can you type already? Take a test</button></p>`:''}
   <p class="note" style="margin:0"><button class="linkbtn" data-act="go" data-to="parents">Grown-ups: see the progress report</button></p>
@@ -350,7 +350,7 @@ function cardHTML(i,f,o={}){
 function renderBinder(){
  const c=Object.keys(S.cards).length,holo=Object.values(S.cards).filter(x=>x.holo).length,gold=Object.values(S.cards).filter(x=>x.tier==='gold').length,dia=Object.values(S.cards).filter(x=>x.tier==='diamond').length;
  let g='';SPECIES.forEach((sp,i)=>[0,1,2].forEach(f=>{const cd=S.cards[sk(i,f)];g+=cd?cardHTML(i,f,cd):cardHTML(i,f,{locked:1})}));
- $('#s-binder').innerHTML=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Card Binder</h2><span class="muted">${c} of 60 found · ${holo} holo · ${gold} gold · ${dia} diamond</span></div>
+ $('#s-binder').innerHTML=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Keylori Collection</h2><span class="muted">${c} of 60 found · ${holo} holo · ${gold} gold · ${dia} diamond</span></div>
  <p class="muted" style="margin-top:-6px">Win a level to get a card. 3 stars = holo!</p><div class="binder">${g}</div>`;
 }
 function renderShop(){
@@ -998,7 +998,7 @@ function renderShop(){const L=levelOf(S.xp);
 function renderBinder(){
  const C=Object.values(S.cards),c=C.length,holo=C.filter(x=>x.holo).length,gold=C.filter(x=>x.tier==='gold').length,dia=C.filter(x=>x.tier==='diamond').length;
  let g='';SPECIES.forEach((sp,i)=>[0,1,2].forEach(f=>{const cd=S.cards[sk(i,f)];g+=cd?`<button class="cardbtn" data-act="card" data-k="${i}-${f}" aria-label="${sp.n[f]}">${cardHTML(i,f,cd)}</button>`:cardHTML(i,f,{locked:1})}));
- $('#s-binder').innerHTML=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Card Binder</h2><span class="muted">${c}/${TOTAL} · ${holo} holo · ${gold} gold · ${dia} diamond</span></div>
+ $('#s-binder').innerHTML=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Keylori Collection</h2><span class="muted">${c}/${TOTAL} · ${holo} holo · ${gold} gold · ${dia} diamond</span></div>
  <p class="muted" style="margin-top:-6px">Tap a card to see it big!</p><div class="binder">${g}</div>`;
 }
 ACT.card=d=>{const [i,f]=d.k.split('-').map(Number),cd=S.cards[d.k]||{},sp=SPECIES[i],b=S.best[d.k]||0;
@@ -2370,7 +2370,7 @@ const _rh36=renderHome;renderHome=function(){_rh36();
  hb.appendChild(info);box.remove();requestAnimationFrame(()=>typeof fitHome==='function'&&fitHome())};
 /* ================= V37: slower levels, binder button on results ================= */
 needXP=L=>L<=1?0:Math.round(200*Math.pow(L-1,1.75)/10)*10;
-const _res37=results;results=function(r){_res37(r);setTimeout(()=>{const rb=document.querySelector('#mbox .rbtns');if(rb)rb.querySelectorAll('.btn').forEach(b=>/again/i.test(b.textContent)&&(b.classList.remove('alt'),b.classList.add('coral')));if(rb&&document.querySelector('#mbox .bigstars')&&!rb.querySelector('[data-to=binder]')){rb.insertAdjacentHTML('beforeend','<button class="btn lav" data-act="go" data-to="binder">Card Binder</button>');typeof fitModal==='function'&&fitModal()}},0)};
+const _res37=results;results=function(r){_res37(r);setTimeout(()=>{const rb=document.querySelector('#mbox .rbtns');if(rb)rb.querySelectorAll('.btn').forEach(b=>/again/i.test(b.textContent)&&(b.classList.remove('alt'),b.classList.add('coral')));if(rb&&document.querySelector('#mbox .bigstars')&&!rb.querySelector('[data-to=binder]')){rb.insertAdjacentHTML('beforeend','<button class="btn lav" data-act="go" data-to="binder">Keylori Collection</button>');typeof fitModal==='function'&&fitModal()}},0)};
 /* ================= V38: clean-name filter ================= */
 const BAD_SUB='fuck,fuk,fuq,phuck,shit,shyt,cunt,bitch,biatch,nigg,nigga,fag,slut,whore,dick,penis,vagina,pussy,porn,nazi,hitler,kkk,twat,wank,boob,bastard,asshole,arsehole,jackass,dumbass,badass,asshat,jizz,retard,dildo,horny,sex,poop,pee pee,pedo,molest,butthole,buttface,damn,goddam,piss,crap,prick,testicle,scrot,nipple,naked,nude,bollock,bugger,motherf,stfu,wtf,milf,thot,suckmy,cocks'.split(',').map(w=>w.replace(/ /g,''));
 const BAD_WORD='anal,anus,cock,kill,killer,ass,arse,cum,tit,tits,rape,rapist,butt,poo,nude,sexy,hell,die,dead,kys,gay,homo,lesbo,wtf,omfg,fu,fk,sob,stupid,idiot,dumb,loser,hate'.split(',');

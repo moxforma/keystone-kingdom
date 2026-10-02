@@ -108,3 +108,9 @@ try{if(screen==='home')renderHome()}catch(e){}
 /* sticky header: keep the map's world picker right under the header */
 (function(){const set=()=>{try{const t=document.querySelector('.screen:not([hidden])>.topbar');if(t)document.documentElement.style.setProperty('--tbh',Math.round(t.getBoundingClientRect().height)+'px')}catch(e){}};
  const _sh=show;show=function(){const r=_sh.apply(this,arguments);requestAnimationFrame(set);return r};addEventListener('resize',set);setTimeout(set,300)})();
+/* Keylori Collection: world boxes + trophy shelf stay put; tap a world box to jump to it */
+(function(){const set=()=>{try{const r=document.getElementById('s-binder');if(!r||r.hidden)return;const w=r.querySelector('.wpages'),t=r.querySelector('.trophy'),d=document.documentElement.style;
+  if(w)d.setProperty('--wph',Math.round(w.getBoundingClientRect().height)+'px');if(t)d.setProperty('--trh',Math.round(t.getBoundingClientRect().height)+'px');
+  if(w)[...w.children].forEach((b,k)=>{b.dataset.act='binderWorld';b.dataset.w=k+1;b.setAttribute('role','button')})}catch(e){}};
+ ACT.binderWorld=d=>{const g=document.querySelector('#s-binder .binder'),i=WSTART[(+d.w)-1];const el=g&&g.children[i*3];if(el)el.scrollIntoView({behavior:'smooth',block:'start'})};
+ const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments);requestAnimationFrame(set);setTimeout(set,200);return r};addEventListener('resize',set)})();
