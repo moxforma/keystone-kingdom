@@ -28,7 +28,7 @@ const fsHTML=()=>`<div class="fsz" role="group" aria-label="Text size">${FS.map(
 function addFs(){document.querySelectorAll('.screen:not([hidden]) .topbar, #hud, #ghud').forEach(t=>{if(!t.querySelector('.fsz')){const back=t.querySelector('[data-act=go],[data-act=back],[data-act=quit]');
   if(back)back.insertAdjacentHTML('afterend',fsHTML());else t.insertAdjacentHTML('afterbegin',fsHTML())}});applyFs()}
 window.addFs=addFs;
-ACT.fsz=d=>{S.set.fsz=d.v;save();applyFs();try{sfx.click()}catch(e){}};
+ACT.fsz=d=>{S.set.fsz=d.v;save();applyFs();try{sfx.click()}catch(e){}try{if(S.set.lines2)setTimeout(()=>{beginRound&&document.querySelector('#stripIn')&&window.dispatchEvent(new Event('resize'))},50)}catch(e){}};
 const _show=show;show=function(){const r=_show.apply(this,arguments);setTimeout(addFs,0);return r};
 const _ss=startStage;startStage=function(){const r=_ss.apply(this,arguments);setTimeout(addFs,0);return r};
 if(typeof mountGame==='function'){const _mg=mountGame;mountGame=function(){const r=_mg.apply(this,arguments);setTimeout(addFs,0);return r}}

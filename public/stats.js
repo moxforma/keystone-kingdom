@@ -52,10 +52,12 @@ const _res=results;results=function(r){const out=_res.apply(this,arguments);try{
 const on2=()=>!!(S.set&&S.set.lines2);
 function lines2Render(){const si=$('#stripIn'),st=$('#strip');if(!si||!st)return;document.body.classList.toggle('lines2',on2());if(!on2()){st.style.removeProperty('height');return}
  si.querySelectorAll('span.sp').forEach(s=>{if(s.textContent.length===1)s.textContent='·​'});
- requestAnimationFrame(()=>{const lh=parseFloat(getComputedStyle(si).lineHeight)||40;st.style.setProperty('height',(lh*2+20)+'px','important');try{updateStrip()}catch(e){}})}
+ requestAnimationFrame(()=>{const kids=[...si.children];let pitch=0;const y0=kids.length?kids[0].offsetTop:0;for(const k of kids){if(k.offsetTop>y0+4){pitch=k.offsetTop-y0;break}}
+  if(!pitch){const fs=parseFloat(getComputedStyle(si).fontSize)||48;pitch=fs*1.25}st.style.setProperty('height',Math.round(pitch*2+12)+'px','important');try{updateStrip()}catch(e){}})}
+addEventListener('resize',()=>{if(on2())lines2Render()});
 const _us=updateStrip;updateStrip=function(){const r=_us.apply(this,arguments);if(on2()){const si=$('#stripIn'),el=si&&si.children[P.pos]||si&&si.lastElementChild;if(el)si.style.transform=`translateY(${-el.offsetTop}px)`}return r};
-function lineSwitch(){const kb=$('#kbwrap'),h=$('#hands');if(!kb||!h||kb.querySelector('.linesw'))return;
- h.insertAdjacentHTML('afterend',`<div class="linesw" role="group" aria-label="Lines of text"><span>LINES</span><button data-act="lines" data-v="1" class="${on2()?'':'on'}">1</button><button data-act="lines" data-v="2" class="${on2()?'on':''}">2</button></div>`)}
+function lineSwitch(){const h=$('#hands');if(!h||document.querySelector('.linesw'))return;
+ h.insertAdjacentHTML('beforeend',`<div class="linesw" role="group" aria-label="Lines of text"><span>LINES</span><button data-act="lines" data-v="1" class="${on2()?'':'on'}">1</button><button data-act="lines" data-v="2" class="${on2()?'on':''}">2</button></div>`)}
 ACT.lines=d=>{S.set.lines2=d.v==='2';save();document.querySelectorAll('.linesw button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='2')===S.set.lines2));
  const si=$('#stripIn');if(si&&!S.set.lines2){si.querySelectorAll('span.sp').forEach(s=>s.textContent='·');si.style.transform=''}lines2Render();try{updateStrip()}catch(e){}};
 const _ss=startStage;startStage=function(){const r=_ss.apply(this,arguments);lineSwitch();document.body.classList.toggle('lines2',on2());return r};

@@ -1259,3 +1259,11 @@ body.lines2 .strip{position:relative}body.lines2 .strip::before{content:"";posit
  #s-arcade .games .game .btn{font-size:clamp(15px,1.5vw,20px)!important}
  #s-arcade .playrow{flex-wrap:wrap}
 }
+/* lines switch under the hands, same font as LEFT / RIGHT */
+#hands .linesw{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:10px;font:400 clamp(20px,2.4vw,26px) 'Jersey 10',monospace;letter-spacing:.12em;color:#f0eaf8}
+#hands .linesw span{font:inherit;letter-spacing:inherit}
+#hands .linesw button{font:400 clamp(20px,2.4vw,26px) 'Jersey 10',monospace;width:auto;min-width:44px;height:40px;padding:0 10px;background:#0c1238;border:2px solid var(--line);color:#c8d0ff;cursor:pointer}
+#hands .linesw button.on{background:#7fe8ff;color:#10122a;border-color:#7fe8ff}
+#hands .linesw{flex-wrap:wrap}
+#hands .linesw span{flex-basis:100%;text-align:center}
+#hands .linesw button{min-width:52px}

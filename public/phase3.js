@@ -64,6 +64,9 @@ const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments)
  tb&&!root.querySelector('.wpages')&&tb.insertAdjacentHTML('afterend',h)}catch(e){}return r};
 
 /* ---------- little learners (under 5) ---------- */
+/* little-learner mode only makes sense before all letters are learned: switch it off for anyone past that */
+function littleCheck(){try{if(S.little&&Math.floor(Math.max(0,nextStage())/NST)>=15){S.little=false;if(S.age==='u5')S.age=null;if(S.set.len===.6)S.set.len=1;save()}}catch(e){}}
+const _ldL=load;load=function(){const r=_ldL.apply(this,arguments);littleCheck();return r};setTimeout(littleCheck,0);
 function setLittle(on){S.little=!!on;if(on){S.age='u5';S.set.voice=true;S.set.len=.6;S.placed=true;S.skip=0}else{if(S.set.len===.6)S.set.len=1}}
 window.setLittle=setLittle;
 const _gt=genText;genText=function(i,s,pr){if(!S.little||pr||(typeof P!=='undefined'&&P.mode==='place'))return _gt.apply(this,arguments);
