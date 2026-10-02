@@ -1585,8 +1585,11 @@ function evolvedV(i,f,tier,v={}){const D=KKDATA,k=D.order[i],rows=D.spr[k],w=row
   put(ox+x,oy+y,col)}));
  if(f===1){const sc=(TYPES[SPECIES[i].t]||'#e8584f');let [hh,ss,ll]=hex2hsl(sc);if(hh>280&&hh<345)hh=8;const S1=hsl2hex(hh,Math.min(.75,ss),.55),S2=hsl2hex(hh,Math.min(.75,ss),.36),O=pal.o||'#1b1626',ty=Math.round(Y0+(Y1-Y0)*.7);
   let xa=99,xb=-1;for(let yy=ty;yy<=ty+1;yy++){const r=rows[yy];if(!r)continue;for(let x=0;x<r.length;x++)if(r[x]!=='.'&&r[x]!=='o'){xa=Math.min(xa,x);xb=Math.max(xb,x)}}
-  if(xb>xa){for(let x=xa;x<=xb;x++){put(ox+x,oy+ty-1,O);put(ox+x,oy+ty,S1);put(ox+x,oy+ty+1,S2);put(ox+x,oy+ty+2,O)}
-   const tx=ox+xb-2;[[0,3,S1],[1,3,S2],[0,4,S1],[1,4,S2],[0,5,O],[1,5,O],[-1,3,O],[2,3,O],[-1,4,O],[2,4,O]].forEach(([a,b,c])=>put(tx+a,oy+ty+b,c))}}
+  if(xb>xa){const by=ty-2,half=Math.max(3,Math.min(5,Math.floor((xb-xa)/4)));
+   // bandana: a triangle hanging from the neck, knot on top, shaded + outlined
+   for(let r=0;r<=half;r++){const w=half-r;for(let x=-w;x<=w;x++){const edge=x===-w||x===w;put(ox+cx+x,oy+by+r,edge?O:(x>0?S2:S1))}}
+   put(ox+cx,oy+by+half+1,O);for(let x=-half-1;x<=half+1;x++){put(ox+cx+x,oy+by-1,O)}for(let x=-half;x<=half;x++)put(ox+cx+x,oy+by,x>0?S2:S1);
+   put(ox+cx-1,oy+by+1,'#ffffff');}}
  if(feats.includes('horns')){draw(OVL.horn,ox+cx-5,oy+Y0-3,pal,false);draw(OVL.horn,ox+cx+3,oy+Y0-3,pal,true)}
  if(feats.includes('crest'))draw(OVL.crest,ox+cx-2,oy+Y0-2,pal,false);
  if(feats.includes('crown'))draw(OVL.crown,ox+cx-5,oy+Y0-3,gp,false);

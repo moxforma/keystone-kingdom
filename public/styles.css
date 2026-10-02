@@ -925,3 +925,29 @@ svg.zk,svg.zk image{pointer-events:none}
 .kp-typed{position:absolute;left:34%;right:4%;bottom:14%;text-align:center;font:400 28px 'Jersey 10',monospace;color:#fff}
 #s-home .hbtns>[data-act=practice]{flex:1 1 calc(50% - 8px)!important;grid-column:auto!important}
 .bubart{display:flex;gap:10px;align-items:center}.bubart .bub:nth-child(2){margin-top:-30px!important}
+/* menu: every main button its own color */
+#s-home .btn[data-to=arcade]{background:#8ab4e8!important;color:#14243a!important;box-shadow:0 5px 0 #4a74a8!important}
+#s-home .btn[data-to=shop]{background:#a8d878!important;color:#1e3a14!important;box-shadow:0 5px 0 #5a8a3a!important}
+/* bubble pop forest + hero */
+.bubble-arena{background:#2e4a28!important}
+.bubble-arena .scene{position:absolute;inset:0;width:100%;height:100%}
+.bub-hero{position:absolute;left:50%;bottom:3%;width:min(14%,96px);transform:translateX(-50%);z-index:3}
+.bub-hero.zap .zk{animation:recoil .14s}
+.bub{z-index:2}
+.xsky{position:absolute;inset:0;display:grid;grid-template-rows:repeat(4,1fr)}.xsky i{display:block}
+.xterr{position:absolute;left:0;right:0;bottom:0;width:100%;height:55%;image-rendering:pixelated;object-fit:fill}
+.bub-k{position:absolute;inset:16%;opacity:.9}.bub-k svg,.bub-k img{width:100%;height:100%}
+.bub span{position:absolute;right:-4px;top:-6px;background:#fffaf0;color:#2a1d3e;text-shadow:none;border:3px solid #2a1d3e;min-width:28px;line-height:1;padding:2px 4px;font-size:26px;text-align:center}
+.keepart{gap:8px}.keepart .food{font-size:22px;padding:2px 10px}
+.arcade-stats:has(>.arcade-stat:only-child){grid-template-columns:minmax(0,55%)!important;justify-content:center!important;display:grid}
+.kp-want{z-index:3}.kp-pet,.kp-food,.kp-belly,.kp-typed{z-index:2}
+.keepart>svg,.keepart>img{height:110px!important;width:auto!important}.bub-k{inset:10%}
+.dig-arena{background:#8a6a44}
+.dig-shaft{position:absolute;left:30%;right:6%;top:42%;transition:transform .25s steps(4)}
+.dl{height:64px;border-bottom:3px solid rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;gap:12px;position:relative}
+.dl b{font:400 30px 'Jersey 10',monospace;color:#fff6e0;text-shadow:2px 2px 0 #1b1626;font-weight:400}
+.dl.cur{outline:4px solid #f0c860;outline-offset:-4px}.dl .tr{width:34px;image-rendering:pixelated;opacity:.45}.dl.cur .tr{opacity:.75}
+.dl.gone{visibility:hidden}
+.dig-hero{position:absolute;left:8%;top:18%;width:min(18%,120px);z-index:3}.dig-hero.dig .zk{animation:hop .25s steps(2)}
+.digart{gap:14px}.digart img{width:48px;image-rendering:pixelated}
+.dig-list{display:flex;justify-content:center;gap:14px;font-size:24px}.dig-got{display:inline-flex;align-items:center;gap:4px}.dig-got img{width:30px;image-rendering:pixelated}
