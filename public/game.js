@@ -934,9 +934,9 @@ function evolved(i,f,tier){
   rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch!=='.')[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].forEach(([a,b])=>{const q=rows[y+b];if(!q||q[x+a]===undefined||q[x+a]==='.')put(ox+x+a,oy+y+b,ring)})}));g.globalAlpha=1}
  if(feats.includes('wings')){const wy=oy+Math.round((Y0+14)/2)+2;draw(OVL.wing,ox+X0-7,wy,pal,false);draw(OVL.wing,ox+X1,wy,pal,true)}
  draw(rows,ox,oy,pal,false);
- if(feats.includes('horns')){draw(OVL.horn,ox+cx-5,oy+Y0-3,pal,false);draw(OVL.horn,ox+cx+3,oy+Y0-3,pal,true)}
- if(feats.includes('crest'))draw(OVL.crest,ox+cx-2,oy+Y0-2,pal,false);
- if(feats.includes('crown'))draw(OVL.crown,ox+cx-5,oy+Y0-3,gp,false);
+ if(feats.includes('horns')){const hw=Math.max(2,Math.min(6,Math.floor((AN.hr-AN.hl)/2)-2)),xa=cx-hw-1,xb=cx+hw-1;const hp={o:pal.o||'#1b1626',H:'#fff6e0',L:'#e8d4a8',B:'#b8946a'};draw(OVL.horn,ox+xa,oy+AN.top(xa+1)-3,hp,false);draw(OVL.horn,ox+xb,oy+AN.top(xb+1)-3,hp,true)}
+ if(feats.includes('crest')){let [hh,ss]=hex2hsl(TYPES[SPECIES[i].t]||'#e8584f');if(hh>280&&hh<345)hh=8;const cp={o:pal.o||'#1b1626',H:hsl2hex(hh,Math.min(.75,ss),.72),L:hsl2hex(hh,Math.min(.75,ss),.55),B:hsl2hex(hh,Math.min(.75,ss),.38)};draw(OVL.crest,ox+cx-2,oy+AN.med2(cx-1,cx+1)-2,cp,false)}
+ if(feats.includes('crown'))draw(OVL.crown,ox+cx-6,oy+AN.med2(cx-3,cx+3)-3,gp,false);
  if(f===2||tier){const sp=tier==='diamond'?['#ffffff','#bfe2f6']:['#fff4c8','#f6d050'];[[2,3],[36,6],[1,20],[38,24],[30,1]].forEach(([x,y])=>{put(x,y,sp[0]);put(x-1,y,sp[1]);put(x+1,y,sp[1]);put(x,y-1,sp[1]);put(x,y+1,sp[1])})}
  return c}
 function creatureSVG(i,form,cls='',tier){const s=[.6,.8,1][form],u=kku('e'+i+'-'+form+(tier||''),()=>evolved(i,form,tier));
@@ -1070,11 +1070,12 @@ function evolved(i,f,tier){
  const cx=Math.round((X0+X1)/2),feats=f===0?[]:EVO[i][f-1],gp=Object.assign({y:'#f6d050',Y:'#c8981e',r:'#e84a6a'},pal);
  if(feats.includes('aura')){const ring=tier==='diamond'?'#bfe2f6':tier==='gold'?'#f6dc7a':pal.L||'#ffffff';g.globalAlpha=.55;
   rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch!=='.')[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].forEach(([a,b])=>{const q=rows[y+b];if(!q||q[x+a]===undefined||q[x+a]==='.')put(ox+x+a,oy+y+b,ring)})}));g.globalAlpha=1}
- if(feats.includes('wings')){const wy=oy+Math.round((Y0+w*.58)/2)+2;draw(OVL.wing,ox+X0-7,wy,pal,false);draw(OVL.wing,ox+X1,wy,pal,true)}
+ if(feats.includes('wings')){const A=kAnchor(k),wr=Math.round((Y0+w*.58)/2)+2;let xl=99,xr=-1;for(let y=wr;y<=wr+5;y++){const r=rows[y]||'';for(let x=0;x<r.length;x++)if(r[x]!=='.'){xl=Math.min(xl,x);xr=Math.max(xr,x)}}if(xr<0){xl=X0;xr=X1}
+  if(xl>A.hx-3)xl=X0;if(xr<A.hx+3)xr=X1;draw(OVL.wing,ox+xl-7,oy+wr,pal,false);draw(OVL.wing,ox+xr,oy+wr,pal,true)}
  draw(rows,ox,oy,pal,false);
- if(feats.includes('horns')){draw(OVL.horn,ox+cx-5,oy+Y0-3,pal,false);draw(OVL.horn,ox+cx+3,oy+Y0-3,pal,true)}
- if(feats.includes('crest'))draw(OVL.crest,ox+cx-2,oy+Y0-2,pal,false);
- if(feats.includes('crown'))draw(OVL.crown,ox+cx-5,oy+Y0-3,gp,false);
+ if(feats.includes('horns')){const hw=Math.max(2,Math.min(6,Math.floor((AN.hr-AN.hl)/2)-2)),xa=cx-hw-1,xb=cx+hw-1;const hp={o:pal.o||'#1b1626',H:'#fff6e0',L:'#e8d4a8',B:'#b8946a'};draw(OVL.horn,ox+xa,oy+AN.top(xa+1)-3,hp,false);draw(OVL.horn,ox+xb,oy+AN.top(xb+1)-3,hp,true)}
+ if(feats.includes('crest')){let [hh,ss]=hex2hsl(TYPES[SPECIES[i].t]||'#e8584f');if(hh>280&&hh<345)hh=8;const cp={o:pal.o||'#1b1626',H:hsl2hex(hh,Math.min(.75,ss),.72),L:hsl2hex(hh,Math.min(.75,ss),.55),B:hsl2hex(hh,Math.min(.75,ss),.38)};draw(OVL.crest,ox+cx-2,oy+AN.med2(cx-1,cx+1)-2,cp,false)}
+ if(feats.includes('crown'))draw(OVL.crown,ox+cx-6,oy+AN.med2(cx-3,cx+3)-3,gp,false);
  if(f===2||tier){const sp=tier==='diamond'?['#ffffff','#bfe2f6']:['#fff4c8','#f6d050'];[[2,3],[Wd-4,6],[1,H-12],[Wd-2,H-8],[Wd-10,1]].forEach(([x,y])=>{put(x,y,sp[0]);put(x-1,y,sp[1]);put(x+1,y,sp[1]);put(x,y-1,sp[1]);put(x,y+1,sp[1])})}
  return c}
 function creatureSVG(i,form,cls='',tier){const k=KKDATA.order[i],w=KKDATA.spr[k][0].length,Wd=w+16,H=w+8,s=[.6,.8,1][form],fit=/\bfit\b/.test(cls);
@@ -1571,6 +1572,18 @@ const PROPS={bow:{n:'Red Bow',side:1,r:["oo...oo","oRo.oRo","oRRoRRo","oRo.oRo",
  tophat:{n:'Top Hat',side:0,r:[".oooooo.",".oKKKKo.",".oKKKKo.",".oRRRRo.","oooooooo"],p:{o:'#120c18',K:'#3a3248',R:'#d8483a'}},
  party:{n:'Party Hat',side:0,r:["..y..","..o..",".oCo.",".oCo.","oCyCo","oCCCo","ooooo"],p:{o:'#1a2a3a',C:'#6cc8e0',y:'#f0c860'}},
  sprout:{n:'Lucky Sprout',side:1,r:["oo..","oLo.",".oLo","..o.","..o."],p:{o:'#14240f',L:'#7fc858'}}};
+/* head anchors: find eyes, head top contour and head width so accessories sit ON the head */
+const ANCH={};
+function kAnchor(k){if(ANCH[k])return ANCH[k];const rows=KKDATA.spr[k],w=rows[0].length,h=rows.length,at=(x,y)=>(rows[y]||'')[x]||'.';
+ const tops=[];for(let x=0;x<w;x++){let t=-1;for(let y=0;y<h;y++)if(at(x,y)!=='.'){t=y;break}tops.push(t)}
+ const eyes=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(at(x,y)==='w'){let near=false;for(let a=-2;a<=2&&!near;a++)for(let b=-2;b<=2;b++)if(at(x+a,y+b)==='k'){near=true;break}if(near)eyes.push([x,y])}
+ let X0=w,X1=0,Y0=h,Y1=0;rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch!=='.'){X0=Math.min(X0,x);X1=Math.max(X1,x);Y0=Math.min(Y0,y);Y1=Math.max(Y1,y)}}));
+ let hx=Math.round((X0+X1)/2),ey=Math.round((Y0+Y1)/2);
+ if(eyes.length){const xs=eyes.map(e=>e[0]).sort((a,b)=>a-b);hx=Math.round((xs[0]+xs[xs.length-1])/2);ey=Math.min(...eyes.map(e=>e[1]))}
+ let hl=hx,hr=hx;const row=rows[ey]||'';for(let x=hx;x>=0&&row[x]&&row[x]!=='.'&&row[x]!=='o';x--)hl=x;for(let x=hx;x<w&&row[x]&&row[x]!=='.'&&row[x]!=='o';x++)hr=x;
+ if(eyes.length){const xs=eyes.map(e=>e[0]);hl=Math.min(hl,Math.min(...xs)-1);hr=Math.max(hr,Math.max(...xs)+1)}
+ const med=(a,b)=>{const v=[];for(let x=a;x<=b;x++)if(tops[x]>=0)v.push(tops[x]);if(!v.length)return Y0;v.sort((m,n)=>m-n);return v[Math.floor(v.length/2)]};
+ return ANCH[k]={tops,hx,ey,hl,hr,X0,X1,Y0,Y1,med,top:x=>{const t=tops[Math.max(0,Math.min(w-1,x))];return t<0?med(x-2,x+2):t},med2:(a,b)=>med(a,b)}}
 /* --- evolution art: baby soft, teen marked, grown bold --- */
 function evolvedV(i,f,tier,v={}){const D=KKDATA,k=D.order[i],rows=D.spr[k],w=rows[0].length;let pal=tierPal(cwPal(D.pal[k],v.cw),tier);
  if(f===0){const p=Object.assign({},pal);if(pal.L&&pal.H)p.L=pal.H;if(pal.B&&pal.L)p.B=pal.L;if(pal.D&&pal.B)p.D=pal.B;pal=p}
@@ -1578,30 +1591,31 @@ function evolvedV(i,f,tier,v={}){const D=KKDATA,k=D.order[i],rows=D.spr[k],w=row
  const put=(x,y,col)=>{if(col){g.fillStyle=col;g.fillRect(x,y,1,1)}};
  const draw=(r,x0,y0,p,flip)=>r.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.')put(flip?x0+row.length-1-x:x0+x,y0+y,p[ch])}));
  let X0=w,X1=0,Y0=w,Y1=0;rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch!=='.'){X0=Math.min(X0,x);X1=Math.max(X1,x);Y0=Math.min(Y0,y);Y1=Math.max(Y1,y)}}));
- const cx=Math.round((X0+X1)/2),ev=(EVO[i]||[['crest'],['wings','aura']]),feats=f===0?[]:ev[f-1],gp=Object.assign({y:'#f6d050',Y:'#c8981e',r:'#e84a6a'},pal);
+ const AN=kAnchor(k),cx=AN.hx,ev=(EVO[i]||[['crest'],['wings','aura']]),feats=f===0?[]:ev[f-1],gp=Object.assign({y:'#f6d050',Y:'#c8981e',r:'#e84a6a'},pal);
  if(feats.includes('aura')){const ring=tier==='diamond'?'#bfe2f6':tier==='gold'?'#f6dc7a':pal.L||'#ffffff';g.globalAlpha=.55;
   rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch!=='.')[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].forEach(([a,b])=>{const q=rows[y+b];if(!q||q[x+a]===undefined||q[x+a]==='.')put(ox+x+a,oy+y+b,ring)})}));g.globalAlpha=1}
- if(feats.includes('wings')){const wy=oy+Math.round((Y0+w*.58)/2)+2;draw(OVL.wing,ox+X0-7,wy,pal,false);draw(OVL.wing,ox+X1,wy,pal,true)}
+ if(feats.includes('wings')){const A=kAnchor(k),wr=Math.round((Y0+w*.58)/2)+2;let xl=99,xr=-1;for(let y=wr;y<=wr+5;y++){const r=rows[y]||'';for(let x=0;x<r.length;x++)if(r[x]!=='.'){xl=Math.min(xl,x);xr=Math.max(xr,x)}}if(xr<0){xl=X0;xr=X1}
+  if(xl>A.hx-3)xl=X0;if(xr<A.hx+3)xr=X1;draw(OVL.wing,ox+xl-7,oy+wr,pal,false);draw(OVL.wing,ox+xr,oy+wr,pal,true)}
  // body: teen gets stripe markings + a belly band; grown gets bold dark markings
  const mid=Math.round((Y0+Y1)/2);
  rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch==='.')return;let col=pal[ch];
   if(f===1&&(ch==='B'||ch==='L'||ch==='H')&&y>=Y0+2&&y<=mid&&(x-cx+40)%4===1&&row[x-1]!=='o'&&row[x+1]!=='o')col=pal.D||col;
   put(ox+x,oy+y,col)}));
- if(f===1){const sc=(TYPES[SPECIES[i].t]||'#e8584f');let [hh,ss,ll]=hex2hsl(sc);if(hh>280&&hh<345)hh=8;const S1=hsl2hex(hh,Math.min(.75,ss),.55),S2=hsl2hex(hh,Math.min(.75,ss),.36),O=pal.o||'#1b1626',ty=Math.round(Y0+(Y1-Y0)*.7);
+ if(f===1){const sc=(TYPES[SPECIES[i].t]||'#e8584f');let [hh,ss,ll]=hex2hsl(sc);if(hh>280&&hh<345)hh=8;const S1=hsl2hex(hh,Math.min(.75,ss),.55),S2=hsl2hex(hh,Math.min(.75,ss),.36),O=pal.o||'#1b1626',ty=Math.min(Y1-3,Math.max(Math.round(Y0+(Y1-Y0)*.7),AN.ey+6));
   let xa=99,xb=-1;for(let yy=ty;yy<=ty+1;yy++){const r=rows[yy];if(!r)continue;for(let x=0;x<r.length;x++)if(r[x]!=='.'&&r[x]!=='o'){xa=Math.min(xa,x);xb=Math.max(xb,x)}}
   if(xb>xa){const by=ty-2,half=Math.max(3,Math.min(5,Math.floor((xb-xa)/4)));
    // bandana: a triangle hanging from the neck, knot on top, shaded + outlined
    for(let r=0;r<=half;r++){const w=half-r;for(let x=-w;x<=w;x++){const edge=x===-w||x===w;put(ox+cx+x,oy+by+r,edge?O:(x>0?S2:S1))}}
    put(ox+cx,oy+by+half+1,O);for(let x=-half-1;x<=half+1;x++){put(ox+cx+x,oy+by-1,O)}for(let x=-half;x<=half;x++)put(ox+cx+x,oy+by,x>0?S2:S1);
    put(ox+cx-1,oy+by+1,'#ffffff');}}
- if(feats.includes('horns')){draw(OVL.horn,ox+cx-5,oy+Y0-3,pal,false);draw(OVL.horn,ox+cx+3,oy+Y0-3,pal,true)}
- if(feats.includes('crest'))draw(OVL.crest,ox+cx-2,oy+Y0-2,pal,false);
- if(feats.includes('crown'))draw(OVL.crown,ox+cx-5,oy+Y0-3,gp,false);
- const pr=PROPS[v.prop];if(pr){const pw=pr.r[0].length,ph=pr.r.length;draw(pr.r,ox+(pr.side?Math.min(X1-1,cx+3):cx-Math.floor(pw/2)),oy+Y0-ph+(pr.side?2:1),pr.p,false)}
+ if(feats.includes('horns')){const hw=Math.max(2,Math.min(6,Math.floor((AN.hr-AN.hl)/2)-2)),xa=cx-hw-1,xb=cx+hw-1;const hp={o:pal.o||'#1b1626',H:'#fff6e0',L:'#e8d4a8',B:'#b8946a'};draw(OVL.horn,ox+xa,oy+AN.top(xa+1)-3,hp,false);draw(OVL.horn,ox+xb,oy+AN.top(xb+1)-3,hp,true)}
+ if(feats.includes('crest')){let [hh,ss]=hex2hsl(TYPES[SPECIES[i].t]||'#e8584f');if(hh>280&&hh<345)hh=8;const cp={o:pal.o||'#1b1626',H:hsl2hex(hh,Math.min(.75,ss),.72),L:hsl2hex(hh,Math.min(.75,ss),.55),B:hsl2hex(hh,Math.min(.75,ss),.38)};draw(OVL.crest,ox+cx-2,oy+AN.med2(cx-1,cx+1)-2,cp,false)}
+ if(feats.includes('crown'))draw(OVL.crown,ox+cx-6,oy+AN.med2(cx-3,cx+3)-3,gp,false);
+ const pr=PROPS[v.prop];if(pr){const pw=pr.r[0].length,ph=pr.r.length;if(pr.side){const sx=Math.min(AN.hr-pw+1,Math.max(cx+2,Math.round((cx+AN.hr)/2)-1));draw(pr.r,ox+sx,oy+AN.med2(sx,sx+pw-1)-ph+2,pr.p,false)}else{const sx=cx-Math.floor(pw/2);draw(pr.r,ox+sx,oy+AN.med2(sx+1,sx+pw-2)-ph+1,pr.p,false)}}
  if(f===2||tier||v.cw){const sp=tier==='diamond'?['#ffffff','#bfe2f6']:v.cw&&!tier?['#ffffff','#c8e8f0']:['#fff4c8','#f6d050'];[[2,3],[Wd-4,6],[1,H-12],[Wd-2,H-8],[Wd-10,1]].forEach(([x,y])=>{put(x,y,sp[0]);put(x-1,y,sp[1]);put(x+1,y,sp[1]);put(x,y-1,sp[1]);put(x,y+1,sp[1])})}
  return c}
 function creatureSVG(i,form,cls='',tier){const k=KKDATA.order[i],w=KKDATA.spr[k][0].length,Wd=w+16,H=w+8,px=/\bpx\b/.test(cls),s=px||/\bbig\b/.test(cls)?1:[.6,.8,1][form],fit=/\bfit\b/.test(cls);
- const v=(S.kv&&S.kv[i])||{},unit=fit?Math.min(5,200/Wd)*(w/24>1&&!/\bbig\b/.test(cls)?24/w*1.05:1):px?5*Math.min(1,30/w):5,iw=Wd*unit*s,ih=H*unit*s,u=kku('e8'+i+'-'+form+(tier||'')+(v.cw||'')+(v.prop||''),()=>evolvedV(i,form,tier,v));
+ const v=(S.kv&&S.kv[i])||{},unit=fit?Math.min(5,200/Wd)*(w/24>1&&!/\bbig\b/.test(cls)?24/w*1.05:1):px?5*Math.min(1,30/w):5,iw=Wd*unit*s,ih=H*unit*s,u=kku('e9'+i+'-'+form+(tier||'')+(v.cw||'')+(v.prop||''),()=>evolvedV(i,form,tier,v));
  const y=fit?(200-ih)/2+ih*.06:200-ih;
  return `<svg class="cr ${cls} ${tier||''}" viewBox="0 0 200 200" aria-hidden="true" style="overflow:visible"><image href="${u}" x="${(200-iw)/2}" y="${y}" width="${iw}" height="${ih}"/></svg>`}
 /* --- rare finds --- */
