@@ -35,11 +35,11 @@ const validGlitchWords = data => data.q === undefined && data.b === undefined ||
  Array.isArray(data.b) && data.b.length >= 3 && data.b.length <= 12 && data.b.every(validWord);
 
 export const validChallenge = data => {
- if (!data || data.v !== 2 || !["race", "meteor", "glitch", "bubble"].includes(data.g) ||
+ if (!data || data.v !== 2 || !["race", "meteor", "glitch", "bubble", "bridge"].includes(data.g) ||
      !["auto", "easy", "medium", "hard", "beast"].includes(data.d) ||
      typeof data.n !== "boolean" || typeof data.s !== "boolean" ||
      typeof data.l !== "number" || !Number.isFinite(data.l) || data.l < .2 || data.l > 3) return false;
- if (data.g === "race") {
+ if (data.g === "race" || data.g === "bridge") {
   return typeof data.t === "string" && data.t.length >= 4 && data.t.length <= 1000 &&
    !/[\x00-\x1f]/.test(data.t) && Number.isInteger(data.a) && data.a >= 0 && data.a <= 100 &&
    validFrames(data.f, data.t.length);

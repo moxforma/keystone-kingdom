@@ -25,7 +25,7 @@ try{Object.keys(KKC).forEach(k=>{if(/scarf|bruno|royalcape/.test(k))delete KKC[k
 function xWords(maxLen=8){const i=arcadeLesson(),ls=learned(i);const ok=WORDS.filter(w=>w.length<=maxLen&&[...w].every(c=>ls.has(c)));
  return ok.length>=8?ok:Array.from({length:30},()=>groups(()=>rand([...ls].filter(c=>/[a-z]/.test(c))),1,2,3))}
 function xLetters(){return [...learned(arcadeLesson())].filter(c=>/[a-z]/.test(c))}
-const xSpeed=()=>(({easy:.75,medium:1,hard:1.4,beast:1.9}[(S.set.arcd||'auto').split('-')[0]]||Math.min(1.4,Math.max(.7,avgWpm()/14)))*(window.INSANE?1.35:1));
+const xSpeed=()=>(({easy:.75,medium:1,hard:1.4,beast:1.9}[(S.set.arcd||'auto').split('-')[0]]||Math.min(1.4,Math.max(.7,avgWpm()/14)))*(window.INSANE?1.7:1));
 function xEnd(title,stats,gems,again,extra='',share=''){G.done=true;stopGame();setTarget(null);S.gems+=gems;S.xp+=gems*5;save();sfx.win();
  setTimeout(()=>modal(`<h2>${title}</h2><div class="hero-mini">${zookSVG()}</div>${extra}<div class="rstats">${stats.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('')}<div><b>+${gems}</b><span>Diamonds</span></div></div>
  <div class="rbtns"><button class="btn" data-act="${again}">Play again</button><button class="btn alt" data-act="go" data-to="arcade">Arcade</button><button class="btn" data-act="go" data-to="home">Main Menu</button>${share}</div>`),500)}
@@ -160,6 +160,7 @@ function roamTick(now){if(typeof screen!=='undefined'&&screen!=='home'){roamStop
  ROAM.els.forEach(c=>{const w=c.sz,h=c.sz;if(c.held){c.el.style.transform=`translate(${c.x}px,${c.y}px) scaleX(${c.vx<0?-1:1})`;return}
   if(c.fly){c.ph+=dt*1.6;const tvx=(c.vx<0?-1:1)*28;c.vx+=(tvx-c.vx)*Math.min(1,dt*1.5);c.vy+=(Math.sin(c.ph)*30-c.vy)*Math.min(1,dt*2);c.x+=c.vx*dt;c.y+=c.vy*dt;
    const top=60,bot=ROAM.floor-h-10;if(c.y<top){c.y=top;c.vy=Math.abs(c.vy)}if(c.y>bot){c.y=bot;c.vy=-Math.abs(c.vy)}if(c.x<0){c.x=0;c.vx=Math.abs(c.vx)}if(c.x+w>ROAM.W){c.x=ROAM.W-w;c.vx=-Math.abs(c.vx)}
+   for(const p of ROAM.plats){const cx=c.x+w*.5;if(cx>p.l-w*.3&&cx<p.r+w*.3&&c.y+h>p.t-6&&c.y<p.b){c.y=p.t-h-6;c.vy=-Math.abs(c.vy)}}
    if(Math.random()<dt*.15)c.vx=-c.vx;c.el.style.transform=`translate(${c.x}px,${c.y}px) scaleX(${c.vx<0?-1:1})`;c.el.classList.add('air','flyer');return}
   // walkers: air drag, and once on the ground ease back to a slow amble
   if(!c.ground)c.vx*=Math.pow(.6,dt);else{const sp=Math.abs(c.vx),t=Math.min(40,Math.max(22,sp));c.vx=(c.vx<0?-1:1)*(sp>t?sp+(t-sp)*Math.min(1,dt*6):t)}
@@ -174,6 +175,8 @@ function roamTick(now){if(typeof screen!=='undefined'&&screen!=='home'){roamStop
   // bump into the side of a box while walking: turn around
   if(c.ground){for(const p of ROAM.plats){if(p===c.ground)continue;const feet=c.y+h-2;if(feet>p.t+4&&c.y<p.b&&((c.vx>0&&c.x+w>p.l&&c.x+w<p.l+8)||(c.vx<0&&c.x<p.r&&c.x>p.r-8))){
    const rise=feet-p.t+30;if(rise<520&&Math.random()<.7){c.vy=-Math.sqrt(2*900*rise);c.ground=null}else c.vx=-c.vx;break}}}
+  // never stand or walk in front of a menu box: anything inside a box pops up onto its top
+  for(const p of ROAM.plats){const cx=c.x+w*.5;if(cx>p.l&&cx<p.r&&c.y+h>p.t+4&&c.y<p.b){c.y=p.t-h;c.vy=0;c.ground=p;break}}
   c.el.style.transform=`translate(${c.x}px,${c.y}px) scaleX(${c.vx<0?-1:1})`;c.el.classList.toggle('air',!c.ground)});
  ROAM.raf=requestAnimationFrame(roamTick)}
 const _rh95=renderHome;renderHome=function(){_rh95();setTimeout(roamStart,300)};

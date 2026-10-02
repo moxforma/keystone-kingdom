@@ -60,4 +60,9 @@ const _pa=ACT.practice;ACT.practice=function(){_pa.apply(this,arguments);const m
  <button class="pm ${lock?'pmlock':''}" data-act="pr2" data-m="para"><b>Paragraphs</b><span>${lock?'Unlocks after Lesson '+UNLOCK:'Type a whole mini story'}</span></button>`)};
 ACT.pr2=d=>{if(prog()<UNLOCK){toast('Finish Lesson '+UNLOCK+' to unlock this!');return}closeModal();MODE=d.m;startStage(0,'practice');
  setTimeout(()=>{const b=$('#hud .ht b');if(b)b.textContent=d.m==='sent'?'Practice: sentences':'Practice: paragraph'},0)};
+
+/* ---------- home balance: keystones + daily egg move to the left box ---------- */
+const _rhb=renderHome;renderHome=function(){const r=_rhb.apply(this,arguments);try{const hi=$('#s-home .hero-info'),btns=hi&&hi.querySelector('.hi-btns');if(hi&&btns){
+ ['.shards','.eggrow'].forEach(q=>{const el=$('#s-home .tcard '+q);if(el){el.classList.add('moved');btns.insertAdjacentElement('beforebegin',el)}})}}catch(e){}return r};
+try{if(screen==='home')renderHome()}catch(e){}
 })();
