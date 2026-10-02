@@ -26,6 +26,11 @@ function arcadePhrase(value,includeSelected=false){
  if(includeSelected&&arcadeSymbolOn()&&!/[^a-zA-Z0-9\s]/.test(text))text+=' ?';
  return text;
 }
+/* keep a word only if the toggles don't change it (no 'wednesdaymorning' mash-ups) */
+function arcadeWord(w){const t=arcadeToken(w);return(/\s/.test(String(w))||t!==String(w).toLowerCase())?'':t}
+const BEAST_CLEAN=['Seven sleepy sloths quietly juggled glowing jellyfish.','Zany wizards fix broken clocks with quartz and rhythm.','The sphinx asked a quizzical question about the fjord.','Brave knights rarely kneel beside gnomes in the labyrinth.','Jovial pirates sketched a kaleidoscope of whirling galaxies.','A shy rhinoceros waltzed through the misty archipelago.','Twelve plucky penguins zigzagged across the frozen lake.','The colonel recited a mnemonic about the mysterious pharaoh.'];
+function beastBossText(){const okS=s=>(arcadeNumberOn()||!/\d/.test(s))&&(arcadeSymbolOn()||![...ARCADE_SYMBOLS].some(c=>s.includes(c)));
+ const pool=BEAST_SENT.concat(BEAST_CLEAN).filter(okS);return arcadePhrase(rand(pool.length?pool:BEAST_CLEAN),true)}
 function arcadeBonus(index,interval){
  if(index%interval!==interval-1)return null;
  const pool=[...(arcadeNumberOn()?['7','3','9']:[]),...(arcadeSymbolOn()?['?','#','!']:[])];
@@ -52,15 +57,15 @@ const _arcadeOptionsMeteor=startMeteor;
 startMeteor=function(){
  _arcadeOptionsMeteor();
  G.arcLevel=arcadeLevelNow();
- G.set=G.set.map(arcadeToken).filter(Boolean);
- if(G.words)G.words=G.words.map(arcadeToken).filter(Boolean);
+ G.set=G.set.map(arcadeWord).filter(Boolean);if(!G.set.length)G.set=['go'];
+ if(G.words)G.words=G.words.map(arcadeWord).filter(Boolean);
  if(G.words&&!G.words.length)G.words=null;
  arcadeKeys();
 };
 const _arcadeOptionsGlitch=startGlitch;
 startGlitch=function(){_arcadeOptionsGlitch();G.arcLevel=arcadeLevelNow();G.arcBonusCount=0;arcadeKeys()};
 const _arcadeOptionsWord=gw;
-gw=function(size){const bonus=arcadeBonus(G.arcBonusCount++,4);return bonus||arcadeToken(_arcadeOptionsWord(size))||'go'};
+gw=function(size){const bonus=arcadeBonus(G.arcBonusCount++,4);if(bonus)return bonus;for(let k=0;k<12;k++){const w=arcadeWord(_arcadeOptionsWord(size));if(w)return w}return arcadeToken(_arcadeOptionsWord(size))||'go'};
 const _arcadeOptionsBoss=bossPhrase;
 bossPhrase=function(){
  _arcadeOptionsBoss();

@@ -1476,6 +1476,7 @@ setInterval(()=>{ensureTrackers();const hk=(S.hero||'')+(S.color||'')+JSON.strin
   else if(G.type==='bubble'){const n=G.popped+G.missed;f=n/G.total;lab=`${G.total-n} left`}
   else if(G.type==='dig'){f=G.li/G.L.length;lab=`${G.li} layers`}
   else if(G.type==='keeper'){f=Math.min(1,G.fed/G.goal);lab=`${G.fed}/${G.goal} fed`}
+  else if(G.type==='bridge'){f=G.pos/G.text.length;lab=`${G.wi}/${G.words.length} words`}
   if(G.done&&G.type!=='glitch')f=1;setTrk(tg,f,lab);if(typeof ghostWaveDisplay==='function')ghostWaveDisplay()}},150);
 /* --- whole-game progress on home --- */
 const _rh4=renderHome;renderHome=function(){_rh4();const xb=$('#s-home .trow');if(!xb||!S.name)return;const tot=LESSONS.length*8,done=Object.keys(S.best).length,pc=Math.round(done/tot*100);
@@ -1519,7 +1520,7 @@ const _dm0=diffMult;diffMult=()=>S.set.arcd==='beast'?3.4:_dm0();
 const isBeast=()=>S.set.arcd==='beast';
 function beastKeys(){setAvail(new Set([...keyEls.keys()]),true);applyLabels()}
 const _gw0=gw;gw=size=>isBeast()&&G.beast?rand(BEAST[size]):_gw0(size);
-const _bp0=bossPhrase;bossPhrase=function(){if(!(isBeast()&&G.beast))return _bp0();const b=G.boss;b.txt=rand(BEAST_SENT);b.typed=0;b.t=0;b.lim=b.txt.length/7+2.5;paintLab(b);gHint()};
+const _bp0=bossPhrase;bossPhrase=function(){if(!(isBeast()&&G.beast))return _bp0();const b=G.boss;b.txt=typeof beastBossText==='function'?beastBossText():rand(BEAST_SENT);b.typed=0;b.t=0;b.lim=b.txt.length/7+2.5;paintLab(b);gHint()};
 const _sg2=startGlitch;startGlitch=function(){_sg2();if(isBeast()){G.beast=true;G.speed=3.4;beastKeys()}};
 const _sm2=startMeteor;startMeteor=function(){_sm2();if(isBeast()){G.beast=true;G.speed=4.2;G.words=[...BEAST.s,...BEAST.m];G.set=[...BEAST.s];G.total=Math.round(30*S.set.len);beastKeys()}};
 const _sr2=startRace;startRace=function(){_sr2();if(isBeast()){G.beast=true;G.text=fillSent(BEAST_SENT,Math.round(240*S.set.len));G.pos=0;G.mist=new Set();

@@ -25,7 +25,7 @@ try{Object.keys(KKC).forEach(k=>{if(/scarf|bruno|royalcape/.test(k))delete KKC[k
 function xWords(maxLen=8){const i=arcadeLesson(),ls=learned(i);const ok=WORDS.filter(w=>w.length<=maxLen&&[...w].every(c=>ls.has(c)));
  return ok.length>=8?ok:Array.from({length:30},()=>groups(()=>rand([...ls].filter(c=>/[a-z]/.test(c))),1,2,3))}
 function xLetters(){return [...learned(arcadeLesson())].filter(c=>/[a-z]/.test(c))}
-const xSpeed=()=>({easy:.75,medium:1,hard:1.4,beast:1.9}[(S.set.arcd||'auto').split('-')[0]]||Math.min(1.4,Math.max(.7,avgWpm()/14)));
+const xSpeed=()=>(({easy:.75,medium:1,hard:1.4,beast:1.9}[(S.set.arcd||'auto').split('-')[0]]||Math.min(1.4,Math.max(.7,avgWpm()/14)))*(window.INSANE?1.35:1));
 function xEnd(title,stats,gems,again,extra='',share=''){G.done=true;stopGame();setTarget(null);S.gems+=gems;S.xp+=gems*5;save();sfx.win();
  setTimeout(()=>modal(`<h2>${title}</h2><div class="hero-mini">${zookSVG()}</div>${extra}<div class="rstats">${stats.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('')}<div><b>+${gems}</b><span>Diamonds</span></div></div>
  <div class="rbtns"><button class="btn" data-act="${again}">Play again</button><button class="btn alt" data-act="go" data-to="arcade">Arcade</button><button class="btn" data-act="go" data-to="home">Main Menu</button>${share}</div>`),500)}

@@ -1089,9 +1089,10 @@ body.no-rarity .cr[class*=rar]{filter:none!important;animation:none!important}bo
 .wpage.done{border-color:#f0c860;background:#3a2a08}.wpage.done small{color:#f0c860}
 .trophy{margin:0 0 14px}
 .tr-head{display:flex;gap:10px;align-items:baseline;font-family:var(--display)}.tr-head small{font-family:inherit;color:#aab;font-size:14px}
-.shelf{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;min-height:84px;padding:6px 8px 0;border-bottom:10px solid #8a5a30;box-shadow:0 4px 0 #5a3418;background:linear-gradient(#1a1430,#241a3a)}
-.tro{width:72px;height:72px;background:none;border:0;padding:0;cursor:pointer}
+.shelf{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;gap:8px;align-items:flex-end;min-height:128px;padding:6px 8px 0;border-bottom:10px solid #8a5a30;box-shadow:0 4px 0 #5a3418;background:linear-gradient(#1a1430,#241a3a)}
+.tro{flex:none;width:116px;height:116px;background:none;border:0;padding:0;cursor:pointer;scroll-snap-align:start}
 .tro svg{width:100%;height:100%}
+.shelf::-webkit-scrollbar{height:10px}.shelf::-webkit-scrollbar-thumb{background:#8a5a30}.shelf::-webkit-scrollbar-track{background:#1a1430}
 /* little learners */
 .agerow{display:flex;flex-direction:column;gap:6px;margin-top:10px}.agerow span{font-family:var(--display);font-size:20px}
 body.little .strip{height:clamp(110px,16vw,140px)!important}
@@ -1106,3 +1107,39 @@ body.fs-l .strip{height:clamp(104px,16vw,146px)!important}body.fs-l .strip-in{fo
 body.fs-s .screen{zoom:.9}body.fs-l .screen{zoom:1.1}
 body.fs-s .gw,body.fs-s .word,body.fs-s .met-w{font-size:.85em}
 .pm.pmlock{opacity:.55}
+/* Story Bridge */
+.garena.bridge-arena{height:clamp(340px,56vh,520px)}
+.br-para{position:absolute;left:3%;right:3%;top:4%;height:58%;overflow-y:auto;z-index:3;background:#f3e2b8;border:4px solid #5a3a1a;box-shadow:4px 4px 0 rgba(0,0,0,.45);padding:10px 14px;font-family:'Jersey 10',var(--mono),monospace;font-size:clamp(20px,2.6vw,28px);line-height:1.35;color:#8a7a60;white-space:pre-wrap;word-break:normal;scroll-behavior:smooth}
+.br-para span{border-radius:2px}
+.br-para span.ok{color:#2a1a10}.br-para span.bad{color:#c03a2a}
+.br-para span.cur{background:#ffd23c;color:#2a1a10;box-shadow:0 3px 0 #c8800a}
+.br-para span.err{animation:brerr .3s steps(3)}
+@keyframes brerr{50%{background:#ff7a6a}}
+body.fs-s .br-para{font-size:clamp(16px,2vw,21px)}body.fs-l .br-para{font-size:clamp(26px,3.4vw,36px)}
+.br-chasm{position:absolute;left:0;right:0;bottom:0;height:34%;z-index:2}
+.br-cliff{position:absolute;bottom:0;width:10%;height:70%;background:repeating-linear-gradient(0deg,#5a4030 0 8px,#6a4c38 8px 16px);border-top:8px solid #4aa04a}
+.br-cliff.l{left:0}.br-cliff.r{right:0}
+.br-planks{position:absolute;left:10%;right:10%;bottom:42%;height:14px;display:flex;gap:2px;border-top:3px solid #3a2a18}
+.br-planks i{flex:1;height:100%;background:transparent;border:2px dashed rgba(255,255,255,.18)}
+.br-planks i.on{background:#a8743e;border:2px solid #3a2410;box-shadow:inset 0 3px 0 #c89058}
+.br-planks i.wob{animation:brwob .3s steps(3)}
+@keyframes brwob{33%{transform:translateY(4px) rotate(4deg)}66%{transform:translateY(-2px) rotate(-3deg)}}
+.br-rope{position:absolute;left:10%;right:10%;bottom:64%;height:6px;background:#3a2a18}
+.br-rope i{display:block;height:100%;width:100%;background:repeating-linear-gradient(90deg,#e8c070 0 6px,#a8803a 6px 10px)}
+.br-rope.fray i{animation:brfray .4s steps(2) infinite}@keyframes brfray{50%{opacity:.4}}
+.br-hero{position:absolute;bottom:52%;left:4%;width:clamp(56px,8vw,84px);transition:left .25s steps(4);z-index:3}
+.br-hero svg{width:100%;display:block}
+.br-goal{position:absolute;right:1%;bottom:62%;width:clamp(60px,9vw,96px);animation:jit 1.6s infinite}
+.br-goal svg{width:100%;display:block}
+.garena.br-lost .br-planks{animation:brfall .8s forwards}@keyframes brfall{to{transform:translateY(160px) rotate(8deg);opacity:0}}
+.gart.brart{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center}
+.mini-para{background:#f3e2b8;border:3px solid #5a3a1a;color:#2a1a10;font-size:13px;padding:4px 6px;max-width:220px;line-height:1.2}
+.mini-bridge{display:flex;gap:2px;width:180px}.mini-bridge i{flex:1;height:10px;background:#a8743e;border:2px solid #3a2410}
+/* INSANITY MODE */
+.playrow{display:flex;gap:8px;justify-content:center;align-items:stretch;max-width:100%}
+.playrow .btn{min-width:0}
+.btn.insbtn{background:#1a0608!important;color:#ff5040!important;border:3px solid #ff3a2a!important;box-shadow:0 4px 0 #6a0a0a!important;animation:insglow 1s steps(2) infinite;letter-spacing:1px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:clamp(11px,1.4vw,15px)!important;line-height:1.05;padding:4px 10px!important;white-space:nowrap;max-width:60%}
+.btn.insbtn span{display:block}
+@keyframes insglow{50%{color:#ffe46a!important;border-color:#ffe46a}}
+.garena.insane{box-shadow:inset 0 0 0 4px #ff3a2a,0 0 0 3px #6a0a0a}
+.garena.insane::after{content:'IMPOSSIBLE MODE';position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:8;font-family:var(--display);color:#ff5040;background:#1a0608;border:2px solid #ff3a2a;padding:2px 10px;letter-spacing:2px;pointer-events:none}

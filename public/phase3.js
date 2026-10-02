@@ -61,7 +61,7 @@ const _res=results;results=function(r){const i=typeof P!=='undefined'?P.fi:null;
 const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments);try{checkWorlds();const root=$('#s-binder');if(!root)return r;const tb=root.querySelector('.topbar');
  let h='<div class="wpages">'+WORLDS.map((W,k)=>{const[n,t]=wCount(k+1),done=n>=t;return `<div class="wpage ${done?'done':''}" title="${esc(W.name)}"><b>W${k+1}</b><small>${done?'★ DONE':n+'/'+t}</small></div>`}).join('')+'</div>';
  const tro=Object.entries(S.cards).filter(([k,c])=>c.tier==='gold'||c.tier==='diamond').sort((a,b)=>(b[1].tier==='diamond')-(a[1].tier==='diamond'));
- h+=`<div class="trophy"><div class="tr-head"><b>TROPHY SHELF</b><small>${tro.length} gold and diamond Keylori</small></div><div class="shelf">${tro.length?tro.slice(0,16).map(([k,c])=>{const[i,f]=k.split('-').map(Number);return `<button class="tro ${c.tier}" data-act="card" data-k="${k}" title="${esc(SPECIES[i].n[f])}">${creatureSVG(i,f,'fit',c.tier)}</button>`}).join(''):'<span class="muted">Catch a gold or diamond Keylori to put it here!</span>'}</div></div>`;
+ h+=`<div class="trophy"><div class="tr-head"><b>TROPHY SHELF</b><small>${tro.length} gold and diamond Keylori</small></div><div class="shelf">${tro.length?tro.map(([k,c])=>{const[i,f]=k.split('-').map(Number);return `<button class="tro ${c.tier}" data-act="card" data-k="${k}" title="${esc(SPECIES[i].n[f])}">${creatureSVG(i,f,'fit big',c.tier)}</button>`}).join(''):'<span class="muted">Catch a gold or diamond Keylori to put it here!</span>'}</div></div>`;
  tb&&!root.querySelector('.wpages')&&tb.insertAdjacentHTML('afterend',h)}catch(e){}return r};
 
 /* ---------- little learners (under 5) ---------- */

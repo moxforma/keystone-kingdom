@@ -37,7 +37,7 @@ function ghostFutureWave(index){
  return ghostWaveDeck(queue);
 }
 function ghostBossText(){
- if(G.beast)return rand(BEAST_SENT);
+ if(G.beast)return beastBossText();
  const text=G.i>=16?rand(SENT.filter(s=>s.length<=22)):G.ok.length>=8?fillWords(G.ok,11):groups(()=>rand(G.letters),7,2,3);
  return arcadePhrase(text,true);
 }
