@@ -70,12 +70,12 @@ const TREAS=(()=>{const mk=(rows,pal)=>PXG(rows,pal).toDataURL();return{
 const REDDIA=PXG(["...ooooo...","..oHHRRRo..",".oHRRRRRro.","oRRRRRRRrro","oooooooooo.",".oRRRrrrro.","..oRRrrro..","...oRrro...","....oro....",".....o....."].map(r=>r.padEnd(11,'.')),{o:'#3a0a14',H:'#ffd0d0',R:'#e8384f',r:'#a8202e'}).toDataURL();
 TREAS.red=REDDIA;
 const PRIZE={gem:{n:'gem',g:3,xp:0},coin:{n:'gold coin',g:1,xp:0},bone:{n:'fossil',g:0,xp:15},egg:{n:'Keylori egg',g:0,xp:25},red:{n:'BIG RED DIAMOND',g:200,xp:0}};
-ACT.dig=()=>{mountGame('Treasure Dig','Pick a word in the row and type it to dig there!','Treasure','Time');
+ACT.dig=()=>{mountGame('Treasure Dig','Dig 15 layers before time runs out! Pick a word in the row to dig.','Treasure','Time');
  const words=xWords(7).slice().sort(()=>Math.random()-.5);let wi=0;const nw=()=>words[(wi++)%words.length];
  const roll=()=>Math.random()<1/200?'red':Math.random()<.5?rand(['gem','coin','coin','bone','gem','egg']):null;
  const L=Array.from({length:40},()=>{const n=2+(Math.random()<.4?1:0),ws=[];while(ws.length<n){const w=nw();if(!ws.some(x=>x[0]===w[0]))ws.push(w);if(wi>400)break}return {ws,pr:ws.map(roll)}});
  G={type:'dig',arcLevel:arcadeLevelNow(),L,li:0,typed:'',found:0,gems:0,xpg:0,got:{},left:75,done:false,mist:0};$('#gsw').hidden=false;$('#garena').className='garena dig-arena';
- $('#garena').innerHTML=`${backdrop(4,['#e8a050','#f0b868','#f6cc88','#fbe0b0'])}<div class="dig-shaft" id="digshaft">${L.map((l,k)=>`<div class="dl" id="dl${k}" style="background:url(${kku('dt'+Math.min(DIRT.length-1,Math.floor(k/5))+'_'+(k%3),()=>{return {toDataURL:()=>dirtTex(DIRT[Math.min(DIRT.length-1,Math.floor(k/5))],k%3*17+Math.floor(k/5))}})}) 0 0/256px 64px">${l.ws.map((w,q)=>`<span class="dw" id="dw${k}_${q}">${esc(w)}</span>`).join('')}</div>`).join('')}</div><div class="dig-hero" id="dighero">${zookSVG()}</div><img class="shovel" id="digshovel" src="${SHOVEL}" alt=""><div class="gmsg" id="gmsg"></div>`;
+ $('#garena').innerHTML=`${backdrop(4,['#e8a050','#f0b868','#f6cc88','#fbe0b0'])}<div class="dig-shaft" id="digshaft">${L.map((l,k)=>`<div class="dl" id="dl${k}" style="background:url(${kku('dt'+Math.min(DIRT.length-1,Math.floor(k/5))+'_'+(k%3),()=>{return {toDataURL:()=>dirtTex(DIRT[Math.min(DIRT.length-1,Math.floor(k/5))],k%3*17+Math.floor(k/5))}})}) 0 0/256px 64px">${l.ws.map((w,q)=>`<span class="dw" id="dw${k}_${q}">${esc(w)}</span>`).join('')}</div>`).join('')}</div><div class="dig-hero" id="dighero">${zookSVG()}</div><img class="shovel" id="digshovel" src="${SHOVEL}" alt=""><div class="timebar"><i id="digtime"></i><span id="diggoal">0/15</span></div><div class="gmsg" id="gmsg"></div>`;
  const strip=()=>{const row=G.L[G.li],m=G.typed?row.ws.find(w=>w.startsWith(G.typed)):null;const show=m||G.typed;
   $('#gstripIn').innerHTML=[...show].map((c,k)=>`<span class="${k<G.typed.length?'ok':k===G.typed.length?'cur':''}">${esc(c)}</span>`).join('')||'<span class="cur">·</span>';
   const cur=$('#gstripIn .cur');if(cur&&m){cur.style.setProperty('--fc',fcol(keyInfo(m[G.typed.length]).f));}if(cur)$('#gstripIn').style.transform=`translateX(${$('#gstrip').clientWidth/2-(cur.offsetLeft+cur.offsetWidth/2)}px)`;
@@ -84,7 +84,7 @@ ACT.dig=()=>{mountGame('Treasure Dig','Pick a word in the row and type it to dig
   $('#digshaft').style.transform=`translateY(${-G.li*64}px)`;document.querySelectorAll('.dl.cur').forEach(e=>e.classList.remove('cur'));$('#dl'+G.li)?.classList.add('cur')};
  const finish=()=>{const deep=G.li,win=deep>=15;S.arc.dig=Math.max(S.arc.dig||0,deep);S.arc.digT=Math.max(S.arc.digT||0,G.found);if(typeof arcadeRecordWin==='function')arcadeRecordWin('dig',win);S.xp+=G.xpg;
   const list=Object.entries(G.got).map(([t,n])=>`<span class="dig-got"><img src="${TREAS[t]}" alt="">×${n}</span>`).join('');
-  xEnd(win?'Great dig!':'Keep digging next time!',[[G.score||0,'Score'],[deep,'Layers dug'],[G.found,'Treasures'],['+'+G.xpg,'XP']],1+G.gems,'dig',list?`<div class="dig-list">${list}</div>`:'')};
+  xEnd(win?'Great dig! You reached the goal!':'Time’s up! The tunnel caved in.',[[G.score||0,'Score'],[deep,'Layers dug'],[G.found,'Treasures'],['+'+G.xpg,'XP']],1+G.gems,'dig',list?`<div class="dig-list">${list}</div>`:'')};
  G.xin=ch=>{const row=G.L[G.li],nt=G.typed+ch;if(!row.ws.some(w=>w.startsWith(nt))){G.mist++;sfx.bad();G.typed='';strip();return}
   G.typed=nt;sfx.ok(nt.length);const h=$('#dighero'),sv=$('#digshovel');[h,sv].forEach(e=>{if(!e)return;e.classList.remove('dig');void e.offsetWidth;e.classList.add('dig')});
   const q=row.ws.indexOf(nt);if(q>=0){const el=$(`#dw${G.li}_${q}`),t=row.pr[q];try{burst($('#garena'),el,DIRT[Math.min(DIRT.length-1,Math.floor(G.li/5))],8)}catch(e){}
@@ -92,7 +92,7 @@ ACT.dig=()=>{mountGame('Treasure Dig','Pick a word in the row and type it to dig
     if(el)el.outerHTML=`<span class="dw dug prize"><img src="${TREAS[t]}" alt="">${P.g?'+'+P.g+' ♦':'+'+P.xp+' XP'}</span>`;tone(t==='red'?1200:880,.15,'square',.06);gmsg(t==='red'?'WOW! A BIG RED DIAMOND! +200':`Found a ${P.n}!`,t==='red'?'big good':'good');if(t==='red')sfx.win()}
    else{if(el)el.classList.add('dug');tone(300,.06,'square',.04)}
    G.li++;G.typed='';if(G.li>=G.L.length)return finish()}strip()};
- let last=performance.now();const tick=now=>{if(G.done||G.type!=='dig')return;G.left-=(now-last)/1000;last=now;$('#g-b').textContent=Math.max(0,Math.ceil(G.left));if(G.left<=0)return finish();G.raf=requestAnimationFrame(tick)};
+ let last=performance.now();const tick=now=>{if(G.done||G.type!=='dig')return;G.left-=(now-last)/1000;last=now;$('#g-b').textContent=Math.max(0,Math.ceil(G.left));const tb=$('#digtime');if(tb){tb.style.width=Math.max(0,G.left/75*100)+'%';tb.parentElement.classList.toggle('low',G.left<15)}const dg=$('#diggoal');if(dg)dg.textContent=`${Math.min(G.li,15)}/15`;if(G.li>=15&&!G.goalHit){G.goalHit=1;gmsg('Goal reached! Keep digging for treasure!','good')}if(G.left<=0)return finish();G.raf=requestAnimationFrame(tick)};
  strip();G.raf=requestAnimationFrame(tick)};
 
 /* ---------- 3. Keylori Keeper ---------- */
@@ -100,16 +100,16 @@ const WANTS=[{t:'a LONG word (6+ letters)',f:w=>w.length>=6},{t:'a SHORT word (3
  {t:'a word that starts with S',f:w=>w[0]==='s'},{t:'a word with double letters',f:w=>/(.)\1/.test(w)},{t:'a word with the letter O',f:w=>w.includes('o')},{t:'a word that ends with T',f:w=>w.endsWith('t')}];
 ACT.keeper=()=>{mountGame('Keylori Keeper','Feed your Keylori the word it wants!','Fed','Time');
  const pool=xWords(9),cards=Object.keys(S.cards),[ci,cf]=(rand(cards.length?cards:['0-0'])).split('-').map(Number);
- G={type:'keeper',pool,ci,cf,goal:15,fed:0,miss:0,left:60,typed:'',done:false,want:null,opts:[]};$('#gsw').hidden=true;$('#garena').className='garena keeper-arena';
- $('#garena').innerHTML=`${backdrop(0,['#f0a870','#f0c088','#f6d8a8','#fbe8c8'])}${cloudsHTML()}<div class="kp-pet" id="kppet">${creatureSVG(ci,cf,'px')}</div><div class="kp-want bubble" id="kpwant"></div><div class="kp-food" id="kpfood"></div><div class="kp-belly"><i id="kpbelly"></i></div><div class="kp-typed" id="kptyped"></div>`;
+ G={type:'keeper',pool,ci,cf,goal:15,life:100,fed:0,miss:0,left:60,typed:'',done:false,want:null,opts:[]};$('#gsw').hidden=true;$('#garena').className='garena keeper-arena';
+ $('#garena').innerHTML=`${backdrop(0,['#f0a870','#f0c088','#f6d8a8','#fbe8c8'])}${cloudsHTML()}<div class="kp-pet" id="kppet">${creatureSVG(ci,cf,'px')}</div><div class="kp-want bubble" id="kpwant"></div><div class="kp-food" id="kpfood"></div><div class="kp-belly"><i id="kpbelly"></i></div><div class="kp-life"><span>♥</span><div><i id="kplife"></i></div></div><div class="kp-typed" id="kptyped"></div>`;
  const round=()=>{const ws=WANTS.filter(W=>pool.some(W.f)&&pool.some(w=>!W.f(w)));G.want=rand(ws.length?ws:WANTS);const good=pool.filter(G.want.f),bad=pool.filter(w=>!G.want.f(w));
   G.opts=[rand(good),rand(bad),rand(bad)].sort(()=>Math.random()-.5);G.typed='';$('#kpwant').innerHTML=`I want ${G.want.t}!`;$('#kpfood').innerHTML=G.opts.map((w,k)=>`<div class="food" id="fd${k}"><span>${esc(w)}</span></div>`).join('');paint()};
  const paint=()=>{$('#kptyped').textContent=G.typed||' ';G.opts.forEach((w,k)=>{const el=$('#fd'+k);if(el)el.classList.toggle('match',!!G.typed&&w.startsWith(G.typed))});const m=G.opts.find(w=>w.startsWith(G.typed));setTarget(m?m[G.typed.length]:null)};
  G.xin=ch=>{const nt=G.typed+ch;if(!G.opts.some(w=>w.startsWith(nt))){sfx.bad();G.typed='';paint();return}G.typed=nt;sfx.ok(nt.length);const done=G.opts.find(w=>w===nt);
   if(done){const pet=$('#kppet');if(G.want.f(done)){G.fed++;G.score=(G.score||0)+20+done.length*5;$('#g-a').textContent=G.fed;$('#kpbelly').style.width=Math.min(100,G.fed*8)+'%';pet.classList.remove('yum','nope');void pet.offsetWidth;pet.classList.add('yum');tone(880,.1,'square',.05);round()}
-   else{G.miss++;pet.classList.remove('yum','nope');void pet.offsetWidth;pet.classList.add('nope');$('#kpwant').innerHTML=`Not that one! I want ${G.want.t}.`;G.typed='';paint()}}else paint()};
+   else{G.miss++;pet.classList.remove('yum','nope');void pet.offsetWidth;pet.classList.add('nope');G.life-=15;$('#kplife').style.width=Math.max(0,G.life)+'%';if(G.life<=0){S.arc.keeper=Math.max(S.arc.keeper||0,G.fed);if(typeof arcadeRecordWin==='function'){G.arcLevel=G.arcLevel||arcadeLevelNow();arcadeRecordWin('keeper',false)}return xEnd(`${SPECIES[G.ci].n[G.cf]} got too grumpy!`,[[G.score||0,'Score'],[G.fed,'Fed'],[G.speedBonus||0,'Speed bonus']],1,'keeper')}$('#kpwant').innerHTML=`Not that one! I want ${G.want.t}.`;G.typed='';paint()}}else paint()};
  let last=performance.now();const tick=now=>{if(G.done||G.type!=='keeper')return;G.left-=(now-last)/1000;last=now;$('#g-b').textContent=Math.max(0,Math.ceil(G.left));
-  if(G.left<=0){S.arc.keeper=Math.max(S.arc.keeper||0,G.fed);if(typeof arcadeRecordWin==='function'){G.arcLevel=G.arcLevel||arcadeLevelNow();arcadeRecordWin('keeper',G.fed>=G.goal)}const name=SPECIES[G.ci].n[G.cf];return xEnd(`${name} is full and happy!`,[[G.score||0,'Score'],[G.fed,'Fed'],[G.speedBonus||0,'Speed bonus']],Math.min(8,1+Math.floor(G.fed/2)),'keeper')}
+  if(G.left<=0){S.arc.keeper=Math.max(S.arc.keeper||0,G.fed);if(typeof arcadeRecordWin==='function'){G.arcLevel=G.arcLevel||arcadeLevelNow();arcadeRecordWin('keeper',G.fed>=G.goal)}const name=SPECIES[G.ci].n[G.cf];return xEnd(G.fed>=G.goal?`${name} is full and happy!`:`${name} is still a little hungry!`,[[G.score||0,'Score'],[G.fed,'Fed'],[G.speedBonus||0,'Speed bonus']],Math.min(8,1+Math.floor(G.fed/2)),'keeper')}
   G.raf=requestAnimationFrame(tick)};round();G.raf=requestAnimationFrame(tick)};
 
 /* ---------- arcade screen: 6 games ---------- */
@@ -140,19 +140,21 @@ const ROAM={els:[],plats:[],raf:0,last:0,scan:0};
 function roamPick(){const best={};Object.entries(S.cards||{}).forEach(([k,c])=>{const [i,f]=k.split('-').map(Number);if(!SPECIES[i])return;
   const rank=f*10+(c.tier==='diamond'?3:c.tier==='gold'?2:c.holo?1:0);if(!best[i]||rank>best[i].rank)best[i]={i,f,tier:c.tier||null,rank}});
  return Object.values(best).sort((a,b)=>b.rank-a.rank).slice(0,Math.min(14,Object.keys(best).length))}
-function roamPlats(){const sel=['#s-home .pxlogo','#s-home .hero-big .zk','#s-home .hero-info','#s-home .tcard','#s-home .btn','#s-home .eggrow','#s-home .daily','#s-home .footbtns .btn','#s-home .topbar .btn','#s-home .topbar .icon-btn'];
- ROAM.plats=[];sel.forEach(q=>document.querySelectorAll(q).forEach(el=>{const r=el.getBoundingClientRect();if(r.width>20&&r.height>8)ROAM.plats.push({l:r.left+scrollX,r:r.right+scrollX,t:r.top+scrollY,b:r.bottom+scrollY})}));
- ROAM.floor=Math.max(document.documentElement.scrollHeight,innerHeight)-4;ROAM.W=document.documentElement.clientWidth}
+function roamPlats(){const sel=[['#s-home .hero-info',0,0],['#s-home .tcard',0,0]];
+ ROAM.plats=[];sel.forEach(([q,ix,it])=>document.querySelectorAll(q).forEach(el=>{const r=el.getBoundingClientRect();if(r.width>20&&r.height>8)ROAM.plats.push({l:r.left+scrollX+r.width*ix,r:r.right+scrollX-r.width*ix,t:r.top+scrollY+r.height*it,b:r.bottom+scrollY})}));
+ {const hi=document.querySelector('#s-home .hero-info'),tc=document.querySelector('#s-home .tcard');if(hi&&tc){const A=hi.getBoundingClientRect(),B=tc.getBoundingClientRect();const l=Math.min(A.right,B.right),r=Math.max(A.left,B.left);
+  if(r>l)ROAM.plats.push({l:l+scrollX-2,r:r+scrollX+2,t:Math.min(A.top,B.top)+scrollY,b:Math.max(A.bottom,B.bottom)+scrollY,gap:1})}}
+ const boxes=[...document.querySelectorAll('#s-home .tcard,#s-home .hero-info')].map(e=>e.getBoundingClientRect().bottom+scrollY);ROAM.floor=boxes.length?Math.max(...boxes):Math.max(document.documentElement.scrollHeight,innerHeight)-4;ROAM.W=document.documentElement.clientWidth}
 function roamStart(){roamStop();roamToggleBtn();if(typeof screen==='undefined'||screen!=='home'||!S.name||S.set.hideRoam)return;const list=roamPick();if(!list.length)return;
  let layer=document.getElementById('roam');if(!layer){layer=document.createElement('div');layer.id='roam';document.body.appendChild(layer)}layer.innerHTML='';roamPlats();
  ROAM.els=list.map((k,n)=>{const el=document.createElement('div');el.className='roamer';el.innerHTML=creatureSVG(k.i,k.f,'px',k.tier);layer.appendChild(el);
-  const sz=[56,66,78][k.f];el.style.width=sz+'px';el.style.height=sz+'px';
-  return {el,sz,x:30+Math.random()*(ROAM.W-90),y:-sz-n*30,vx:(Math.random()<.5?-1:1)*(25+Math.random()*30),vy:0,ground:null,hop:1+Math.random()*3}});
+  const sz=[112,132,156][k.f];el.style.width=sz+'px';el.style.height=sz+'px';
+  const o={el,sz,x:30+Math.random()*(ROAM.W-90),y:-sz-n*30,vx:(Math.random()<.5?-1:1)*(25+Math.random()*30),vy:0,ground:null,hop:1+Math.random()*3};roamDrag(o);return o});
  ROAM.last=performance.now();ROAM.raf=requestAnimationFrame(roamTick)}
 function roamStop(){cancelAnimationFrame(ROAM.raf);ROAM.raf=0;const l=document.getElementById('roam');if(l)l.innerHTML='';ROAM.els=[]}
 function roamTick(now){if(typeof screen!=='undefined'&&screen!=='home'){roamStop();return}
  const dt=Math.min(.05,(now-ROAM.last)/1000);ROAM.last=now;if(now-ROAM.scan>1000){ROAM.scan=now;roamPlats()}
- ROAM.els.forEach(c=>{const w=c.sz,h=c.sz;
+ ROAM.els.forEach(c=>{const w=c.sz,h=c.sz;if(c.held){c.el.style.transform=`translate(${c.x}px,${c.y}px) scaleX(${c.vx<0?-1:1})`;return}
   if(c.ground){c.hop-=dt;if(c.hop<=0){c.vy=-(260+Math.random()*220);c.ground=null;c.hop=1+Math.random()*3.5;if(Math.random()<.25)c.vx=-c.vx}
    else{const p=c.ground;if(p!=='floor'&&(c.x+w*.5<p.l||c.x+w*.5>p.r))c.ground=null}}
   if(!c.ground){c.vy+=900*dt}
@@ -162,7 +164,8 @@ function roamTick(now){if(typeof screen!=='undefined'&&screen!=='home'){roamStop
    for(const p of ROAM.plats){if(cx>=p.l&&cx<=p.r&&oy+h<=p.t+2&&c.y+h>=p.t){if(!landed||p.t<landed.t)landed=p}}
    if(landed){c.y=landed.t-h;c.vy=0;c.ground=landed}else if(c.y+h>=ROAM.floor){c.y=ROAM.floor-h;c.vy=0;c.ground='floor'}}
   // bump into the side of a box while walking: turn around
-  if(c.ground){for(const p of ROAM.plats){if(p===c.ground)continue;const feet=c.y+h-2;if(feet>p.t+4&&c.y<p.b&&((c.vx>0&&c.x+w>p.l&&c.x+w<p.l+8)||(c.vx<0&&c.x<p.r&&c.x>p.r-8))){c.vx=-c.vx;break}}}
+  if(c.ground){for(const p of ROAM.plats){if(p===c.ground)continue;const feet=c.y+h-2;if(feet>p.t+4&&c.y<p.b&&((c.vx>0&&c.x+w>p.l&&c.x+w<p.l+8)||(c.vx<0&&c.x<p.r&&c.x>p.r-8))){
+   const rise=feet-p.t+30;if(rise<520&&Math.random()<.7){c.vy=-Math.sqrt(2*900*rise);c.ground=null}else c.vx=-c.vx;break}}}
   c.el.style.transform=`translate(${c.x}px,${c.y}px) scaleX(${c.vx<0?-1:1})`;c.el.classList.toggle('air',!c.ground)});
  ROAM.raf=requestAnimationFrame(roamTick)}
 const _rh95=renderHome;renderHome=function(){_rh95();setTimeout(roamStart,300)};
@@ -174,3 +177,14 @@ function roamToggleBtn(){const tb=$('#s-home .topbar');if(!tb||!S.name)return;le
  if(!b){tb.querySelector('.selp')?.insertAdjacentHTML('afterend','<button class="btn roamtog" data-act="roamToggle"></button>');b=tb.querySelector('.roamtog')}
  if(b)b.textContent=S.set.hideRoam?'SHOW KEYLORI':'HIDE KEYLORI'}
 ACT.roamToggle=()=>{S.set.hideRoam=!S.set.hideRoam;save();sfx.click&&sfx.click();roamStart()};
+
+function roamDrag(c){c.el.addEventListener('pointerdown',e=>{e.preventDefault();c.held=true;c.ground=null;c.el.setPointerCapture(e.pointerId);c.el.classList.add('held');
+  const ox=e.pageX-c.x,oy=e.pageY-c.y;let lx=e.pageX,ly=e.pageY,lt=performance.now();
+  const mv=ev=>{const now=performance.now(),dt=Math.max(.016,(now-lt)/1000);c.vx=(ev.pageX-lx)/dt*.6;c.vy=(ev.pageY-ly)/dt*.6;lx=ev.pageX;ly=ev.pageY;lt=now;
+   c.x=Math.max(0,Math.min(ROAM.W-c.sz,ev.pageX-ox));c.y=Math.min(ROAM.floor-c.sz,ev.pageY-oy)};
+  const up=()=>{c.held=false;c.el.classList.remove('held');c.vx=Math.max(-600,Math.min(600,c.vx))||40;c.vy=Math.max(-900,Math.min(600,c.vy));c.hop=1+Math.random()*2;
+   c.el.removeEventListener('pointermove',mv);c.el.removeEventListener('pointerup',up);c.el.removeEventListener('pointercancel',up)};
+  c.el.addEventListener('pointermove',mv);c.el.addEventListener('pointerup',up);c.el.addEventListener('pointercancel',up)})}
+
+/* closet: taking an item off (or putting one on) ends any preview so the hero shows the real outfit */
+const _eq95=ACT.equip;ACT.equip=d=>{SHOPPV=null;return _eq95(d)};
