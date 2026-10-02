@@ -1621,7 +1621,7 @@ const _res8=results;results=function(r){_res8(r);if(P.practice||!r.pass)return;c
  let h='';
  if(r.evo!=null)h+=`<div class="banner gold">${sp.n[r.evoFrom]} evolved into ${sp.n[r.evo]}!</div>`;
  if(r.lucky){const L=r.lucky;h+=L.kind==='gems'?`<div class="banner luck">Lucky! ${sp.n[P.ff]} found ${L.gems} diamonds!</div>`:L.kind==='prop'?`<div class="banner gold">WOW! ${sp.n[P.ff]} found a ${PROPS[L.prop].n}!</div>`:`<div class="banner dia">SUPER RARE! ${sp.n[P.ff]} turned ${CW[L.cw].n} colors!</div>`}
- h+=`<div class="evobar"><span>${nxt?`Evolve: ${pts} / ${nxt}`:'Fully evolved!'}</span><div class="eb"><i style="width:${nxt?Math.round(pts/nxt*100):100}%"></i></div></div>`;
+ h+=evoPanel(i,pts,f,nxt);
  box.insertAdjacentHTML('afterend',h)};
 /* --- map: 8 levels per lesson + evolution meter --- */
 function renderMap(){
@@ -2371,5 +2371,106 @@ ACT.about=()=>{modal(`<h2>About</h2><div class="hero-mini">${zookSVG()}</div>
 addEventListener('keydown',e=>{if(e.target&&(e.target.id==='fbmsg'||e.target.id==='fbmail'))e.stopImmediatePropagation()},true);
 let UID=0;function uniq(svg){const u='_'+(++UID);return svg.replace(/id="([^"]+)"/g,`id="$1${u}"`).replace(/url\(#([^)]+)\)/g,`url(#$1${u})`)}
 [['zookSVG'],['creatureSVG'],['glitchSVG'],['sceneSVG'],['pathScene']].forEach(()=>{});
+/* --- evolution progress panel (results) --- */
+function evoPanel(i,pts,f,nxt){const sp=SPECIES[i],p0=Math.min(P.pts0??pts,pts),gain=pts-p0;
+ if(!nxt)return masteryPanel(i,pts,p0,gain);
+ const base=EVO_PTS[f],span=nxt-base,w0=Math.max(0,Math.round((Math.max(p0,base)-base)/span*100)),w1=Math.round((pts-base)/span*100),left=nxt-pts;
+ const miss=[];for(let s=0;s<NST;s++){const b=S.best[i+'-'+s]||0;if(b<3)miss.push({s,b})}
+ const tip=miss.length?miss.slice(0,3).map(m=>`<span class="ev-lv">${STAGES8[m.s]} ${'★'.repeat(m.b)}${'☆'.repeat(3-m.b)}</span>`).join(''):'';
+ return `<div class="evobar evo2"><div class="ev-top"><b>${sp.n[f]}</b><span class="ev-next">${creatureSVG(i,f+1,'fit sil')}<em>???</em></span></div>
+ <div class="eb ev-eb"><i class="ev-old" style="width:${w0}%"></i><i class="ev-new" style="left:${w0}%;width:0%" data-w="${Math.max(0,w1-w0)}"></i></div>
+ <div class="ev-msg">${gain>0?`<b class="ev-gain">+${gain} star${gain>1?'s':''} of power!</b> `:''}${left} more star${left>1?'s':''} to evolve!</div>
+ ${gain>0?'':`<div class="ev-tip">${miss.length?'Beat your best stars on:':'Earn more stars to evolve!'} ${tip}</div>`}</div>`}
+const _ss50=startStage;startStage=function(n,mode){const i=Math.floor(n/NST);P.pts0=undefined;const r=_ss50.apply(this,arguments);try{if(LESSONS[i])P.pts0=lessonPts(i)}catch(e){}return r};
+const _res50=results;results=function(r){_res50(r);const nw=document.querySelector('#mbox .ev-new');if(nw)setTimeout(()=>{nw.style.width=nw.dataset.w+'%';if(+nw.dataset.w>0&&sfx.ok)[0,1,2].forEach(k=>setTimeout(()=>tone&&tone(500+k*150,.08,'square',.05),k*120))},500)};
+/* --- mastery track after full evolution --- */
+const MAST_PTS=NST*3,MAST_GEMS=10;
+function masteryPanel(i,pts,p0,gain){const sp=SPECIES[i],m=(S.mast||{})[i],w0=Math.round(Math.max(p0,16)/MAST_PTS*100),w1=Math.round(pts/MAST_PTS*100),left=MAST_PTS-pts;
+ const holo=[0,1,2].map(f=>{const c=S.cards[i+'-'+f],got=c&&c.holo,need=BAND[f].filter(s=>(S.best[i+'-'+s]||0)<3).length;
+  return `<span class="ms-h ${got?'got':''}">${creatureSVG(i,f,'fit big')}<small>${got?'HOLO ✓':need+' to holo'}</small></span>`}).join('');
+ const miss=[];for(let s=0;s<NST;s++){const b=S.best[i+'-'+s]||0;if(b<3)miss.push(`<span class="ev-lv">${STAGES8[s]} ${'★'.repeat(b)}${'☆'.repeat(3-b)}</span>`)}
+ if(m)return `<div class="evobar evo2 mast"><div class="ev-top"><b>${sp.n[2]}</b><span class="ms-crown">♛ MASTERED</span></div><div class="ms-holo">${holo}</div></div>`;
+ return `<div class="evobar evo2 mast"><div class="ev-top"><b>${sp.n[2]} · Mastery</b><span>${pts} / ${MAST_PTS}</span></div>
+ <div class="eb ev-eb"><i class="ev-old" style="width:${w0}%"></i><i class="ev-new" style="left:${w0}%;width:0%" data-w="${Math.max(0,w1-w0)}"></i></div>
+ <div class="ev-msg">${gain>0?`<b class="ev-gain">+${gain} mastery star${gain>1?'s':''}!</b> `:''}${left} more to master ${sp.n[2]} and win <b class="ms-g">${MAST_GEMS} diamonds</b> + a crown!</div>
+ <div class="ms-holo">${holo}</div>${gain>0?'':`<div class="ev-tip">Get 3 stars on: ${miss.slice(0,3).join('')}</div>`}</div>`}
+const _res51=results;results=function(r){if(r&&r.pass&&!P.practice&&!r._ms){const i=P.fi;if(SPECIES[i]&&lessonPts(i)>=MAST_PTS&&!(S.mast||{})[i]){r._ms=1;S.mast=S.mast||{};S.mast[i]=1;S.gems+=MAST_GEMS;save();r._newMast=1}}
+ _res51(r);if(r&&r._newMast){const b=document.querySelector('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend',`<div class="banner gold">♛ ${SPECIES[P.fi].n[2]} MASTERED! +${MAST_GEMS} diamonds</div>`);sfx.win&&sfx.win()}};
+function fitNames(root){(root||document).querySelectorAll('.sprtile small').forEach(el=>{el.style.fontSize='';let f=parseFloat(getComputedStyle(el).fontSize)||13;let n=0;while(el.scrollWidth>el.clientWidth+1&&f>7&&n++<20){f-=.5;el.style.setProperty('font-size',f+'px','important')}})}
+const _rb50=renderBinder;renderBinder=function(){const r=_rb50.apply(this,arguments);requestAnimationFrame(()=>fitNames());return r};
+addEventListener('resize',()=>{if(document.querySelector('.sprtile'))fitNames()});
+/* ================= V52: world globes + new meteor ================= */
+if(typeof shadeHex==='undefined')window.shadeHex=function(h,a){const n=parseInt(h.slice(1),16),f=v=>Math.max(0,Math.min(255,Math.round(a<0?v*(1+a):v+(255-v)*a)));return '#'+((1<<24)|(f(n>>16)<<16)|(f(n>>8&255)<<8)|f(n&255)).toString(16).slice(1)};
+function prng(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return((s>>>0)%10000)/10000}}
+/* sea/land palettes per world: [sea, land, land2, special] */
+const GLOBE=[
+ {sea:'#3f74a8',land:'#5aa64a',l2:'#8ac85a',ice:1},            // 1 Keyloria meadows
+ {sea:'#2f5f78',land:'#2f7a46',l2:'#4a9a52',dots:'#1f5a36'},   // 2 forest
+ {sea:'#46628a',land:'#7a6e5e',l2:'#9a8e7a',peaks:'#eef0f6'},  // 3 mountains
+ {sea:'#2f8ab0',land:'#d8c08a',l2:'#e8d6a4',reef:'#e08a6a'},   // 4 coral coast
+ {sea:'#b88a4a',land:'#e0b060',l2:'#f0cc80',dune:'#a0703a',dry:1}, // 5 desert
+ {sea:'#6a9ac0',land:'#dfe8f2',l2:'#ffffff',ice:2},            // 6 tundra
+ {sea:'#3a5a48',land:'#6a8a3a',l2:'#8aa84a',dots:'#c8e06a'},   // 7 swamp
+ {sea:'#4a4a62',land:'#8a7a5a',l2:'#c8a050',grid:'#f0c860'},   // 8 clockwork
+ {sea:'#7aa8e0',land:'#f0f4fa',l2:'#ffffff',cloud:1},          // 9 sky
+ {sea:'#3a2a6a',land:'#6a4ab0',l2:'#9a7ad8',ring:'#f0c860',stars:1}]; // 10 cosmos
+function globeCanvas(w){const G=GLOBE[w%GLOBE.length],N=28,R=11.5,cx=13.5,cy=13.5,c=document.createElement('canvas');c.width=N;c.height=N;const g=c.getContext('2d'),rnd=prng(w*977+13);
+ const px=(x,y,col)=>{g.fillStyle=col;g.fillRect(x,y,1,1)};
+ // continent blobs
+ const blobs=[];for(let k=0;k<(G.dry?4:6);k++){const a=rnd()*6.283,r=rnd()*8;blobs.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r,3.5+rnd()*3.5])}
+ const land=(x,y)=>{let v=0;blobs.forEach(([bx,by,br])=>{const d=Math.hypot(x-bx,y-by);if(d<br)v+=1-d/br});return v};
+ if(G.ring){g.fillStyle=shadeHex(G.ring,-.25);for(let x=0;x<N;x++){const y=Math.round(cy+ (x-cx)*0.28+1);if(Math.abs(x-cx)>R-1)px(x,y,G.ring),px(x,y+1,shadeHex(G.ring,-.35))}}
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const dx=x+.5-cx,dy=y+.5-cy,d=Math.hypot(dx,dy);if(d>R)continue;
+  if(d>R-1.1){px(x,y,'#1b1626');continue}
+  const ld=Math.hypot(x+.5-9,y+.5-8)/(2*R),shade=ld<.22?.24:ld<.5?0:ld<.7?-.2:-.4;
+  let col=G.sea;const v=land(x,y);
+  if(G.dry)col=v>.25?G.l2:v>0?G.land:G.sea;else if(v>.55)col=G.l2;else if(v>.15)col=G.land;
+  if(G.ice&&(y<4+G.ice||y>N-5-G.ice))col='#eef4fa';
+  if(G.peaks&&v>1.35)col=G.peaks;else if(G.peaks&&v>.4&&(x+y)%5===0)col=shadeHex(G.land,-.3);
+  if(G.dots&&v>.15&&(x*7+y*3)%9===0)col=G.dots;
+  if(G.reef&&v>0.05&&v<.18)col=G.reef;
+  if(G.dune&&v>.1&&(x+y*2)%6===0)col=G.dune;
+  if(G.grid&&v>.15&&(x%4===0||y%4===0))col=G.grid;
+  if(G.cloud&&v>.15)col=v>.5?'#ffffff':'#d8e4f4';
+  px(x,y,shadeHex(col,shade))}
+ // cloud streaks (most worlds)
+ if(!G.dry&&!G.cloud){for(let k=0;k<3;k++){const y=Math.round(6+rnd()*15),x0=Math.round(5+rnd()*12),L=3+Math.round(rnd()*4);for(let x=x0;x<x0+L;x++){const d=Math.hypot(x+.5-cx,y+.5-cy);if(d<R-1.5)px(x,y,'rgba(255,255,255,.75)')}}}
+ if(G.ring){for(let x=0;x<N;x++){const y=Math.round(cy+(x-cx)*0.28+1);if(Math.abs(x-cx)<=R-1&&y>cy-2)px(x,y,G.ring),px(x,y+1,shadeHex(G.ring,-.35))}}
+ // highlight
+ px(8,7,'rgba(255,255,255,.85)');px(9,7,'rgba(255,255,255,.55)');px(8,8,'rgba(255,255,255,.55)');
+ if(G.stars){[[2,3],[24,5],[3,23],[25,22]].forEach(([x,y])=>{px(x,y,'#f0c860')})}
+ return c}
+const globeURL=w=>kku('globe'+w,()=>globeCanvas(w));
+function globeImg(w,cls=''){return `<img class="globe ${cls}" src="${globeURL(w)}" alt="">`}
+/* world headers get a globe + picker row on top of the map */
+const _rm52=renderMap;renderMap=function(){const r=_rm52.apply(this,arguments);const root=$('#s-map');if(!root)return r;
+ const heads=[...root.querySelectorAll('.worldhead')];heads.forEach((h,k)=>{if(!h.querySelector('.globe')){h.insertAdjacentHTML('afterbegin',globeImg(k));h.classList.add('hasglobe');h.id='world-'+(k+1)}});
+ const cur=worldOf(Math.floor(nextStage()/8));
+ if(!root.querySelector('.wpick')){const tb=root.querySelector('.topbar');tb&&tb.insertAdjacentHTML('afterend',`<div class="wpick">${WORLDS.map((W,k)=>{const open=k<heads.length&&!heads[k].classList.contains('shut');
+  return `<button class="wp ${open?'':'lockd'} ${k+1===cur?'cur':''}" ${open?`data-act="gotoWorld" data-w="${k+1}"`:'disabled'} title="${open?esc(W.name):'Locked'}">${globeImg(k)}<small>${open?esc(W.name):'???'}</small></button>`}).join('')}</div>`)}
+ return r};
+ACT.gotoWorld=d=>{const el=document.getElementById('world-'+d.w);el&&el.scrollIntoView({behavior:'smooth',block:'start'})};
+/* ---- new meteor: craggy rock + 2-frame flame trail ---- */
+function meteorSheet(){const FW=24,FH=36,c=document.createElement('canvas');c.width=FW*2;c.height=FH;const g=c.getContext('2d');
+ const P={o:'#1e1218',H:'#e8c8a0',L:'#c09468',B:'#946a4a',D:'#6a4a44',K:'#4a3440',hot:'#ffe08a',hot2:'#f0903a'};
+ for(let f=0;f<2;f++){const ox=f*FW,rnd=prng(7+f*31),px=(x,y,col)=>{g.fillStyle=col;g.fillRect(ox+x,y,1,1)};
+  // flame trail (upward), tapered, flickers
+  for(let y=0;y<20;y++){const t=y/20,half=Math.max(1,Math.round(1+t*8+(rnd()-.5)*2));for(let x=12-half;x<12+half;x++){const e=Math.abs(x+.5-12)/Math.max(1,half);
+   const col=e<.35&&t>.45?'#fff2b0':e<.65?(t>.3?'#f0c860':'#e8a040'):(t>.5?'#e8783a':'#b8482a');if(rnd()<.04+(1-t)*.42)continue;px(x,y+2,col)}}
+  // sparks
+  for(let k=0;k<4;k++)px(Math.round(4+rnd()*16),Math.round(rnd()*12),rnd()<.5?'#fff2b0':'#f0c860');
+  // rock (irregular circle)
+  const cx=12,cy=25,R=9.5;for(let y=14;y<FH;y++)for(let x=0;x<FW;x++){const a=Math.atan2(y-cy,x-cx),rr=R+Math.sin(a*3+1)*0.9+Math.cos(a*5)*0.6,d=Math.hypot(x+.5-cx,y+.5-cy);if(d>rr)continue;
+   let col;if(d>rr-1)col=P.o;else{const lit=(-(x-cx)*.5+(y-cy)*.85)/R;col=lit>.5?P.hot:lit>.25?P.hot2:lit>-.1?P.L:lit>-.5?P.B:P.D;if(d<rr-1&&(x-cx)<-4&&(y-cy)<-3)col=P.H}px(x,y,col)}
+  // craters
+  [[9,23,2],[15,27,1.6],[11,29,1.2]].forEach(([x0,y0,r])=>{for(let y=Math.floor(y0-r);y<=y0+r;y++)for(let x=Math.floor(x0-r);x<=x0+r;x++){const d=Math.hypot(x+.5-x0,y+.5-y0);if(d<r)px(x,y,d<r-.8?P.K:P.D)}px(Math.round(x0+r*.5),Math.round(y0+r*.6),P.H)})}
+ return c}
+const METEOR2=kku('meteor2',()=>meteorSheet());
+document.head.insertAdjacentHTML('beforeend',`<style>.met .rock{background:none!important}
+.met .mt{top:auto!important;bottom:-34px;transform:translateX(-50%)!important}
+.met .rock::before{content:"";position:absolute;left:-14%;right:-14%;bottom:-8%;height:190%;background:url(${METEOR2}) 0 0/200% 100% no-repeat;image-rendering:pixelated;animation:metfl .24s steps(1) infinite}
+@keyframes metfl{0%{background-position:0 0}50%{background-position:100% 0}}</style>`);
+const METEOR1=kku('meteor1',()=>{const sh=meteorSheet(),c=document.createElement('canvas');c.width=24;c.height=36;c.getContext('2d').drawImage(sh,0,0);return c});
+if(typeof meteorArt==='function')meteorArt=function(){return `<svg viewBox="0 0 40 40" style="image-rendering:pixelated"><image href="${METEOR1}" x="6" y="0" width="26" height="39"/></svg>`};
 zookSVG=(f=>(...a)=>uniq(f(...a)))(zookSVG);creatureSVG=(f=>(...a)=>uniq(f(...a)))(creatureSVG);glitchSVG=(f=>(...a)=>uniq(f(...a)))(glitchSVG);sceneSVG=(f=>(...a)=>uniq(f(...a)))(sceneSVG);pathScene=(f=>(...a)=>uniq(f(...a)))(pathScene);
 load();buildKB();initHands();show('home');
