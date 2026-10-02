@@ -987,3 +987,8 @@ svg.zk,svg.zk image{pointer-events:none}
 @keyframes scoop{0%{transform:rotate(0)}35%{transform:rotate(-35deg) translate(6px,18px)}70%{transform:rotate(25deg) translate(-4px,-6px)}100%{transform:rotate(0)}}
 .dl{image-rendering:pixelated}
 .spdpop{position:absolute;right:4%;top:6%;font:400 30px "Jersey 10",monospace;color:#f0c860;text-shadow:3px 3px 0 #1b1626;z-index:20;animation:rise .7s steps(5) forwards;pointer-events:none}
+#roam{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:50}
+.roamer{position:absolute;left:0;top:0;will-change:transform}.roamer svg,.roamer img{width:100%;height:100%;display:block}
+.roamer:not(.air) svg{animation:bob .5s steps(2) infinite}
+#s-home .btn.roamtog{height:42px!important;font-family:var(--title)!important;font-size:12px!important;padding:0 12px!important;background:#3a2f4e!important;color:#f0eaf8!important;box-shadow:4px 4px 0 rgba(4,6,24,.65)!important;margin-right:auto}
+#s-home .btn.selp{margin-right:0!important}

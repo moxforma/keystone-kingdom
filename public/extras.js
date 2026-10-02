@@ -134,3 +134,43 @@ const SPEED_GAMES=['meteor','glitch','bubble','keeper','dig'];
 function speedPop(n){const a=$('#garena');if(!a||!n)return;const e=document.createElement('div');e.className='spdpop';e.textContent=`+${n} fast!`;a.appendChild(e);setTimeout(()=>e.remove(),700)}
 const _ok90=sfx.ok;sfx.ok=function(){try{if(typeof screen!=='undefined'&&screen==='game'&&G&&!G.done&&SPEED_GAMES.includes(G.type)){const now=performance.now(),dt=now-(G.lastOk||0);G.lastOk=now;
  const b=dt<220?3:dt<350?2:dt<500?1:0;if(b){G.score=(G.score||0)+b;G.speedBonus=(G.speedBonus||0)+b;if(G.type==='meteor'||G.type==='glitch'){const ga=$('#g-a');if(ga)ga.textContent=G.score}if(b>=2&&Math.random()<.35)speedPop(b)}}}catch(e){}return _ok90.apply(this,arguments)};
+
+/* ---------- Keylori roaming the main menu ---------- */
+const ROAM={els:[],plats:[],raf:0,last:0,scan:0};
+function roamPick(){const best={};Object.entries(S.cards||{}).forEach(([k,c])=>{const [i,f]=k.split('-').map(Number);if(!SPECIES[i])return;
+  const rank=f*10+(c.tier==='diamond'?3:c.tier==='gold'?2:c.holo?1:0);if(!best[i]||rank>best[i].rank)best[i]={i,f,tier:c.tier||null,rank}});
+ return Object.values(best).sort((a,b)=>b.rank-a.rank).slice(0,Math.min(14,Object.keys(best).length))}
+function roamPlats(){const sel=['#s-home .pxlogo','#s-home .hero-big .zk','#s-home .hero-info','#s-home .tcard','#s-home .btn','#s-home .eggrow','#s-home .daily','#s-home .footbtns .btn','#s-home .topbar .btn','#s-home .topbar .icon-btn'];
+ ROAM.plats=[];sel.forEach(q=>document.querySelectorAll(q).forEach(el=>{const r=el.getBoundingClientRect();if(r.width>20&&r.height>8)ROAM.plats.push({l:r.left+scrollX,r:r.right+scrollX,t:r.top+scrollY,b:r.bottom+scrollY})}));
+ ROAM.floor=Math.max(document.documentElement.scrollHeight,innerHeight)-4;ROAM.W=document.documentElement.clientWidth}
+function roamStart(){roamStop();roamToggleBtn();if(typeof screen==='undefined'||screen!=='home'||!S.name||S.set.hideRoam)return;const list=roamPick();if(!list.length)return;
+ let layer=document.getElementById('roam');if(!layer){layer=document.createElement('div');layer.id='roam';document.body.appendChild(layer)}layer.innerHTML='';roamPlats();
+ ROAM.els=list.map((k,n)=>{const el=document.createElement('div');el.className='roamer';el.innerHTML=creatureSVG(k.i,k.f,'px',k.tier);layer.appendChild(el);
+  const sz=[56,66,78][k.f];el.style.width=sz+'px';el.style.height=sz+'px';
+  return {el,sz,x:30+Math.random()*(ROAM.W-90),y:-sz-n*30,vx:(Math.random()<.5?-1:1)*(25+Math.random()*30),vy:0,ground:null,hop:1+Math.random()*3}});
+ ROAM.last=performance.now();ROAM.raf=requestAnimationFrame(roamTick)}
+function roamStop(){cancelAnimationFrame(ROAM.raf);ROAM.raf=0;const l=document.getElementById('roam');if(l)l.innerHTML='';ROAM.els=[]}
+function roamTick(now){if(typeof screen!=='undefined'&&screen!=='home'){roamStop();return}
+ const dt=Math.min(.05,(now-ROAM.last)/1000);ROAM.last=now;if(now-ROAM.scan>1000){ROAM.scan=now;roamPlats()}
+ ROAM.els.forEach(c=>{const w=c.sz,h=c.sz;
+  if(c.ground){c.hop-=dt;if(c.hop<=0){c.vy=-(260+Math.random()*220);c.ground=null;c.hop=1+Math.random()*3.5;if(Math.random()<.25)c.vx=-c.vx}
+   else{const p=c.ground;if(p!=='floor'&&(c.x+w*.5<p.l||c.x+w*.5>p.r))c.ground=null}}
+  if(!c.ground){c.vy+=900*dt}
+  const oy=c.y;c.x+=c.vx*dt;c.y+=c.vy*dt;
+  if(c.x<0){c.x=0;c.vx=Math.abs(c.vx)}if(c.x+w>ROAM.W){c.x=ROAM.W-w;c.vx=-Math.abs(c.vx)}
+  if(c.vy>0&&!c.ground){const cx=c.x+w*.5;let landed=null;
+   for(const p of ROAM.plats){if(cx>=p.l&&cx<=p.r&&oy+h<=p.t+2&&c.y+h>=p.t){if(!landed||p.t<landed.t)landed=p}}
+   if(landed){c.y=landed.t-h;c.vy=0;c.ground=landed}else if(c.y+h>=ROAM.floor){c.y=ROAM.floor-h;c.vy=0;c.ground='floor'}}
+  // bump into the side of a box while walking: turn around
+  if(c.ground){for(const p of ROAM.plats){if(p===c.ground)continue;const feet=c.y+h-2;if(feet>p.t+4&&c.y<p.b&&((c.vx>0&&c.x+w>p.l&&c.x+w<p.l+8)||(c.vx<0&&c.x<p.r&&c.x>p.r-8))){c.vx=-c.vx;break}}}
+  c.el.style.transform=`translate(${c.x}px,${c.y}px) scaleX(${c.vx<0?-1:1})`;c.el.classList.toggle('air',!c.ground)});
+ ROAM.raf=requestAnimationFrame(roamTick)}
+const _rh95=renderHome;renderHome=function(){_rh95();setTimeout(roamStart,300)};
+const _show95=show;show=function(id){_show95.apply(this,arguments);if(id!=='home')roamStop()};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(ROAM.raf);else if(typeof screen!=='undefined'&&screen==='home'&&ROAM.els.length){ROAM.last=performance.now();ROAM.raf=requestAnimationFrame(roamTick)}});
+if(typeof screen!=='undefined'&&screen==='home')setTimeout(roamStart,400);
+
+function roamToggleBtn(){const tb=$('#s-home .topbar');if(!tb||!S.name)return;let b=tb.querySelector('.roamtog');const n=roamPick().length;if(!n){b&&b.remove();return}
+ if(!b){tb.querySelector('.selp')?.insertAdjacentHTML('afterend','<button class="btn roamtog" data-act="roamToggle"></button>');b=tb.querySelector('.roamtog')}
+ if(b)b.textContent=S.set.hideRoam?'SHOW KEYLORI':'HIDE KEYLORI'}
+ACT.roamToggle=()=>{S.set.hideRoam=!S.set.hideRoam;save();sfx.click&&sfx.click();roamStart()};
