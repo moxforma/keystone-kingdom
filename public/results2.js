@@ -4,11 +4,18 @@
 if(typeof TIPS!=='undefined'){const NEW=['Keep your eyes on the screen, not your hands!','Sit up tall and relax your shoulders!','After each key, rest your fingers on A S D F and J K L ;','Slow is OK! Getting it right comes first.'];TIPS.length=0;NEW.forEach(t=>TIPS.push(t))}
 const HOME=PXG(["....oooo....","...oRRRRo...","..oRRRRRRo..",".oRRRRRRRRo.","oRRRRRRRRRRo","oooWWWWWWooo","..oWWBBWWo..","..oWWBBWWo..","..oWWBBWWo..","..oooooooo.."],{o:'#2a1d3e',R:'#e8584f',W:'#fff6e0',B:'#8a5a2a'}).toDataURL();
 const ICON_FOR={map:['map','Map'],arcade:['pad','Arcade'],binder:['cards','Card binder'],home:[null,'Main menu']};
+function fitRows(rb){rb.classList.remove('tight','tighter');const rows=()=>new Set([...rb.children].filter(c=>c.offsetParent).map(c=>c.offsetTop)).size;
+ requestAnimationFrame(()=>{if(rows()>2){rb.classList.add('tight');if(rows()>2){rb.classList.remove('tight');rb.classList.add('tighter')}}})}
 function tidy(){const box=$('#mbox');if(!box||!box.querySelector('.rstats'))return;
  /* icon buttons */
- const rb=box.querySelector('.rbtns');if(rb){let row=rb.querySelector('.iconrow');rb.querySelectorAll('[data-act=go][data-to]:not(.iconbtn)').forEach(b=>{const m=ICON_FOR[b.dataset.to];if(!m)return;
-   b.classList.add('iconbtn');b.title=m[1];b.setAttribute('aria-label',m[1]);b.innerHTML=`<img src="${m[0]?BICU[m[0]]:HOME}" alt="">`;if(!row){row=document.createElement('div');row.className='iconrow'}row.appendChild(b)});
-  if(row){const order=['map','arcade','binder','home'];[...row.children].sort((a,b)=>order.indexOf(a.dataset.to)-order.indexOf(b.dataset.to)).forEach(b=>row.appendChild(b));rb.appendChild(row)}}
+ const rb=box.querySelector('.rbtns');if(rb){const want=screen==='game'?['arcade','home']:['map','arcade','binder','home'];
+  want.forEach(to=>{if(!rb.querySelector(`[data-act=go][data-to=${to}]`))rb.insertAdjacentHTML('beforeend',`<button class="btn alt" data-act="go" data-to="${to}"></button>`)});
+  rb.querySelectorAll('.iconrow').forEach(r=>{[...r.children].forEach(c=>rb.appendChild(c));r.remove()});
+  rb.querySelectorAll('[data-act=go][data-to]').forEach(b=>{const m=ICON_FOR[b.dataset.to];if(!m)return;if(!b.classList.contains('iconbtn')){b.classList.add('iconbtn');b.title=m[1];b.setAttribute('aria-label',m[1]);b.innerHTML=`<img src="${m[0]?BICU[m[0]]:HOME}" alt="">`}});
+  const order=['map','arcade','binder','home'];rb.querySelectorAll('[data-act=go].iconbtn').forEach(()=>{});[...rb.querySelectorAll('[data-act=go].iconbtn')].sort((a,b)=>order.indexOf(a.dataset.to)-order.indexOf(b.dataset.to)).forEach(b=>rb.appendChild(b));
+  /* share / challenge always in words */
+  rb.querySelectorAll('[data-act=copyRun]').forEach(b=>{if(b.querySelector('img')){b.innerHTML=esc(b.title||'Share result')}b.classList.remove('iconbtn','shareic');const icons=rb.querySelector('[data-act=go].iconbtn');icons?rb.insertBefore(b,icons):rb.appendChild(b)});
+  fitRows(rb)}
  /* "Your run" on one line */
  const h3=[...box.querySelectorAll('h3')].find(h=>/your run/i.test(h.textContent));const rs=h3&&h3.nextElementSibling&&h3.nextElementSibling.classList.contains('rstats')?h3.nextElementSibling:box.querySelector('.rstats');
  if(h3)h3.remove();if(rs){rs.classList.add('oneline');rs.querySelectorAll('span').forEach(s=>{if(/words per minute/i.test(s.textContent))s.textContent='WPM'})}
@@ -35,9 +42,6 @@ function compact(){const box=$('#mbox');if(!box||!box.querySelector('.rstats'))r
  /* 3. tip goes into the Keylori's bubble */
  const bub=box.querySelector('.kbubble');if(bub&&!bub.querySelector('.ktip')){const tip=[...box.querySelectorAll('p.note')].find(p=>TIPS.includes(p.textContent.trim()));
   if(tip){bub.insertAdjacentHTML('beforeend',`<span class="ktip">Tip: ${esc(tip.textContent.trim())}</span>`);tip.remove()}}
- /* 5. share becomes an icon in the icon row */
- const sh=box.querySelector('[data-act=copyRun]'),row=box.querySelector('.iconrow');
- if(sh&&row&&sh.parentElement!==row){const lab=sh.title||sh.textContent.trim()||'Share';sh.classList.add('iconbtn','shareic');sh.title=lab;sh.setAttribute('aria-label',lab);if(!sh.querySelector('img'))sh.innerHTML=`<img src="${SHARE}" alt="">`;sh.classList.add('iconbtn','shareic');row.appendChild(sh)}
  /* 6. two columns on wide screens: card + bubble left, everything else right */
  const fw=box.querySelector('.flipwrap');if(fw&&!box.querySelector('.fcols')){const cols=document.createElement('div');cols.className='fcols';const L=document.createElement('div');L.className='fcol-l';const R=document.createElement('div');R.className='fcol-r';
   const h2=box.querySelector(':scope > h2');[...box.children].forEach(ch=>{if(ch===h2)return;(ch===fw?L:R).appendChild(ch)});L.appendChild(fw);cols.appendChild(L);cols.appendChild(R);box.appendChild(cols);box.classList.add('finish2')}

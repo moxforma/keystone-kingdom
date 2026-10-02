@@ -36,7 +36,7 @@ const keyChip=(c,v)=>`<span class="kchip">${c===' '?'space':esc(c.toUpperCase()
 function detail(a){const box=$('#mbox');if(!box)return;const back=box.innerHTML,cls=box.className;
  box.innerHTML=`<h2>Your typing graph</h2>${chartSVG(a,true)}${legend}
  <div class="rstats oneline"><div><b>${a.wpm}</b><span>WPM</span></div><div><b>${a.acc}%</b><span>Accuracy</span></div><div><b>${a.cons}%</b><span>Steady</span></div><div><b>${a.dur.toFixed(1)}s</b><span>Time</span></div></div>
- <div class="rstats oneline"><div><b class="okc">${a.good}</b><span>Right keys</span></div><div><b class="badc">${a.wrong}</b><span>Wrong keys</span></div><div><b class="okc">${a.wr}</b><span>Right words</span></div><div><b class="badc">${a.ww}</b><span>Words with a slip</span></div></div>
+ <div class="rstats oneline"><div><b class="okc">${a.good}</b><span>Right keys</span></div><div><b class="badc">${a.wrong}</b><span>Wrong keys</span></div>${a.wr==null?'':`<div><b class="okc">${a.wr}</b><span>Right words</span></div><div><b class="badc">${a.ww}</b><span>Words with a slip</span></div>`}</div>
  ${a.slow.length?`<p class="tkeys">Slowest keys: ${a.slow.map(([c,v])=>keyChip(c,Math.round(v)+'ms')).join('')}</p>`:''}
  ${a.missed.length?`<p class="tkeys">Missed most: ${a.missed.map(([c,v])=>keyChip(c,'×'+v)).join('')}</p>`:''}
  <p class="muted" style="margin:0;font-size:14px">"Steady" is how even your speed was. 100% means you kept the same pace the whole time.</p>
@@ -62,4 +62,18 @@ ACT.lines=d=>{S.set.lines2=d.v==='2';save();document.querySelectorAll('.linesw b
  const si=$('#stripIn');if(si&&!S.set.lines2){si.querySelectorAll('span.sp').forEach(s=>s.textContent='·');si.style.transform=''}lines2Render();try{updateStrip()}catch(e){}};
 const _ss=startStage;startStage=function(){const r=_ss.apply(this,arguments);lineSwitch();document.body.classList.toggle('lines2',on2());return r};
 lineSwitch();
+
+/* ---------- arcade games: log keys + graph on the end screen ---------- */
+let GLOG=[],GOBJ=null,BAD=false;
+const _bad=sfx.bad;sfx.bad=function(){BAD=true;return _bad.apply(this,arguments)};
+const _gi=gameInput;gameInput=function(ch,caps){if(typeof G!=='undefined'&&G!==GOBJ){GOBJ=G;GLOG=[]}BAD=false;const r=_gi.apply(this,arguments);
+ if(ch&&ch.length===1&&G&&!G.done)GLOG.push({t:performance.now(),ok:!BAD,ch});else if(ch&&ch.length===1&&G&&G.done&&GLOG.length)GLOG.push({t:performance.now(),ok:!BAD,ch});return r};
+function analyseArc(){const L=GLOG;if(L.length<5)return null;const t0=L[0].t,dur=Math.max(1,(L[L.length-1].t-t0)/1000),secs=Math.max(2,Math.ceil(dur));
+ const net=[],raw=[],err=[];let ok=0,k=0;for(let s=1;s<=secs;s++){let typed=0,bad=0;while(k<L.length&&(L[k].t-t0)/1000<=s){typed++;if(L[k].ok)ok++;else bad++;k++}net.push(Math.round(ok/5/(s/60)));raw.push(typed*12);err.push(bad)}
+ const good=L.filter(x=>x.ok).length,wrong=L.length-good;const time={};let prev=t0;L.forEach(x=>{if(!x.ok||x.ch===' '){prev=x.t;return}(time[x.ch.toLowerCase()]=time[x.ch.toLowerCase()]||[]).push(x.t-prev);prev=x.t});
+ const slow=Object.entries(time).filter(([c,a])=>a.length>=2).map(([c,a])=>[c,a.reduce((p,q)=>p+q,0)/a.length]).sort((a,b)=>b[1]-a[1]).slice(0,3);
+ const mean=raw.reduce((a,b)=>a+b,0)/raw.length,sd=Math.sqrt(raw.reduce((a,b)=>a+(b-mean)*(b-mean),0)/raw.length);
+ return {net,raw,err,secs,dur,good,wrong,wr:null,ww:null,slow,missed:[],cons:mean?Math.max(0,Math.round(100-sd/mean*100)):0,wpm:net[net.length-1]||0,acc:Math.round(good/Math.max(1,L.length)*100)}}
+const _md=modal;modal=function(html){const r=_md.apply(this,arguments);try{if(screen==='game'){setTimeout(()=>{const box=$('#mbox');if(!box||box.querySelector('.tmini'))return;const rs=box.querySelector('.rstats');if(!rs)return;const a=analyseArc();if(!a)return;LAST=a;
+  rs.insertAdjacentHTML('afterend',`<button class="tmini" title="Open your typing graph">${chartSVG(a,false)}<span class="tmore">Tap for details</span></button>`);wire()},60)}}catch(e){}return r};
 })();

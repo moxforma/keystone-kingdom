@@ -1267,3 +1267,12 @@ body.lines2 .strip{position:relative}body.lines2 .strip::before{content:"";posit
 #hands .linesw{flex-wrap:wrap}
 #hands .linesw span{flex-basis:100%;text-align:center}
 #hands .linesw button{min-width:52px}
+/* finish buttons: one row if they fit, two at most */
+#mbox .rbtns{display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:8px}
+#mbox .rbtns>.btn{flex:0 1 auto;min-width:0}
+#mbox .rbtns .btn.iconbtn{width:52px;height:auto;min-height:48px;padding:6px!important}
+#mbox .rbtns.tight{gap:6px}#mbox .rbtns.tight>.btn{font-size:15px!important;padding:8px 10px!important}#mbox .rbtns.tight .btn.iconbtn{width:44px;min-height:42px}#mbox .rbtns.tight .btn.iconbtn img{width:24px}
+#mbox .rbtns.tighter{gap:4px}#mbox .rbtns.tighter>.btn{font-size:13px!important;padding:6px 8px!important;letter-spacing:.02em!important}#mbox .rbtns.tighter .btn.iconbtn{width:38px;min-height:38px;padding:4px!important}#mbox .rbtns.tighter .btn.iconbtn img{width:20px}
+.fcol-l .rbtns.lbtns{max-width:330px}
+.fcol-l .rbtns.lbtns>.btn{flex:0 1 auto}
+#mbox .rbtns [data-act=copyRun]{order:5!important}#mbox .rbtns .btn.iconbtn{order:10!important}
