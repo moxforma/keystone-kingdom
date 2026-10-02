@@ -1505,10 +1505,10 @@ const _modal0=modal;modal=function(h){_modal0(h);fitModal();$('#mbox').scrollTop
 /* ================= V16: BEAST MODE ================= */
 const BEAST={
  s:['rhythm','sphinx','zephyr','quartz','jinxed','xylem','fjord','glyph','psyche','myth','yacht','twelfth','sixths','colonel','queue','gnome','knack','wry','tsk-tsk','awry','lymph','crypt','pygmy','sylph','gypsum'],
- m:['pharaoh','bourgeois','silhouette','mnemonic','kaleidoscope','conscience','quizzical','liaison','misspell','embarrass','occurrence','millennium','threshold','archipelago','handkerchief','entrepreneur','privilege','maneuver','Wednesday','labyrinth','aesthetic','jeopardy','rhinoceros','vacuum','pseudonym','#42-B','$1,299.99','3:45 p.m.','(x+y)/2','e-mail@me'],
- l:['onomatopoeia','serendipity','idiosyncrasy','conscientious','pneumonia','chrysanthemum','bureaucracy','sesquipedalian','Wednesday morning','acquaintance','accommodate',"hors d'oeuvre",'rendezvous','questionnaire','psychoanalysis','hippopotamus','x = (y^2) / 4','user_42@mail.com','C++ & code!','"Quick!" she said.','50% off; ~$19.99','#hashtag @handle','the glacier\'s ice']};
+ m:['pharaoh','bourgeois','silhouette','mnemonic','kaleidoscope','conscience','quizzical','liaison','misspell','embarrass','occurrence','millennium','threshold','archipelago','handkerchief','entrepreneur','privilege','maneuver','Wednesday','labyrinth','aesthetic','jeopardy','rhinoceros','vacuum','pseudonym','#42-B','$1,299.99','3:45 p.m.','(x+y)/2','A+ grade'],
+ l:['onomatopoeia','serendipity','idiosyncrasy','conscientious','pneumonia','chrysanthemum','bureaucracy','sesquipedalian','Wednesday morning','acquaintance','accommodate',"hors d'oeuvre",'rendezvous','questionnaire','psychoanalysis','hippopotamus','x = (y^2) / 4','50 km/h','C++ & code!','"Quick!" she said.','50% off; ~$19.99','#1 & #2 @ noon','the glacier\'s ice']};
 const BEAST_SENT=['The quixotic jazz pianist vexed the bourgeois judge.','The big wizard quickly jumps over foxes near the pond!','"Rhythm," said the colonel, "is a conscientious pursuit."',
- 'Is 7 x 8 = 56? Yes; and (12 / 4) + 9 = 12.','The pharaoh\'s mnemonic: Wednesday, 3:45 p.m., gate #42-B.','Email zephyr_99@quartz.io before 11:59 p.m. (sharp!).',
+ 'Is 7 x 8 = 56? Yes; and (12 / 4) + 9 = 12.','The pharaoh\'s mnemonic: Wednesday, 3:45 p.m., gate #42-B.','Finish zephyr quiz #9 before 11:59 p.m. (sharp!).',
  'Mustard costs $4.99 & ketchup is ~$2.50.','Onomatopoeia: buzz, hiss, kerplunk, and zap!','An idiosyncratic bureaucracy accommodates no one\'s schedule.',
  'Pack my box with five dozen juice boxes... or more?','Hippopotamuses, rhinoceroses, and giraffes are huge.','The chrysanthemum\'s rendezvous was at 6:00 a.m. on the 21st.'];
 DIFF.beast='BEAST MODE';
@@ -1940,8 +1940,8 @@ const WT={
  g_star:['salt & pepper','5 + 5','A = 1','4 * 2','Pop & Leo','x + y = z','3 * 3 = 9','fish & chips','10 = ten','2 + 2 = 4'],
  g_brack:['(hello)','[glow]','(frog)','[1] [2] [3]','(yes or no)','[map]','(see page 4)','[open]','(look up!)','[the end]'],
  g_slash:['yes/no','up/down','and/or','glow_cap','swamp-frog','day/night','my_file','tip-top','left/right','lily_pad'],
- g_mail:['pop@keyloria.com','mia@mail.com','frog@swamp.net','leo_9@school.org','glow@cap.io','ruby.star@mail.com','sam_2026@fun.com','hello@hollow.net'],
- g_web:['www.keyloria.com','https://frog.net','www.glow-cap.com/map','fun.org/games','www.swamp.io/frogs','https://mail.com/inbox','keyloria.com/cards?id=7','www.moths.net/night'],
+ g_mail:['meet @ noon','2 pens @ $1 each','see you @ the park','lunch @ 12:30','game night @ 7','3 apples @ 50 cents','class @ 9:00','pick up @ 3:15'],
+ g_web:['3.5 km','a.m. and p.m.','half/half','1.25 kg','yes/no/maybe','9.99 points','up/down/left','4.0 stars'],
  e_double:'apple balloon coffee letter rabbit summer hammer kitten mirror puppy happen ladder bubble giggle carrot butter pillow little middle tunnel'.split(' '),
  e_silent:'knight knee know write wrong lamb thumb climb island listen castle whistle ghost honest hour gnome sign answer doubt calm'.split(' '),
  e_tion:'nation station motion action lotion fraction mention question vacation invention television decision vision explosion collision division confusion attention position solution'.split(' '),
@@ -1956,7 +1956,7 @@ const WT={
  s_saga:['Long ago, the Skyreach Isles floated above a sea of clouds. Brave trainers flew from island to island.','The Thunderblot rolled in, dark and loud. Zaplet sparked with joy and zapped the storm away.','Pop climbed the tallest island and saw Keyloria below, tiny and bright.','When the rainbow bridge appeared, the Keylori crossed it together, one by one.'],
  l_sprint:['the quick brown fox jumps over the lazy dog','how quickly daft jumping zebras vex','how vexingly quick daft zebras jump','the big wizard quickly jumps over foxes near the pond','the five boxing wizards jump quickly','quick brown foxes jump over the lazy green wizard'],
  l_perfect:['Every key counts.','Slow is smooth, smooth is fast.','Eyes up, fingers home.','One mistake and you start again.','Steady hands win the race.','Breathe, focus, type.'],
- l_mix:['Pop scored 98% on level #7!','Email me @ star@citadel.io (by 5:00).','The price: $12.50 - a great deal!','"Ready?" asked Lunaut. "Always!"','Comet #42 flew 3,000 km/s.','Team: Pop, Mia & Leo [captains].'],
+ l_mix:['Pop scored 98% on level #7!','Meet me @ the citadel (by 5:00).','The price: $12.50 - a great deal!','"Ready?" asked Lunaut. "Always!"','Comet #42 flew 3,000 km/s.','Team: Pop, Mia & Leo [captains].'],
  l_code:['let x = 5;','if (stars > 10) { win(); }','print("Hello, world!")','total = a + b * 2','for i in range(10):','name = "Novadrake"','score += 100;','const pet = { name: "Orbiling" };'],
  l_epic:['At the edge of the stars stood the Starfall Citadel, its crystal towers shining like frozen light.','Pop and the Keylori had come from the meadows, the woods, the peaks, the coast, the dunes, the ice, the swamp, the city, and the sky.','Every key they had ever pressed had led them here, to the final gate.','The Scrambler King waited inside, but so did every friend they had made along the way.'],
  l_final:['You have mastered every key on the keyboard.','Your fingers know the way, even with your eyes closed.','Speed, symbols, numbers, stories: nothing can scramble you now.','Welcome, Keyboard Legend, to the top of Keyloria Kingdom!']};
@@ -1964,7 +1964,7 @@ const NEWLESSONS=[
  [['c_top','Top Words'],['c_pairs','Word Pairs'],['c_caps','Capital Start'],['c_sea','Sea Words'],['c_tide','Tide Sentences'],['c_reef','Reef Race']],
  [['d_comma','Commas'],['d_ask','Ask and Shout'],['d_apos','Apostrophes'],['d_talk','Talking Quotes'],['d_colon','Colons'],['d_dash','Dashes and Brackets']],
  [['f_row','Number Row'],['f_count','Counting'],['f_money','Prices'],['f_time','Times and Dates'],['f_math','Math Facts'],['f_big','Big Numbers']],
- [['g_at','@ and #'],['g_star','& * + ='],['g_brack','Brackets'],['g_slash','Slashes and Lines'],['g_mail','Emails'],['g_web','Web Links']],
+ [['g_at','@ and #'],['g_star','& * + ='],['g_brack','Brackets'],['g_slash','Slashes and Lines'],['g_mail','At Signs'],['g_web','Dots and Slashes']],
  [['e_double','Double Letters'],['e_silent','Silent Letters'],['e_tion','-tion and -sion'],['e_homo','Sound-alikes'],['e_fix','Prefix and Suffix'],['e_giant','Giant Words']],
  [['s_fable','Fables'],['s_fact','Fun Facts'],['s_poem','Rhymes'],['s_letter','Letters'],['s_twist','Tongue Twisters'],['s_saga','Sky Saga']],
  [['l_sprint','Star Sprint'],['l_perfect','Perfect Run'],['l_mix','Everything Mix'],['l_code','Code Lines'],['l_epic','Epic Tale'],['l_final','Legend Trial']]];
@@ -2431,7 +2431,7 @@ const LSUM={caps:'Shift for capital letters',sent:'Type your first full sentence
  c_top:'The most common words',c_pairs:'Two words at a time',c_caps:'Start sentences with capitals',c_sea:'Ocean words, smooth typing',c_tide:'Short sentences by the sea',c_reef:'Race through reef facts',
  d_comma:'Pause with commas',d_ask:'Question marks and exclamations',d_apos:"Apostrophes: it's and don't",d_talk:'Quotes for talking characters',d_colon:'Colons and semicolons',d_dash:'Dashes and brackets',
  f_row:'Master the number row',f_count:'Counting with words',f_money:'Prices with dollar signs',f_time:'Times and dates',f_math:'Type math facts',f_big:'Big numbers with commas',
- g_at:'@ and # symbols',g_star:'& * + = symbols',g_brack:'Round and square brackets',g_slash:'Slashes, dashes, underscores',g_mail:'Type email addresses',g_web:'Type web links',
+ g_at:'@ and # symbols',g_star:'& * + = symbols',g_brack:'Round and square brackets',g_slash:'Slashes, dashes, underscores',g_mail:'Use @ in sentences',g_web:'Dots and slashes in numbers',
  e_double:'Words with double letters',e_silent:'Words with silent letters',e_tion:'Endings: -tion and -sion',e_homo:'Words that sound alike',e_fix:'Prefixes and suffixes',e_giant:'Giant words, letter by letter',
  s_fable:'Type classic fables',s_fact:'Type fun science facts',s_poem:'Type rhyming lines',s_letter:'Write little letters',s_twist:'Tongue twisters for fingers',s_saga:'An epic sky story',
  l_sprint:'Every letter, full speed',l_perfect:'No mistakes allowed',l_mix:'Letters, numbers and symbols',l_code:'Type real code lines',l_epic:'The epic final tale',l_final:'Become a Keyboard Legend'};
@@ -2478,6 +2478,13 @@ function terrainCanvas(w){const T=TERR[w%TERR.length],G=GLOBE[w%GLOBE.length],W=
  const d=D[T.deco];if(d){for(let x=W*.35|0;x<W-4;x+=8+Math.floor(rnd()*14)){if(rnd()<.75)sprite(x,d[0],d[1])}}
  if(T.kind==='flat'){for(let x=0;x<W;x++)for(let y=H-3;y<H;y++)if((x+y)%7===0)px(x,y,'#7fc8e0')}
  return c}
+/* after joining a family, switch away from a blank new player to the family's players */
+const _sp56=syncPull;syncPull=async function(){await _sp56.apply(this,arguments);try{
+ const blank=d=>!d.name&&!(d.xp>0)&&!Object.keys(d.best||{}).length;if(!blank(S))return;
+ const others=PROF.list.filter(id=>id!==PROF.cur).map(id=>({id,d:peek(id)})).filter(o=>o.d.name);if(!others.length)return;
+ others.sort((a,b)=>(b.d.upd||0)-(a.d.upd||0));const dead=PROF.cur;PROF.list=PROF.list.filter(id=>id!==dead);PROF.cur=others[0].id;
+ try{localStorage.setItem(PKEY,JSON.stringify(PROF));localStorage.removeItem(pkey(dead))}catch(e){}load();closeModal();show('home');toast(`Welcome back, ${S.name}!`);
+ if(others.length>1)setTimeout(()=>ACT.players&&ACT.players(),900)}catch(e){}};
 function fitNames(root){(root||document).querySelectorAll('.sprtile small').forEach(el=>{el.style.fontSize='';let f=parseFloat(getComputedStyle(el).fontSize)||13;let n=0;while(el.scrollWidth>el.clientWidth+1&&f>7&&n++<20){f-=.5;el.style.setProperty('font-size',f+'px','important')}})}
 const _rb50=renderBinder;renderBinder=function(){const r=_rb50.apply(this,arguments);requestAnimationFrame(()=>fitNames());return r};
 addEventListener('resize',()=>{if(document.querySelector('.sprtile'))fitNames()});
