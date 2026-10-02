@@ -149,12 +149,18 @@ function roamStart(){roamStop();roamToggleBtn();if(typeof screen==='undefined'||
  let layer=document.getElementById('roam');if(!layer){layer=document.createElement('div');layer.id='roam';document.body.appendChild(layer)}layer.innerHTML='';roamPlats();
  ROAM.els=list.map((k,n)=>{const el=document.createElement('div');el.className='roamer';el.innerHTML=creatureSVG(k.i,k.f,'px',k.tier);layer.appendChild(el);
   const sz=[112,132,156][k.f];el.style.width=sz+'px';el.style.height=sz+'px';
-  const o={el,sz,x:30+Math.random()*(ROAM.W-90),y:-sz-n*30,vx:(Math.random()<.5?-1:1)*(25+Math.random()*30),vy:0,ground:null,hop:1+Math.random()*3};roamDrag(o);return o});
+  const o={el,sz,x:30+Math.random()*(ROAM.W-90),y:-sz-n*30,vx:(Math.random()<.5?-1:1)*(25+Math.random()*30),vy:0,ground:null,hop:1+Math.random()*3,fly:roamFlyer(k),ph:Math.random()*6};roamDrag(o);return o});
  ROAM.last=performance.now();ROAM.raf=requestAnimationFrame(roamTick)}
+function roamFlyer(k){try{const ev=EVO[k.i]||[];const feats=k.f>0?(ev[k.f-1]||[]):[];return feats.includes('wings')||/wind|sky|storm|air/i.test(SPECIES[k.i].t||'')}catch(e){return false}}
 function roamStop(){cancelAnimationFrame(ROAM.raf);ROAM.raf=0;const l=document.getElementById('roam');if(l)l.innerHTML='';ROAM.els=[]}
 function roamTick(now){if(typeof screen!=='undefined'&&screen!=='home'){roamStop();return}
  const dt=Math.min(.05,(now-ROAM.last)/1000);ROAM.last=now;if(now-ROAM.scan>1000){ROAM.scan=now;roamPlats()}
  ROAM.els.forEach(c=>{const w=c.sz,h=c.sz;if(c.held){c.el.style.transform=`translate(${c.x}px,${c.y}px) scaleX(${c.vx<0?-1:1})`;return}
+  if(c.fly){c.ph+=dt*1.6;const tvx=(c.vx<0?-1:1)*28;c.vx+=(tvx-c.vx)*Math.min(1,dt*1.5);c.vy+=(Math.sin(c.ph)*30-c.vy)*Math.min(1,dt*2);c.x+=c.vx*dt;c.y+=c.vy*dt;
+   const top=60,bot=ROAM.floor-h-10;if(c.y<top){c.y=top;c.vy=Math.abs(c.vy)}if(c.y>bot){c.y=bot;c.vy=-Math.abs(c.vy)}if(c.x<0){c.x=0;c.vx=Math.abs(c.vx)}if(c.x+w>ROAM.W){c.x=ROAM.W-w;c.vx=-Math.abs(c.vx)}
+   if(Math.random()<dt*.15)c.vx=-c.vx;c.el.style.transform=`translate(${c.x}px,${c.y}px) scaleX(${c.vx<0?-1:1})`;c.el.classList.add('air','flyer');return}
+  // walkers: air drag, and once on the ground ease back to a slow amble
+  if(!c.ground)c.vx*=Math.pow(.6,dt);else{const sp=Math.abs(c.vx),t=Math.min(40,Math.max(22,sp));c.vx=(c.vx<0?-1:1)*(sp>t?sp+(t-sp)*Math.min(1,dt*6):t)}
   if(c.ground){c.hop-=dt;if(c.hop<=0){c.vy=-(260+Math.random()*220);c.ground=null;c.hop=1+Math.random()*3.5;if(Math.random()<.25)c.vx=-c.vx}
    else{const p=c.ground;if(p!=='floor'&&(c.x+w*.5<p.l||c.x+w*.5>p.r))c.ground=null}}
   if(!c.ground){c.vy+=900*dt}
