@@ -153,6 +153,35 @@ const BOSS=[
   f.line(25,30,22,62,'#f0c040',2);f.line(39,30,42,62,'#f0c040',2);f.rect(28,38,8,8,'#f0c040');f.rect(30,40,4,4,'#7fe8ff');
   for(let y=34;y<62;y+=6)f.line(14,y,20,y+3,'~-');
   drawGlyph(f,'A',4,6,'#ffffff');drawGlyph(f,'K',58,26,'#ffffff');drawGlyph(f,'Z',6,30,'#7fe8ff');drawGlyph(f,'Q',58,48,'#f0c040');drawGlyph(f,'R',4,52,'#ffffff')})
+,
+ /* 11 Umbra: hooded shadow wraith of the Obsidian Rift */
+ ()=>render(t=>{const C='#2e2a52',H='#3c3870',A='#4a4688';
+  t.poly([[32,8],[14,30],[6,63],[58,63],[50,30]],C);
+  t.line(18,32,5,46,C,7);t.line(46,32,59,46,C,7);t.ell(5,48,4,3,A);t.ell(59,48,4,3,A);
+  t.ell(32,19,13,13,H);t.poly([[32,0],[24,10],[40,10]],H);
+  for(let x=6;x<58;x+=9)t.clear(x+2,59,4,5);
+ },f=>{f.ell(32,22,8,8,'#0e0a1c');
+  [[28,21],[36,21]].forEach(([x,y])=>{f.rect(x-2,y-1,4,3,'#7fe8ff');f.p(x-1,y-1,'#ffffff')});
+  f.line(28,27,30,26,'#7fe8ff');f.line(30,26,32,28,'#7fe8ff');f.line(32,28,34,26,'#7fe8ff');f.line(34,26,36,27,'#7fe8ff');
+  for(let y=36;y<60;y+=6){f.line(22,y,20,y+4,'~-');f.line(42,y,44,y+4,'~-')}
+  f.line(14,40,50,40,'#c8a040',2);[18,26,34,42].forEach(x=>f.rect(x,39,3,3,'#f0c860'));
+  f.ell(60,52,4,4,'#7fe8ff');f.p(59,51,'#ffffff');
+  drawGlyph(f,'Q',4,8,'#7fe8ff');drawGlyph(f,'Z',56,14,'#9a8ad8');drawGlyph(f,'R',2,30,'#7fe8ff');drawGlyph(f,'K',56,30,'#ffffff')}),
+ /* 12 Eclipsar: the eclipse dragon on the Eclipse Throne */
+ ()=>render(t=>{const D='#3e3480',W='#2c2460',B='#d8a848';
+  t.ell(32,16,17,15,'#e89a30');
+  both(m=>t.poly([[m(24),34],[m(2),8],[m(8),26],[m(0),34],[m(10),38],[m(4),48],[m(22),46]],W));
+  t.ell(32,48,13,15,D);t.ell(32,52,7,10,B);
+  t.poly([[40,58],[56,63],[60,56],[50,54]],D);
+  t.rect(27,26,10,12,D);t.ell(32,20,10,9,D);t.ell(32,28,7,4,'#4e449a');
+  both(m=>t.poly([[m(25),14],[m(18),2],[m(28),12]],'#e8dcc0'));
+  both(m=>t.ell(m(23),58,4,4,D));
+ },f=>{f.ell(32,16,12,10,'~-');
+  [[28,19],[36,19]].forEach(([x,y])=>{f.rect(x-2,y,4,2,'#ff5040');f.p(x,y,'#ffe080')});f.line(25,16,30,18,'#140c20',2);f.line(39,16,34,18,'#140c20',2);
+  f.rect(27,29,10,2,'#140c20');[28,31,34].forEach(x=>f.rect(x,29,2,2,'#ffffff'));
+  for(let y=46;y<62;y+=4)f.line(27,y,37,y,'~-');
+  [[6,4],[58,4],[2,22],[62,22],[14,60],[50,14]].forEach(([x,y])=>f.ell(x,y,1.4,1.4,'#fff6e0'));
+  drawGlyph(f,'A',4,44,'#f0c860');drawGlyph(f,'Z',56,40,'#ffffff')})
 ];
 window.FBOSS_URL=w=>kku('fboss'+w,()=>BOSS[w-1]());
 

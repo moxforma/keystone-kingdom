@@ -22,7 +22,7 @@ try{if(screen==='home')renderHome()}catch(e){}
 
 /* ---------- text size: small / medium / large ---------- */
 const FS=[['s','A','Smaller text'],['m','A','Medium text'],['l','A','Bigger text']];
-function applyFs(){const v=(S.set&&S.set.fsz)||'m';document.body.classList.remove('fs-s','fs-m','fs-l');document.body.classList.add('fs-'+v);
+function applyFs(){const v=(S.set&&S.set.fsz)||'s';document.body.classList.remove('fs-s','fs-m','fs-l');document.body.classList.add('fs-'+v);
  document.querySelectorAll('.fsz button').forEach(b=>b.classList.toggle('on',b.dataset.v===v))}
 const fsHTML=()=>`<div class="fsz" role="group" aria-label="Text size">${FS.map(([v,t,l])=>`<button class="f${v}" data-act="fsz" data-v="${v}" aria-label="${l}" title="${l}">${t}</button>`).join('')}</div>`;
 function addFs(){document.querySelectorAll('.screen:not([hidden]) .topbar, #hud, #ghud').forEach(t=>{if(!t.querySelector('.fsz')){const back=t.querySelector('[data-act=go],[data-act=back],[data-act=quit]');
@@ -34,7 +34,7 @@ const _ss=startStage;startStage=function(){const r=_ss.apply(this,arguments);set
 if(typeof mountGame==='function'){const _mg=mountGame;mountGame=function(){const r=_mg.apply(this,arguments);setTimeout(addFs,0);return r}}
 const _ld=load;load=function(){const r=_ld.apply(this,arguments);applyFs();return r};
 const _set=ACT.settings;ACT.settings=function(){_set.apply(this,arguments);const box=$('#modal .mbox')||$('#modal'),first=box&&box.querySelector('.setrow');
- if(first&&!box.querySelector('.fsrow'))first.insertAdjacentHTML('beforebegin',`<div class="setrow fsrow"><span>Text size</span><div class="seg">${FS.map(([v,,l])=>`<button class="${((S.set.fsz||'m')===v)?'on':''}" data-act="fszSet" data-v="${v}">${['Small','Medium','Big'][['s','m','l'].indexOf(v)]}</button>`).join('')}</div></div>`)};
+ if(first&&!box.querySelector('.fsrow'))first.insertAdjacentHTML('beforebegin',`<div class="setrow fsrow"><span>Text size</span><div class="seg">${FS.map(([v,,l])=>`<button class="${((S.set.fsz||'s')===v)?'on':''}" data-act="fszSet" data-v="${v}">${['Small','Medium','Big'][['s','m','l'].indexOf(v)]}</button>`).join('')}</div></div>`)};
 ACT.fszSet=d=>{ACT.fsz(d);ACT.settings()};
 const _set2=ACT.settings;ACT.settings=function(){_set2.apply(this,arguments);const box=$('#modal .mbox')||$('#modal'),fs=box&&box.querySelector('.fsrow');
  if(fs&&!box.querySelector('.testrow'))fs.insertAdjacentHTML('afterend',`<div class="setrow testrow"><span>Skill test<small class="muted" style="display:block;font-size:16px">Take the starting test again to jump ahead to a harder world</small></span><button class="btn sm volt" data-act="place">TAKE TEST</button></div>`)};

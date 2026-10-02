@@ -46,5 +46,12 @@ function compact(){const box=$('#mbox');if(!box||!box.querySelector('.rstats'))r
  const fw=box.querySelector('.flipwrap');if(fw&&!box.querySelector('.fcols')){const cols=document.createElement('div');cols.className='fcols';const L=document.createElement('div');L.className='fcol-l';const R=document.createElement('div');R.className='fcol-r';
   const h2=box.querySelector(':scope > h2');[...box.children].forEach(ch=>{if(ch===h2)return;(ch===fw?L:R).appendChild(ch)});L.appendChild(fw);cols.appendChild(L);cols.appendChild(R);box.appendChild(cols);box.classList.add('finish2')}
  const fl=box.querySelector('.fcol-l'),rbs=box.querySelector('.fcol-r > .rbtns');if(fl&&rbs&&innerWidth>760){fl.appendChild(rbs);rbs.classList.add('lbtns')}}
-const _tidy2=tidy;tidy=function(){_tidy2();try{compact()}catch(e){console.warn(e)}};
+/* keep both columns the same height: grow the card (or the graph) to fill */
+function equalize(){const box=$('#mbox'),L=box&&box.querySelector('.fcol-l'),R=box&&box.querySelector('.fcol-r');if(!L||!R||innerWidth<=760)return;
+ const card=L.querySelector('.flip .cw:not(.bk)')||L.querySelector('.cw');const fw=L.querySelector('.flipwrap');if(!card||!fw)return;
+ fw.style.removeProperty('--cw');const g=R.querySelector('.tmini .tchart');if(g)g.style.height='';
+ let w=card.getBoundingClientRect().width;for(let k=0;k<14;k++){const d=R.scrollHeight-L.scrollHeight;if(d<=12)break;w=Math.min(w+Math.max(8,d*0.45),330);fw.style.setProperty('--cw',w+'px');if(w>=330)break}
+ const d2=L.scrollHeight-R.scrollHeight;if(d2>12&&g){g.style.height=Math.min(260,96+d2)+'px'}}
+const _tidy2=tidy;tidy=function(){_tidy2();try{compact();requestAnimationFrame(equalize)}catch(e){console.warn(e)}};
+addEventListener('resize',()=>{try{equalize()}catch(e){}});
 })();

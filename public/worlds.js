@@ -47,7 +47,7 @@ const _ch=cardHTML;cardHTML=function(i,f,o={}){let h=_ch.apply(this,arguments);i
  return h};
 /* rare catch banner */
 const _res=results;results=function(r){_res.apply(this,arguments);try{if(!r||!r.pass||P.practice||!r.newCard)return;const k=rarOf(P.fi);if(!k)return;
- const b=document.querySelector('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend',`<div class="banner rarban rb${k}">WOW! A ${RN[k].toUpperCase()} KEYLORI!</div>`)}catch(e){}};
+ const b=document.querySelector('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend',`<div class="banner rarban rb${k}">WOW! ${k===2?'AN':'A'} ${RN[k].toUpperCase()} KEYLORI!</div>`)}catch(e){}};
 
 const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments);document.querySelectorAll('#s-binder .sprtile[data-k]').forEach(t=>{const k=rarOf(+t.dataset.k.split('-')[0]);if(k){t.classList.add('rar'+k);t.insertAdjacentHTML('beforeend',`<span class="rdot rt${k}">${RN[k][0].toUpperCase()}</span>`)}});return r};
 try{if(screen==='home')renderHome()}catch(e){}

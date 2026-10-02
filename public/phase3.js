@@ -47,7 +47,7 @@ if(typeof petDone==='function'){const _pd=petDone;petDone=function(){try{if(PET)
 const wRange=w=>[WSTART[w-1],(WSTART[w]||LESSONS.length)];
 const wDone=w=>{const[a,b]=wRange(w);for(let i=a;i<b;i++)for(let f=0;f<3;f++)if(!S.cards[i+'-'+f])return false;return true};
 const wCount=w=>{const[a,b]=wRange(w);let n=0;for(let i=a;i<b;i++)for(let f=0;f<3;f++)if(S.cards[i+'-'+f])n++;return[n,(b-a)*3]};
-function checkWorlds(){S.wrew=S.wrew||{};const got=[];for(let w=1;w<WSTART.length+1&&w<=10;w++)if(!S.wrew[w]&&wDone(w)){S.wrew[w]=1;S.gems+=50;got.push(w)}
+function checkWorlds(){S.wrew=S.wrew||{};const got=[];for(let w=1;w<WSTART.length+1;w++)if(!S.wrew[w]&&wDone(w)){S.wrew[w]=1;S.gems+=50;got.push(w)}
  if(got.length){save();setTimeout(()=>toast(`World ${got.join(', ')} binder page complete! +${50*got.length} diamonds`),1200)}}
 
 /* results: friendship-up banner + world check */
@@ -65,9 +65,9 @@ const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments)
 
 /* ---------- little learners (under 5) ---------- */
 /* little-learner mode only makes sense before all letters are learned: switch it off for anyone past that */
-function littleCheck(){try{if(S.little&&Math.floor(Math.max(0,nextStage())/NST)>=15){S.little=false;if(S.age==='u5')S.age=null;if(S.set.len===.6)S.set.len=1;save()}}catch(e){}}
+function littleCheck(){try{if(S.little&&(S.age!=='u5'||Math.floor(Math.max(0,nextStage())/NST)>=15)){S.little=false;if(S.age==='u5')S.age=null;if(S.set.len===.6)S.set.len=1.4;save()}}catch(e){}}
 const _ldL=load;load=function(){const r=_ldL.apply(this,arguments);littleCheck();return r};setTimeout(littleCheck,0);
-function setLittle(on){S.little=!!on;if(on){S.age='u5';S.set.voice=true;S.set.len=.6;S.placed=true;S.skip=0}else{if(S.set.len===.6)S.set.len=1}}
+function setLittle(on){S.little=!!on;if(on){S.age='u5';S.set.voice=true;S.set.len=.6;S.placed=true;S.skip=0}else{if(S.set.len===.6)S.set.len=1.4}}
 window.setLittle=setLittle;
 const _gt=genText;genText=function(i,s,pr){if(!S.little||pr||(typeof P!=='undefined'&&P.mode==='place'))return _gt.apply(this,arguments);
  const L=LESSONS[i]||{},ls=[...learned(i)].filter(c=>/[a-z]/.test(c)),nw=[...(L.k||'')].filter(c=>/[a-z]/.test(c));

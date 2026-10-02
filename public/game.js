@@ -366,7 +366,7 @@ function settings(){
  <div class="setrow"><span>Sound effects</span><div class="seg"><button class="${S.set.sound?'on':''}" data-act="set" data-k="sound" data-v="1">On</button><button class="${S.set.sound?'':'on'}" data-act="set" data-k="sound" data-v="0">Off</button></div></div>
  <div class="setrow"><span>Read hints out loud</span><div class="seg"><button class="${S.set.voice?'on':''}" data-act="set" data-k="voice" data-v="1">On</button><button class="${S.set.voice?'':'on'}" data-act="set" data-k="voice" data-v="0">Off</button></div></div>
  <div class="setrow"><span>Letters on the screen keyboard<small class="muted" style="display:block;font-size:16px">Hide them for a no-peek bonus!</small></span><div class="seg">${[['show','Show'],['smart','Hide learned'],['hide','Hide all']].map(([v,t])=>`<button class="${S.set.hide===v?'on':''}" data-act="set" data-k="hide" data-v="${v}">${t}</button>`).join('')}</div></div>
- <div class="setrow"><span>Round length</span><div class="seg">${[[.6,'Short'],[1,'Normal'],[1.4,'Long']].map(([v,t])=>`<button class="${L===v?'on':''}" data-act="set" data-k="len" data-v="${v}">${t}</button>`).join('')}</div></div>
+ <div class="setrow"><span>Round length</span><div class="seg">${[[1,'Short'],[1.4,'Normal'],[1.8,'Long']].map(([v,t])=>`<button class="${L===v?'on':''}" data-act="set" data-k="len" data-v="${v}">${t}</button>`).join('')}</div></div>
  <div class="setrow"><span>Trainer name</span><button class="btn sm alt" data-act="rename">Change</button></div>
  <div class="setrow"><span>Start over from zero</span><button class="btn sm alt" data-act="reset1" id="rst">Reset progress</button></div>
  <button class="btn" data-act="close">Done</button>`);
@@ -439,7 +439,7 @@ function updateStrip(){
  const sp=$('#stripIn').children,t=P.text[P.pos];
  for(let k=Math.max(0,P.pos-2);k<Math.min(sp.length,P.pos+2);k++){sp[k].classList.remove('cur');if(k<P.pos){sp[k].classList.add(P.mist.has(k)?'fix':'ok')}}
  if(t!=null){const el=sp[P.pos];el.classList.add('cur');el.style.setProperty('--fc',fcol(keyInfo(t).f));
-  const w=$('#strip').clientWidth;$('#stripIn').style.transform=`translateX(${w/2-(el.offsetLeft+el.offsetWidth/2)}px)`;
+  if(!document.body.classList.contains('lines2')){const w=$('#strip').clientWidth;$('#stripIn').style.transform=`translateX(${w/2-(el.offsetLeft+el.offsetWidth/2)}px)`}
   setTarget(t);$('#fhint').innerHTML=fingerHTML(t)}
  const len=P.text.length;$('#fbar').style.width=(100-P.pos/len*100)+'%';
  const acc=P.pos?Math.round((P.pos-[...P.mist].filter(x=>x<P.pos).length)/P.pos*100):100;$('#h-acc').textContent=acc+'%';$('#h-cmb').textContent=P.combo;
@@ -1997,7 +1997,7 @@ const _gt19=genText;genText=function(i,s,pr){const L=LESSONS[i];if(!L||!WT[L.sp]
 const worldPool=w=>w>=4&&VIL[w]?VIL[w].map(v=>v.key):BADKEYS;
 function vilCanvas(k,king){const rows=SCR2.spr[k],w=rows[0].length,c=PXG(rows,SCR2.pal[k]);if(king){const g=c.getContext('2d'),cr=KKDATA.acc.crown;blit(g,cr.rows,cr.pal,Math.round(w/2-6),0)}return c}
 function vilSVG(k,king,scale){const w=SCR2.spr[k][0].length,sz=200*scale*w/24;return `<svg class="gl" viewBox="0 0 200 200" aria-hidden="true" style="overflow:visible"><image href="${kku('v19'+k+king,()=>vilCanvas(k,king))}" x="${(200-sz)/2}" y="${200-sz}" width="${sz}" height="${sz}"/></svg>`}
-const wScale=w=>w<=3?[1,1.15,1.3][w-1]:[.8,.8,.75,.75,.72,.72,.7][w-4];
+const wScale=w=>w<=3?[1,1.15,1.3][w-1]:([.8,.8,.75,.75,.72,.72,.7][w-4]||.7);
 villainName=(i,boss)=>{P.vkey=rand(worldPool(worldOf(i)));const n=SCR2.names[P.vkey];return boss?(i===LESSONS.length-1?'Scrambler King':'Mega '+n):n};
 villainSVG=(i,boss)=>{const w=worldOf(i);return vilSVG(P.vkey||rand(worldPool(w)),boss,wScale(w)*(boss?(w>=4?1.05:1.2):1))};
 villainArc=(v,king)=>{const w=worldOf(arcadeLesson());return vilSVG(rand(worldPool(w)),king,(w<=3?1:.75)*(king?1.2:1))};
@@ -2085,7 +2085,7 @@ const _gt20=genText;genText=function(i,s,pr){
  if(pr){PRACT=null;return _gt20(i,s,pr)}
  let t=_gt20(i,s,pr);REVIEW=null;
  // 4. weave in a quick review of trouble keys (letters only, ones already learned)
- if(typeof P!=="undefined"&&!P.mode&&i<30){const L=learned(Math.min(i,19)),cur=new Set((LESSONS[i].k||'').split(''));
+ if(typeof P!=="undefined"&&!P.mode&&i<15){const L=learned(Math.min(i,19)),cur=new Set((LESSONS[i].k||'').split(''));
   const wk=Object.entries(S.ks).filter(([c,k])=>/^[a-z]$/.test(c)&&L.has(c)&&!cur.has(c)&&k.h+k.m>=8&&k.h/(k.h+k.m)<.9).sort((a,b)=>a[1].h/(a[1].h+a[1].m)-b[1].h/(b[1].h+b[1].m)).slice(0,2).map(x=>x[0]);
   if(wk.length){const chunk=[0,1,2].map(()=>wk.map(c=>c+c).join('')).join(' ');REVIEW=wk;t=chunk+' '+t}}
  return t};
@@ -2263,10 +2263,10 @@ let EVO_DONE=null;
 function evolveAnim(i,from,to,done){const sp=SPECIES[i],t=(S.cards[i+'-'+to]||{}).tier;EVO_DONE=done;
  modal(`<h2>What? ${sp.n[from]} is evolving!</h2><div class="evostage"><div class="evospr" id="evoA">${creatureSVG(i,from,'fit',t)}</div><div class="evospr" id="evoB" style="display:none">${creatureSVG(i,to,'fit',t)}</div></div><p class="muted" id="evoMsg" style="margin:0">&nbsp;</p><div class="rbtns" id="evoBtns" style="visibility:hidden"><button class="btn" data-act="evoNext">Yay!</button></div>`);
  const A=$('#evoA'),B=$('#evoB');A.classList.add('wsil');B.classList.add('wsil');let k=0;const gaps=[420,380,340,300,260,220,190,160,140,120,110,100,90,80,80,70,70,60];
- const step=()=>{if(k>=gaps.length){A.style.display='none';B.style.display='';B.classList.remove('wsil');B.classList.add('evoreveal');burst($('#mbox'),B,'#f0c860',24);sfx.lvl();
+ let fin=false;const step=()=>{if(fin||!document.getElementById('evoA'))return;if(k>=gaps.length){fin=true;A.style.display='none';B.style.display='';B.classList.remove('wsil');B.classList.add('evoreveal');burst($('#mbox'),B,'#f0c860',24);sfx.lvl();
    $('#evoMsg').innerHTML=`<b style="font-size:24px;color:#f0c860">${sp.n[from]} evolved into ${sp.n[to]}!</b>`;$('#evoBtns').style.visibility='visible';return}
   const show=k%2===0;A.style.display=show?'none':'';B.style.display=show?'':'none';tone(400+k*40,.06,'square',.05);k++;setTimeout(step,gaps[k-1])};
- setTimeout(step,700)}
+ window._evoFF=()=>{k=gaps.length;step()};setTimeout(step,700)}
 ACT.evoNext=()=>{const d=EVO_DONE;EVO_DONE=null;closeModal();d&&d()};
 const _res27=results;results=function(r){if(r.evo!=null&&!r._ev&&!P.practice){r._ev=1;return evolveAnim(P.fi,r.evoFrom,r.evo,()=>results(r))}
  _res27(r);if(r.holoUp&&r.holoF!=null&&(r.evo==null||r.holoF===r.evo)){const fl=$('#flip .fi');if(fl){const cw=fl.querySelector('.cw:not(.bk)');if(cw)cw.outerHTML=cardHTML(P.fi,r.holoF,S.cards[P.fi+'-'+r.holoF]||{})}const f=$('#flip');f&&f.classList.add('goholo');setTimeout(()=>sfx.buy(),700)}};
