@@ -81,7 +81,7 @@ ACT.dig=()=>{mountGame('Treasure Dig','Dig 15 layers before time runs out! Pick 
   const cur=$('#gstripIn .cur');if(cur&&m){cur.style.setProperty('--fc',fcol(keyInfo(m[G.typed.length]).f));}if(cur)$('#gstripIn').style.transform=`translateX(${$('#gstrip').clientWidth/2-(cur.offsetLeft+cur.offsetWidth/2)}px)`;
   const nx=G.typed?m&&m[G.typed.length]:null;setTarget(nx||null);$('#ghint').innerHTML=G.typed?(nx?fingerHTML(nx):''):'Pick any word in the glowing row!';
   row.ws.forEach((w,q)=>$(`#dw${G.li}_${q}`)?.classList.toggle('match',!!G.typed&&w.startsWith(G.typed)));
-  $('#digshaft').style.transform=`translateY(${-G.li*64}px)`;document.querySelectorAll('.dl.cur').forEach(e=>e.classList.remove('cur'));$('#dl'+G.li)?.classList.add('cur')};
+  {const cr=$('#dl'+G.li);$('#digshaft').style.transform=`translateY(${-(cr?cr.offsetTop:G.li*64)}px)`}document.querySelectorAll('.dl.cur').forEach(e=>e.classList.remove('cur'));$('#dl'+G.li)?.classList.add('cur')};
  const finish=()=>{const deep=G.li,win=deep>=15;S.arc.dig=Math.max(S.arc.dig||0,deep);S.arc.digT=Math.max(S.arc.digT||0,G.found);if(typeof arcadeRecordWin==='function')arcadeRecordWin('dig',win);S.xp+=G.xpg;
   const list=Object.entries(G.got).map(([t,n])=>`<span class="dig-got"><img src="${TREAS[t]}" alt="">×${n}</span>`).join('');
   xEnd(win?'Great dig! You reached the goal!':'Time’s up! The tunnel caved in.',[[G.score||0,'Score'],[deep,'Layers dug'],[G.found,'Treasures'],['+'+G.xpg,'XP']],1+G.gems,'dig',list?`<div class="dig-list">${list}</div>`:'')};
