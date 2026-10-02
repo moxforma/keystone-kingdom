@@ -7,7 +7,7 @@ const SYM='!?@#$%&*+-=/';
 function prepText(t){const p=progLesson();
  if(p<15)t=t.toLowerCase();
  if(p<22)t=t.replace(/[!?]/g,'.').replace(/["']/g,'');
- if(typeof arcadeNumberOn==='function'){if(!arcadeNumberOn())t=t.replace(/\d/g,'');if(!arcadeSymbolOn())t=t.replace(/[!?]/g,'.').replace(/[@#$%&*+=\/]/g,'')}
+ if(typeof arcadeNumberOn==='function'){if(!arcadeNumberOn())t=t.replace(/\d/g,'');if(!arcadeSymbolOn())t=t.replace(/[!?;:]/g,'.').replace(/[^A-Za-z0-9\s.,]/g,'')}
  return t.replace(/\s+/g,' ').replace(/\.\.+/g,'.').trim()}
 function wpmTarget(){const d=S.set.arcd||'auto';if(window.INSANE)return 85;return d==='beast'?48:d==='hard'?30:d==='medium'?20:d==='easy'?12:Math.max(10,Math.min(40,Math.round((typeof avgWpm==='function'?avgWpm():12)*.85)))}
 let LASTP=null;
