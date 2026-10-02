@@ -10,7 +10,7 @@ Object.assign(HERO_COLORS,{ember:[null,'gold','red','snow'],bruno:[null,'gold','
 const ICEW=["o.........","oHo.......","oLHo......",".oLHo.....",".oBLHoo...","..oBLLHo..","..oBBLLHo.","...oBBLLo.","...oBoBLo.","....o.oBo.","......oo.."];
 const CAPE=["oo","oRo","oRo","oRRo","oRRo","oRDo","oRDo","oRDo","oRRDo","oYYYo"];
 const LEGEND={
- royalcape:{slot:'back',name:'Royal Cape',cost:550,lvl:13,back:1,parts:[[CAPE,-3,12],[mirror(CAPE),22,12]],pal:{o:'#2a1418',R:'#b83a3a',D:'#7a2228',Y:'#f0c860'}},
+ royalcape:{slot:'back',name:'Royal Cape',cost:550,lvl:13,back:1,parts:[[["....oooooooooooooooooooooo....", "...oYYYYYYYYYYYYYYYYYYYYYYo...", "...oLRRRDLRRRDLRRRDLRRRDLRo...", "...oLRRRDLRRRDLRRRDLRRRDLRo...", "...oLRRRDLRRRDLRRRDLRRRDLRo...", "..oLRRRDLRRRDLRRRDLRRRDLRRRo..", "..oLRRRDLRRRDLRRRDLRRRDLRRRo..", "..oLRRRDLRRRDLRRRDLRRRDLRRRo..", "..oLRRRDLRRRDLRRRDLRRRDLRRRo..", "..oLRRRDLRRRDLRRRDLRRRDLRRRo..", ".oLRRRDLRRRDLRRRDLRRRDLRRRDLo.", ".oLRRRDLRRRDLRRRDLRRRDLRRRDLo.", ".oLRRRDLRRRDLRRRDLRRRDLRRRDLo.", ".oLRRRDLRRRDLRRRDLRRRDLRRRDLo.", ".oLRRRDLRRRDLRRRDLRRRDLRRRDLo.", "oLRRRDLRRRDLRRRDLRRRDLRRRDLRRo", "oLRRRDLRRRDLRRRDLRRRDLRRRDLRRo", "oYYYYYYYYYYYYYYYYYYYYYYYYYYYYo", "oooooooooooooooooooooooooooooo"],-3,7]],pal:{o:'#2a1418',R:'#b83a3a',L:'#d85a4a',D:'#7a2228',Y:'#f0c860'}},
  crystalwings:{slot:'back',name:'Crystal Wings',cost:700,lvl:14,back:1,parts:[[ICEW,-5,6],[mirror(ICEW),19,6]],pal:{o:'#1a3a5a',B:'#5a9ad0',L:'#9ad8f6',H:'#ffffff'}},
  galaxywings:{slot:'back',name:'Galaxy Wings',cost:850,lvl:15,back:1,parts:[[DWING,-5,6],[mirror(DWING),19,6]],pal:{o:'#140e30',B:'#3a2a8a',L:'#6a5ad0',H:'#f6e08a'}},
  starcrown:{slot:'head',name:'Starlight Crown',cost:900,lvl:15,parts:[[["....o....o....","...oYo..oYo...","o..oYYooYYo..o","oYoYGYYYYGYoYo","oYYYYYRRYYYYYo","oYBYYYRRYYYBYo","oHHHHHHHHHHHHo","oooooooooooooo"],5,-1]],pal:{o:'#5a3a00',Y:'#f6d050',G:'#7fe8ff',R:'#e8584f',B:'#4aa8d8',H:'#fff2b0'}},
@@ -20,12 +20,12 @@ Object.entries(LEGEND).forEach(([id,a])=>{ACC[id]={slot:a.slot,name:a.name,cost:
 
 /* hero scarf: knitted, striped, with a knot and fringed tail */
 KKDATA.acc.scarf=Object.assign({},KKDATA.acc.scarf,{x:2,y:18,rows:["oooooooooooooooooooo","oHHWHHWHHWHHWHHWHHWo","oRRWRRWRRWRRWRRWRRWo","oooooooooooooKKKoooo",".............oRWRo..","............oRWRo...","............offfo..."],pal:{o:'#4a0a14',H:'#f0645a',R:'#c83a3a',W:'#fff2dc',K:'#a82a30',f:'#fff2dc'}});
-try{Object.keys(KKC).forEach(k=>{if(/scarf|bruno/.test(k))delete KKC[k]})}catch(e){}
+try{Object.keys(KKC).forEach(k=>{if(/scarf|bruno|royalcape/.test(k))delete KKC[k]})}catch(e){}
 /* ---------- shared helpers for the new games ---------- */
 function xWords(maxLen=8){const i=arcadeLesson(),ls=learned(i);const ok=WORDS.filter(w=>w.length<=maxLen&&[...w].every(c=>ls.has(c)));
  return ok.length>=8?ok:Array.from({length:30},()=>groups(()=>rand([...ls].filter(c=>/[a-z]/.test(c))),1,2,3))}
 function xLetters(){return [...learned(arcadeLesson())].filter(c=>/[a-z]/.test(c))}
-const xSpeed=()=>({easy:.75,medium:1,hard:1.5,beast:2.6}[(S.set.arcd||'auto').split('-')[0]]||Math.min(1.4,Math.max(.7,avgWpm()/14)));
+const xSpeed=()=>({easy:.75,medium:1,hard:1.4,beast:1.9}[(S.set.arcd||'auto').split('-')[0]]||Math.min(1.4,Math.max(.7,avgWpm()/14)));
 function xEnd(title,stats,gems,again,extra='',share=''){G.done=true;stopGame();setTarget(null);S.gems+=gems;S.xp+=gems*5;save();sfx.win();
  setTimeout(()=>modal(`<h2>${title}</h2><div class="hero-mini">${zookSVG()}</div>${extra}<div class="rstats">${stats.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('')}<div><b>+${gems}</b><span>Diamonds</span></div></div>
  <div class="rbtns"><button class="btn" data-act="${again}">Play again</button><button class="btn alt" data-act="go" data-to="arcade">Arcade</button><button class="btn" data-act="go" data-to="home">Main Menu</button>${share}</div>`),500)}
@@ -42,21 +42,25 @@ ACT.bubble=()=>{mountGame('Bubble Pop','Scramblers trapped Keylori in bubbles! T
  const L=xLetters(),gh=(typeof ghostToStart!=='undefined'&&ghostToStart&&ghostToStart.g==='bubble')?ghostToStart:null;G={type:'bubble',L,deck:gh&&gh.q?gh.q.slice():Array.from({length:40},()=>rand(L)),ghostInvite:gh,ghostStartTime:performance.now(),ghostTimeline:[[0,0]],b:[],score:0,combo:0,best:0,hearts:3,popped:0,missed:0,total:40,spawned:0,t:0,next:.2,done:false,start:performance.now()};
  $('#gsw').hidden=true;$('#garena').className='garena bubble-arena';$('#garena').innerHTML=`${backdrop(1)}<div class="bub-hero gz" id="bubhero">${zookSVG()}</div><div class="gcombo" id="gcombo"></div><div class="gmsg" id="gmsg"></div>`;$('#g-b').textContent='♥♥♥';G.total=G.deck.length;if(gh&&typeof ghostScoreBar==='function'){ghostScoreBar();ghostFooterMount()}
  G.xin=ch=>{const c=G.b.filter(x=>!x.pop&&x.ch===ch);if(!c.length){G.combo=0;sfx.bad();$('#gcombo').textContent='';return}
-  const t=c.reduce((a,b)=>a.y<b.y?a:b);t.pop=1;try{laser($('#garena'),$('#bubhero'),t.el,fcol(keyInfo(ch).f),G.combo>=5,.5,.3);const h=$('#bubhero');h.classList.remove('zap');void h.offsetWidth;h.classList.add('zap')}catch(e){}t.el.classList.add('pop');setTimeout(()=>t.el.remove(),300);G.combo++;G.best=Math.max(G.best,G.combo);G.popped++;G.score+=10*(1+Math.floor(G.combo/5));sfx.ok(G.combo%20);
+  const t=c.reduce((a,b)=>a.y<b.y?a:b);t.pop=1;try{laser($('#garena'),$('#bubhero'),t.el,fcol(keyInfo(ch).f),G.combo>=5,.5,.3);const h=$('#bubhero');h.classList.remove('zap');void h.offsetWidth;h.classList.add('zap')}catch(e){}t.el.classList.add('pop');setTimeout(()=>t.el.remove(),300);G.combo++;G.best=Math.max(G.best,G.combo);G.popped++;const age=(performance.now()-t.t0)/1000,quick=Math.max(0,Math.round(15-age*5));G.score+=10*(1+Math.floor(G.combo/5))+quick;if(quick>=8)speedPop(quick);sfx.ok(G.combo%20);
   $('#g-a').textContent=G.popped;if(G.ghostTimeline.at(-1)[0]!==G.score)G.ghostTimeline.push([G.score,Math.max(1,Math.round((performance.now()-G.ghostStartTime)/100))]);$('#gcombo').textContent=G.combo>=5?`x${1+Math.floor(G.combo/5)} combo!`:'';const nx=G.b.filter(x=>!x.pop).sort((a,b)=>a.y-b.y)[0];setTarget(nx?nx.ch:null)};
  let last=performance.now();const tick=now=>{if(G.done||G.type!=='bubble')return;const dt=Math.min(.05,(now-last)/1000);last=now;G.t+=dt;const a=$('#garena');if(!a)return;const H=a.clientHeight,W=a.clientWidth,sp=xSpeed();
-  G.next-=dt;if(G.next<=0&&G.spawned<G.total){G.spawned++;G.next=Math.max(.3,1.1-G.spawned*.02)/sp;const ch=G.deck[G.spawned-1]||rand(G.L),el=document.createElement('div');el.className='bub';const kl=Math.floor(Math.random()*Math.min(SPECIES.length,30));el.innerHTML=`<div class="bub-k">${creatureSVG(kl,0,'fit big')}</div><img src="${BUBURL}" alt=""><span>${esc(ch)}</span>`;const x=8+Math.random()*84;el.style.left=x+'%';a.appendChild(el);G.b.push({ch,el,y:H+40,v:(55+Math.random()*30)*sp,w:Math.random()*6.28})}
+  G.next-=dt;if(G.next<=0&&G.spawned<G.total){G.spawned++;G.next=Math.max(.3,1.1-G.spawned*.02)/sp;const ch=G.deck[G.spawned-1]||rand(G.L),el=document.createElement('div');el.className='bub';const kl=Math.floor(Math.random()*Math.min(SPECIES.length,30));el.innerHTML=`<div class="bub-k">${creatureSVG(kl,0,'fit big')}</div><img src="${BUBURL}" alt=""><span>${esc(ch)}</span>`;const x=8+Math.random()*84;el.style.left=x+'%';a.appendChild(el);G.b.push({t0:performance.now(),ch,el,y:H+40,v:(55+Math.random()*30)*sp,w:Math.random()*6.28})}
   G.b.forEach(o=>{if(o.pop)return;o.y-=o.v*dt;o.w+=dt*2;o.el.style.transform=`translate(${Math.sin(o.w)*8}px,${o.y}px)`;if(o.y<-70){o.pop=1;o.el.remove();G.hearts--;G.missed++;G.combo=0;sfx.bad();$('#g-b').textContent='♥'.repeat(Math.max(0,G.hearts))}});
   G.b=G.b.filter(o=>!o.pop||o.el.isConnected);const nx=G.b.filter(x=>!x.pop).sort((p,q)=>p.y-q.y)[0];setTarget(nx?nx.ch:null);
   if(G.hearts<=0||G.spawned>=G.total&&!G.b.some(o=>!o.pop)){const win=G.hearts>0;if(typeof arcadeRecordWin==='function'){G.arcLevel=G.arcLevel||arcadeLevelNow();arcadeRecordWin('bubble',win)}S.arc.bubble=Math.max(S.arc.bubble||0,G.score);if(win)S.arc.bwin=(S.arc.bwin||0)+1;
    const end=Math.max(1,Math.round((performance.now()-G.ghostStartTime)/100)),fr=[...G.ghostTimeline];if(fr.at(-1)[1]<end)fr.push([G.score,end]);
    G.challengeData={v:2,g:'bubble',...ghostSettings(),r:G.score,w:win,f:fr,m:true,q:G.deck};
    const fd=G.ghostInvite,gs=fd?`<div class="ghost-summary"><b>${G.score===fd.r?'A tie with your friend!':G.score>fd.r?'You beat your friend’s ghost!':'Your friend’s ghost won this time!'}</b><span>Your score: ${G.score} · Friend’s score: ${fd.r}</span></div>`:'';
-   return xEnd(win?'You freed the Keylori!':'Out of hearts!',[[G.score,'Score'],[G.popped,'Keylori freed'],[G.best,'Best combo']],win?Math.min(6,2+Math.floor(G.score/150)):1,'bubble',gs,shareRunHTML('Bubble Pop',`${G.score} points · ${G.popped} Keylori freed`))}
+   return xEnd(win?'You freed the Keylori!':'Out of hearts!',[[G.score,'Score'],[G.popped,'Keylori freed'],[G.speedBonus||0,'Speed bonus']],win?Math.min(6,2+Math.floor(G.score/150)):1,'bubble',gs,shareRunHTML('Bubble Pop',`${G.score} points · ${G.popped} Keylori freed`))}
   if(G.ghostInvite&&typeof ghostScoreTick==='function')ghostScoreTick(now);G.raf=requestAnimationFrame(tick)};G.raf=requestAnimationFrame(tick)};
 
 /* ---------- 2. Treasure Dig ---------- */
-const SHOVEL=PXG(["......oo",".....oHo","....oHo.","...oWo..","..oWo...",".oWo....","oMMo....","oMMMo...",".oMMMo..","..ooo..."],{o:'#2a1d3e',W:'#a0703a',H:'#c8964e',M:'#b8c0d0'}).toDataURL();
+const SHOVEL=PXG(["....oo....","...oHWo...","...oWWo...","....oWo...","....oWo...","....oWo...","....oWo...","....oWo...","....oWo...","..ooWWoo..",".oMMMMMMo.","oMHMMMMMDo","oMHMMMMMDo","oMMMMMMMDo",".oMMMMMDo.","..oMMMDo..","...oMDo...","....oo...."],{o:'#2a1d3e',W:'#a0703a',H:'#e8eef8',M:'#a8b4c8',D:'#6a768a'}).toDataURL();
+function dirtTex(base,seed){const W=64,H=16,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),r=prng(seed);g.fillStyle=base;g.fillRect(0,0,W,H);
+ const dk=shadeHex(base,-.25),lt=shadeHex(base,.18);for(let k=0;k<60;k++){g.fillStyle=r()<.5?dk:lt;g.fillRect(Math.floor(r()*W),Math.floor(r()*H),1,1)}
+ for(let k=0;k<4;k++){const x=Math.floor(r()*(W-5)),y=Math.floor(r()*(H-4)),R=r();const col=R<.5?['#7a7488','#9a94a8','#4a4458']:R<.75?['#c8a040','#f0d070','#8a6a20']:R<.9?['#4aa8c8','#9ae0f0','#2a6a88']:['#b0503a','#e08060','#6a2a20'];
+  [[1,0],[2,0],[0,1],[1,1],[2,1],[3,1],[1,2],[2,2]].forEach(([a,b],q)=>{g.fillStyle=q<2?col[1]:q>5?col[2]:col[0];g.fillRect(x+a,y+b,1,1)})}return c.toDataURL()}
 const DIRT=['#8a6a44','#7a5a3a','#6a4a34','#5a4030','#4a3a34','#3e3440','#34304a','#2a2a50'];
 const TREAS=(()=>{const mk=(rows,pal)=>PXG(rows,pal).toDataURL();return{
  gem:mk(["..ooo..",".oHLBo.","oHLLBBo","oLLBBDo",".oBBDo.","..oDo..","...o..."],{o:'#1a2a4a',H:'#ffffff',L:'#7fd8f0',B:'#4aa8d8',D:'#2a6aa8'}),
@@ -71,7 +75,7 @@ ACT.dig=()=>{mountGame('Treasure Dig','Pick a word in the row and type it to dig
  const roll=()=>Math.random()<1/200?'red':Math.random()<.5?rand(['gem','coin','coin','bone','gem','egg']):null;
  const L=Array.from({length:40},()=>{const n=2+(Math.random()<.4?1:0),ws=[];while(ws.length<n){const w=nw();if(!ws.some(x=>x[0]===w[0]))ws.push(w);if(wi>400)break}return {ws,pr:ws.map(roll)}});
  G={type:'dig',arcLevel:arcadeLevelNow(),L,li:0,typed:'',found:0,gems:0,xpg:0,got:{},left:75,done:false,mist:0};$('#gsw').hidden=false;$('#garena').className='garena dig-arena';
- $('#garena').innerHTML=`${backdrop(4,['#e8a050','#f0b868','#f6cc88','#fbe0b0'])}<div class="dig-shaft" id="digshaft">${L.map((l,k)=>`<div class="dl" id="dl${k}" style="background:${DIRT[Math.min(DIRT.length-1,Math.floor(k/5))]}">${l.ws.map((w,q)=>`<span class="dw" id="dw${k}_${q}">${esc(w)}</span>`).join('')}</div>`).join('')}</div><div class="dig-hero" id="dighero">${zookSVG()}<img class="shovel" src="${SHOVEL}" alt=""></div><div class="gmsg" id="gmsg"></div>`;
+ $('#garena').innerHTML=`${backdrop(4,['#e8a050','#f0b868','#f6cc88','#fbe0b0'])}<div class="dig-shaft" id="digshaft">${L.map((l,k)=>`<div class="dl" id="dl${k}" style="background:url(${kku('dt'+Math.min(DIRT.length-1,Math.floor(k/5))+'_'+(k%3),()=>{return {toDataURL:()=>dirtTex(DIRT[Math.min(DIRT.length-1,Math.floor(k/5))],k%3*17+Math.floor(k/5))}})}) 0 0/256px 64px">${l.ws.map((w,q)=>`<span class="dw" id="dw${k}_${q}">${esc(w)}</span>`).join('')}</div>`).join('')}</div><div class="dig-hero" id="dighero">${zookSVG()}</div><img class="shovel" id="digshovel" src="${SHOVEL}" alt=""><div class="gmsg" id="gmsg"></div>`;
  const strip=()=>{const row=G.L[G.li],m=G.typed?row.ws.find(w=>w.startsWith(G.typed)):null;const show=m||G.typed;
   $('#gstripIn').innerHTML=[...show].map((c,k)=>`<span class="${k<G.typed.length?'ok':k===G.typed.length?'cur':''}">${esc(c)}</span>`).join('')||'<span class="cur">·</span>';
   const cur=$('#gstripIn .cur');if(cur&&m){cur.style.setProperty('--fc',fcol(keyInfo(m[G.typed.length]).f));}if(cur)$('#gstripIn').style.transform=`translateX(${$('#gstrip').clientWidth/2-(cur.offsetLeft+cur.offsetWidth/2)}px)`;
@@ -80,11 +84,11 @@ ACT.dig=()=>{mountGame('Treasure Dig','Pick a word in the row and type it to dig
   $('#digshaft').style.transform=`translateY(${-G.li*64}px)`;document.querySelectorAll('.dl.cur').forEach(e=>e.classList.remove('cur'));$('#dl'+G.li)?.classList.add('cur')};
  const finish=()=>{const deep=G.li,win=deep>=15;S.arc.dig=Math.max(S.arc.dig||0,deep);S.arc.digT=Math.max(S.arc.digT||0,G.found);if(typeof arcadeRecordWin==='function')arcadeRecordWin('dig',win);S.xp+=G.xpg;
   const list=Object.entries(G.got).map(([t,n])=>`<span class="dig-got"><img src="${TREAS[t]}" alt="">×${n}</span>`).join('');
-  xEnd(win?'Great dig!':'Keep digging next time!',[[deep,'Layers dug'],[G.found,'Treasures'],['+'+G.xpg,'XP']],1+G.gems,'dig',list?`<div class="dig-list">${list}</div>`:'')};
+  xEnd(win?'Great dig!':'Keep digging next time!',[[G.score||0,'Score'],[deep,'Layers dug'],[G.found,'Treasures'],['+'+G.xpg,'XP']],1+G.gems,'dig',list?`<div class="dig-list">${list}</div>`:'')};
  G.xin=ch=>{const row=G.L[G.li],nt=G.typed+ch;if(!row.ws.some(w=>w.startsWith(nt))){G.mist++;sfx.bad();G.typed='';strip();return}
-  G.typed=nt;sfx.ok(nt.length);const h=$('#dighero');h.classList.remove('dig');void h.offsetWidth;h.classList.add('dig');
+  G.typed=nt;sfx.ok(nt.length);const h=$('#dighero'),sv=$('#digshovel');[h,sv].forEach(e=>{if(!e)return;e.classList.remove('dig');void e.offsetWidth;e.classList.add('dig')});
   const q=row.ws.indexOf(nt);if(q>=0){const el=$(`#dw${G.li}_${q}`),t=row.pr[q];try{burst($('#garena'),el,DIRT[Math.min(DIRT.length-1,Math.floor(G.li/5))],8)}catch(e){}
-   if(t){const P=PRIZE[t];G.found++;G.got[t]=(G.got[t]||0)+1;G.gems+=P.g;G.xpg+=P.xp;$('#g-a').textContent=G.found;
+   G.score=(G.score||0)+10+nt.length*5;if(t){const P=PRIZE[t];G.found++;G.got[t]=(G.got[t]||0)+1;G.gems+=P.g;G.xpg+=P.xp;$('#g-a').textContent=G.found;
     if(el)el.outerHTML=`<span class="dw dug prize"><img src="${TREAS[t]}" alt="">${P.g?'+'+P.g+' ♦':'+'+P.xp+' XP'}</span>`;tone(t==='red'?1200:880,.15,'square',.06);gmsg(t==='red'?'WOW! A BIG RED DIAMOND! +200':`Found a ${P.n}!`,t==='red'?'big good':'good');if(t==='red')sfx.win()}
    else{if(el)el.classList.add('dug');tone(300,.06,'square',.04)}
    G.li++;G.typed='';if(G.li>=G.L.length)return finish()}strip()};
@@ -99,13 +103,13 @@ ACT.keeper=()=>{mountGame('Keylori Keeper','Feed your Keylori the word it wants!
  G={type:'keeper',pool,ci,cf,goal:15,fed:0,miss:0,left:60,typed:'',done:false,want:null,opts:[]};$('#gsw').hidden=true;$('#garena').className='garena keeper-arena';
  $('#garena').innerHTML=`${backdrop(0,['#f0a870','#f0c088','#f6d8a8','#fbe8c8'])}${cloudsHTML()}<div class="kp-pet" id="kppet">${creatureSVG(ci,cf,'px')}</div><div class="kp-want bubble" id="kpwant"></div><div class="kp-food" id="kpfood"></div><div class="kp-belly"><i id="kpbelly"></i></div><div class="kp-typed" id="kptyped"></div>`;
  const round=()=>{const ws=WANTS.filter(W=>pool.some(W.f)&&pool.some(w=>!W.f(w)));G.want=rand(ws.length?ws:WANTS);const good=pool.filter(G.want.f),bad=pool.filter(w=>!G.want.f(w));
-  G.opts=[rand(good),rand(bad),rand(bad)].sort(()=>Math.random()-.5);G.typed='';$('#kpwant').innerHTML=`I want ${G.want.t}!`;$('#kpfood').classList.toggle('caps',/the letter|starts with|ends with/.test(G.want.t));$('#kpfood').innerHTML=G.opts.map((w,k)=>`<div class="food" id="fd${k}"><span>${esc(w)}</span></div>`).join('');paint()};
+  G.opts=[rand(good),rand(bad),rand(bad)].sort(()=>Math.random()-.5);G.typed='';$('#kpwant').innerHTML=`I want ${G.want.t}!`;$('#kpfood').innerHTML=G.opts.map((w,k)=>`<div class="food" id="fd${k}"><span>${esc(w)}</span></div>`).join('');paint()};
  const paint=()=>{$('#kptyped').textContent=G.typed||' ';G.opts.forEach((w,k)=>{const el=$('#fd'+k);if(el)el.classList.toggle('match',!!G.typed&&w.startsWith(G.typed))});const m=G.opts.find(w=>w.startsWith(G.typed));setTarget(m?m[G.typed.length]:null)};
  G.xin=ch=>{const nt=G.typed+ch;if(!G.opts.some(w=>w.startsWith(nt))){sfx.bad();G.typed='';paint();return}G.typed=nt;sfx.ok(nt.length);const done=G.opts.find(w=>w===nt);
-  if(done){const pet=$('#kppet');if(G.want.f(done)){G.fed++;$('#g-a').textContent=G.fed;$('#kpbelly').style.width=Math.min(100,G.fed*8)+'%';pet.classList.remove('yum','nope');void pet.offsetWidth;pet.classList.add('yum');tone(880,.1,'square',.05);round()}
+  if(done){const pet=$('#kppet');if(G.want.f(done)){G.fed++;G.score=(G.score||0)+20+done.length*5;$('#g-a').textContent=G.fed;$('#kpbelly').style.width=Math.min(100,G.fed*8)+'%';pet.classList.remove('yum','nope');void pet.offsetWidth;pet.classList.add('yum');tone(880,.1,'square',.05);round()}
    else{G.miss++;pet.classList.remove('yum','nope');void pet.offsetWidth;pet.classList.add('nope');$('#kpwant').innerHTML=`Not that one! I want ${G.want.t}.`;G.typed='';paint()}}else paint()};
  let last=performance.now();const tick=now=>{if(G.done||G.type!=='keeper')return;G.left-=(now-last)/1000;last=now;$('#g-b').textContent=Math.max(0,Math.ceil(G.left));
-  if(G.left<=0){S.arc.keeper=Math.max(S.arc.keeper||0,G.fed);if(typeof arcadeRecordWin==='function'){G.arcLevel=G.arcLevel||arcadeLevelNow();arcadeRecordWin('keeper',G.fed>=G.goal)}const name=SPECIES[G.ci].n[G.cf];return xEnd(`${name} is full and happy!`,[[G.fed,'Fed'],[G.miss,'Oops']],Math.min(8,1+Math.floor(G.fed/2)),'keeper')}
+  if(G.left<=0){S.arc.keeper=Math.max(S.arc.keeper||0,G.fed);if(typeof arcadeRecordWin==='function'){G.arcLevel=G.arcLevel||arcadeLevelNow();arcadeRecordWin('keeper',G.fed>=G.goal)}const name=SPECIES[G.ci].n[G.cf];return xEnd(`${name} is full and happy!`,[[G.score||0,'Score'],[G.fed,'Fed'],[G.speedBonus||0,'Speed bonus']],Math.min(8,1+Math.floor(G.fed/2)),'keeper')}
   G.raf=requestAnimationFrame(tick)};round();G.raf=requestAnimationFrame(tick)};
 
 /* ---------- arcade screen: 6 games ---------- */
@@ -124,3 +128,9 @@ if(typeof screen!=='undefined'&&screen==='home')renderHome();
 /* ghost challenges for Bubble Pop */
 const _gim90=ghostInviteModal;ghostInviteModal=function(data){if(data&&data.g==='bubble'){challengeToStart=data;modal(`<h2>A friend challenged you!</h2><p><b>Bubble Pop</b>: Pop the same bubbles in the same order while your friend’s score replays.</p><div class="rbtns"><button class="btn" data-act="ghostStart">Play the challenge</button><button class="btn alt" data-act="ghostDismiss">Maybe later</button></div>${ghostFooterHTML()}`);return}return _gim90(data)};
 const _gs90=ACT.ghostStart;ACT.ghostStart=()=>{const c=challengeToStart;if(!c||c.g!=='bubble')return _gs90();S.set.arcd=c.d;S.set.arcNumbers=c.n;S.set.arcSymbols=c.s;S.set.len=c.l;save();ghostToStart=c;closeModal();try{ACT.bubble()}finally{ghostToStart=null}};
+
+/* ---------- speed bonus for every scored arcade game ---------- */
+const SPEED_GAMES=['meteor','glitch','bubble','keeper','dig'];
+function speedPop(n){const a=$('#garena');if(!a||!n)return;const e=document.createElement('div');e.className='spdpop';e.textContent=`+${n} fast!`;a.appendChild(e);setTimeout(()=>e.remove(),700)}
+const _ok90=sfx.ok;sfx.ok=function(){try{if(typeof screen!=='undefined'&&screen==='game'&&G&&!G.done&&SPEED_GAMES.includes(G.type)){const now=performance.now(),dt=now-(G.lastOk||0);G.lastOk=now;
+ const b=dt<220?3:dt<350?2:dt<500?1:0;if(b){G.score=(G.score||0)+b;G.speedBonus=(G.speedBonus||0)+b;if(G.type==='meteor'||G.type==='glitch'){const ga=$('#g-a');if(ga)ga.textContent=G.score}if(b>=2&&Math.random()<.35)speedPop(b)}}}catch(e){}return _ok90.apply(this,arguments)};

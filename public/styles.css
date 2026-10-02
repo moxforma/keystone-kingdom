@@ -973,3 +973,17 @@ svg.zk,svg.zk image{pointer-events:none}
 .dl.cur .dw{background:rgba(27,22,38,.35)}.dw.match{border-color:#7fe8a0;color:#c8ffd8}
 .dw.dug{visibility:hidden}.dw.prize{display:inline-flex;align-items:center;gap:6px;color:#f0c860;visibility:visible}.dw.prize img{width:30px;image-rendering:pixelated}
 .gmsg.big{font-size:clamp(28px,5vw,48px)}
+/* bubble: capital letters; beast tuned in JS */
+.bub span{text-transform:uppercase}
+.bubart{gap:34px!important}.bubart .bub{width:84px!important;height:84px!important}
+/* keeper: normal lowercase */
+.kp-food .food span,.kp-food.caps .food span{text-transform:none!important}
+/* dig: bigger hero, hovering spade */
+.dig-hero{width:min(24%,170px)!important;top:12%!important;left:4%!important}
+.dig-hero .shovel{display:none}
+#digshovel{position:absolute;left:calc(4% + min(24%,170px));top:20%;width:min(7%,54px);image-rendering:pixelated;z-index:4;transform-origin:50% 10%;animation:hover 1.6s steps(4) infinite}
+#digshovel.dig{animation:scoop .35s steps(4)}
+@keyframes hover{50%{transform:translateY(-6px)}}
+@keyframes scoop{0%{transform:rotate(0)}35%{transform:rotate(-35deg) translate(6px,18px)}70%{transform:rotate(25deg) translate(-4px,-6px)}100%{transform:rotate(0)}}
+.dl{image-rendering:pixelated}
+.spdpop{position:absolute;right:4%;top:6%;font:400 30px "Jersey 10",monospace;color:#f0c860;text-shadow:3px 3px 0 #1b1626;z-index:20;animation:rise .7s steps(5) forwards;pointer-events:none}
