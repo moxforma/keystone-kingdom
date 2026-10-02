@@ -36,6 +36,8 @@ const _ld=load;load=function(){const r=_ld.apply(this,arguments);applyFs();retur
 const _set=ACT.settings;ACT.settings=function(){_set.apply(this,arguments);const box=$('#modal .mbox')||$('#modal'),first=box&&box.querySelector('.setrow');
  if(first&&!box.querySelector('.fsrow'))first.insertAdjacentHTML('beforebegin',`<div class="setrow fsrow"><span>Text size</span><div class="seg">${FS.map(([v,,l])=>`<button class="${((S.set.fsz||'m')===v)?'on':''}" data-act="fszSet" data-v="${v}">${['Small','Medium','Big'][['s','m','l'].indexOf(v)]}</button>`).join('')}</div></div>`)};
 ACT.fszSet=d=>{ACT.fsz(d);ACT.settings()};
+const _set2=ACT.settings;ACT.settings=function(){_set2.apply(this,arguments);const box=$('#modal .mbox')||$('#modal'),fs=box&&box.querySelector('.fsrow');
+ if(fs&&!box.querySelector('.testrow'))fs.insertAdjacentHTML('afterend',`<div class="setrow testrow"><span>Skill test<small class="muted" style="display:block;font-size:16px">Take the starting test again to jump ahead to a harder world</small></span><button class="btn sm volt" data-act="place">TAKE TEST</button></div>`)};
 applyFs();setTimeout(addFs,0);
 
 /* ---------- sentence + paragraph practice ---------- */

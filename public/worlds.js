@@ -34,8 +34,10 @@ function applyPerm(){
  for(let i=0;i<N;i++){const o=PERM[i];SPECIES[i]=ORIG.sp[o];KKDATA.order[i]=ORIG.ord[o];EVO[i]=ORIG.evo[o];if(ORIG.fl.length)EVOLUTION_FLAVOR[i]=ORIG.fl[o]}
  try{Object.keys(KKC).forEach(k=>{if(/^[ekKs]\d+-/.test(k)||/^e\d/.test(k))delete KKC[k]})}catch(e){}}
 window.applyPerm=applyPerm;
-const _ld=load;load=function(){const r=_ld.apply(this,arguments);applyPerm();return r};
-applyPerm();
+/* never lose access: everything up to the furthest stage you've passed stays open */
+function keepFrontier(){try{let far=-1;Object.entries(S.best||{}).forEach(([k,v])=>{if(v>=1){const[i,st]=k.split('-').map(Number);if(i<LESSONS.length&&st<NST)far=Math.max(far,i*NST+st)}});if(far>=0&&far>(S.skip||0)){S.skip=far;try{save()}catch(e){}}}catch(e){}}
+const _ld=load;load=function(){const r=_ld.apply(this,arguments);applyPerm();keepFrontier();return r};
+applyPerm();keepFrontier();
 
 /* ---- 4. rarity looks ---- */
 const _cs=creatureSVG;creatureSVG=function(i,f,cls='',tier){const r=rarOf(i);if(r&&!/\bsil\b/.test(cls||''))cls=(cls||'')+' rar'+r;return _cs.call(this,i,f,cls,tier)};

@@ -12,9 +12,16 @@ function prepText(t){const p=progLesson();
 function wpmTarget(){const d=S.set.arcd||'auto';if(window.INSANE)return 85;return d==='beast'?48:d==='hard'?30:d==='medium'?20:d==='easy'?12:Math.max(10,Math.min(40,Math.round((typeof avgWpm==='function'?avgWpm():12)*.85)))}
 let LASTP=null;
 let BGHOST=null;
-ACT.bridge=()=>{if(!BGHOST&&progLesson()<UNLOCK){toast('Story Bridge unlocks after Lesson '+UNLOCK+'!');return}
- const pool=TXT.para.filter(x=>x!==LASTP);let raw=rand(pool.length?pool:TXT.para)||'The bridge is ready. Type to cross it.';LASTP=raw;
- if(S.set.arcd==='beast'){const two=rand(TXT.para.filter(x=>x!==raw));if(two)raw+=' '+two}
+function learnedStory(){const p=progLesson(),ls=learned(Math.min(LESSONS.length-1,p));const ok=w=>[...w.toLowerCase()].every(c=>ls.has(c));
+ if(p>=UNLOCK){const pool=TXT.para.filter(x=>x!==LASTP);const raw=rand(pool.length?pool:TXT.para);LASTP=raw;return raw}
+ /* not all letters yet: use whole sentences that only need letters you know, else simple word lines */
+ const sents=[...(TXT.easy||[]),...(TXT.medium||[])].map(x=>x.replace(/[.!?]$/,'')).filter(x=>x.split(' ').every(ok));
+ if(sents.length>=3){const pick=[];const sh=sents.slice().sort(()=>Math.random()-.5);for(const x of sh){pick.push(x);if(pick.join(' ').length>110)break}return pick.join('. ')+'.'}
+ const words=(typeof WORDS!=='undefined'?WORDS:[]).filter(w=>w.length<=6&&ok(w));
+ if(words.length>=6){const out=[];for(let k=0;k<5;k++){out.push(Array.from({length:4},()=>rand(words)).join(' '))}return out.join(' ')}
+ const lets=[...ls].filter(c=>/[a-z]/.test(c));return Array.from({length:24},()=>Array.from({length:2+Math.floor(Math.random()*2)},()=>rand(lets)).join('')).join(' ')}
+ACT.bridge=()=>{let raw=learnedStory();
+ if(S.set.arcd==='beast'&&progLesson()>=UNLOCK){const two=rand(TXT.para.filter(x=>x!==raw));if(two)raw+=' '+two}
  const text=BGHOST?BGHOST.t:prepText(raw),words=text.split(' '),wpm=wpmTarget(),limit=Math.round(text.length/5/wpm*60+6);
  mountGame('Story Bridge','Type the story to build the bridge!','Words','Rope');
  G={type:'bridge',frames:[[0,0]],ghostInvite:BGHOST,text,pos:0,mist:new Set(),words,wi:0,limit,left:limit,done:false,start:0,score:0,combo:0,arcLevel:typeof arcadeLevelNow==='function'?arcadeLevelNow():'auto'};
@@ -53,7 +60,7 @@ const _gi=gameInput;gameInput=function(ch,caps){if(!(typeof G!=='undefined'&&G&&
  else{G.mist.add(G.pos);G.combo=0;try{sfx.bad()}catch(e){}const pl=$('#bp'+G.wi);if(pl){pl.classList.remove('wob');void pl.offsetWidth;pl.classList.add('wob')}const el=$('#bc'+G.pos);if(el){el.classList.remove('err');void el.offsetWidth;el.classList.add('err')}}};
 
 /* arcade card */
-const _ra=renderArcade;renderArcade=function(){_ra.apply(this,arguments);const g=$('#s-arcade .games');if(!g||g.querySelector('[data-act=bridge]'))return;const lock=progLesson()<UNLOCK;
+const _ra=renderArcade;renderArcade=function(){_ra.apply(this,arguments);const g=$('#s-arcade .games');if(!g||g.querySelector('[data-act=bridge]'))return;const lock=false;
  g.insertAdjacentHTML('beforeend',`<div class="game panel"><div class="gart brart"><div class="mini-para">Once upon a time, a brave hero typed a whole story...</div><div class="mini-bridge">${'<i></i>'.repeat(7)}</div></div><h3>Story Bridge</h3><p>Type a whole story to build a bridge!</p>
  <div class="arcade-stats"><div class="arcade-stat"><b>${S.arc.bridge||0}</b><span>Best WPM</span></div><div class="arcade-stat"><b>${S.arc.brwin||0}</b><span>Wins</span></div><div class="arcade-stat level"><b>${typeof arcadeHighest==='function'?arcadeHighest('bridge'):''}</b><span>Highest level beaten</span></div></div>
  <button class="btn ${lock?'alt':''}" data-act="bridge">${lock?'After Lesson '+UNLOCK:'Play'}</button></div>`)};
