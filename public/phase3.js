@@ -13,13 +13,12 @@ if(typeof cutscene==='function'){const _cut=cutscene;cutscene=function(w,lines,k
 
 let GATE=null;
 ACT.parGate=()=>{const a=6+Math.floor(Math.random()*4),b=3+Math.floor(Math.random()*7);GATE=a*b;
- modal(`<h2>GROWN-UPS ONLY</h2><p style="margin:0;font-size:22px">What is ${a} × ${b}?</p><input id="pgate" class="nameinput" inputmode="numeric" autocomplete="off" style="max-width:160px;text-align:center">
+ modal(`<h2>GROWN-UPS ONLY</h2><div class="pgatebox"><p class="pgq">What is ${a} × ${b}?</p><input id="pgate" class="pgin" inputmode="numeric" autocomplete="off" maxlength="3" aria-label="Answer"></div>
  <div class="rbtns"><button class="btn" data-act="parCheck">OK</button><button class="btn alt" data-act="settings">BACK</button></div>`);setTimeout(()=>$('#pgate')?.focus(),50)};
 ACT.parCheck=()=>{const v=+($('#pgate')?.value||0);if(v!==GATE){sfx.bad&&sfx.bad();toast('Not quite. Ask a grown-up!');return ACT.settings()}parPanel()};
 function parPanel(){S.par=S.par||{};
  modal(`<h2>GROWN-UP SETTINGS</h2><p class="muted" style="margin:0">Turn features on or off for ${esc(S.name||'this player')}.</p>
  ${PAR.map(([k,t])=>`<div class="setrow"><span>${t}</span><div class="seg"><button class="${par(k)?'on':''}" data-act="parSet" data-k="${k}" data-v="1">ON</button><button class="${par(k)?'':'on'}" data-act="parSet" data-k="${k}" data-v="0">OFF</button></div></div>`).join('')}
- <div class="setrow"><span>Little learner mode<small class="muted" style="display:block;font-size:16px">Under 5: single big letters, read out loud</small></span><div class="seg"><button class="${S.little?'on':''}" data-act="parLittle" data-v="1">ON</button><button class="${S.little?'':'on'}" data-act="parLittle" data-v="0">OFF</button></div></div>
  <div class="rbtns"><button class="btn" data-act="parDone">DONE</button></div>`)}
 ACT.parLittle=d=>{setLittle(d.v==='1');save();applyPar();parPanel()};
 ACT.parSet=d=>{S.par=S.par||{};S.par[d.k]=+d.v;save();applyPar();parPanel()};

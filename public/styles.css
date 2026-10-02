@@ -1166,3 +1166,8 @@ body.fs-s .br-para{font-size:clamp(16px,2vw,21px)}body.fs-l .br-para{font-size:c
 .flipwrap .flip{flex:none}
 .rbtns .iconrow{order:90}.rbtns [data-act=copyRun]{order:95}
 .flipwrap .flip{margin:0!important}.flipwrap{gap:14px}
+/* grown-ups gate */
+.pgatebox{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.pgq,.pgin{font-family:var(--display);font-size:clamp(24px,3.4vw,32px);line-height:1.2;text-align:center;margin:0}
+.pgin{width:5.5em;padding:6px 8px;background:#0c1238;color:#fff;border:3px solid var(--line);border-radius:0;outline:none}
+.pgin:focus{border-color:#7fe8ff}
