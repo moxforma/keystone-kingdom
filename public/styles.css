@@ -1189,3 +1189,73 @@ body.fs-s .br-para{font-size:clamp(16px,2vw,21px)}body.fs-l .br-para{font-size:c
 .dangersec [data-act=reset1]{background:#d8383f!important;color:#fff!important;box-shadow:0 4px 0 #6a0a10!important}
 .parpanel .setrow>span:first-child{text-align:left}
 @media (max-width:600px){.setsec{padding:6px 8px 8px}.setsec .setrow{flex-direction:column;align-items:stretch;gap:6px}.setsec .setrow .seg{flex-wrap:wrap;justify-content:flex-start}.setsec .setrow>span:first-child{font-size:20px}.famcode{letter-spacing:3px;padding:6px 12px}}
+/* evolved: old + new card side by side */
+.flipwrap.multi{flex-wrap:wrap;gap:10px}
+.flipwrap.multi .reward-cards{display:flex;gap:10px;margin:0}
+.flipwrap.multi .cw{width:clamp(130px,22vw,190px)}
+.flipwrap.multi .kbubble{flex-basis:100%;max-width:none;text-align:center}
+.flipwrap.multi .kbubble::before{display:none}
+/* compact finish screen */
+.chiprow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:2px 0 4px}
+.banner.chip{width:auto!important;margin:0!important;padding:4px 10px!important;font-size:12px!important;line-height:1.3;border-radius:0}
+.kbubble .ktip{display:block;margin-top:6px;padding-top:6px;border-top:2px dashed #c8b8a0;font-size:12px;color:#5a4a6a}
+.btn.iconbtn.shareic{background:#4cd98a!important}
+.mbox.finish2{width:min(900px,96vw)!important;max-width:min(900px,96vw)!important}
+.fcols{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.fcol-l{display:flex;justify-content:center}
+.fcol-l .flipwrap{flex-direction:column}
+.fcol-l .flipwrap .kbubble{max-width:220px}
+.fcol-l .flipwrap .kbubble::before{left:50%;top:-12px;margin:0 0 0 -6px;border:6px solid transparent;border-bottom-color:#2a1d3e;border-top:0}
+.fcol-r{display:flex;flex-direction:column;gap:8px;min-width:0}
+.fcol-r .rbtns{margin-top:4px}
+@media (max-width:760px){.fcols{grid-template-columns:1fr}.fcol-l .flipwrap{flex-direction:row}.fcol-l .flipwrap .kbubble::before{left:-12px;top:50%;margin-top:-6px;border:6px solid transparent;border-right-color:#2a1d3e;border-left:0}}
+.rchip{font-size:12px}
+.iconrow .btn.iconbtn,.iconrow .btn.shareic{width:56px!important;max-width:56px!important;min-width:0!important;flex:none!important;flex-basis:auto!important}
+@media (max-width:560px){.fcol-l .flipwrap{flex-direction:column!important}.fcol-l .flipwrap .kbubble{max-width:none}.fcol-l .flipwrap .kbubble::before{display:none}}
+/* typing graph */
+.tmini{display:block;width:100%;background:#0c1238;border:2px solid #3a3458;padding:6px 6px 2px;cursor:pointer;position:relative}
+.tmini .tchart{width:100%;height:96px;display:block}
+.tmini .tmore{position:absolute;right:8px;top:4px;font-size:11px;color:#9a94b8;text-transform:uppercase}
+.tchart{width:100%;height:auto;background:#0c1238}
+#mbox > .tchart{border:2px solid #3a3458;height:220px}
+.tleg{display:flex;gap:14px;justify-content:center;font-size:13px;color:#c8c0e0;flex-wrap:wrap}
+.tleg .ln{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px}.tleg .ln.y{background:#f0c860}.tleg .ln.g{background:repeating-linear-gradient(90deg,#6a628a 0 4px,transparent 4px 7px)}
+.tleg .sq{display:inline-block;width:8px;height:8px;background:#ff5a4a;margin-right:5px;vertical-align:middle}
+.okc{color:#6ae08a}.badc{color:#ff7a6a}
+.tkeys{margin:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;font-size:15px}
+.kchip{display:inline-flex;flex-direction:column;align-items:center;background:#1e1830;border:2px solid #3a2f4e;padding:2px 8px;font-family:var(--display);font-size:18px;line-height:1}
+.kchip small{font-size:11px;color:#9a94b8}
+/* two-line strip */
+body.lines2 .strip-in{position:absolute!important;left:14px!important;right:14px!important;top:10px!important;bottom:auto!important;display:block!important;white-space:normal!important;line-height:1.25!important;transition:transform .2s steps(3)}
+body.lines2 .strip-in span{display:inline;min-width:0;padding:0;border-radius:0}
+.linesw{display:flex;gap:4px;align-items:center;justify-content:center;margin-top:6px;font-family:var(--title);font-size:11px;color:#c8c0e0}
+.linesw button{background:#0c1238;border:2px solid var(--line);color:#c8d0ff;font-family:var(--title);font-size:13px;width:34px;height:30px;cursor:pointer}
+.linesw button.on{background:#7fe8ff;color:#10122a;border-color:#7fe8ff}
+body.lines2 .strip{position:relative}body.lines2 .strip::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:#0c1238;z-index:2;pointer-events:none}
+.fcol-l{flex-direction:column;align-items:center;gap:12px}
+.fcol-l .rbtns.lbtns{width:100%;max-width:260px;margin:0;justify-content:center;border-top:0;padding-top:0}
+.fcol-l .rbtns.lbtns>.btn{flex:1 1 45%;min-width:0;padding-left:6px!important;padding-right:6px!important}
+.fcol-l .rbtns.lbtns .iconrow{flex-wrap:wrap;gap:6px}
+.fcol-l .rbtns.lbtns .iconrow .btn.iconbtn{width:46px!important;max-width:46px!important;height:44px}
+/* arcade: always two rows on wide screens */
+@media (min-width:860px){
+ #s-arcade{max-width:min(1500px,97vw)!important;padding-left:12px!important;padding-right:12px!important}
+ #s-arcade .games{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px}
+ #s-arcade .games .game{min-width:0;padding:12px 10px}
+ #s-arcade .games .game h3{font-size:clamp(17px,1.7vw,24px)}
+ #s-arcade .games .game p{font-size:clamp(13px,1.15vw,16px)}
+ #s-arcade .games .gart{transform:scale(.85);transform-origin:center}
+ #s-arcade .arcade-stats{gap:4px}
+ #s-arcade .arcade-stat b{font-size:clamp(14px,1.5vw,22px)!important}
+ #s-arcade .arcade-stat span{font-size:clamp(10px,.9vw,13px)!important}
+ #s-arcade .playrow .btn{padding-left:8px!important;padding-right:8px!important}
+}
+@media (min-width:860px){
+ body.fs-l #s-arcade{max-width:min(1360px,87vw)!important}
+ #s-arcade .games .gart{overflow:hidden;transform:none;max-height:150px}
+ #s-arcade .games .gart .bubart{transform:scale(.78);transform-origin:center}
+ #s-arcade .games .keepart .food{font-size:clamp(20px,2.4vw,34px)!important;padding:2px 8px!important}
+ #s-arcade .games .keepart{gap:4px}
+ #s-arcade .games .game .btn{font-size:clamp(15px,1.5vw,20px)!important}
+ #s-arcade .playrow{flex-wrap:wrap}
+}

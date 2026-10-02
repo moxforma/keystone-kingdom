@@ -29,7 +29,7 @@ const xSpeed=()=>(({easy:.75,medium:1,hard:1.4,beast:1.9}[(S.set.arcd||'auto').s
 function xEnd(title,stats,gems,again,extra='',share=''){G.done=true;stopGame();setTarget(null);S.gems+=gems;S.xp+=gems*5;save();sfx.win();
  setTimeout(()=>modal(`<h2>${title}</h2><div class="hero-mini">${zookSVG()}</div>${extra}<div class="rstats">${stats.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('')}<div><b>+${gems}</b><span>Diamonds</span></div></div>
  <div class="rbtns"><button class="btn" data-act="${again}">Play again</button><button class="btn alt" data-act="go" data-to="arcade">Arcade</button><button class="btn" data-act="go" data-to="home">Main Menu</button>${share}</div>`),500)}
-const _gi90=gameInput;gameInput=function(ch,caps){if(G&&G.xin&&!G.done){pressFx(ch===' '?'space':ch.toLowerCase());return G.xin(caps?ch.toLowerCase():ch)}return _gi90(ch,caps)};
+const _gi90=gameInput;gameInput=function(ch,caps){if(G&&G.xin&&!G.done){pressFx(ch===' '?'space':ch.toLowerCase());return G.xin(/[A-Z]/.test(ch)?ch.toLowerCase():ch)}return _gi90(ch,caps)};
 
 /* side-view backdrop: stepped pixel sky + a world's terrain silhouette */
 function backdrop(w,sky=['#5a8ac8','#7aa8dc','#9ac4ea','#bfe0f4']){return `<div class="xsky">${sky.map(c=>`<i style="background:${c}"></i>`).join('')}</div><img class="xterr" src="${kku('terr'+w,()=>terrainCanvas(w))}" alt="">`}

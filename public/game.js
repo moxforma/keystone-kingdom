@@ -448,7 +448,7 @@ function stat(c,hit){const b=c.toLowerCase();if(b===' ')return;const k=S.ks[b]||
 function zap(color,big){const a=$('#arena');laser(a,$('#hero'),$('#vil'),color,big);kick($('#vil'),'hit');kick($('#hero'),'recoil');if(big){kick(a,'quake');burst(a,$('#vil'),color,8)}}
 function pressFx(id){const el=keyEls.get(id);if(!el)return;el.classList.add('press');setTimeout(()=>el.classList.remove('press'),120)}
 const PRAISE=['Nice!','Zap!','Great typing!','You got it!','Awesome!','Keep going!','Super!','Wow!'];
-function matchKey(ch,t,caps){return ch===t||(caps&&ch.toLowerCase()===t.toLowerCase()&&/[a-z]/i.test(t))}
+function matchKey(ch,t,caps){if(t==null)return false;return ch===t||(/[a-z]/.test(t)&&ch.toLowerCase()===t)||(caps&&ch.toLowerCase()===t.toLowerCase()&&/[a-z]/i.test(t))}
 function input(ch,caps){
  if(screen==='game')return gameInput(ch,caps);
  if(P.phase==='camp'){if(ch===' '||ch==='\n')campNext();return}
@@ -630,8 +630,8 @@ function gameInput(ch,caps){
  if(G.type==='race')return raceInput(ch,caps);
  if(G.type==='glitch')return glitchInput(ch,caps);
  if(caps)ch=ch.toLowerCase();
- let m=G.tgt;if(!m){const c=G.m.filter(x=>x.txt[0]===ch);if(c.length)m=c.reduce((a,b)=>a.y>b.y?a:b)}
- if(m&&m.txt[m.typed]===ch){G.tgt=m;m.typed++;G.hits++;const s=m.el.querySelectorAll('i');s[m.typed-1].className='on';zapTo(m);sfx.ok(G.hits%20);
+ let m=G.tgt;if(!m){const c=G.m.filter(x=>matchKey(ch,x.txt[0],caps));if(c.length)m=c.reduce((a,b)=>a.y>b.y?a:b)}
+ if(m&&matchKey(ch,m.txt[m.typed],caps)){G.tgt=m;m.typed++;G.hits++;const s=m.el.querySelectorAll('i');s[m.typed-1].className='on';zapTo(m);sfx.ok(G.hits%20);
   if(m.typed>=m.txt.length){G.score+=10*m.txt.length+Math.round(G.speed*5);G.zapped++;G.speed=Math.min(3,G.speed+.07);removeMet(m,'boom');if(G.zapped%5===0)gsay(rand(PRAISE))}else mHint();gUpdate()}
  else{G.errs++;sfx.bad();gsay(G.next?`That was ${esc(disp(ch))}. ${fingerSay(G.next)}`:'Wait for a meteor!',true)}
 }
@@ -2387,6 +2387,7 @@ ACT.fbSend=async()=>{const msg=($('#fbmsg')?.value||'').trim();if(msg.length<3){
 ACT.about=()=>{modal(`<h2>About</h2><div class="hero-mini">${zookSVG()}</div>
  <p style="margin:0;font-size:22px">KEYLORIA KINGDOM</p>
  <p style="margin:0">A typing adventure made by<br><b>Andy Tsang</b></p>
+ <p style="margin:0">Vibecoded with help from <b>Claude</b> (Anthropic) and <b>ChatGPT</b> (OpenAI).</p>
  <p class="muted" style="margin:0">© ${Math.max(2026,new Date().getFullYear())} Andy Tsang. All rights reserved.</p>
  <div class="rbtns"><button class="btn" data-act="close">Close</button></div>`)};
 addEventListener('keydown',e=>{if(e.target&&(e.target.id==='fbmsg'||e.target.id==='fbmail'))e.stopImmediatePropagation()},true);
