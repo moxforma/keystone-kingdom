@@ -1415,7 +1415,7 @@ setTimeout(syncPull,400);
 
 /* ================= V13: arcade diamonds + progress trackers ================= */
 let runShareText='',runShareChallenge=null;
-function shareRunHTML(game,stats){const arcadeGame={ 'Meteor Zap':'meteor','Scrambler Attack':'glitch','Keylori Race':'race' }[game];runShareChallenge=arcadeGame&&G.challengeData?.g===arcadeGame?G.challengeData:null;const challenge=!!runShareChallenge,rematch=challenge&&typeof ghostRematchWon==='function'&&ghostRematchWon();runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${rematch?'I beat your ghost! Can you beat mine?':challenge?'Can you beat my arcade ghost?':'Come explore Keyloria Kingdom and try it yourself!'}`;return `<button class="btn alt" data-act="copyRun">${rematch?'Send rematch challenge':arcadeGame?'Challenge a friend':'Share result'}</button>`}
+function shareRunHTML(game,stats){const arcadeGame={ 'Meteor Zap':'meteor','Scrambler Attack':'glitch','Keylori Race':'race','Bubble Pop':'bubble' }[game];runShareChallenge=arcadeGame&&G.challengeData?.g===arcadeGame?G.challengeData:null;const challenge=!!runShareChallenge,rematch=challenge&&typeof ghostRematchWon==='function'&&ghostRematchWon();runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${rematch?'I beat your ghost! Can you beat mine?':challenge?'Can you beat my arcade ghost?':'Come explore Keyloria Kingdom and try it yourself!'}`;return `<button class="btn alt" data-act="copyRun">${rematch?'Send rematch challenge':arcadeGame?'Challenge a friend':'Share result'}</button>`}
 ACT.copyRun=async()=>{try{await navigator.clipboard.writeText(runShareText);toast('Result copied!')}catch(e){toast('Could not copy the result')}};
 let ARC_X=()=>({easy:.75,medium:1,hard:1.5})[S.set.arcd]||1;
 function arcReward(parts){const x=ARC_X();let tot=0;const rows=parts.filter(p=>p[1]>0).map(([t,n])=>{tot+=n;return `<div><span>${t}</span><b>+${n}</b></div>`});
@@ -1473,6 +1473,9 @@ setInterval(()=>{ensureTrackers();const hk=(S.hero||'')+(S.color||'')+JSON.strin
   if(G.type==='meteor'){f=(G.spawned-G.m.length)/G.total;lab=`${Math.max(0,G.total-(G.spawned-G.m.length))} left`}
   else if(G.type==='race'){f=G.pos/G.text.length;lab=Math.round(f*100)+'%'}
   else if(G.type==='glitch'){const progress=glitchProgress();f=progress.fraction;lab=progress.label}
+  else if(G.type==='bubble'){const n=G.popped+G.missed;f=n/G.total;lab=`${G.total-n} left`}
+  else if(G.type==='dig'){f=G.li/G.L.length;lab=`${G.li} layers`}
+  else if(G.type==='keeper'){f=Math.min(1,G.fed/G.goal);lab=`${G.fed}/${G.goal} fed`}
   if(G.done&&G.type!=='glitch')f=1;setTrk(tg,f,lab);if(typeof ghostWaveDisplay==='function')ghostWaveDisplay()}},150);
 /* --- whole-game progress on home --- */
 const _rh4=renderHome;renderHome=function(){_rh4();const xb=$('#s-home .trow');if(!xb||!S.name)return;const tot=LESSONS.length*8,done=Object.keys(S.best).length,pc=Math.round(done/tot*100);

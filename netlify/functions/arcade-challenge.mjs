@@ -35,7 +35,7 @@ const validGlitchWords = data => data.q === undefined && data.b === undefined ||
  Array.isArray(data.b) && data.b.length >= 3 && data.b.length <= 12 && data.b.every(validWord);
 
 export const validChallenge = data => {
- if (!data || data.v !== 2 || !["race", "meteor", "glitch"].includes(data.g) ||
+ if (!data || data.v !== 2 || !["race", "meteor", "glitch", "bubble"].includes(data.g) ||
      !["auto", "easy", "medium", "hard", "beast"].includes(data.d) ||
      typeof data.n !== "boolean" || typeof data.s !== "boolean" ||
      typeof data.l !== "number" || !Number.isFinite(data.l) || data.l < .2 || data.l > 3) return false;
@@ -47,7 +47,7 @@ export const validChallenge = data => {
  return Number.isInteger(data.r) && data.r >= 0 && data.r <= 1000000 &&
   typeof data.w === "boolean" && validFrames(data.f, data.r) &&
   (data.g !== "glitch" || data.p === undefined || validProgress(data.p)) &&
-  (data.g === "meteor" ? validMeteorWords(data) : validGlitchWords(data));
+  (data.g === "meteor" || data.g === "bubble" ? validMeteorWords(data) : validGlitchWords(data));
 };
 
 export default async req => {

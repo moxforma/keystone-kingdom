@@ -951,3 +951,25 @@ svg.zk,svg.zk image{pointer-events:none}
 .dig-hero{position:absolute;left:8%;top:18%;width:min(18%,120px);z-index:3}.dig-hero.dig .zk{animation:hop .25s steps(2)}
 .digart{gap:14px}.digart img{width:48px;image-rendering:pixelated}
 .dig-list{display:flex;justify-content:center;gap:14px;font-size:24px}.dig-got{display:inline-flex;align-items:center;gap:4px}.dig-got img{width:30px;image-rendering:pixelated}
+/* bigger bubbles, hero always visible */
+.bub{width:96px!important;height:96px!important;margin-left:-48px!important}
+.bub span{font-size:44px!important;min-width:44px!important;padding:2px 8px!important;right:-10px!important;top:-12px!important}
+.bub-hero{bottom:2%!important;width:min(16%,120px)!important;z-index:6!important}
+/* keeper: big words, big Keylori, clouds */
+.kp-pet{width:min(36%,300px)!important;left:4%!important;bottom:4%!important}
+.food{font-size:52px!important;padding:6px 20px!important}
+.kp-food.caps .food span{text-transform:uppercase}
+.kp-food{left:38%!important;bottom:26%!important;gap:18px!important}
+.kp-typed{font-size:44px!important;bottom:15%!important;left:38%!important}
+.kp-want{font-size:clamp(20px,2.6vw,30px)!important}
+.xcloud{position:absolute;image-rendering:pixelated;animation:drift 40s linear infinite;z-index:1}
+@keyframes drift{from{transform:translateX(-30px)}to{transform:translateX(60px)}}
+/* dig shovel */
+.dig-hero .shovel{position:absolute;right:-30%;bottom:0;width:55%;image-rendering:pixelated;transform-origin:20% 90%;transform:rotate(-20deg)}
+.dig-hero.dig .shovel{animation:shovel .25s steps(3)}
+@keyframes shovel{0%{transform:rotate(-20deg)}50%{transform:rotate(35deg) translateY(10px)}100%{transform:rotate(-20deg)}}
+.dl{gap:22px!important}
+.dw{font:400 30px 'Jersey 10',monospace;color:#fff6e0;text-shadow:2px 2px 0 #1b1626;padding:0 10px;border:3px solid transparent}
+.dl.cur .dw{background:rgba(27,22,38,.35)}.dw.match{border-color:#7fe8a0;color:#c8ffd8}
+.dw.dug{visibility:hidden}.dw.prize{display:inline-flex;align-items:center;gap:6px;color:#f0c860;visibility:visible}.dw.prize img{width:30px;image-rendering:pixelated}
+.gmsg.big{font-size:clamp(28px,5vw,48px)}
