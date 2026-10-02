@@ -2161,11 +2161,16 @@ function logoCanvas(){const W=240,H=78,c=document.createElement('canvas');c.widt
  word('KEYLORIA',Math.round((W-tw('KEYLORIA',1)*3)/2),26,3,'t',1);
  put2(GEM,6,22,false,{o:'go',H:'gH',h:'gh',L:'gL',B:'gB',D:'gD'});put2(GEM,W-6-26,22,true,{o:'go',H:'gH',h:'gh',L:'gL',B:'gB',D:'gD'});
  // ribbon + big KINGDOM
- const kw=tw('KINGDOM',1)*2,rw=kw+16,rx=Math.round((W-rw)/2),ry=52,rh=20;
+ const KF={K:["XX..XX","XX.XX.","XXXX..","XXX...","XXXX..","XX.XX.","XX..XX"],I:["XXXXXX","..XX..","..XX..","..XX..","..XX..","..XX..","XXXXXX"],
+  N:["XX...XX","XXX..XX","XXXX.XX","XX.XXXX","XX..XXX","XX...XX","XX...XX"],G:[".XXXXX.","XX...XX","XX.....","XX.XXXX","XX...XX","XX...XX",".XXXXX."],
+  D:["XXXXX.","XX..XX","XX..XX","XX..XX","XX..XX","XX..XX","XXXXX."],O:[".XXXX.","XX..XX","XX..XX","XX..XX","XX..XX","XX..XX",".XXXX."],
+  M:["XX....XX","XXX..XXX","XXXXXXXX","XX.XX.XX","XX....XX","XX....XX","XX....XX"]};
+ const kw=[...'KINGDOM'].reduce((t,ch)=>t+KF[ch][0].length+1,-1)*2,rw=kw+20,rx=Math.round((W-rw)/2),ry=52,rh=20;
  [[-11,rx-11],[1,rx+rw]].forEach(([d,x0])=>{for(let y=3;y<rh+3;y++)for(let x=0;x<11;x++){const mid=(rh+6)/2,dd=Math.abs(y-mid),cut=dd<4?4-Math.round(dd):0;const notch=d<0?x<cut:x>10-cut;if(!notch)set(x0+x,ry+y,'rD')}});
  for(let y=0;y<rh;y++)for(let x=0;x<rw;x++)set(rx+x,ry+y,y<2?'rH':y>rh-3?'rD':'rB');
- word('KINGDOM',rx+8,ry+3,2,'w',1);
- const P={go:'#1a2a4a',gH:'#ffffff',gh:'#c8f0ff',gL:'#7fd8f0',gB:'#4aa8d8',gD:'#2a6aa8',wo:'#2a1d3e',wB:'#c8a040',wL:'#f6d878',wH:'#fffbe0',co:'#5a3a00',cy:'#f6d050',cY:'#c8981e',cr:'#e8584f',t0:'#fffbe0',t1:'#ffe680',t2:'#f6c040',t3:'#e0842a',rH:'#8fe0d8',rB:'#3a8a84',rD:'#22605c',w0:'#fffbe0',w1:'#fff6e0',w2:'#fff6e0',w3:'#f0e0c0'};
+ const wordK=(x0,y0,tag)=>{let x=x0;[...'KINGDOM'].forEach(ch=>{const gph=KF[ch];gph.forEach((row,yy)=>[...row].forEach((v,xx)=>{if(v==='X')for(let a=0;a<2;a++)for(let q=0;q<2;q++)set(x+xx*2+a,y0+yy*2+q,tag)}));x+=(gph[0].length+1)*2})};
+ wordK(rx+10,ry+3+1,'wS');wordK(rx+10,ry+3,'w1');
+ const P={go:'#1a2a4a',gH:'#ffffff',gh:'#c8f0ff',gL:'#7fd8f0',gB:'#4aa8d8',gD:'#2a6aa8',wo:'#2a1d3e',wB:'#c8a040',wL:'#f6d878',wH:'#fffbe0',co:'#5a3a00',cy:'#f6d050',cY:'#c8981e',cr:'#e8584f',t0:'#fffbe0',t1:'#ffe680',t2:'#f6c040',t3:'#e0842a',rH:'#8fe0d8',rB:'#3a8a84',rD:'#22605c',wS:'#123c3a',w0:'#fffbe0',w1:'#fffbe8',w2:'#fff6e0',w3:'#f0e0c0'};
  for(let y=H-1;y>=0;y--)for(let x=W-1;x>=0;x--){const v=m[y][x];if(v&&v[0]!=='w'&&y+3<H&&x+2<W&&!m[y+3][x+2]){g.fillStyle='#120c1c';g.fillRect(x+2,y+3,1,1)}}
  for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(m[y][x])continue;let near=false;for(let b=-1;b<=1&&!near;b++)for(let a=-1;a<=1;a++){const v=m[y+b]?.[x+a];if(v&&v[0]!=='w'||v&&v.length===2&&v[0]==='w'&&'oBLH'.includes(v[1])){near=true;break}}if(near){g.fillStyle='#4a2a1a';g.fillRect(x,y,1,1)}}
  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const v=m[y][x];if(v){g.fillStyle=P[v]||'#fff';g.fillRect(x,y,1,1)}}
