@@ -533,7 +533,7 @@ $('#modal').addEventListener('click',e=>{if(e.target.id==='modal'&&P.phase!=='do
 document.addEventListener('keydown',e=>{
  if(e.target.matches('input')){if(e.key==='Enter')ACT.saveName();return}
  if(e.ctrlKey||e.metaKey||e.altKey)return;
- if(!$('#modal').hidden){if(e.key==='Enter'){const b=$('#mbox .rbtns .btn');if(b){e.preventDefault();b.click()}}if(e.key==='Escape'&&P.phase!=='done')closeModal();return}
+ if(!$('#modal').hidden){if(e.key==='Enter'||(e.key===' '&&$('#mbox .rbtns .nextbtn'))){const b=$('#mbox .rbtns .nextbtn')||$('#mbox .rbtns .btn');if(b){e.preventDefault();b.click()}}if(e.key==='Escape'&&P.phase!=='done')closeModal();return}
  if(screen!=='play'&&screen!=='game')return;
  if(e.key==='Escape'){show(screen==='game'?'arcade':'map');return}
  const caps=e.getModifierState&&e.getModifierState('CapsLock');
@@ -2396,6 +2396,9 @@ function masteryPanel(i,pts,p0,gain){const sp=SPECIES[i],m=(S.mast||{})[i],w0=Ma
  <div class="ms-holo">${holo}</div>${gain>0?'':`<div class="ev-tip">Get 3 stars on: ${miss.slice(0,3).join('')}</div>`}</div>`}
 const _res51=results;results=function(r){if(r&&r.pass&&!P.practice&&!r._ms){const i=P.fi;if(SPECIES[i]&&lessonPts(i)>=MAST_PTS&&!(S.mast||{})[i]){r._ms=1;S.mast=S.mast||{};S.mast[i]=1;S.gems+=MAST_GEMS;save();r._newMast=1}}
  _res51(r);if(r&&r._newMast){const b=document.querySelector('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend',`<div class="banner gold">♛ ${SPECIES[P.fi].n[2]} MASTERED! +${MAST_GEMS} diamonds</div>`);sfx.win&&sfx.win()}};
+/* results: Next is gold, goes first, and is the Enter/Space default */
+const _res53=results;results=function(r){_res53(r);const rb=document.querySelector('#mbox .rbtns');if(!rb)return;
+ const nx=[...rb.querySelectorAll('.btn')].find(b=>/next/i.test(b.textContent));if(nx){nx.classList.remove('alt','coral');nx.classList.add('nextbtn');rb.prepend(nx)}};
 function fitNames(root){(root||document).querySelectorAll('.sprtile small').forEach(el=>{el.style.fontSize='';let f=parseFloat(getComputedStyle(el).fontSize)||13;let n=0;while(el.scrollWidth>el.clientWidth+1&&f>7&&n++<20){f-=.5;el.style.setProperty('font-size',f+'px','important')}})}
 const _rb50=renderBinder;renderBinder=function(){const r=_rb50.apply(this,arguments);requestAnimationFrame(()=>fitNames());return r};
 addEventListener('resize',()=>{if(document.querySelector('.sprtile'))fitNames()});

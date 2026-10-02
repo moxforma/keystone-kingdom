@@ -857,3 +857,5 @@ svg.zk,svg.zk image{pointer-events:none}
 .wp .globe{width:56px;height:56px}.wp small{font-size:15px;line-height:1.1;text-align:center}
 .wp.cur{border-color:#f0c860}.wp:hover:not([disabled]) .globe{transform:translateY(-3px)}
 .wp.lockd{opacity:.55;cursor:not-allowed}.wp.lockd .globe{filter:brightness(0);opacity:.6}
+
+#mbox .rbtns .btn.nextbtn{background:var(--gold)!important;color:#2a1d00!important;box-shadow:0 5px 0 #b3850f!important}
