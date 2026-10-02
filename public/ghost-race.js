@@ -285,9 +285,12 @@ ACT.copyRun=async()=>{
    }
    const url=new URL(location.href);url.search='';url.hash='';url.searchParams.set('c',G.challengeCode);link=url.href;
   }
-  await navigator.clipboard.writeText(runShareText+'\n'+link);
+  const msg=runShareText+'\n'+link;
+  try{await navigator.clipboard.writeText(msg)}catch(err){
+   if(navigator.share){try{await navigator.share({text:msg});return}catch(e2){if(e2&&e2.name==='AbortError')return}}
+   shareFallback(msg);return}
   toast(runShareChallenge?(ghostRematchWon()?'Rematch link copied! Send it to your friend.':'Short challenge link copied!'):'Result copied!');
- }catch(e){toast('Could not copy the result. Please try again.')}
+ }catch(e){shareFallback(runShareText+'\nhttps://keystone-kingdom.netlify.app/')}
  finally{if(button)button.disabled=false}
 };
 function ghostInviteModal(data){
@@ -312,3 +315,6 @@ if(new URLSearchParams(location.search).has('ghost')){
  if(ghostIncoming)ghostInviteModal(ghostIncoming);
  else modal('<h2>Challenge link not found</h2><p>This race link may be incomplete. Ask your friend to copy the challenge again.</p><div class="rbtns"><button class="btn" data-act="ghostDismiss">Play normally</button></div>');
 }
+
+function shareFallback(msg){const box=document.createElement('div');box.className='sharefb';box.innerHTML=`<p>Copy this and send it to a friend:</p><textarea readonly rows="4"></textarea><button class="btn" type="button">Done</button>`;
+ box.querySelector('textarea').value=msg;box.querySelector('button').onclick=()=>box.remove();document.body.appendChild(box);const t=box.querySelector('textarea');t.focus();t.select()}
