@@ -33,7 +33,7 @@ test('only Arcade result links open ghost challenges', async () => {
 
  for(const [name,kind] of [['Meteor Zap','meteor'],['Scrambler Attack','glitch'],['Keylori Race','race']]){
   context.G={challengeData:{g:kind,v:2,r:100}};
-  assert.match(context.share(name,'100 points'),/Copy challenge/);
+  assert.match(context.share(name,'100 points'),/Challenge a friend/);
   await context.ACT.copyRun();
   assert.equal(posted.at(-1).g,kind);
   assert.match(copied.at(-1), /\?c=ABC123$/);
@@ -41,7 +41,7 @@ test('only Arcade result links open ghost challenges', async () => {
  assert.equal(posted.length,3);
  won=true;
  context.G={challengeData:{g:'meteor',v:2,r:200}};
- assert.match(context.share('Meteor Zap','200 points'),/Copy rematch challenge/);
+ assert.match(context.share('Meteor Zap','200 points'),/Send rematch challenge/);
  await context.ACT.copyRun();
  assert.match(copied.at(-1),/I beat your ghost! Can you beat mine\?/);
  assert.equal(posted.at(-1).r,200);

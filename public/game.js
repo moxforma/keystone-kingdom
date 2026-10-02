@@ -49,16 +49,25 @@ const SPECIES=[
  {n:['Qwertle','Qwertrix','Qwertitan'],t:'Legend',c1:'#ffd166',c2:'#7c5cff',ear:'horn',tail:'star',pat:'stars',fang:1,fl:'The legendary keeper of every key on the keyboard.'}
 ];
 
-const WORDS=('a as ask asks all add adds dad dads sad lad fall falls flask salad glad hall half has had hash ash dash flash gas shall flag lag jag '+
- 'he she see seed feed feel heel deal seal sea lake like likes hike kid kids lid hid hide side slide fish dish wish his if is life file fig jig field shed sled fled egg eggs said ideal idea '+
- 'red rug run fun sun rid ride fire fur rush jug dug hug huge sure rule rules sugar ruler dare hair fair hear dear deer ruff '+
- 'the they yes yell try tree trees street star stars start shy sky fly dry toy tidy tail trail stay story tiger '+
- 'two word world wow owl owls wolf row slow look took foot good food wood hot dot got lot rock rocks goal hook water tower show sword '+
- 'quest quiet quick quit pop pup pet pie pig pal park play plays spot top stop shop ship spark super power poster pirate '+
- 'cat cap came cake cool cute magic comet camp card cards climb come make mud mom mice castle crystal cream '+
- 'van vine seven every have give love wave cave oven night moon nest snow win lion fan fun green dragon legend trainer frog sing song dance '+
- 'box fox six fix mix wax next taxi zap zip zoo zoom lazy fizz buzz prize maze pizza '+
- 'bat bug bee bike ball best book bolt blue brave battle bubble robot rocket planet storm flame frost holo shiny rare epic team hero gem gold coin level jump camp king queen crown knight shield').split(' ');
+const WORDS=('a as ask asks all add adds dad dads sad lad fall falls flask salad glad hall half has had hash ash dash flash gas shall flag lag he she'+' '+
+ 'see seed feed feel heel deal seal sea lake like likes hike kid kids lid hid hide side slide fish dish wish his if is life file fig jig field'+' '+
+ 'shed sled fled egg eggs said ideal idea red rug run fun sun rid ride fire fur rush jug dug hug huge sure rule rules sugar ruler dare hair fair'+' '+
+ 'hear dear deer ruff the they yes yell try tree trees street star stars start shy sky fly dry toy tidy tail trail stay story tiger two word world wow'+' '+
+ 'owl owls wolf row slow look took foot good food wood hot dot got lot rock rocks goal hook water tower show sword quest quiet quick quit pop pup pet'+' '+
+ 'pie pig pal park play plays spot top stop shop ship spark super power poster pirate cat cap came cake cool cute magic comet camp card cards climb come make'+' '+
+ 'mud mom mice castle crystal cream van vine seven every have give love wave cave oven night moon nest snow win lion fan green dragon legend trainer frog sing song'+' '+
+ 'dance box fox six fix mix wax next taxi zap zip zoo zoom lazy fizz buzz prize maze pizza bat bug bee bike ball best book bolt blue brave battle'+' '+
+ 'bubble robot rocket planet storm flame frost shiny rare epic team hero gem gold coin level jump king queen crown knight shield ant ape bear bird bunny camel cheetah chick'+' '+
+ 'clam cobra crab crane cricket dolphin donkey duck eagle eel elephant falcon ferret finch flamingo gecko giraffe goat goose gorilla hamster hawk hedgehog heron hippo horse jaguar kangaroo kitten koala'+' '+
+ 'lamb lemur leopard lizard llama lobster magpie monkey moose moth mouse newt octopus otter panda parrot pelican penguin pony puffin puppy rabbit raccoon raven robin salmon shark sheep shrimp sloth'+' '+
+ 'snail snake spider squid squirrel swan toad turkey turtle walrus whale zebra apple bagel banana bean berry bread butter carrot cereal cheese cherry cookie corn cracker cupcake muffin grape honey'+' '+
+ 'jam lemon lettuce mango noodle oatmeal olive onion orange pancake pasta peach peanut pear pepper pickle potato pretzel pumpkin raisin rice sandwich soup toast tomato waffle yogurt walnut acorn beach'+' '+
+ 'branch breeze brook canyon cliff cloud desert dew forest garden glacier hill island jungle lagoon leaf meadow mountain ocean pebble petal puddle rain rainbow river root sand shell spring stone'+' '+
+ 'stream summer sunset thunder valley volcano wind winter autumn blossom cactus daisy fern flower grass maple mushroom oak pine rose tulip twig weather basket blanket bottle brush bucket button candle'+' '+
+ 'chair clock crayon desk door drawer eraser glue hammer jacket kettle ladder lamp marker mitten notebook paint paper pencil pillow puzzle ribbon scissors scarf sock spoon table teapot tent ticket'+' '+
+ 'towel umbrella wagon whistle window zipper bake bounce build carry catch cheer chase clap color cook count dig draw dream explore float giggle glow grow help hop invent juggle kick'+' '+
+ 'laugh learn listen paddle plant race read rescue sail share skate skip smile spin splash sprint swim think throw travel wander whisper write bright calm clever curious eager gentle happy'+' '+
+ 'helpful honest kind lucky mighty polite proud silly smart speedy sunny swift tiny wise cozy fuzzy jolly'+' kite drum flute piano violin glass harp').split(' ');
 const SENT=['I like to play.','The fox can run fast.','My dragon is red.','We found a rare card.','Pop can zap the rock.','The sun is hot.','I see a big wave.','A shiny card is cool.','The owl can fly high.','Let us go on a quest.','My team is brave.','The cave is dark.','I will win the battle.','Pizza is the best.','The frog can jump.','We read a fun book.','The moon is big.','A bee sat on me.','I can type fast.','My pet is kind.'];
 const NSENT=['I have 3 cards.','Pop is 7 today.','We saw 12 stars.','The quest has 5 maps.','I got 10 gems.','There are 4 frogs.','My level is 9.','The rocket has 8 jets.','I ate 2 cookies.','6 owls sat in a tree.','We need 20 coins.','It is 100 steps away.'];
 const MSENT=['The quick brown fox jumps over the lazy dog.','Pop zaps five quick bolts of light.','Pack my box with five dozen jugs.','A wizard jumped over a big quilt box.','Brave trainers type with every finger.','Six crazy kings vowed to jump.','Quick zebras jog past the wavy hill.'];
@@ -1027,7 +1036,7 @@ const WORLDS=[{name:'Keyloria',from:0},{name:'Whispering Woods',from:5},{name:'T
 const worldOf=i=>{let w=1;for(let k=1;k<WSTART.length;k++)if(i>=WSTART[k])w=k+1;return w};
 /* ---- text for new worlds ---- */
 const W2={long:'forest branch acorns mossy river stones bridge shadow beetle squirrel mushroom whisper lantern campfire feather thunder blanket rainbow pinecone sparkle journey keyloria trainer monster crystal captain blizzard mountain glacier canyon summit meadow harvest pebble ladder planet rocket tadpole leaflet hollow'.split(' '),
- names:['Pop','Sproutle','Mossling','Fernix','Blinkit','Monday','Friday','Toronto','Canada','Maple','Luna','Max','Ruby','Leo','Mia','Sam','Forest','River','Oakaroth','Shroomie'],
+ names:['Pop','Sproutle','Mossling','Fernix','Blinkit','Monday','Friday','Daisy','Sunday','Maple','Luna','Max','Ruby','Leo','Mia','Sam','Forest','River','Oakaroth','Shroomie'],
  punct:['Wow, look at that!','Can you see the owl?','Run, Pop, run!','Where did it go?','Yes! We did it!','Is it a gold one?','Hey, wait for me!','Oh no, a Scrambler!','Look up, there!','Ready, set, go!'],
  story:['Pop walked into the woods.','The trees were tall and green.','A tiny Keylori hid under a leaf.','Pop said hello, and it smiled.','They played until the sun went down.','The owls began to hoot.','A firefly lit the path home.'],
  numw:['We found 25 acorns.','The bridge is 100 steps long.','Pop climbed 3 big hills.','It is 7 degrees today.','We saw 12 eagles.','The peak is 4000 meters high.','I have 2 gold cards.'],
@@ -1406,7 +1415,7 @@ setTimeout(syncPull,400);
 
 /* ================= V13: arcade diamonds + progress trackers ================= */
 let runShareText='',runShareChallenge=null;
-function shareRunHTML(game,stats){const arcadeGame={ 'Meteor Zap':'meteor','Scrambler Attack':'glitch','Keylori Race':'race' }[game];runShareChallenge=arcadeGame&&G.challengeData?.g===arcadeGame?G.challengeData:null;const challenge=!!runShareChallenge,rematch=challenge&&typeof ghostRematchWon==='function'&&ghostRematchWon();runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${rematch?'I beat your ghost! Can you beat mine?':challenge?'Can you beat my arcade ghost?':'Come explore Keyloria Kingdom and try it yourself!'}`;return `<button class="btn alt" data-act="copyRun">${rematch?'Copy rematch challenge':challenge?'Copy challenge':'Copy result'}</button>`}
+function shareRunHTML(game,stats){const arcadeGame={ 'Meteor Zap':'meteor','Scrambler Attack':'glitch','Keylori Race':'race' }[game];runShareChallenge=arcadeGame&&G.challengeData?.g===arcadeGame?G.challengeData:null;const challenge=!!runShareChallenge,rematch=challenge&&typeof ghostRematchWon==='function'&&ghostRematchWon();runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${rematch?'I beat your ghost! Can you beat mine?':challenge?'Can you beat my arcade ghost?':'Come explore Keyloria Kingdom and try it yourself!'}`;return `<button class="btn alt" data-act="copyRun">${rematch?'Send rematch challenge':arcadeGame?'Challenge a friend':'Share result'}</button>`}
 ACT.copyRun=async()=>{try{await navigator.clipboard.writeText(runShareText);toast('Result copied!')}catch(e){toast('Could not copy the result')}};
 let ARC_X=()=>({easy:.75,medium:1,hard:1.5})[S.set.arcd]||1;
 function arcReward(parts){const x=ARC_X();let tot=0;const rows=parts.filter(p=>p[1]>0).map(([t,n])=>{tot+=n;return `<div><span>${t}</span><b>+${n}</b></div>`});
@@ -1495,13 +1504,13 @@ const _modal0=modal;modal=function(h){_modal0(h);fitModal();$('#mbox').scrollTop
 
 /* ================= V16: BEAST MODE ================= */
 const BEAST={
- s:['rhythm','sphinx','zephyr','quartz','jinxed','xylem','fjord','glyph','psyche','nymph','yacht','twelfth','sixths','colonel','queue','gnome','knack','wry','tsk-tsk','czar',"y'all",'awry','Pfizer','Qatar','Iraq'],
- m:['pharaoh','bourgeois','silhouette','mnemonic','Fahrenheit','conscience','Albuquerque','liaison','misspell','embarrass','occurrence','millennium','threshold','Connecticut','handkerchief','entrepreneur','privilege','maneuver','Wednesday','Worcester','aesthetic','jeopardy','rhinoceros','vacuum','pseudonym','#42-B','$1,299.99','3:45 p.m.','(x+y)/2','e-mail@me'],
- l:['onomatopoeia','Worcestershire','idiosyncrasy','conscientious','pneumonia','chrysanthemum','bureaucracy','sesquipedalian','Massachusetts','acquaintance','accommodate',"hors d'oeuvre",'rendezvous','questionnaire','psychoanalysis','Mississippi River','x = (y^2) / 4','user_42@mail.com','C++ & JavaScript!','"Quick!" she said.','50% off; ~$19.99','#hashtag @handle','Antarctica\'s ice']};
+ s:['rhythm','sphinx','zephyr','quartz','jinxed','xylem','fjord','glyph','psyche','myth','yacht','twelfth','sixths','colonel','queue','gnome','knack','wry','tsk-tsk','awry','lymph','crypt','pygmy','sylph','gypsum'],
+ m:['pharaoh','bourgeois','silhouette','mnemonic','kaleidoscope','conscience','quizzical','liaison','misspell','embarrass','occurrence','millennium','threshold','archipelago','handkerchief','entrepreneur','privilege','maneuver','Wednesday','labyrinth','aesthetic','jeopardy','rhinoceros','vacuum','pseudonym','#42-B','$1,299.99','3:45 p.m.','(x+y)/2','e-mail@me'],
+ l:['onomatopoeia','serendipity','idiosyncrasy','conscientious','pneumonia','chrysanthemum','bureaucracy','sesquipedalian','Wednesday morning','acquaintance','accommodate',"hors d'oeuvre",'rendezvous','questionnaire','psychoanalysis','hippopotamus','x = (y^2) / 4','user_42@mail.com','C++ & code!','"Quick!" she said.','50% off; ~$19.99','#hashtag @handle','the glacier\'s ice']};
 const BEAST_SENT=['The quixotic jazz pianist vexed the bourgeois judge.','The big wizard quickly jumps over foxes near the pond!','"Rhythm," said the colonel, "is a conscientious pursuit."',
  'Is 7 x 8 = 56? Yes; and (12 / 4) + 9 = 12.','The pharaoh\'s mnemonic: Wednesday, 3:45 p.m., gate #42-B.','Email zephyr_99@quartz.io before 11:59 p.m. (sharp!).',
- 'Worcestershire sauce costs $4.99 & ketchup is ~$2.50.','Onomatopoeia: buzz, hiss, kerplunk, and zap!','An idiosyncratic bureaucracy accommodates no one\'s schedule.',
- 'Pack my box with five dozen liquor jugs... or juice jugs?','Mississippi, Massachusetts, and Connecticut are U.S. states.','The chrysanthemum\'s rendezvous was at 6:00 a.m. on the 21st.'];
+ 'Mustard costs $4.99 & ketchup is ~$2.50.','Onomatopoeia: buzz, hiss, kerplunk, and zap!','An idiosyncratic bureaucracy accommodates no one\'s schedule.',
+ 'Pack my box with five dozen juice boxes... or more?','Hippopotamuses, rhinoceroses, and giraffes are huge.','The chrysanthemum\'s rendezvous was at 6:00 a.m. on the 21st.'];
 DIFF.beast='BEAST MODE';
 const _dm0=diffMult;diffMult=()=>S.set.arcd==='beast'?3.4:_dm0();
 const isBeast=()=>S.set.arcd==='beast';
@@ -1620,7 +1629,7 @@ function finish(){
 const _res8=results;results=function(r){_res8(r);if(P.practice||!r.pass)return;const box=$('#mbox .bigstars');if(!box)return;const i=P.fi,sp=SPECIES[i],pts=lessonPts(i),f=formNow(i),nxt=EVO_PTS[f+1];
  let h='';
  if(r.evo!=null)h+=`<div class="banner gold">${sp.n[r.evoFrom]} evolved into ${sp.n[r.evo]}!</div>`;
- if(r.lucky){const L=r.lucky;h+=L.kind==='gems'?`<div class="banner luck">Lucky! ${sp.n[P.ff]} found ${L.gems} diamonds!</div>`:L.kind==='prop'?`<div class="banner gold">WOW! ${sp.n[P.ff]} found a ${PROPS[L.prop].n}!</div>`:`<div class="banner dia">SUPER RARE! ${sp.n[P.ff]} turned ${CW[L.cw].n} colors!</div>`}
+ if(r.lucky){const L=r.lucky;h+=L.kind==='gems'?`<div class="banner luck">Lucky find! +${L.gems} diamonds</div>`:L.kind==='prop'?'':`<div class="banner dia">SUPER RARE! ${sp.n[P.ff]} turned ${CW[L.cw].n} colors!</div>`}
  h+=evoPanel(i,pts,f,nxt);
  box.insertAdjacentHTML('afterend',h)};
 /* --- map: 8 levels per lesson + evolution meter --- */
@@ -2049,7 +2058,7 @@ function dailyHTML(){const d=S.daily||{},mins=d.day===todayKey()?Math.floor((d.s
 const _rh20=renderHome;renderHome=function(){_rh20();const g=$('#s-home .gprog');if(g&&S.name)g.insertAdjacentHTML('beforebegin',dailyHTML());
  const hb=$('#s-home .hbtns');if(hb&&!hb.querySelector('[data-act=practice]'))hb.insertAdjacentHTML('beforeend','<button class="btn alt" data-act="practice">Practice</button>')};
 /* --- 2. no-peek bonus --- */
-const _res20=results;results=function(r){_res20(r);if(!r.pass||P.practice||S.set.hide==='show')return;S.gems+=1;save();const b=$('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend','<div class="banner luck">No-peek bonus! +1 diamond</div>')};
+const _res20=results;results=function(r){_res20(r);if(!r.pass||P.practice||S.set.hide==='show')return;S.gems+=1;save();const b=$('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend','<div class="banner luck">No-peek +1 diamond</div>')};
 /* --- 3/4. practice menu: trouble keys, letter combos, free write --- */
 const COMBOS=['th','he','in','er','an','re','on','at','en','nd','ti','es','or','te','of','ed','is','it','al','ar','st','to','nt','ng','se','ha','as','ou','io','le','ve','co','me','de','hi','ri','ro','ic','ne','ea','ra','ce','the','ing','and','ion','ent','her','for','tha','ter','was','you','ith','ver','all','wit','thi','tio'];
 let PRACT=null;
@@ -2399,6 +2408,76 @@ const _res51=results;results=function(r){if(r&&r.pass&&!P.practice&&!r._ms){cons
 /* results: Next is gold, goes first, and is the Enter/Space default */
 const _res53=results;results=function(r){_res53(r);const rb=document.querySelector('#mbox .rbtns');if(!rb)return;
  const nx=[...rb.querySelectorAll('.btn')].find(b=>/next/i.test(b.textContent));if(nx){nx.classList.remove('alt','coral');nx.classList.add('nextbtn');rb.prepend(nx)}};
+/* --- lucky item: gift tile beside the card, tap to put it on --- */
+const _res54=results;results=function(r){const L=r&&r.lucky,i=P.fi;let stash=null;
+ if(L&&L.kind==='prop'&&!r._gave&&S.kv&&S.kv[i]&&S.kv[i].prop===L.prop){stash=L.prop;delete S.kv[i].prop}
+ try{_res54(r)}finally{if(stash){S.kv[i].prop=stash}}
+ const m=document.querySelector('#mbox');if(!m)return;
+ // compact chips for small bonuses
+ const chips=[...m.querySelectorAll('.banner.luck')];if(chips.length){const row=document.createElement('div');row.className='chiprow';chips.forEach(c=>{c.className='rchip';row.appendChild(c)});m.querySelector('.bigstars')?.after(row)}
+ if(stash&&!r._gave){const fl=m.querySelector('#flip');if(!fl)return;const pr=PROPS[stash],u=PXG(pr.r,pr.p).toDataURL();
+  const wrap=document.createElement('div');wrap.className='cardrow';fl.before(wrap);wrap.appendChild(fl);
+  wrap.insertAdjacentHTML('beforeend',`<button class="gift" data-act="giveProp" aria-label="Give ${esc(pr.n)}"><b>Found!</b><img src="${u}" alt=""><span>${esc(pr.n)}</span><em>Tap to give</em></button>`);
+  r._gave=1}};
+ACT.giveProp=()=>{const g=document.querySelector('#mbox .gift'),fl=document.querySelector('#mbox #flip');if(!g||!fl||g.classList.contains('done'))return;
+ const img=g.querySelector('img'),a=img.getBoundingClientRect(),b=fl.querySelector('.c-art')?.getBoundingClientRect()||fl.getBoundingClientRect();
+ const f=img.cloneNode();f.className='giftfly';f.style.cssText=`left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px`;document.body.appendChild(f);
+ requestAnimationFrame(()=>{f.style.transform=`translate(${b.left+b.width/2-a.left-a.width/2}px,${b.top+b.height*.3-a.top-a.height/2}px) scale(.6)`});
+ tone&&tone(660,.08,'square',.05);
+ setTimeout(()=>{f.remove();const cw=fl.querySelector('.cw:not(.bk)');if(cw)cw.outerHTML=cardHTML(P.fi,P.ff,S.cards[P.fi+'-'+P.ff]||{});fl.classList.remove('goholo');void fl.offsetWidth;fl.classList.add('gave');
+  g.classList.add('done');g.querySelector('em').textContent='Wearing it!';sfx.win&&sfx.win()},600)};
+/* --- lesson splash: blinking LESSON N + short summary --- */
+const LSUM={caps:'Shift for capital letters',sent:'Type your first full sentences',num:'Reach up to the numbers',master:'Every key, all together',long:'Longer words, steady fingers',names:'Names with capital letters',punct:'Periods, commas and question marks',speedy:'Go fast, stay accurate',story:'Type a whole forest story',numw:'Numbers mixed with words',symb:'Find the tricky symbols',quote:'Quotes and talking words',tricky:'Tricky spellings to master',summit:'The big mountain challenge',
+ c_top:'The most common words',c_pairs:'Two words at a time',c_caps:'Start sentences with capitals',c_sea:'Ocean words, smooth typing',c_tide:'Short sentences by the sea',c_reef:'Race through reef facts',
+ d_comma:'Pause with commas',d_ask:'Question marks and exclamations',d_apos:"Apostrophes: it's and don't",d_talk:'Quotes for talking characters',d_colon:'Colons and semicolons',d_dash:'Dashes and brackets',
+ f_row:'Master the number row',f_count:'Counting with words',f_money:'Prices with dollar signs',f_time:'Times and dates',f_math:'Type math facts',f_big:'Big numbers with commas',
+ g_at:'@ and # symbols',g_star:'& * + = symbols',g_brack:'Round and square brackets',g_slash:'Slashes, dashes, underscores',g_mail:'Type email addresses',g_web:'Type web links',
+ e_double:'Words with double letters',e_silent:'Words with silent letters',e_tion:'Endings: -tion and -sion',e_homo:'Words that sound alike',e_fix:'Prefixes and suffixes',e_giant:'Giant words, letter by letter',
+ s_fable:'Type classic fables',s_fact:'Type fun science facts',s_poem:'Type rhyming lines',s_letter:'Write little letters',s_twist:'Tongue twisters for fingers',s_saga:'An epic sky story',
+ l_sprint:'Every letter, full speed',l_perfect:'No mistakes allowed',l_mix:'Letters, numbers and symbols',l_code:'Type real code lines',l_epic:'The epic final tale',l_final:'Become a Keyboard Legend'};
+function lessonSummary(i){const L=LESSONS[i];if(LSUM[L.sp])return LSUM[L.sp];if(L.k){const ks=[...L.k].map(c=>c==='.'?'period':c===','?'comma':c===';'?'semicolon':c.toUpperCase());return 'New keys: '+(ks.length>1?ks.slice(0,-1).join(', ')+' and '+ks[ks.length-1]:ks[0])}return lessonTitle(i)}
+let SPLASH=null;
+function lessonSplash(i){const pl=document.getElementById('s-play');if(!pl)return;document.getElementById('lsplash')?.remove();
+ const el=document.createElement('div');el.id='lsplash';el.innerHTML=`<div class="ls-box"><div class="ls-world">${esc(REGIONS[LESSONS[i].r]?.name||'')}</div><div class="ls-num">LESSON ${i+1}</div><div class="ls-title">${esc(lessonTitle(i))}</div><div class="ls-sum">${esc(lessonSummary(i))}</div><div class="ls-go">Press SPACE to start</div></div>`;
+ pl.appendChild(el);SPLASH=el;[523,659,784,1047].forEach((f,k)=>setTimeout(()=>tone&&tone(f,.12,'square',.06),k*110));
+ const done=()=>{if(SPLASH!==el)return;SPLASH=null;el.classList.add('out');setTimeout(()=>el.remove(),300)};el.addEventListener('click',done);el._done=done;setTimeout(()=>el.classList.add('ready'),700);setTimeout(done,6000)}
+addEventListener('keydown',e=>{if(!SPLASH)return;e.preventDefault();e.stopImmediatePropagation();if((e.key===' '||e.key==='Enter')&&SPLASH.classList.contains('ready'))SPLASH._done()},true);
+const _ss55=startStage;startStage=function(n,mode){const r=_ss55.apply(this,arguments);try{const i=Math.floor(n/NST);
+ if(!mode&&LESSONS[i]&&(n%NST===0||S.lastLesson!==i))lessonSplash(i);if(!mode&&LESSONS[i]){S.lastLesson=i}}catch(e){}return r};
+/* arcade button on results */
+const _res55=results;results=function(r){_res55(r);const rb=document.querySelector('#mbox .rbtns');if(rb&&document.querySelector('#mbox .bigstars')&&!rb.querySelector('[data-to=arcade]')){const m=rb.querySelector('[data-to=map]');(m||rb.lastElementChild).insertAdjacentHTML('afterend','<button class="btn" data-act="go" data-to="arcade">Arcade</button>')}
+ if(rb&&document.querySelector('#mbox .bigstars')&&!rb.querySelector('[data-to=home]')){rb.insertAdjacentHTML('beforeend','<button class="btn" data-act="go" data-to="home">Main Menu</button>');
+  const cp=rb.querySelector('[data-act=copyRun]');if(cp)rb.appendChild(cp)}};
+/* --- world header terrain silhouette (no sky), rises from the bar bottom --- */
+const TERR=[{kind:'hills',deco:'tree'},{kind:'hills',deco:'pine'},{kind:'peaks',deco:'snow'},{kind:'flat',deco:'palm'},{kind:'dunes',deco:'cactus'},{kind:'peaks',deco:'snowall'},{kind:'hills',deco:'shroom'},{kind:'city',deco:'gear'},{kind:'clouds',deco:'cloud'},{kind:'peaks',deco:'crystal'}];
+function terrainCanvas(w){const T=TERR[w%TERR.length],G=GLOBE[w%GLOBE.length],W=180,H=44,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),rnd=prng(w*331+7);
+ const px=(x,y,col)=>{if(x>=0&&y>=0&&x<W&&y<H){g.fillStyle=col;g.fillRect(x,y,1,1)}};
+ const ph=[rnd()*6,rnd()*6,rnd()*6];
+ const prof=(x,layer)=>{const t=x/W,ramp=Math.min(1,Math.max(0,(t-.02)/.55));const amp=T.kind==='peaks'?30:T.kind==='dunes'?14:T.kind==='flat'?12:T.kind==='city'?10:T.kind==='clouds'?12:18;
+  let n=Math.sin(x*.045+ph[0]+layer)*.5+Math.sin(x*.11+ph[1]+layer*2)*.3+Math.sin(x*.023+ph[2])*.4;
+  if(T.kind==='peaks')n=1-Math.abs(Math.sin(x*.05+ph[0]+layer*1.7))+Math.sin(x*.17+ph[1])*.15;
+  if(T.kind==='city')n=Math.floor((Math.sin(Math.floor(x/9)*2.3+ph[0]+layer)+1)*2)/4;
+  const base=ramp*((layer?amp*.8+8:amp)*(0.6+0.4*n)+2);return Math.round(H-base)};
+ const back=shadeHex(G.land,-.35),front=G.land,hi=G.l2,edge=shadeHex(G.land,-.55);
+ // back layer
+ for(let x=0;x<W;x++){const top=prof(x,1);for(let y=top;y<H;y++)px(x,y,back)}
+ // front layer with lit edge
+ const tops=[];for(let x=0;x<W;x++){const top=prof(x,0);tops.push(top);for(let y=top;y<H;y++)px(x,y,y===top?hi:(y>H-6?shadeHex(front,-.18):front))}
+ // decorations
+ const snow=y=>T.deco==='snowall'||(T.deco==='snow'&&y<H-24);
+ for(let x=0;x<W;x++){const y=tops[x];if(snow(y))for(let k=0;k<2;k++)px(x,y+k,'#eef4fa')}
+ const sprite=(x,rows,pal)=>{const y0=tops[x]-rows.length+1;rows.forEach((r,yy)=>[...r].forEach((ch,xx)=>{if(pal[ch])px(x-Math.floor(r.length/2)+xx,y0+yy,pal[ch])}))};
+ const D={tree:[[' gg ','gggg','gGGg',' tt ',' tt '],{g:shadeHex(G.l2,-.1),G:shadeHex(G.land,-.3),t:'#6a4a34'}],
+  pine:[['  g  ',' ggg ',' gGg ','ggggg','  t  '],{g:'#2f6a3e',G:'#1f4a2e',t:'#5a3a2a'}],
+  palm:[['gg gg',' gtg ','  t  ','  t  ','  t  '],{g:'#4a9a52',t:'#8a6a44'}],
+  cactus:[[' c ','cc c','c cc',' c ',' c '],{c:'#4a8a4a'}],
+  shroom:[[' rrr ','rrwrr','  s  ','  s  '],{r:'#c86a5a',w:'#fff2e0',s:'#e8dcc8'}],
+  gear:[['y y y',' yyy ','yy yy',' yyy ','y y y'],{y:'#f0c860'}],
+  cloud:[[' ww  ','wwwww'],{w:'#ffffff'}],
+  crystal:[[' c ',' c ','cCc','cCc'],{c:'#c8a8f0',C:'#8a6ad8'}],snow:null,snowall:null};
+ const d=D[T.deco];if(d){for(let x=W*.35|0;x<W-4;x+=8+Math.floor(rnd()*14)){if(rnd()<.75)sprite(x,d[0],d[1])}}
+ if(T.kind==='flat'){for(let x=0;x<W;x++)for(let y=H-3;y<H;y++)if((x+y)%7===0)px(x,y,'#7fc8e0')}
+ return c}
 function fitNames(root){(root||document).querySelectorAll('.sprtile small').forEach(el=>{el.style.fontSize='';let f=parseFloat(getComputedStyle(el).fontSize)||13;let n=0;while(el.scrollWidth>el.clientWidth+1&&f>7&&n++<20){f-=.5;el.style.setProperty('font-size',f+'px','important')}})}
 const _rb50=renderBinder;renderBinder=function(){const r=_rb50.apply(this,arguments);requestAnimationFrame(()=>fitNames());return r};
 addEventListener('resize',()=>{if(document.querySelector('.sprtile'))fitNames()});
@@ -2447,7 +2526,8 @@ const globeURL=w=>kku('globe'+w,()=>globeCanvas(w));
 function globeImg(w,cls=''){return `<img class="globe ${cls}" src="${globeURL(w)}" alt="">`}
 /* world headers get a globe + picker row on top of the map */
 const _rm52=renderMap;renderMap=function(){const r=_rm52.apply(this,arguments);const root=$('#s-map');if(!root)return r;
- const heads=[...root.querySelectorAll('.worldhead')];heads.forEach((h,k)=>{if(!h.querySelector('.globe')){h.insertAdjacentHTML('afterbegin',globeImg(k));h.classList.add('hasglobe');h.id='world-'+(k+1)}});
+ const heads=[...root.querySelectorAll('.worldhead')];heads.forEach((h,k)=>{if(!h.querySelector('.globe')){h.insertAdjacentHTML('afterbegin',globeImg(k));h.classList.add('hasglobe');h.id='world-'+(k+1);
+  try{h.insertAdjacentHTML('beforeend',`<img class="wh-land" src="${kku('terr'+k,()=>terrainCanvas(k))}" alt="">`)}catch(e){}}});
  const cur=worldOf(Math.floor(nextStage()/8));
  if(!root.querySelector('.wpick')){const tb=root.querySelector('.topbar');tb&&tb.insertAdjacentHTML('afterend',`<div class="wpick">${WORLDS.map((W,k)=>{const open=k<heads.length&&!heads[k].classList.contains('shut');
   return `<button class="wp ${open?'':'lockd'} ${k+1===cur?'cur':''}" ${open?`data-act="gotoWorld" data-w="${k+1}"`:'disabled'} title="${open?esc(W.name):'Locked'}">${globeImg(k)}<small>${open?esc(W.name):'???'}</small></button>`}).join('')}</div>`)}

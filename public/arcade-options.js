@@ -5,13 +5,16 @@ const ARCADE_LEVELS={auto:[0,'Auto'],easy:[1,'Easy'],medium:[2,'Medium'],hard:[3
 const arcadeNumberOn=()=>S.set.arcNumbers===true;
 const arcadeSymbolOn=()=>S.set.arcSymbols===true;
 const arcadeLevelNow=()=>S.set.arcd||'auto';
-const arcadeHighest=type=>ARCADE_LEVELS[S.arc.high?.[type]]?.[1]||'None yet';
+const arcadeHighest=type=>{const lv=ARCADE_LEVELS[S.arc.high?.[type]];if(!lv)return 'None yet';const m=S.arc.highMod?.[type]||{};
+ return lv[1]+(m.n||m.s?`<span class="arc-mods">${m.n?'<i>123</i>':''}${m.s?'<i>#?!</i>':''}</span>`:'')};
 const arcadeStat=(label,value,cls='')=>`<div class="arcade-stat ${cls}"><b>${value}</b><span>${label}</span></div>`;
 function arcadeRecordWin(type,won){
  if(!won)return;
  S.arc.high=S.arc.high||{};
  const level=G.arcLevel||arcadeLevelNow();
- if(!S.arc.high[type]||ARCADE_LEVELS[level][0]>ARCADE_LEVELS[S.arc.high[type]]?.[0])S.arc.high[type]=level;
+ S.arc.highMod=S.arc.highMod||{};
+ const mod={n:arcadeNumberOn(),s:arcadeSymbolOn()},score=(lv,m)=>(ARCADE_LEVELS[lv]?.[0]??-1)*10+(m&&m.n?1:0)+(m&&m.s?1:0);
+ if(!S.arc.high[type]||score(level,mod)>score(S.arc.high[type],S.arc.highMod[type])){S.arc.high[type]=level;S.arc.highMod[type]=mod}
 }
 
 function arcadeToken(value){
