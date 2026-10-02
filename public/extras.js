@@ -96,6 +96,8 @@ ACT.dig=()=>{mountGame('Treasure Dig','Dig 15 layers before time runs out! Pick 
  strip();G.raf=requestAnimationFrame(tick)};
 
 /* ---------- 3. Keylori Keeper ---------- */
+function kpOpts(good,bad){const ok=a=>new Set(a).size===a.length&&!a.some((x,i)=>a.some((y,j)=>i!==j&&y.startsWith(x)));let best=null;for(let t=0;t<60;t++){const a=[rand(good),rand(bad),rand(bad)];if(ok(a)){best=a;break}}
+ if(!best){const g=rand(good),b=bad.filter(w=>!w.startsWith(g)&&!g.startsWith(w));const b1=rand(b.length?b:bad),b2=b.filter(w=>w!==b1&&!w.startsWith(b1)&&!b1.startsWith(w));best=b2.length?[g,b1,rand(b2)]:[g,b1]}return best.sort(()=>Math.random()-.5)}
 const WANTS=[{t:'a LONG word (6+ letters)',f:w=>w.length>=6},{t:'a SHORT word (3 letters or less)',f:w=>w.length<=3},{t:'a word with the letter E',f:w=>w.includes('e')},{t:'a word with the letter A',f:w=>w.includes('a')},
  {t:'a word that starts with S',f:w=>w[0]==='s'},{t:'a word with double letters',f:w=>/(.)\1/.test(w)},{t:'a word with the letter O',f:w=>w.includes('o')},{t:'a word that ends with T',f:w=>w.endsWith('t')}];
 ACT.keeper=()=>{mountGame('Keylori Keeper','Feed your Keylori the word it wants!','Fed','Time');
@@ -103,7 +105,7 @@ ACT.keeper=()=>{mountGame('Keylori Keeper','Feed your Keylori the word it wants!
  G={type:'keeper',pool,ci,cf,goal:15,life:100,fed:0,miss:0,left:60,typed:'',done:false,want:null,opts:[]};$('#gsw').hidden=true;$('#garena').className='garena keeper-arena';
  $('#garena').innerHTML=`${backdrop(0,['#f0a870','#f0c088','#f6d8a8','#fbe8c8'])}${cloudsHTML()}<div class="kp-pet" id="kppet">${creatureSVG(ci,cf,'px')}</div><div class="kp-want bubble" id="kpwant"></div><div class="kp-food" id="kpfood"></div><div class="kp-belly"><i id="kpbelly"></i></div><div class="kp-life"><span>♥</span><div><i id="kplife"></i></div></div><div class="kp-typed" id="kptyped"></div>`;
  const round=()=>{const ws=WANTS.filter(W=>pool.some(W.f)&&pool.some(w=>!W.f(w)));G.want=rand(ws.length?ws:WANTS);const good=pool.filter(G.want.f),bad=pool.filter(w=>!G.want.f(w));
-  G.opts=[rand(good),rand(bad),rand(bad)].sort(()=>Math.random()-.5);G.typed='';$('#kpwant').innerHTML=`I want ${G.want.t}!`;$('#kpfood').innerHTML=G.opts.map((w,k)=>`<div class="food" id="fd${k}"><span>${esc(w)}</span></div>`).join('');paint()};
+  G.opts=kpOpts(good,bad);G.typed='';$('#kpwant').innerHTML=`I want ${G.want.t}!`;$('#kpfood').innerHTML=G.opts.map((w,k)=>`<div class="food" id="fd${k}"><span>${esc(w)}</span></div>`).join('');paint()};
  const paint=()=>{$('#kptyped').textContent=G.typed||' ';G.opts.forEach((w,k)=>{const el=$('#fd'+k);if(el)el.classList.toggle('match',!!G.typed&&w.startsWith(G.typed))});const m=G.opts.find(w=>w.startsWith(G.typed));setTarget(m?m[G.typed.length]:null)};
  G.xin=ch=>{const nt=G.typed+ch;if(!G.opts.some(w=>w.startsWith(nt))){sfx.bad();G.typed='';paint();return}G.typed=nt;sfx.ok(nt.length);const done=G.opts.find(w=>w===nt);
   if(done){const pet=$('#kppet');if(G.want.f(done)){G.fed++;G.score=(G.score||0)+20+done.length*5;$('#g-a').textContent=G.fed;$('#kpbelly').style.width=Math.min(100,G.fed*8)+'%';pet.classList.remove('yum','nope');void pet.offsetWidth;pet.classList.add('yum');tone(880,.1,'square',.05);round()}

@@ -1523,7 +1523,7 @@ const _bp0=bossPhrase;bossPhrase=function(){if(!(isBeast()&&G.beast))return _bp0
 const _sg2=startGlitch;startGlitch=function(){_sg2();if(isBeast()){G.beast=true;G.speed=3.4;beastKeys()}};
 const _sm2=startMeteor;startMeteor=function(){_sm2();if(isBeast()){G.beast=true;G.speed=4.2;G.words=[...BEAST.s,...BEAST.m];G.set=[...BEAST.s];G.total=Math.round(30*S.set.len);beastKeys()}};
 const _sr2=startRace;startRace=function(){_sr2();if(isBeast()){G.beast=true;G.text=fillSent(BEAST_SENT,Math.round(240*S.set.len));G.pos=0;G.mist=new Set();
- [95,105,118].forEach((w,k)=>G.racers[k].w=w);beastKeys();try{const box=$('#gstripIn');if(box){box.innerHTML=[...G.text].map(c=>`<span class="${c===' '?'sp':''}">${c===' '?'·':esc(c)}</span>`).join('')}}catch(e){}if(typeof raceStrip==='function')raceStrip()}};
+ [72,82,94].forEach((w,k)=>G.racers[k].w=w);beastKeys();try{const box=$('#gstripIn');if(box){box.innerHTML=[...G.text].map(c=>`<span class="${c===' '?'sp':''}">${c===' '?'·':esc(c)}</span>`).join('')}}catch(e){}if(typeof raceStrip==='function')raceStrip()}};
 const _ax0=ARC_X;ARC_X=()=>isBeast()?2:_ax0();
 
 
