@@ -13,12 +13,19 @@ const validCode = v => /^[a-z]{3}[0-9]{3}$/.test(v) && words.includes(v.slice(0,
 const validPid = v => /^[a-z0-9]{6,24}$/.test(v);
 const num = (v, max) => { const n = Math.round(+v || 0); return Math.max(0, Math.min(max, n)) };
 const GAMES = ["meteor", "race", "glitch", "bubble", "dig", "keeper", "bridge"];
+function cleanAsg(a) {
+  const o = {};
+  if (a && typeof a === "object") for (const [k, v] of Object.entries(a).slice(-60)) if (/^\d{1,4}$/.test(k) && v && typeof v === "object") o[k] = { at: num(v.at, 9e15), d: num(v.d, 9e15), w: num(v.w, 300), a: num(v.a, 100) };
+  return o;
+}
 function cleanStats(s) {
   s = s && typeof s === "object" ? s : {};
   const arc = {};
   for (const g of GAMES) if (s.arc && s.arc[g]) arc[g] = { wpm: num(s.arc[g].wpm, 300), acc: num(s.arc[g].acc, 100) };
   return { lesson: cleanTitle(s.lesson), pos: num(s.pos, 999), world: num(s.world, 99), stars: num(s.stars, 99999),
-    wpm: num(s.wpm, 300), acc: num(s.acc, 100), mins: num(s.mins, 100000), arc, seen: Date.now() };
+    wpm: num(s.wpm, 300), acc: num(s.acc, 100), mins: num(s.mins, 100000), arc, seen: Date.now(),
+    prog: String(s.prog || "").replace(/[^0-9:;<=>?@A-Z]/g, "").slice(0, 600), asg: cleanAsg(s.asg),
+    cur: s.cur && typeof s.cur === "object" ? { i: num(s.cur.i, 9999), at: num(s.cur.at, 9e15), n: num(s.cur.n, 99) } : null };
 }
 export const weekBoard = members => {
   const rows = [];
@@ -64,8 +71,8 @@ export default async req => {
   if (a === "leave") { if (validPid(pid)) await store.delete("m:" + code + ":" + pid); return json({ ok: true }) }
   if (a === "board") return json({ name: meta.name, rows: weekBoard(await members()).slice(0, 60) });
   if (!(await isTeacher())) return json({ error: "Grown-ups only" }, 403);
-  if (a === "dash") return json({ ...pub(), members: (await members()).map(m => ({ pid: m.pid, name: m.name, joined: m.joined, stats: m.stats })) });
-  if (a === "assign") { meta.assign = b.i == null ? null : { i: num(b.i, 9999), title: cleanTitle(b.title), at: Date.now() }; await store.setJSON("c:" + code, meta); return json(pub()) }
+  if (a === "dash") return json({ ...pub(), hist: meta.hist || (meta.assign ? [meta.assign] : []), members: (await members()).map(m => ({ pid: m.pid, name: m.name, joined: m.joined, stats: m.stats })) });
+  if (a === "assign") { meta.assign = b.i == null ? null : { i: num(b.i, 9999), title: cleanTitle(b.title), at: Date.now() }; if (meta.assign) meta.hist = [...(meta.hist || []), meta.assign].slice(-40); await store.setJSON("c:" + code, meta); return json(pub()) }
   if (a === "race") { meta.race = b.room ? { room: String(b.room).toUpperCase().slice(0, 6), at: Date.now() } : null; await store.setJSON("c:" + code, meta); return json(pub()) }
   if (a === "remove") { if (validPid(pid)) await store.delete("m:" + code + ":" + pid); return json({ ok: true }) }
   return json({ error: "unknown" }, 400);

@@ -35,6 +35,14 @@ addEventListener('keydown',e=>{if(e.key!==' '&&e.key!=='Enter')return;const ae=d
  const fl=box.querySelector('#flip');if(fl&&!fl.classList.contains('go')){stop();fl.classList.add('go');return}
  const b=primaryBtn(box);if(b){stop();b.click()}},true);
 
+/* ---------- tell kids they can press SPACE whenever it skips or continues ---------- */
+{const pill=document.createElement('div');pill.id='spacehint';pill.hidden=true;document.body.appendChild(pill);
+ document.head.insertAdjacentHTML('beforeend','<style>#spacehint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10050;background:#1b1626;color:#fff6e0;border:3px solid #f0c860;padding:6px 14px;font-size:16px;pointer-events:none;white-space:nowrap;box-shadow:0 4px 0 rgba(0,0,0,.4)}#spacehint b{display:inline-block;background:#f0c860;color:#2a1d3e;padding:0 10px;margin-right:6px;letter-spacing:1px}#spacehint[hidden]{display:none}body.mobile #spacehint{display:none!important}</style>');
+ const why=()=>{if(window.KK_MOBILE||$('#lvlfx'))return '';if(CATCH_SKIP)return 'to skip';const m=$('#modal');if(!m||m.hidden)return '';
+  const eb=$('#evoBtns');if(eb)return eb.style.visibility==='hidden'?'to skip':'to continue';
+  const box=$('#mbox');if(!box||!(box.querySelector('.rstats')||box.querySelector('.cutscene')))return '';const fl=box.querySelector('#flip');if(fl&&!fl.classList.contains('go'))return 'to flip the card';return primaryBtn(box)?'to continue':''};
+ let last='';setInterval(()=>{const t=why();if(t===last)return;last=t;pill.hidden=!t;if(t)pill.innerHTML='Press <b>SPACE</b> '+t},200)}
+
 /* ---------- boss phrases never repeat in one session ---------- */
 const SEEN=new Set();let depth=0;
 const fresh=(fn,alt)=>function(){if(depth)return fn.apply(this,arguments);depth++;try{let t;for(let k=0;k<30;k++){t=fn.apply(this,arguments);if(!SEEN.has(t))break}

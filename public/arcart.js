@@ -132,8 +132,12 @@ body.mobile #s-arcade .game .gart.zart{transform:none!important;height:auto!impo
 const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments);try{document.querySelectorAll('#s-arcade .game').forEach(card=>{const h=card.querySelector('h3'),k=h&&MAP[h.textContent.trim()],a=card.querySelector('.gart');
   if(!k||!a)return;const u=url(k);if(!u)return;a.className='gart zart';a.innerHTML=`<div class="zimg" style="background-image:url(${u})"></div>`})}catch(e){console.warn(e)}return r};
 try{if(screen==='arcade')renderArcade()}catch(e){}
-setTimeout(()=>document.body.classList.add('kkready'),3000);
+setTimeout(()=>document.body.classList.add('kkready'),3500);
 /* show the home screen only once every script and the fonts have settled (stops the header jumping on load) */
 {const ready=()=>{try{if(screen==='home'){renderHome();fitHome()}}catch(e){}requestAnimationFrame(()=>document.body.classList.add('kkready'))};
- const fr=document.fonts&&document.fonts.ready;Promise.race([fr||Promise.resolve(),new Promise(r=>setTimeout(r,1500))]).then(ready)}
+ /* wait for the web fonts the home screen actually uses (fonts.ready can resolve before they're even requested) */
+ const fonts=()=>{if(!document.fonts||!document.fonts.load)return Promise.resolve();const want=new Set();
+  document.querySelectorAll('#s-home, #s-home *').forEach(e=>{const c=getComputedStyle(e);want.add(c.fontStyle+' '+c.fontWeight+' 16px '+c.fontFamily)});
+  return Promise.all([...want].map(f=>document.fonts.load(f).catch(()=>{}))).then(()=>document.fonts.ready)};
+ Promise.race([fonts(),new Promise(r=>setTimeout(r,2500))]).then(ready)}
 })();

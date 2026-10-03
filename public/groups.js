@@ -17,7 +17,10 @@ const lessonIdx=()=>Math.floor(nextStage()/NST);
 function stats(){const i=lessonIdx(),h=(S.hist||[]).slice(-8),avg=f=>h.length?Math.round(h.reduce((a,x)=>a+f(x),0)/h.length):0,ws=weekStart();
  if(!S.wk||S.wk.w!==ws)S.wk={w:ws,base:S.time||0};
  const arc={};(S.hs||[]).filter(x=>x.t>=ws).forEach(x=>{if(!arc[x.g]||x.wpm>arc[x.g].wpm)arc[x.g]={wpm:x.wpm,acc:x.acc}});
- return{lesson:`Lesson ${LNUM(i)}: ${lessonTitle(i)}`,pos:LNUM(i),world:worldOf(i),stars:Object.values(S.best||{}).reduce((a,b)=>a+b,0),wpm:avg(x=>x.w),acc:avg(x=>x.a),mins:Math.round(((S.time||0)-S.wk.base)/60),arc}}
+ const prog=(window.ORDER||LESSONS.map((_,k)=>k)).map(j=>{let n=0,st=0;for(let q=0;q<NST;q++){const b=(S.best||{})[j+'-'+q]||0;if(b>=1)n++;st+=Math.min(3,b)}return String.fromCharCode(48+n)+String.fromCharCode(48+st)}).join('');
+ const A=S.asga&&S.cls&&S.asga.code===S.cls.code?S.asga:null;
+ return{lesson:`Lesson ${LNUM(i)}: ${lessonTitle(i)}`,pos:LNUM(i),world:worldOf(i),stars:Object.values(S.best||{}).reduce((a,b)=>a+b,0),wpm:avg(x=>x.w),acc:avg(x=>x.a),mins:Math.round(((S.time||0)-S.wk.base)/60),arc,prog,
+  asg:S.asgr||{},cur:A?{i:A.i,at:A.at,n:(A.st||[]).length}:null}}
 let lastRep=0;
 function report(force){if(!S.cls||(!force&&Date.now()-lastRep<15000))return;lastRep=Date.now();post('/api/class',{a:'report',code:S.cls.code,pid:pid(),name:myName(),stats:stats()}).then(info=>{CLS_INFO=info;homeBanner()}).catch(()=>{})}
 const _res=results;results=function(){const r=_res.apply(this,arguments);setTimeout(report,1500);return r};
@@ -27,11 +30,30 @@ const _md=modal;modal=function(){const r=_md.apply(this,arguments);try{if(screen
 let CLS_INFO=null,lastInfo=0;
 function fetchInfo(){if(!S.cls||Date.now()-lastInfo<15000)return;lastInfo=Date.now();post('/api/class',{a:'info',code:S.cls.code}).then(i=>{CLS_INFO=i;S.cls.name=i.name;homeBanner()}).catch(e=>{if(/not found/i.test(e.message)){S.cls=null;save()}})}
 function homeBanner(){const home=$('#s-home');if(!home||home.hidden)return;home.querySelector('.clsban')?.remove();if(!S.cls||!CLS_INFO)return;const I=CLS_INFO;
- const pick=I.assign&&LESSONS[I.assign.i]?`<div class="cb-row"><span>Teacher's pick: <b>Lesson ${LNUM(I.assign.i)}: ${esc(lessonTitle(I.assign.i))}</b></span><button class="btn sm volt" data-act="clsPick" data-i="${I.assign.i}">Play</button></div>`:'';
+ const pick=I.assign&&LESSONS[I.assign.i]?`<div class="cb-row"><span>Teacher's pick: <b>Lesson ${LNUM(I.assign.i)}: ${esc(lessonTitle(I.assign.i))}</b></span>${(()=>{const R=S.asgr&&S.asgr[I.assign.i];return R&&R.at===I.assign.at?'<span class="cb-done">Done ✓</span>':''})()}<button class="btn sm volt" data-act="clsPick" data-i="${I.assign.i}">Play</button></div>`:'';
  const race=I.race?`<div class="cb-row"><span>A class race is open!</span><button class="btn sm" data-act="raceJoinCode" data-r="${esc(I.race.room)}">Join race</button></div>`:'';
  if(!pick&&!race)return;const tb=home.querySelector('.topbar');const el=document.createElement('div');el.className='clsban panel';el.innerHTML=`<div class="cb-name">${esc(I.name||'My class')}</div>${pick}${race}`;
  tb?tb.insertAdjacentElement('afterend',el):home.prepend(el)}
-ACT.clsPick=d=>{const i=+d.i;let s=0;for(;s<NST-1;s++)if(!((S.best[i+'-'+s]||0)>=1))break;closeModal();startStage(i*NST+s)};
+/* playing the teacher's pick: stages count from when it was assigned, and the last one ends with "Lesson complete!" */
+const asgFor=()=>{const a=CLS_INFO&&CLS_INFO.assign;if(!a||!S.cls)return null;if(!S.asga||S.asga.i!==a.i||S.asga.at!==a.at||S.asga.code!==S.cls.code){S.asga={code:S.cls.code,i:a.i,at:a.at,st:[]};save()}return S.asga};
+let ASG_RUN=false;
+ACT.clsPick=d=>{const i=+d.i,A=asgFor();let s=0;if(A&&A.i===i){for(;s<NST-1;s++)if(!A.st.includes(s))break}else{for(;s<NST-1;s++)if(!((S.best[i+'-'+s]||0)>=1))break}
+ ASG_RUN=!!(A&&A.i===i);closeModal();startStage(i*NST+s)};
+const _shw=show;show=function(n){if(n!=='play')ASG_RUN=false;return _shw.apply(this,arguments)};
+const _res2=results;results=function(r){const out=_res2.apply(this,arguments);try{const A=S.asga;
+ if(ASG_RUN&&A&&typeof P!=='undefined'&&!P.mode&&!P.practice&&P.i===A.i&&r&&!r._asg&&document.querySelector('#mbox .rstats')){r._asg=1;
+  if(r.pass&&!A.st.includes(P.s)){A.st.push(P.s);save()}
+  const box=document.querySelector('#mbox'),rb=box&&box.querySelector('.rbtns');
+  if(A.st.length>=NST){S.asgr=S.asgr||{};const prev=S.asgr[A.i];if(!prev||prev.at!==A.at){S.asgr[A.i]={at:A.at,d:Date.now(),w:r.wpm||0,a:r.acc||0}}
+   const k=Object.keys(S.asgr);if(k.length>60)delete S.asgr[k[0]];save();
+   if(rb){rb.querySelectorAll('[data-act=play],.nextbtn').forEach(b=>b.remove());rb.insertAdjacentHTML('afterbegin','<button class="btn nextbtn" data-act="asgDone">Lesson complete! Next</button>')}}
+  else if(rb&&r.pass){const nx=A.st.length<NST?(()=>{for(let q=0;q<NST;q++)if(!A.st.includes(q))return q})():null;rb.querySelectorAll('[data-act=play]').forEach(b=>{if(!b.closest('.stpick')&&nx!=null)b.dataset.n=A.i*NST+nx})}}}catch(e){console.warn(e)}return out};
+ACT.asgDone=()=>{const A=S.asga,R=S.asgr&&A&&S.asgr[A.i];
+ modal(`<div class="asgdone"><h2>Lesson complete!</h2><p class="big">Lesson ${LNUM(A.i)}: ${esc(lessonTitle(A.i))}</p>${R?`<div class="rstats2"><div><b>${R.w}</b><span>WPM</span></div><div><b>${R.a}%</b><span>Accuracy</span></div></div>`:''}
+ <p class="muted">Send it to your teacher, then head back to the menu.</p><div class="rbtns"><button class="btn nextbtn" data-act="asgSubmit">Submit to teacher</button></div></div>`)};
+ACT.asgSubmit=()=>{ASG_RUN=false;const b=document.querySelector('[data-act=asgSubmit]');if(b){b.disabled=true;b.textContent='Sending...'}
+ const fin=ok=>{toast(ok?'Sent to your teacher!':'Saved! It will send next time you are online.');closeModal();show('home')};
+ lastRep=0;post('/api/class',{a:'report',code:S.cls.code,pid:pid(),name:myName(),stats:stats()}).then(i=>{CLS_INFO=i;fin(true)}).catch(()=>fin(false))};
 const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const row=$('#s-home .hi-btns');row?.querySelector('[data-act=clsHub]')?.remove();
  const tb=$('#s-home .topbar');if(tb&&S.name&&!tb.querySelector('.clsbtn')){const after=tb.querySelector('.roamtog')||tb.querySelector('.selp');const h=`<button class="btn clsbtn" data-act="clsHub"><img class="bico hico" src="${BOOK}" alt="">CLASS</button>`;after?after.insertAdjacentHTML('afterend',h):tb.insertAdjacentHTML('afterbegin',h)}homeBanner();fetchInfo()}catch(e){}return r};
 setInterval(()=>{if(typeof screen!=='undefined'&&screen==='home'&&S.cls){lastInfo=0;fetchInfo()}},20000);
@@ -113,18 +135,42 @@ ACT.clsCreate=()=>{const name=val('clsName')||'Our class';post('/api/class',{a:'
  modal(`<h2>${esc(name)} is ready!</h2><p style="margin:0">Kids tap <b>CLASS</b> at the top of the home screen and enter:</p><div class="cl-big">${r.code}</div>
  <div class="rbtns"><button class="btn" data-act="clsDash" data-c="${r.code}">Open dashboard</button></div>`)}).catch(e=>toast(e.message))};
 let DASH=null,RLVL='easy';
-ACT.clsDash=d=>{const c=(d&&d.c)||DASH&&DASH.code,t=teach()[c];if(!t)return teachList();post('/api/class',{a:'dash',code:c,tk:t.tk}).then(r=>{DASH={code:c,tk:t.tk,...r};drawDash()}).catch(e=>toast(e.message))};
+ACT.clsDash=d=>{const c=(d&&d.c)||DASH&&DASH.code,t=teach()[c];if(!t)return teachList();const quiet=d&&d.quiet;
+ return post('/api/class',{a:'dash',code:c,tk:t.tk}).then(r=>{DASH={code:c,tk:t.tk,...r};if(!quiet||!document.querySelector('#mbox .dashv'))DVIEW=quiet?DVIEW:null;redraw();dashPoll()}).catch(e=>{if(!quiet)toast(e.message)})};
 const ago=ts=>{if(!ts)return'never';const m=Math.round((Date.now()-ts)/60000);return m<2?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago'};
-function drawDash(){const D=DASH,ms=D.members.slice().sort((a,b)=>(b.stats?.pos||0)-(a.stats?.pos||0));
- const opts=(window.ORDER||LESSONS.map((_,k)=>k)).map(i=>`<option value="${i}" ${D.assign&&D.assign.i===i?'selected':''}>Lesson ${LNUM(i)}: ${esc(lessonTitle(i))}</option>`).join('');
- modal(`<h2>${esc(D.name)} <span class="muted" style="font-size:18px">code ${D.code}</span></h2>
- ${ms.length?`<div class="cl-scroll"><table class="hs-tab"><tr><th>Name</th><th>Now on</th><th>Stars</th><th>WPM</th><th>Acc.</th><th>Mins this week</th><th>Seen</th><th></th></tr>${ms.map(m=>{const s=m.stats||{};return `<tr><td><b>${esc(m.name)}</b></td><td>${esc(s.lesson||'–')}</td><td>${s.stars??'–'}</td><td>${s.wpm??'–'}</td><td>${s.acc!=null?s.acc+'%':'–'}</td><td>${s.mins??0}</td><td>${ago(s.seen||m.joined)}</td><td><button class="cl-x" data-act="clsRemove" data-p="${m.pid}" title="Remove ${esc(m.name)}">✕</button></td></tr>`}).join('')}</table></div>`:`<p class="muted">Nobody has joined yet. Share the code <b>${D.code}</b>.</p>`}
- <div class="cl-sec"><h3>Assign a lesson</h3><div class="cl-field"><select id="asg" class="cl-in wide">${opts}</select><button class="btn sm volt" data-act="clsAssign">Assign</button>${D.assign?'<button class="btn sm alt" data-act="clsAssign" data-clear="1">Clear</button>':''}</div>${D.assign?`<p class="muted" style="margin:4px 0 0">Assigned now: Lesson ${LNUM(D.assign.i)}: ${esc(D.assign.title)}</p>`:''}</div>
+let DVIEW=null,DPOLL=0;
+/* refresh every 10 s while the dashboard (or a student page) is open */
+function dashPoll(){clearInterval(DPOLL);DPOLL=setInterval(()=>{if($('#modal').hidden||!document.querySelector('#mbox .dashv')){clearInterval(DPOLL);return}
+ const ae=document.activeElement;if(ae&&ae.tagName==='SELECT')return;if(document.hidden)return;ACT.clsDash({c:DASH.code,quiet:1})},10000)}
+function redraw(){const box=document.querySelector('#mbox .cl-scroll'),y=box?box.scrollTop:0,my=document.querySelector('#mbox')?.scrollTop||0,sel=document.getElementById('asg')?.value;
+ DVIEW?drawKid(DVIEW):drawDash();const s2=document.getElementById('asg');if(s2&&sel!=null&&!DASH._justAssigned)s2.value=sel;DASH._justAssigned=0;
+ const b2=document.querySelector('#mbox .cl-scroll');if(b2)b2.scrollTop=y;const m2=document.querySelector('#mbox');if(m2)m2.scrollTop=my}
+const asgState=(m,a)=>{const s=m.stats||{};if(!a)return null;const R=s.asg&&s.asg[a.i];if(R&&R.at===a.at)return{k:'done',t:'Done ✓',R};
+ if(s.cur&&s.cur.i===a.i&&s.cur.at===a.at&&s.cur.n)return{k:'part',t:`In progress ${s.cur.n}/${NST}`};const pg=s.prog&&progOf(m)[a.i];if(pg&&pg.n>=NST)return{k:'own',t:'Done on their own'};return{k:'none',t:'Not started'}};
+const progOf=m=>{const p=(m.stats&&m.stats.prog)||'',O=window.ORDER||LESSONS.map((_,k)=>k),o={};O.forEach((i,k)=>{const c=p.charCodeAt(k*2),d=p.charCodeAt(k*2+1);o[i]={n:c>=48?c-48:0,st:d>=48?d-48:0}});return o};
+function drawDash(){const D=DASH,ms=D.members.slice().sort((a,b)=>(b.stats?.pos||0)-(a.stats?.pos||0)),A=D.assign;
+ const opts=(window.ORDER||LESSONS.map((_,k)=>k)).map(i=>`<option value="${i}" ${A&&A.i===i?'selected':''}>Lesson ${LNUM(i)}: ${esc(lessonTitle(i))}</option>`).join('');
+ modal(`<div class="dashv"><h2>${esc(D.name)} <span class="muted" style="font-size:18px">code ${D.code}</span></h2>
+ ${ms.length?`<p class="muted cl-tip">Tap a name to see all their lessons. Updates every 10 seconds.</p><div class="cl-scroll"><table class="hs-tab"><tr><th>Name</th>${A?`<th>Lesson ${LNUM(A.i)}</th>`:''}<th>Adventure at</th><th>Stars</th><th>WPM</th><th>Acc.</th><th>Mins this week</th><th>Seen</th><th></th></tr>${ms.map(m=>{const s=m.stats||{},st=asgState(m,A);return `<tr><td><button class="linkbtn cl-kid" data-act="clsKid" data-p="${m.pid}">${esc(m.name)}</button></td>${A?`<td><span class="asg-${st.k}">${st.t}</span></td>`:''}<td>${esc(s.lesson||'–')}</td><td>${s.stars??'–'}</td><td>${s.wpm??'–'}</td><td>${s.acc!=null?s.acc+'%':'–'}</td><td>${s.mins??0}</td><td>${ago(s.seen||m.joined)}</td><td><button class="cl-x" data-act="clsRemove" data-p="${m.pid}" title="Remove ${esc(m.name)}">✕</button></td></tr>`}).join('')}</table></div>`:`<p class="muted">Nobody has joined yet. Share the code <b>${D.code}</b>.</p>`}
+ <div class="cl-sec"><h3>Assign a lesson</h3><div class="cl-field"><select id="asg" class="cl-in wide">${opts}</select><button class="btn sm volt" data-act="clsAssign">Assign</button>${A?'<button class="btn sm alt" data-act="clsAssign" data-clear="1">Clear</button>':''}</div>${A?`<p class="muted" style="margin:4px 0 0">Assigned now: Lesson ${LNUM(A.i)}: ${esc(A.title)} · ${ms.filter(m=>asgState(m,A).k==='done').length} of ${ms.length} done</p>`:''}</div>
  <div class="cl-sec"><h3>Class race</h3><div class="seg cl-lvl">${lvlsFor(true).map(([v,t])=>`<button class="${RLVL===v?'on':''}" data-act="clsLvl" data-v="${v}">${t}</button>`).join('')}</div><div class="cl-btns"><button class="btn sm" data-act="clsRace">Open a class race</button></div></div>
- <div class="rbtns"><button class="btn sm" data-act="clsDash">Refresh</button><button class="btn sm alt" data-act="clsTeach">Back</button></div>`)}
+ <div class="rbtns"><button class="btn sm alt" data-act="clsTeach">Back</button></div></div>`)}
+/* one student: every assignment + every lesson */
+ACT.clsKid=d=>{DVIEW=d.p;drawKid(d.p)};ACT.clsKidBack=()=>{DVIEW=null;drawDash()};
+function drawKid(p){const D=DASH,m=D.members.find(x=>x.pid===p);if(!m){DVIEW=null;return drawDash()}const s=m.stats||{},pr=progOf(m),O=window.ORDER||LESSONS.map((_,k)=>k);
+ const hist=(D.hist&&D.hist.length?D.hist:(D.assign?[D.assign]:[])).slice().reverse();
+ const rows=hist.map(a=>{const st=asgState(m,a);return `<tr><td>Lesson ${LNUM(a.i)}: ${esc(a.title||lessonTitle(a.i))}</td><td>${new Date(a.at).toLocaleDateString()}</td><td><span class="asg-${st.k}">${st.t}</span></td><td>${st.R?st.R.w:'–'}</td><td>${st.R?st.R.a+'%':'–'}</td><td>${st.R?new Date(st.R.d).toLocaleDateString():'–'}</td></tr>`}).join('');
+ const worlds={};O.forEach(i=>{const w=worldOf(i);(worlds[w]=worlds[w]||[]).push(i)});
+ const done=O.filter(i=>pr[i].n>=NST).length,part=O.filter(i=>pr[i].n>0&&pr[i].n<NST).length;
+ const grid=Object.entries(worlds).map(([w,ls])=>`<div class="kw"><div class="kw-h">${esc((typeof WORLDS!=='undefined'&&WORLDS[w-1]&&(WORLDS[w-1].name||WORLDS[w-1].n))||('World '+w))}</div><div class="kw-g">${ls.map(i=>{const q=pr[i],k=q.n>=NST?'done':q.n?'part':'none';return `<span class="kl kl-${k}" title="Lesson ${LNUM(i)}: ${esc(lessonTitle(i))} · ${q.n}/${NST} parts · ${q.st} stars">${LNUM(i)}</span>`}).join('')}</div></div>`).join('');
+ modal(`<div class="dashv kidv"><h2>${esc(m.name)}</h2><p class="muted" style="margin-top:-6px">Adventure at ${esc(s.lesson||'–')} · ${s.wpm??'–'} WPM · ${s.acc!=null?s.acc+'%':'–'} accuracy · seen ${ago(s.seen||m.joined)}</p>
+ <div class="cl-sec"><h3>Assignments</h3>${rows?`<div class="cl-scroll"><table class="hs-tab"><tr><th>Lesson</th><th>Assigned</th><th>Status</th><th>WPM</th><th>Acc.</th><th>Finished</th></tr>${rows}</table></div>`:'<p class="muted">No lessons assigned yet.</p>'}</div>
+ <div class="cl-sec"><h3>All lessons <span class="muted" style="font-size:15px">${done} complete · ${part} started · ${O.length-done-part} not started</span></h3>
+ <div class="kleg"><span class="kl kl-done">✓</span> complete <span class="kl kl-part">½</span> started <span class="kl kl-none">·</span> not started</div>${s.prog?grid:'<p class="muted">Their lesson list shows up after they play once with the new version.</p>'}</div>
+ <div class="rbtns"><button class="btn sm alt" data-act="clsKidBack">Back to class</button></div></div>`)}
 ACT.clsLvl=d=>{RLVL=d.v;drawDash()};
-ACT.clsAssign=d=>{const D=DASH,i=d&&d.clear?null:+val('asg');post('/api/class',{a:'assign',code:D.code,tk:D.tk,i,title:i==null?'':lessonTitle(i)}).then(r=>{Object.assign(DASH,r);toast(i==null?'Cleared':'Assigned!');drawDash()}).catch(e=>toast(e.message))};
-ACT.clsRemove=d=>{const D=DASH;post('/api/class',{a:'remove',code:D.code,tk:D.tk,pid:d.p}).then(()=>ACT.clsDash({c:D.code})).catch(e=>toast(e.message))};
+ACT.clsAssign=d=>{const D=DASH,i=d&&d.clear?null:+val('asg');post('/api/class',{a:'assign',code:D.code,tk:D.tk,i,title:i==null?'':lessonTitle(i)}).then(r=>{Object.assign(DASH,r);DASH._justAssigned=1;toast(i==null?'Cleared':'Assigned!');ACT.clsDash({c:D.code,quiet:1})}).catch(e=>toast(e.message))};
+ACT.clsRemove=d=>{const D=DASH;DVIEW=null;post('/api/class',{a:'remove',code:D.code,tk:D.tk,pid:d.p}).then(()=>ACT.clsDash({c:D.code})).catch(e=>toast(e.message))};
 ACT.clsRace=()=>{const D=DASH;makeRoom(RLVL,true,room=>post('/api/class',{a:'race',code:D.code,tk:D.tk,room}).catch(()=>{}))};
 
 /* ---------- race text ---------- */
@@ -210,6 +256,13 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .cl-sec{margin:10px 0 0;text-align:left}.cl-sec h3{margin:0 0 6px;font-size:18px}.cl-btns{display:flex;gap:8px;flex-wrap:wrap}
 .cl-field{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}.cl-in{font:inherit;font-size:20px;padding:6px 10px;width:9ch;text-transform:uppercase;background:#1b1626;color:#fff6e0;border:3px solid #3a2f4e}.cl-in.wide{width:auto;flex:1;min-width:12ch;text-transform:none;font-size:17px}
 #mbox:has(.watch){max-width:860px!important;width:94vw}.watch .hs-tab th,.watch .hs-tab td{white-space:nowrap;padding-left:8px;padding-right:8px}.watch .hs-tab td:nth-child(3){min-width:110px}
+.cl-kid{font:inherit;font-weight:700;color:#7fe8ff;text-decoration:underline;background:none;border:0;padding:0;cursor:pointer}.cl-tip{margin:0 0 6px;font-size:14px}
+.asg-done{color:#6edc8c;font-weight:700}.asg-part{color:#f0c860}.asg-none{color:#9a8fb0}.asg-own{color:#a8d8a0}.clsban .cb-done{color:#6edc8c;font-weight:700;margin-left:auto}
+#mbox:has(.kidv),#mbox:has(.dashv){max-width:900px!important;width:94vw}
+.kw{margin:6px 0}.kw-h{font-size:14px;color:#b8a8d8;margin-bottom:3px}.kw-g{display:flex;flex-wrap:wrap;gap:4px}
+.kl{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 4px;font-size:13px;border:2px solid #2a1d3e;box-sizing:border-box}
+.kl-done{background:#58a848;color:#fff}.kl-part{background:#f0c860;color:#2a1d3e}.kl-none{background:#3a2f4e;color:#9a8fb0}.kleg{display:flex;gap:8px;align-items:center;font-size:13px;margin:4px 0 6px;flex-wrap:wrap}
+.asgdone{text-align:center}.asgdone .big{font-size:20px;margin:4px 0}.rstats2{display:flex;gap:12px;justify-content:center;margin:10px 0}.rstats2 div{background:#1b1626;padding:8px 16px;display:flex;flex-direction:column}.rstats2 b{font-size:26px;color:#f0c860}
 select.cl-in option{font:inherit;font-size:17px;padding:4px 8px;background:#1b1626;color:#fff6e0}
 @supports (appearance:base-select){select.cl-in,select.cl-in::picker(select){appearance:base-select}select.cl-in::picker(select){background:#1b1626;border:3px solid #3a2f4e;max-height:60vh}select.cl-in option:checked,select.cl-in option:hover{background:#3a2f4e}}
 .cl-note{font-size:15px;margin:10px 0 0}.cl-big{font-size:46px;letter-spacing:.12em;color:#f0c860;margin:8px 0;text-align:center}
