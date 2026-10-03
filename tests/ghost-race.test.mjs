@@ -34,7 +34,7 @@ test('a copied race link carries a playable, timed replay', () => {
  assert.equal(context.G.challengeData.g, 'meteor');
  assert.equal(context.G.challengeData.f.at(-1)[0], 250);
  assert.match(context.ghostApi.ghostArcadeSummary(), /You beat/);
- assert.match(context.ghostApi.ghostArcadeSummary(), /Your time: 1\.0s · Friend’s time: 2\.4s/);
+ assert.match(context.ghostApi.ghostArcadeSummary(), /You: 250 points, 1\.0s<\/span><span>Friend: 300 points, 2\.4s/);
  assert.equal(context.ghostApi.ghostRematchWon(),false);
  context.G.score=301;
  assert.equal(context.ghostApi.ghostRematchWon(),true);

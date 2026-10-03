@@ -237,7 +237,7 @@ function ghostArcadeSummary(){
  const beat=yourWin!==friend.w?yourWin:G.score>friend.r;
  const tied=yourWin===friend.w&&G.score===friend.r;
  const yours=(G.challengeData.f.at(-1)[1]/10).toFixed(1),theirs=(friend.f.at(-1)[1]/10).toFixed(1);
- return `<div class="ghost-summary"><b>${tied?'A tie with your friend!':beat?'You beat your friend’s ghost!':'Your friend’s ghost won this time!'}</b><span>Your score: ${G.score} · Friend’s score: ${friend.r}</span><span>Your time: ${yours}s · Friend’s time: ${theirs}s</span></div>${ghostFooterHTML()}`;
+ return `<div class="ghost-summary"><b>${tied?'A tie with your friend!':beat?'You beat your friend’s ghost!':'Your friend’s ghost won this time!'}</b><span>You: ${G.score} points, ${yours}s</span><span>Friend: ${friend.r} points, ${theirs}s</span></div>${ghostFooterHTML()}`;
 }
 function ghostRematchWon(){
  const friend=G.ghostInvite;
@@ -250,7 +250,8 @@ function ghostRaceSummary(){
  if(!G.ghostInvite)return '';
  const friendSeconds=G.ghostInvite.f.at(-1)[1]/10;
  const yours=(G.ghostFinishMs/1000).toFixed(1);
- return `<div class="ghost-summary"><b>${G.racers[0].fin?'Your friend finished first!':'You beat your friend’s ghost!'}</b><span>You: ${yours}s · Friend: ${friendSeconds.toFixed(1)}s (${G.ghostInvite.a}% accuracy)</span></div>${ghostFooterHTML()}`;
+ const myAcc=G.text&&G.text.length?Math.max(0,Math.min(100,Math.round((G.text.length-(G.mist?G.mist.size:0))/G.text.length*100))):100;
+ return `<div class="ghost-summary"><b>${G.racers[0].fin?'Your friend finished first!':'You beat your friend’s ghost!'}</b><span>You: ${yours}s, ${myAcc}% accuracy</span><span>Friend: ${friendSeconds.toFixed(1)}s, ${G.ghostInvite.a}% accuracy</span></div>${ghostFooterHTML()}`;
 }
 ACT.ghostStart=()=>{
  const challenge=challengeToStart;
