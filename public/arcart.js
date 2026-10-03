@@ -154,5 +154,5 @@ setTimeout(()=>document.body.classList.add('kkready'),3500);
 {const _rhF=renderHome;renderHome=function(){const r=_rhF.apply(this,arguments);try{window.addFs&&addFs();if(typeof fitHome==='function')fitHome()}catch(e){}return r}}
 
 /* About window links to the full landing page */
-{const _ab=ACT.about;if(_ab)ACT.about=function(){const r=_ab.apply(this,arguments);try{const rb=document.querySelector('#mbox .rbtns');if(rb&&!rb.querySelector('.aboutlink'))rb.insertAdjacentHTML('afterbegin','<a style="text-decoration:none" class="btn aboutlink" href="/about/" target="_blank" rel="noopener">How it works · For teachers</a>')}catch(e){}return r}}
+{const _ab=ACT.about;if(_ab)ACT.about=function(){const r=_ab.apply(this,arguments);try{const rb=document.querySelector('#mbox .rbtns');if(rb&&!rb.querySelector('.aboutlink'))rb.insertAdjacentHTML('afterbegin','<a style="text-decoration:none" class="btn aboutlink" href="/about/" target="_blank" rel="noopener">How to play</a>')}catch(e){}return r}}
 })();

@@ -181,10 +181,12 @@ ACT.clsRace=()=>{const D=DASH;makeRoom(RLVL,true,room=>post('/api/class',{a:'rac
 /* ---------- race text ---------- */
 const T=(typeof KK_TEXT!=='undefined'&&KK_TEXT)||{easy:[],medium:[],hard:[]};
 const pick=(a,n)=>a.slice().sort(()=>Math.random()-.5).slice(0,n);
-const IMP_SENT=['On 12/03 at 4:45pm, 37% of the 1,284 gnomes paid $9.50 each!','"Quick!" yelled Dr. O\'Malley. "Zap the #7 & #8 vortex (now)."','Jinxed wizards pluck 26 ivy twigs; @Max owes Fizzbin 3/4 of a jar.','Pack my box with five dozen liquor jugs? No: 48 jam jars & 19 kiwis.'];
+const IMP_SENT=["On July 20, 1969, Apollo 11 landed on the Moon at 4:17 p.m. (EDT)!", "\"Quick fact!\" said Dr. Lee: about 71% of Earth is covered by water.", "Light travels ~300,000 km/s; the Moon is ~384,400 km away (about 1.3 s).", "H2O = 2 hydrogen + 1 oxygen; it freezes at 0 C & boils at 100 C.", "The Mariana Trench is ~10,935 m deep; Everest is 8,849 m tall!", "A blue whale's heart weighs ~180 kg: about as much as 2 adults.", "Earth's 7 continents & 5 oceans hold roughly 8,000,000,000 people.", "Is Pluto a planet? No; since 2006 it's called a \"dwarf planet.\""];
 const LVLS=[['easy','Easy'],['medium','Medium'],['hard','Hard'],['beast','Beast'],['impossible','Impossible']];
 const beatRace=()=>{const h=(S.arc&&S.arc.high||{}).race;return h==='beast'||h==='insanity'||/^beast/.test(h||'')};
 const lvlsFor=teacher=>LVLS.filter(([v])=>teacher||v!=='impossible'||beatRace());
+/* countdown beeps: short blip each second, a higher longer one on GO */
+const beep=go=>{try{if(go){tone(880,.4,'square',.09);tone(1320,.4,'triangle',.06,.05)}else tone(440,.14,'square',.08)}catch(e){}};
 function raceText(lv){const BS=typeof BEAST_SENT!=='undefined'?BEAST_SENT:T.hard;if(lv==='beast')return pick(BS,3).join(' ');if(lv==='impossible')return [...pick(BS,2),...pick(IMP_SENT,2)].sort(()=>Math.random()-.5).join(' ');
 if(lv==='easy')return pick(T.easy,3).join(' ').toLowerCase().replace(/[^a-z ]/g,'').replace(/\s+/g,' ').trim();
  if(lv==='medium')return pick(T.medium,3).join(' ');return pick(T.hard,2).join(' ')}
@@ -226,7 +228,7 @@ function startNet(r){closeModal();const startLocal=r.startAt-OFF;
  $('#garena').innerHTML=`<div class="finish"></div><div class="lane"><div class="runner" id="rn0">${zookSVG()}<span class="rname">${esc(myName())}</span></div></div>`+lanes.map((p,k)=>`<div class="lane"><div class="runner" id="rq${k}">${heroBig(p.look)}<span class="rname">${esc(p.name)}</span></div></div>`).join('')+`<div class="cdown" id="cdown"></div><div class="rlist" id="rlist"></div>`;$('#garena').style.setProperty('--lanes',lanes.length+1);$('#garena').classList.add('netrace');
  $('#gstripIn').innerHTML=[...G.text].map(c=>`<span class="${c===' '?'sp':''}">${c===' '?'·':esc(c)}</span>`).join('');raceStrip();
  const g=G;const loop=()=>{if(G!==g||G.done)return;const now=Date.now();const cd=$('#cdown');
-  if(now<startLocal){if(cd)cd.textContent=Math.ceil((startLocal-now)/1000)}else{if(cd&&cd.textContent!=='GO!'&&!G.start){cd.textContent='GO!';setTimeout(()=>cd&&cd.remove(),700)}if(!G.start)G.start=performance.now()}
+  if(now<startLocal){const n=Math.ceil((startLocal-now)/1000);if(cd&&cd.textContent!==String(n)){cd.textContent=n;if(n<=5)beep(false)}}else{if(cd&&cd.textContent!=='GO!'&&!G.start){cd.textContent='GO!';beep(true);setTimeout(()=>cd&&cd.remove(),700)}if(!G.start)G.start=performance.now()}
   G.net.lanes.forEach((id,k)=>{const p=G.net.ps[id],el=$('#rq'+k);if(p&&el)el.style.left=(Math.min(1,p.pos/G.text.length)*84)+'%'});
   if(G.start){const el=(performance.now()-G.start)/60000;$('#g-a').textContent=G.pos?Math.round(G.pos/5/Math.max(el,1/60)):0}
   G.raf=requestAnimationFrame(loop)};loop();
