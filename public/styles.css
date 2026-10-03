@@ -1300,3 +1300,5 @@ body.lines2 .strip{position:relative}body.lines2 .strip::before{content:"";posit
 @media (max-height:640px){#s-binder .trophy{position:static}#s-binder .sprtile{scroll-margin-top:calc(var(--tbh,56px) + var(--wph,64px) + 8px)}}
 
 body:not(.kkready) #s-home{visibility:hidden}
+
+.hud .ht .partno{font-style:normal;color:#f0c860;font-weight:700;font-size:1.25em}
