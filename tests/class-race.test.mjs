@@ -47,3 +47,12 @@ test('race rooms: host starts, players tick, standings put finishers first',asyn
  const g=(await call({a:'tick',room:r,pid:'kid0002',pos:30,wpm:25})).body;
  assert.deepEqual(g.players.map(p=>p.name),['Leo','Mia']);
 });
+
+test('rematch resets the room to a new lobby round with only the players who came back',async()=>{
+ const {call}=load('keyloria-race.mjs');
+ const text='the fox ran up the hill and sat in the sun';
+ const r=(await call({a:'make',pid:'kid0001',name:'Mia',text,lvl:'easy'})).body.room;
+ await call({a:'join',room:r,pid:'kid0002',name:'Leo'});await call({a:'join',room:r,pid:'kid0003',name:'Zed'});
+ await call({a:'start',room:r,pid:'kid0001'});
+ assert.equal((await call({a:'rematch',room:r,pid:'kid0002',name:'Leo',text})).status,409);
+});

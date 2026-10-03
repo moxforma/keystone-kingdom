@@ -3,6 +3,11 @@
 const post=(u,b)=>fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Could not connect');return j});
 const pid=()=>{if(!S.cid||!/^[a-z0-9]{6,24}$/.test(S.cid)){S.cid=(Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).replace(/[^a-z0-9]/g,'').slice(0,16);save()}return S.cid};
 const myName=()=>S.name||'Player';
+const myLook=()=>({h:typeof heroNow==='function'?heroNow():S.hero,c:S.color||null,eq:S.equip||{}});
+const lookOk=l=>{l=l||{};const h=typeof HEROES!=='undefined'&&HEROES[l.h]?l.h:'pop',eq={};Object.entries(l.eq||{}).forEach(([k,v])=>{if(typeof ACC!=='undefined'&&ACC[v])eq[k]=v});return{h,c:l.c&&typeof HCOL!=='undefined'&&HCOL[l.c]?l.c:null,eq}};
+const heroIcon=l=>{const L=lookOk(l);try{return kku('hi'+L.h+(L.c||'')+JSON.stringify(L.eq),()=>heroCanvas(L.eq,L.h,L.c))}catch(e){return ''}};
+const heroBig=l=>{const L=lookOk(l);try{return zookSVG(L.eq,L.h,L.c)}catch(e){return zookSVG()}};
+const BOOK=PXG(["............",".oooo..oooo.","oWWWWooWWWWo","oWLLWooWLLWo","oWWWWooWWWWo","oWLLWooWLLWo","oWWWWooWWWWo","oWWWWooWWWWo","oBBBBooBBBBo",".oooo..oooo.",".....oo....."],{o:'#1b2a2e',W:'#fff6e0',L:'#8ab8c8',B:'#c8604a'}).toDataURL();
 const GN={meteor:'Meteor Zap',race:'Typing Race',glitch:'Scrambler Attack',bubble:'Bubble Pop',dig:'Treasure Dig',keeper:'Keylori Keeper',bridge:'Story Bridge'};
 const TEACH='kl-teach';const teach=()=>{try{return JSON.parse(localStorage.getItem(TEACH)||'{}')}catch(e){return{}}};const setTeach=t=>{try{localStorage.setItem(TEACH,JSON.stringify(t))}catch(e){}};
 const weekStart=()=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()};
@@ -27,17 +32,18 @@ function homeBanner(){const home=$('#s-home');if(!home||home.hidden)return;home.
  if(!pick&&!race)return;const tb=home.querySelector('.topbar');const el=document.createElement('div');el.className='clsban panel';el.innerHTML=`<div class="cb-name">${esc(I.name||'My class')}</div>${pick}${race}`;
  tb?tb.insertAdjacentElement('afterend',el):home.prepend(el)}
 ACT.clsPick=d=>{const i=+d.i;let s=0;for(;s<NST-1;s++)if(!((S.best[i+'-'+s]||0)>=1))break;closeModal();startStage(i*NST+s)};
-const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const row=$('#s-home .hi-btns');row?.querySelector('[data-act=clsHub]')?.remove();if(row&&!row.querySelector('[data-act=raceHub]'))row.insertAdjacentHTML('beforeend','<button class="btn racebtn" data-act="raceHub">Race</button>');
- const tb=$('#s-home .topbar');if(tb&&S.name&&!tb.querySelector('.clsbtn')){const after=tb.querySelector('.roamtog')||tb.querySelector('.selp');const h='<button class="btn clsbtn" data-act="clsHub">CLASS</button>';after?after.insertAdjacentHTML('afterend',h):tb.insertAdjacentHTML('afterbegin',h)}homeBanner();fetchInfo()}catch(e){}return r};
+const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const row=$('#s-home .hi-btns');row?.querySelector('[data-act=clsHub]')?.remove();
+ const tb=$('#s-home .topbar');if(tb&&S.name&&!tb.querySelector('.clsbtn')){const after=tb.querySelector('.roamtog')||tb.querySelector('.selp');const h=`<button class="btn clsbtn" data-act="clsHub"><img class="bico hico" src="${BOOK}" alt="">CLASS</button>`;after?after.insertAdjacentHTML('afterend',h):tb.insertAdjacentHTML('afterbegin',h)}homeBanner();fetchInfo()}catch(e){}return r};
 setInterval(()=>{if(typeof screen!=='undefined'&&screen==='home'&&S.cls){lastInfo=0;fetchInfo()}},20000);
-const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments);try{const tb=$('#s-arcade .topbar');if(tb&&!tb.querySelector('[data-act=raceHub]'))tb.insertAdjacentHTML('beforeend','<button class="btn sm racebtn" data-act="raceHub">Race Friends</button>')}catch(e){}return r};
+const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments);try{const gs=$('#s-arcade .games');if(gs&&!gs.querySelector('.racecard')){const own=Object.keys(S.cards||{}).slice(0,2).map(k=>k.split('-').map(Number));while(own.length<2)own.push([[3,5][own.length],1]);
+ gs.insertAdjacentHTML('beforeend',`<div class="game panel racecard"><div class="gart race">${own.map(([i,f])=>creatureSVG(i,f,'big')).join('')}</div><h3>Race with Others</h3><p>Race friends and classmates live!</p><div class="arcade-stats"><div class="arcade-stat"><b>${S.netw||0}</b><span>Races won</span></div><div class="arcade-stat"><b>${S.netb||0}</b><span>Best WPM</span></div><div class="arcade-stat level"><b>Up to 40</b><span>Racers per room</span></div></div><button class="btn" data-act="raceHub">Play</button></div>`)}}catch(e){console.warn(e)}return r};
 
 /* ---------- hub ---------- */
 const field=(id,ph,act,label)=>`<div class="cl-field"><input id="${id}" class="cl-in" maxlength="6" placeholder="${ph}" autocomplete="off" autocapitalize="characters" data-enter="${act}"><button class="btn sm volt" data-act="${act}">${label}</button></div>`;
-ACT.raceHub=()=>{modal(`<h2>Race with friends</h2><p class="muted" style="margin:0 0 8px">Everyone types the same story at the same time. Up to 40 racers!</p>
- <div class="cl-sec"><h3>Start a race</h3><div class="cl-btns"><button class="btn racebtn" data-act="raceMake">Make a race room</button></div></div>
+ACT.raceHub=()=>{modal(`<h2>Race with Others</h2><div class="raceHubBox"><p class="muted" style="margin:0 0 8px">Everyone types the same story at the same time. Up to 40 racers!</p>
+ <div class="cl-sec"><h3>Start a race</h3><div class="cl-btns"><button class="btn racebtn" data-act="raceMake">HOST RACE</button></div></div>
  <div class="cl-sec"><h3>Join a race</h3>${field('raceCode','ZAP12','raceJoin','Join race')}</div>
- <p class="muted cl-note">Only first names are shared. There is no chat.</p><div class="rbtns"><button class="btn alt" data-act="close">Close</button></div>`)};
+ <p class="muted cl-note">Only first names are shared. There is no chat.</p></div><div class="rbtns"><button class="btn alt" data-act="close">Close</button></div>`)};
 ACT.clsHub=()=>{const c=S.cls;
  modal(`<h2>My Class</h2>
  <div class="cl-sec"><h3>My class or friend group</h3>${c?`<p style="margin:0">You're in <b>${esc(c.name||'a class')}</b> <span class="muted">(code ${esc(c.code)})</span></p><div class="cl-btns"><button class="btn sm" data-act="clsBoard">Class leaderboard</button><button class="btn sm alt" data-act="clsLeave">Leave</button></div>`:`<p class="muted" style="margin:0 0 6px">Got a code from your teacher or a friend's grown-up?</p>${field('clsCode','ABC123','clsJoin','Join')}`}</div>
@@ -99,24 +105,25 @@ const myLevel=()=>{const p=EI(lessonIdx());return p<16?'easy':p<44?'medium':'har
 /* ---------- rooms + lobby ---------- */
 let ROOM=null,OFF=0,POLL=null;
 const stopPoll=()=>{clearInterval(POLL);POLL=null};
-function makeRoom(lv,spectate,after){post('/api/race',{a:'make',pid:pid(),name:myName(),text:raceText(lv),spectate}).then(r=>{ROOM={code:r.room,host:true,spectate};after&&after(r.room);lobby()}).catch(e=>toast(e.message))}
-ACT.raceMake=()=>{const lv=myLevel();modal(`<h2>Make a race room</h2><p class="muted" style="margin:0 0 8px">Pick how hard the story is.</p><div class="cl-btns">${lvlsFor(false).map(([v,t])=>`<button class="btn lv-${v} ${v===lv?'':'alt'}" data-act="raceMakeLv" data-v="${v}">${t}</button>`).join('')}</div>${beatRace()?'':'<p class="muted cl-note">Win a Keylori Race on Beast mode to unlock Impossible.</p>'}<div class="rbtns"><button class="btn alt" data-act="clsHub">Back</button></div>`)};
+function makeRoom(lv,spectate,after){post('/api/race',{a:'make',pid:pid(),name:myName(),look:myLook(),text:raceText(lv),lvl:lv,spectate}).then(r=>{ROOM={code:r.room,host:true,spectate,lvl:lv};after&&after(r.room);lobby()}).catch(e=>toast(e.message))}
+ACT.raceMake=()=>{const lv=myLevel();modal(`<h2>Host a race</h2><p class="muted" style="margin:0 0 8px">Choose your difficulty</p><div class="cl-btns lvlrow">${lvlsFor(false).map(([v,t])=>`<button class="btn lv-${v} ${v===lv?'':'alt'}" data-act="raceMakeLv" data-v="${v}">${t}</button>`).join('')}</div>${beatRace()?'':'<p class="muted cl-note">Win a Keylori Race on Beast mode to unlock Impossible.</p>'}<div class="rbtns"><button class="btn alt" data-act="raceHub">Back</button></div>`)};
 ACT.raceMakeLv=d=>makeRoom(d.v,false);
 ACT.raceJoin=()=>joinRoom(val('raceCode'));
 ACT.raceJoinCode=d=>joinRoom(d.r);
-function joinRoom(code){if(!code)return toast('Type the race code');post('/api/race',{a:'join',room:code,pid:pid(),name:myName()}).then(r=>{ROOM={code:code.toUpperCase(),host:false};OFF=r.now-Date.now();ROOM.last=r;lobby()}).catch(e=>toast(e.message))}
+function joinRoom(code){if(!code)return toast('Type the race code');post('/api/race',{a:'join',room:code,pid:pid(),name:myName(),look:myLook()}).then(r=>{ROOM={code:code.toUpperCase(),host:r.host===pid(),lvl:r.lvl};OFF=r.now-Date.now();ROOM.last=r;lobby()}).catch(e=>toast(e.message))}
 function lobby(){stopPoll();const tick=()=>post('/api/race',{a:'get',room:ROOM.code,pid:pid()}).then(r=>{OFF=r.now-Date.now();ROOM.last=r;if(r.state==='go'){stopPoll();return ROOM.spectate?watch():startNet(r)}drawLobby(r)}).catch(e=>{stopPoll();toast(e.message)});
  drawLobby(ROOM.last||{players:[]});tick();POLL=setInterval(()=>{if($('#modal').hidden||!document.querySelector('#mbox .lobby'))return stopPoll();tick()},2000)}
 function drawLobby(r){const ps=r.players||[];
  modal(`<h2>Race room</h2><div class="lobby"><p style="margin:0">Friends join with this code:</p><div class="cl-big">${esc(ROOM.code)}</div>
  <div class="cl-chips">${ps.length?ps.map(p=>`<span class="cl-chip ${p.pid===pid()?'me':''}">${esc(p.name)}</span>`).join(''):'<span class="muted">Waiting for racers...</span>'}</div>
  <p class="muted" style="margin:6px 0 0">${ROOM.host?(ps.length?`${ps.length} racer${ps.length>1?'s':''} ready. Start when everyone is in!`:'Waiting for racers...'):'Waiting for the host to start...'}</p></div>
- <div class="cl-btns" style="justify-content:center;margin-top:8px"><button class="btn sm racebtn" data-act="raceShare">Share invite link</button></div>
- <div class="rbtns">${ROOM.host?`<button class="btn" data-act="raceStart" ${ps.length?'':'disabled'}>Start race!</button>`:''}<button class="btn alt" data-act="raceLeave">Leave</button></div>`)}
+ <div class="cl-btns" style="justify-content:center;margin-top:8px"><button class="btn sm sharebtn" data-act="raceShare">Copy invite link</button></div>
+ <div class="rbtns">${(ROOM.host||(!ROOM.last?.spectate&&!ps.some(p=>p.pid===ROOM.last?.host)&&ps[0]&&ps[0].pid===pid()))?`<button class="btn" data-act="raceStart" ${ps.length?'':'disabled'}>Start race!</button>`:''}<button class="btn alt" data-act="raceLeave">Leave</button></div>`)}
 ACT.raceStart=()=>post('/api/race',{a:'start',room:ROOM.code,pid:pid()}).then(r=>{OFF=r.now-Date.now();stopPoll();ROOM.spectate?watch():startNet(r)}).catch(e=>toast(e.message));
-ACT.raceShare=()=>{if(!ROOM)return;const url=location.origin+location.pathname+'?race='+ROOM.code,text=`Join my Keyloria typing race! Code ${ROOM.code}`;
- if(navigator.share)navigator.share({title:'Race me in Keyloria!',text,url}).catch(()=>{});
- else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast('Invite link copied! Paste it to a friend.')).catch(()=>toast(url));else toast(url)};
+ACT.raceShare=()=>{if(!ROOM)return;const url=location.origin+location.pathname+'?race='+ROOM.code;
+ const ok=()=>toast('Invite link copied to clipboard!'),fallback=()=>{try{const t=document.createElement('textarea');t.value=url;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();ok()}catch(e){toast(url)}};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(ok).catch(fallback);else fallback()};
+ACT.raceRematch=()=>{const R=ROOM;if(!R)return ACT.raceHub();post('/api/race',{a:'rematch',room:R.code,pid:pid(),name:myName(),look:myLook(),text:raceText(R.lvl||myLevel())}).then(r=>{stopPoll();OFF=r.now-Date.now();ROOM={code:R.code,host:r.host===pid(),spectate:R.spectate&&r.host===pid(),lvl:r.lvl||R.lvl,last:r};if(screen==='game')show('arcade');lobby()}).catch(e=>toast(e.message))};
 ACT.raceLeave=()=>{stopPoll();ROOM=null;closeModal()};
 
 /* ---------- racing ---------- */
@@ -128,7 +135,7 @@ function startNet(r){closeModal();const startLocal=r.startAt-OFF;
  G.text=r.text;G.pos=0;G.mist=new Set();G.start=0;G.done=false;G.racers=[];
  G.net={room:ROOM.code,startLocal,ps:{},lanes:lanes.map(p=>p.pid),all:r.players,fin:false};
  const met=Object.keys(S.cards).sort(()=>Math.random()-.5);
- $('#garena').innerHTML=`<div class="finish"></div><div class="lane"><div class="runner" id="rn0">${zookSVG()}<span class="rname">${esc(myName())}</span></div></div>`+lanes.map((p,k)=>{const [a,b]=(met[k]||'0-0').split('-').map(Number);return `<div class="lane"><div class="runner" id="rq${k}">${creatureSVG(a,b)}<span class="rname">${esc(p.name)}</span></div></div>`}).join('')+`<div class="cdown" id="cdown"></div><div class="rlist" id="rlist"></div>`;$('#garena').style.setProperty('--lanes',lanes.length+1);$('#garena').classList.add('netrace');
+ $('#garena').innerHTML=`<div class="finish"></div><div class="lane"><div class="runner" id="rn0">${zookSVG()}<span class="rname">${esc(myName())}</span></div></div>`+lanes.map((p,k)=>`<div class="lane"><div class="runner" id="rq${k}">${heroBig(p.look)}<span class="rname">${esc(p.name)}</span></div></div>`).join('')+`<div class="cdown" id="cdown"></div><div class="rlist" id="rlist"></div>`;$('#garena').style.setProperty('--lanes',lanes.length+1);$('#garena').classList.add('netrace');
  $('#gstripIn').innerHTML=[...G.text].map(c=>`<span class="${c===' '?'sp':''}">${c===' '?'·':esc(c)}</span>`).join('');raceStrip();
  const g=G;const loop=()=>{if(G!==g||G.done)return;const now=Date.now();const cd=$('#cdown');
   if(now<startLocal){if(cd)cd.textContent=Math.ceil((startLocal-now)/1000)}else{if(cd&&cd.textContent!=='GO!'&&!G.start){cd.textContent='GO!';setTimeout(()=>cd&&cd.remove(),700)}if(!G.start)G.start=performance.now()}
@@ -144,19 +151,19 @@ const _ri=raceInput;raceInput=function(ch,caps){if(G.net&&(Date.now()<G.net.star
 const _er=endRace;endRace=function(){if(!G.net)return _er.apply(this,arguments);const g=G;G.done=true;setTarget(null);g.net.fin=true;
  const secs=(performance.now()-g.start)/1000,len=g.text.length;g.net.wpm=Math.round(len/5/Math.max(secs/60,1/60));g.net.acc=Math.round((len-g.mist.size)/len*100);
  S.hist.push({t:Date.now(),w:g.net.wpm,a:g.net.acc});if(S.hist.length>80)S.hist.shift();S.time+=Math.round(secs);S.xp+=len;sfx.win();
- post('/api/race',{a:'tick',room:g.net.room,pid:pid(),pos:len,wpm:g.net.wpm,acc:g.net.acc}).then(r=>{g.net.all=r.players;const place=r.players.findIndex(p=>p.pid===pid())+1;g.net.place=place;const gems=[3,2,1][place-1]||0;S.gems+=gems;g.net.gems=gems;save();drawNetResult()}).catch(()=>{save();drawNetResult()});
+ post('/api/race',{a:'tick',room:g.net.room,pid:pid(),pos:len,wpm:g.net.wpm,acc:g.net.acc}).then(r=>{g.net.all=r.players;const place=r.players.findIndex(p=>p.pid===pid())+1;g.net.place=place;const gems=[3,2,1][place-1]||0;S.gems+=gems;if(place===1)S.netw=(S.netw||0)+1;S.netb=Math.max(S.netb||0,g.net.wpm||0);g.net.gems=gems;save();drawNetResult()}).catch(()=>{save();drawNetResult()});
  clearInterval(g.net.iv);g.net.iv=setInterval(()=>{if(!document.querySelector('#mbox .netres')||G!==g)return clearInterval(g.net.iv);post('/api/race',{a:'get',room:g.net.room,pid:pid()}).then(r=>{g.net.all=r.players;drawNetResult(true)}).catch(()=>{})},2500)};
-function standingsHTML(ps,len){return `<div class="cl-scroll"><table class="hs-tab"><tr><th>#</th><th>Racer</th><th>Progress</th><th>WPM</th></tr>${ps.map((p,k)=>`<tr class="${p.pid===pid()?'me':''}"><td><b>${k+1}</b></td><td>${esc(p.name)}</td><td>${p.ft?'Finished!':`<div class="cl-bar"><i style="width:${Math.round(p.pos/len*100)}%"></i></div>`}</td><td>${p.wpm||'–'}</td></tr>`).join('')}</table></div>`}
+function standingsHTML(ps,len){return `<div class="cl-scroll"><table class="hs-tab"><tr><th>#</th><th>Racer</th><th>Progress</th><th>WPM</th></tr>${ps.map((p,k)=>`<tr class="${p.pid===pid()?'me':''}"><td><b>${k+1}</b></td><td><img class="cl-hero" src="${heroIcon(p.look)}" alt="" style="height:22px;vertical-align:middle;margin-right:6px">${esc(p.name)}</td><td>${p.ft?'Finished!':`<div class="cl-bar"><i style="width:${Math.round(p.pos/len*100)}%"></i></div>`}</td><td>${p.wpm||'–'}</td></tr>`).join('')}</table></div>`}
 function drawNetResult(update){const g=G;if(!g||!g.net)return;const box=document.querySelector('#mbox .netres');if(update&&box){box.innerHTML=standingsHTML(g.net.all,g.text.length);return}
  if(update)return;const pl=g.net.place;
  modal(`<h2>${pl===1?'You won the race!':pl?ord(pl)+' place!':'Race finished!'}</h2>
  <div class="rstats"><div><b>${pl?ord(pl):'–'}</b><span>Place</span></div><div><b>${g.net.wpm}</b><span>WPM</span></div><div><b>${g.net.acc}%</b><span>Accuracy</span></div><div><b>+${g.net.gems||0}</b><span>Diamonds</span></div></div>
  <div class="netres">${standingsHTML(g.net.all,g.text.length)}</div>
- <div class="rbtns"><button class="btn" data-act="raceHub">Race again</button><button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`)}
+ <div class="rbtns"><button class="btn nextbtn" data-act="raceRematch">Rematch</button><button class="btn alt" data-act="raceHub">New race</button><button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`)}
 
 /* ---------- host watching a class race ---------- */
 function watch(){const len=(ROOM.last&&ROOM.last.text||'').length||1;const draw=r=>{const now=Date.now(),st=r.startAt-OFF;
-  modal(`<h2>Class race ${esc(ROOM.code)}</h2><div class="watch">${now<st?`<div class="cl-big">${Math.ceil((st-now)/1000)}</div>`:''}${standingsHTML(r.players,r.text.length||len)}</div><div class="rbtns"><button class="btn alt" data-act="raceLeave">Close</button></div>`)};
+  const done=r.players.length&&r.players.every(p=>p.ft);modal(`<h2>Class race ${esc(ROOM.code)}</h2><div class="watch">${now<st?`<div class="cl-big">${Math.ceil((st-now)/1000)}</div>`:''}${standingsHTML(r.players,r.text.length||len)}</div><div class="rbtns">${done||now>st+20000?'<button class="btn nextbtn" data-act="raceRematch">Rematch</button>':''}<button class="btn alt" data-act="raceLeave">Close</button></div>`)};
  const tick=()=>post('/api/race',{a:'get',room:ROOM.code,pid:pid()}).then(r=>{OFF=r.now-Date.now();if(!document.querySelector('#mbox .watch')&&POLL)return stopPoll();draw(r);if(r.players.length&&r.players.every(p=>p.ft))stopPoll()}).catch(()=>{});
  modal('<h2>Class race</h2><div class="watch"><p class="muted">Getting ready...</p></div>');tick();POLL=setInterval(tick,1500)}
 
@@ -165,20 +172,23 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .cl-sec{margin:10px 0 0;text-align:left}.cl-sec h3{margin:0 0 6px;font-size:18px}.cl-btns{display:flex;gap:8px;flex-wrap:wrap}
 .cl-field{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}.cl-in{font:inherit;font-size:20px;padding:6px 10px;width:9ch;text-transform:uppercase;background:#1b1626;color:#fff6e0;border:3px solid #3a2f4e}.cl-in.wide{width:auto;flex:1;min-width:12ch;text-transform:none;font-size:17px}
 .cl-note{font-size:15px;margin:10px 0 0}.cl-big{font-size:46px;letter-spacing:.12em;color:#f0c860;margin:8px 0;text-align:center}
-.cl-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}.cl-chip{padding:3px 10px;background:#2a2340;border:2px solid #3a2f4e}.cl-chip.me{border-color:#7fe8ff}
+.cl-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}.cl-chip{padding:3px 10px;background:#2a2340;border:2px solid #3a2f4e}.cl-chip.me{border-color:#7fe8ff}.cl-chip{display:inline-flex;align-items:center;gap:6px}.cl-hero{height:28px;width:auto;image-rendering:pixelated}
 .cl-list{display:flex;flex-wrap:wrap;gap:8px}.cl-scroll{max-height:44vh;overflow:auto}.cl-x{background:none;border:0;color:#b8a8d8;cursor:pointer;font:inherit}
 .cl-bar{height:10px;background:#2a2340;border:2px solid #3a2f4e;min-width:80px}.cl-bar i{display:block;height:100%;background:#7fe8ff}
 .runner .rname{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);font-size:12px;white-space:nowrap;background:rgba(27,22,38,.8);padding:0 4px;color:#fff6e0}
 .cdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:72px;color:#f0c860;text-shadow:4px 4px 0 #1b1626;pointer-events:none;z-index:5}
 .netrace .lane{height:calc(100% / var(--lanes,4))}.netrace .runner .rname{font-size:11px}
 .btn.racebtn{background:#f0c860!important;color:#2a1d3e!important;box-shadow:0 4px 0 #a8802a!important}
-.btn.clsbtn{background:#7fd8c8!important;color:#1b2a2e!important;box-shadow:4px 4px 0 rgba(4,6,24,.65)!important;height:42px;font-family:var(--title)!important;font-size:12px!important;padding:0 14px!important;letter-spacing:.05em}
+#s-home .topbar .btn.clsbtn{background:#7fd8c8!important;color:#1b2a2e!important;box-shadow:4px 4px 0 rgba(4,6,24,.65)!important;height:42px!important;font-family:var(--title)!important;font-size:13px!important;padding:0 10px!important;letter-spacing:.04em;display:inline-flex;align-items:center}#s-home .topbar .btn.clsbtn .bico.hico{height:22px;margin:0 6px 0 0}
 #s-home .btn.selp{background:#b8a0e8!important;color:#2a1d3e!important}
 #s-home .roamtog.arcade-switch{display:inline-flex;align-items:center;gap:7px;border:2px solid #8862b6;border-radius:10px;background:#2a1d3e;color:#e9dcfa;padding:0 10px;height:42px;cursor:pointer;font:400 12px/1.2 var(--title);letter-spacing:.05em;margin-right:auto;box-shadow:4px 4px 0 rgba(4,6,24,.65)}
 #s-home .roamtog.on{background:#6e3f9d;color:#fff;border-color:#c9a4f1}
 #s-home .roamtog .switch-track{position:relative;display:inline-block;width:37px;height:19px;border-radius:20px;background:#766887;border:2px solid #d4bfec;box-sizing:border-box}
 #s-home .roamtog .switch-thumb{position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:#fff;transition:left .15s}
 #s-home .roamtog.on .switch-track{background:#bce984}#s-home .roamtog.on .switch-thumb{left:20px;background:#294014}
+.btn.sharebtn{background:#6edc8c!important;color:#14301e!important;box-shadow:0 4px 0 #3a9a5a!important}
+.raceHubBox .cl-sec{text-align:center}.raceHubBox .cl-btns,.raceHubBox .cl-field{justify-content:center}
+.cl-btns.lvlrow{flex-wrap:nowrap;justify-content:center;gap:6px}.cl-btns.lvlrow .btn{padding:8px 10px!important;font-size:15px!important;flex:1 1 0;min-width:0;white-space:nowrap}
 .btn.lv-beast{background:#c8402e!important;color:#fff!important}.btn.lv-impossible{background:#4a1a6a!important;color:#fff!important}
 #s-arcade .game > p{min-height:2.9em}
 .rlist{position:absolute;right:6px;top:6px;font-size:13px;background:rgba(27,22,38,.8);padding:4px 8px;z-index:4}.rlist .me{color:#7fe8ff}

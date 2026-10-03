@@ -36,7 +36,7 @@ body.mobile #kbwrap,body.mobile .kbwrap,body.mobile #roam,body.mobile .roamtog,b
 body.mobile #s-home{transform:none!important}
 body.mobile #s-home .topbar{flex-wrap:wrap;gap:6px;justify-content:flex-start}
 body.mobile #s-home .topbar .selp{margin-right:auto!important}
-body.mobile #s-home .logo{max-width:78%;margin:0 auto 6px}
+body.mobile #s-home .logo{display:flex!important;justify-content:center!important;align-items:center;width:100%!important;max-width:none!important;margin:0 auto 6px!important;transform:none!important;left:auto!important}body.mobile #s-home .logo>*{max-width:82%!important;height:auto;margin-left:auto!important;margin-right:auto!important}
 body.mobile #s-home .home-grid{display:flex!important;flex-direction:column;gap:12px!important}
 body.mobile #s-home .hero-big{width:100%!important;max-width:none!important;display:flex;flex-direction:column;align-items:center}
 body.mobile #s-home .hero-big .zk,body.mobile #s-home .hero-big>svg{max-width:150px;max-height:150px}
