@@ -74,6 +74,7 @@ function analyseArc(){const L=GLOG;if(L.length<5)return null;const t0=L[0].t,dur
  const slow=Object.entries(time).filter(([c,a])=>a.length>=2).map(([c,a])=>[c,a.reduce((p,q)=>p+q,0)/a.length]).sort((a,b)=>b[1]-a[1]).slice(0,3);
  const mean=raw.reduce((a,b)=>a+b,0)/raw.length,sd=Math.sqrt(raw.reduce((a,b)=>a+(b-mean)*(b-mean),0)/raw.length);
  return {net,raw,err,secs,dur,good,wrong,wr:null,ww:null,slow,missed:[],cons:mean?Math.max(0,Math.round(100-sd/mean*100)):0,wpm:net[net.length-1]||0,acc:Math.round(good/Math.max(1,L.length)*100)}}
+window.kkArcStats=()=>analyseArc();
 const _md=modal;modal=function(html){const r=_md.apply(this,arguments);try{if(screen==='game'){setTimeout(()=>{const box=$('#mbox');if(!box||box.querySelector('.tmini'))return;const rs=box.querySelector('.rstats');if(!rs)return;const a=analyseArc();if(!a)return;LAST=a;
   rs.insertAdjacentHTML('afterend',`<button class="tmini" title="Open your typing graph">${chartSVG(a,false)}<span class="tmore">Tap for details</span></button>`);wire()},60)}}catch(e){}return r};
 })();

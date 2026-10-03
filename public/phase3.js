@@ -45,8 +45,9 @@ if(typeof petDone==='function'){const _pd=petDone;petDone=function(){try{if(PET)
 
 /* ---------- world completion ---------- */
 const wRange=w=>[WSTART[w-1],(WSTART[w]||LESSONS.length)];
-const wDone=w=>{const[a,b]=wRange(w);for(let i=a;i<b;i++)for(let f=0;f<3;f++)if(!S.cards[i+'-'+f])return false;return true};
-const wCount=w=>{const[a,b]=wRange(w);let n=0;for(let i=a;i<b;i++)for(let f=0;f<3;f++)if(S.cards[i+'-'+f])n++;return[n,(b-a)*3]};
+const wList=w=>{if(window.SEQWL)return SEQWL(w);const[a,b]=wRange(w);return Array.from({length:b-a},(_,k)=>a+k)};
+const wDone=w=>{for(const i of wList(w))for(let f=0;f<3;f++)if(!S.cards[i+'-'+f])return false;return true};
+const wCount=w=>{const L=wList(w);let n=0;for(const i of L)for(let f=0;f<3;f++)if(S.cards[i+'-'+f])n++;return[n,L.length*3]};
 function checkWorlds(){S.wrew=S.wrew||{};const got=[];for(let w=1;w<WSTART.length+1;w++)if(!S.wrew[w]&&wDone(w)){S.wrew[w]=1;S.gems+=50;got.push(w)}
  if(got.length){save();setTimeout(()=>toast(`World ${got.join(', ')} binder page complete! +${50*got.length} diamonds`),1200)}}
 
@@ -65,7 +66,7 @@ const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments)
 
 /* ---------- little learners (under 5) ---------- */
 /* little-learner mode only makes sense before all letters are learned: switch it off for anyone past that */
-function littleCheck(){try{if(S.little&&(S.age!=='u5'||Math.floor(Math.max(0,nextStage())/NST)>=15)){S.little=false;if(S.age==='u5')S.age=null;if(S.set.len===.6)S.set.len=1.4;save()}}catch(e){}}
+function littleCheck(){try{if(S.little&&(S.age!=='u5'||(typeof EI==='function'?EI(Math.floor(Math.max(0,nextStage())/NST)):Math.floor(Math.max(0,nextStage())/NST))>=15)){S.little=false;if(S.age==='u5')S.age=null;if(S.set.len===.6)S.set.len=1.4;save()}}catch(e){}}
 const _ldL=load;load=function(){const r=_ldL.apply(this,arguments);littleCheck();return r};setTimeout(littleCheck,0);
 function setLittle(on){S.little=!!on;if(on){S.age='u5';S.set.voice=true;S.set.len=.6;S.placed=true;S.skip=0}else{if(S.set.len===.6)S.set.len=1.4}}
 window.setLittle=setLittle;

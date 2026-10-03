@@ -2,7 +2,7 @@
 (function(){
 const TXT=(typeof KK_TEXT!=='undefined'&&KK_TEXT)||{para:[]};
 const UNLOCK=14;
-const progLesson=()=>Math.floor(Math.max(0,nextStage())/NST);
+const progLesson=()=>{const p=Math.floor(Math.max(0,nextStage())/NST);return typeof EI==='function'?EI(p):p};
 const SYM='!?@#$%&*+-=/';
 function prepText(t){const p=progLesson();
  if(p<15)t=t.toLowerCase();

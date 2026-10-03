@@ -44,7 +44,7 @@ applyFs();setTimeout(addFs,0);
 const T=(typeof KK_TEXT!=='undefined'&&KK_TEXT)||{easy:[],medium:[],hard:[],para:[]};
 const okText=s=>!s.split(/[^A-Za-z']+/).some(w=>w&&typeof tokBad==='function'&&tokBad(w));
 ['easy','medium','hard','para'].forEach(k=>T[k]=(T[k]||[]).filter(okText));
-const prog=()=>Math.floor(Math.max(0,nextStage())/NST);
+const prog=()=>{const p=Math.floor(Math.max(0,nextStage())/NST);return typeof EI==='function'?EI(p):p};
 const UNLOCK=14;
 function fit(t){const p=prog();
  if(p<15)t=t.toLowerCase();

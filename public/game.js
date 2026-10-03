@@ -286,7 +286,7 @@ function genText(i,s,practice){
 /* ================= PROGRESS ================= */
 const sk=(i,s)=>i+'-'+s;
 const bestOf=n=>S.best[sk(Math.floor(n/8),n%8)]||0;
-const unlocked=n=>n<=S.skip||bestOf(n-1)>=1;
+const unlocked=n=>window.SEQU?SEQU(n):(n<=S.skip||bestOf(n-1)>=1);
 let TOTAL=LESSONS.length*3;
 function nextStage(){const T=LESSONS.length*8;for(let n=S.skip;n<T;n++)if(bestOf(n)<1)return n;return T-1}
 let needXP=L=>30*(L-1)*L;
@@ -332,7 +332,7 @@ function renderMap(){
   h+=(WREG.includes(r)?worldHead(r):'')+`<section class="region" style="--rc:${R.color}"><div class="rhead"><div class="badge ${S.badges.includes(r)?'got':''}" style="--bc:${R.color}">${r+1}</div><div><h3>${R.name}</h3><p class="muted">${R.desc}</p></div></div><div class="lessons">`;
   LESSONS.forEach((L,i)=>{if(L.r!==r)return;
    const keys=L.k?[...L.k].map(c=>`<span style="--fc:${fcol(fingerOf(c))}">${c.toUpperCase()}</span>`).join(''):'';
-   h+=`<div class="lesson panel"><div class="lt"><div class="num">Lesson ${i+1}</div><h4>${lessonTitle(i)}</h4><div class="minikeys">${keys}</div></div><div class="nodes">`;
+   h+=`<div class="lesson panel"><div class="lt"><div class="num">Lesson ${typeof LNUM==='function'?LNUM(i):i+1}</div><h4>${lessonTitle(i)}</h4><div class="minikeys">${keys}</div></div><div class="nodes">`;
    [0,1,2].forEach(s=>{const n=i*3+s,b=S.best[sk(i,s)]||0,u=unlocked(n);
     const thumb=!u?ICON.lock:creatureSVG(i,s,'fit '+(S.cards[sk(i,s)]?'':'sil')),nm=stageName(i,s);
     h+=`<button class="node ${u?'':'locked'} ${n===nx&&u?'next':''} ${isBoss(i,s)?'boss':''}" ${u?`data-act="play" data-n="${n}"`:'disabled'} aria-label="${nm}${u?'':' locked'}"><span class="nc">${thumb}</span><span class="nl">${nm}</span><span class="ns">${'★'.repeat(b)}${'☆'.repeat(u?3-b:0)}</span></button>`});
@@ -378,13 +378,13 @@ function stopRound(){clearInterval(P.idle);P.phase='off'}
 function hud(){
  const L=LESSONS[P.i],R=REGIONS[L.r];
  $('#hud').innerHTML=`<button class="icon-btn" data-act="go" data-to="map" aria-label="Back to map">${ICON.back}</button>
- <div class="ht"><b>${P.mode==='place'?'Skill check':P.practice?'Practice: tricky keys':lessonTitle(P.i)+' · '+stageName(P.i,P.s)}</b><span>${R.name} · Lesson ${P.i+1}</span></div>
+ <div class="ht"><b>${P.mode==='place'?'Skill check':P.practice?'Practice: tricky keys':lessonTitle(P.i)+' · '+stageName(P.i,P.s)}</b><span>${R.name} · Lesson ${typeof LNUM==='function'?LNUM(P.i):P.i+1}</span></div>
  <div class="stat"><b id="h-acc">100%</b><span>Accuracy</span></div><div class="stat"><b id="h-cmb">0</b><span>Combo</span></div><button class="icon-btn" data-act="sayit" aria-label="Read the hint out loud">${ICON.say}</button>${soundBtn()}`;
  $('#arena').style.setProperty('--rc',R.color);
 }
 function startStage(n,mode){
  const practice=mode==='practice',place=mode==='place';
- const i=place?14:practice?Math.floor(Math.max(0,nextStage()-1)/8):Math.floor(n/8),s=practice?1:place?2:n%8;
+ const i=place?14:practice?(typeof EI==='function'?EI(Math.floor(Math.max(0,nextStage()-1)/8)):Math.floor(Math.max(0,nextStage()-1)/8)):Math.floor(n/8),s=practice?1:place?2:n%8;
  P={i,s,n,mode,practice,phase:'off'};
  show('play');$('#s-play').appendChild($('#kbwrap'));hud();
  const L=LESSONS[i],set=learned(i);if(L.sp==='caps'||i>15)[...'abcdefghijklmnopqrstuvwxyz;,.'].forEach(c=>set.add(c));
@@ -577,7 +577,7 @@ function placeResult(){
  <div class="rbtns"><button class="btn" data-act="play" data-n="${nextStage()}">Let's go ▸</button><button class="btn alt" data-act="go" data-to="map">Map</button></div>`);
 }
 /* ---- arcade ---- */
-const arcadeLesson=()=>Math.floor(nextStage()/8);
+const arcadeLesson=()=>(typeof EI==='function'?EI(Math.floor(nextStage()/8)):Math.floor(nextStage()/8));
 function stopGame(){if(G.raf)cancelAnimationFrame(G.raf);G.done=true;G.raf=0}
 let meteorArt=()=>`<svg viewBox="0 0 160 120"><path d="M20 10 L96 70" stroke="#ff9f45" stroke-width="18" stroke-linecap="round" opacity=".5"/><path d="M36 22 L96 70" stroke="#ffd84d" stroke-width="8" stroke-linecap="round" opacity=".7"/><circle cx="104" cy="76" r="30" fill="#8a6446" ${st}/><circle cx="96" cy="68" r="6" fill="#5b3d2a"/><circle cx="114" cy="86" r="8" fill="#5b3d2a"/><text x="104" y="84" text-anchor="middle" font-family="Atkinson Hyperlegible Mono,monospace" font-weight="700" font-size="26" fill="#fff">f</text></svg>`;
 function renderArcade(){
@@ -1033,7 +1033,7 @@ const WDATA={"spr": {"mossling": ["............................", "..........ooo
 })();
 TOTAL=LESSONS.length*3;
 const WORLDS=[{name:'Keyloria',from:0},{name:'Whispering Woods',from:5},{name:'Thunder Peaks',from:6}];
-const worldOf=i=>{let w=1;for(let k=1;k<WSTART.length;k++)if(i>=WSTART[k])w=k+1;return w};
+const worldOf=i=>{if(window.SEQW&&i>=0&&LESSONS[i])return SEQW(i);let w=1;for(let k=1;k<WSTART.length;k++)if(i>=WSTART[k])w=k+1;return w};
 /* ---- text for new worlds ---- */
 const W2={long:'forest branch acorns mossy river stones bridge shadow beetle squirrel mushroom whisper lantern campfire feather thunder blanket rainbow pinecone sparkle journey keyloria trainer monster crystal captain blizzard mountain glacier canyon summit meadow harvest pebble ladder planet rocket tadpole leaflet hollow'.split(' '),
  names:['Pop','Sproutle','Mossling','Fernix','Blinkit','Monday','Friday','Daisy','Sunday','Maple','Luna','Max','Ruby','Leo','Mia','Sam','Forest','River','Oakaroth','Shroomie'],
@@ -1481,7 +1481,7 @@ setInterval(()=>{ensureTrackers();const hk=(S.hero||'')+(S.color||'')+JSON.strin
   if(G.done&&G.type!=='glitch')f=1;setTrk(tg,f,lab);if(typeof ghostWaveDisplay==='function')ghostWaveDisplay()}},150);
 /* --- whole-game progress on home --- */
 const _rh4=renderHome;renderHome=function(){_rh4();const xb=$('#s-home .trow');if(!xb||!S.name)return;const tot=LESSONS.length*8,done=Object.keys(S.best).length,pc=Math.round(done/tot*100);
- xb.insertAdjacentHTML('afterend',`<div class="gprog"><div class="gp-top"><span>Whole game</span><b>${pc}% done</b></div><div class="gp-bar"><i style="width:${pc}%"></i></div><small>${done} of ${tot} levels · World ${worldOf(Math.min(LESSONS.length-1,Math.floor(nextStage()/8)))} of ${WORLDS.length}</small></div>`)};
+ xb.insertAdjacentHTML('afterend',`<div class="gprog"><div class="gp-top"><span>Whole game</span><b>${pc}% done</b></div><div class="gp-bar"><i style="width:${pc}%"></i></div><small>${done} of ${tot} levels · World ${worldOf(Math.min(LESSONS.length-1,(typeof EI==='function'?EI(Math.floor(nextStage()/8)):Math.floor(nextStage()/8))))} of ${WORLDS.length}</small></div>`)};
 
 /* ================= V14: delete player ================= */
 const TRASH=[".oooooo.","oHHHHHHo","oooooooo",".oLoLoL.",".oLoLoL.",".oLoLoL.",".oLoLoL.",".oooooo."];
@@ -1667,10 +1667,10 @@ function renderMap(){
  let h=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Adventure Map</h2><button class="btn sm volt" data-act="practice">Practice</button>${gemsHTML()}</div>`;
  REGIONS.forEach((R,r)=>{
   h+=(WREG.includes(r)?worldHead(r):'')+`<section class="region" style="--rc:${R.color}"><div class="rhead"><div class="badge ${S.badges.includes(r)?'got':''}" style="--bc:${R.color}">${r+1}</div><div><h3>${R.name}</h3><p class="muted">${R.desc}</p></div></div><div class="lessons l8s">`;
-  LESSONS.forEach((L,i)=>{if(L.r!==r)return;
+  (window.ORDER||LESSONS.map((_,k)=>k)).forEach(i=>{const L=LESSONS[i];if(L.r!==r)return;
    const keys=L.k?[...L.k].map(c=>`<span style="--fc:${fcol(fingerOf(c))}">${c.toUpperCase()}</span>`).join(''):'';
    const f=formNow(i),has=!!S.cards[i+'-'+f],pts=lessonPts(i),nxt=EVO_PTS[f+1];
-   h+=`<div class="lesson panel l8"><div class="l8top"><span class="evo-art">${creatureSVG(i,f,'fit '+(has?'':'sil'))}</span><div class="lt"><div class="num">Lesson ${i+1}</div><h4>${lessonTitle(i)}</h4><div class="minikeys">${keys}</div>
+   h+=`<div class="lesson panel l8"><div class="l8top"><span class="evo-art">${creatureSVG(i,f,'fit '+(has?'':'sil'))}</span><div class="lt"><div class="num">Lesson ${typeof LNUM==='function'?LNUM(i):i+1}</div><h4>${lessonTitle(i)}</h4><div class="minikeys">${keys}</div>
     <div class="evo-meter" title="Stars help your Keylori evolve"><div class="eb"><i style="width:${nxt?Math.round(pts/nxt*100):100}%"></i></div><small>${has?SPECIES[i].n[f]:'???'} · ${nxt?pts+'/'+nxt+' to evolve':'Fully evolved'}</small></div></div></div><div class="stages">`;
    for(let s=0;s<NST;s++){const n=i*NST+s,b=S.best[sk(i,s)]||0,u=unlocked(n),boss=isBoss(i,s);
     h+=`<button class="st8 ${u?'':'locked'} ${n===nx&&u?'next':''} ${boss?'boss':''}" ${u?`data-act="play" data-n="${n}"`:'disabled'} title="${stageName(i,s)}" aria-label="Level ${s+1} ${stageName(i,s)}${u?'':' locked'}"><b>${u?(boss?'BOSS':s+1):'🔒'}</b><span>${'★'.repeat(b)}${'☆'.repeat(u?3-b:0)}</span></button>`}
@@ -2091,7 +2091,7 @@ const _res20=results;results=function(r){_res20(r);if(!r.pass||P.practice||S.set
 /* --- 3/4. practice menu: trouble keys, letter combos, free write --- */
 const COMBOS=['th','he','in','er','an','re','on','at','en','nd','ti','es','or','te','of','ed','is','it','al','ar','st','to','nt','ng','se','ha','as','ou','io','le','ve','co','me','de','hi','ri','ro','ic','ne','ea','ra','ce','the','ing','and','ion','ent','her','for','tha','ter','was','you','ith','ver','all','wit','thi','tio'];
 let PRACT=null;
-ACT.practice=()=>{const i=Math.max(0,Math.floor(Math.max(0,nextStage()-1)/8)),wk=weakKeys(learned(Math.min(i,19)));
+ACT.practice=()=>{const i=(typeof EI==='function'?EI(Math.max(0,Math.floor(Math.max(0,nextStage()-1)/8))):Math.max(0,Math.floor(Math.max(0,nextStage()-1)/8))),wk=weakKeys(learned(Math.min(i,19)));
  modal(`<h2>Practice</h2><div class="pmenu">
  <button class="pm" data-act="pr" data-m="weak"><b>Trouble keys</b><span>${wk.length?'Work on: '+wk.map(x=>x[0].toUpperCase()).join(' '):'Keys you miss the most'}</span></button>
  <button class="pm" data-act="pr" data-m="combo"><b>Letter combos</b><span>th, ing, the... type them in one smooth move</span></button>
@@ -2151,7 +2151,7 @@ ACT.place2=()=>{closeModal();startStage(0,'place');const parts=[fillSent(SENT.co
 
 /* ================= V22: map shows worlds as you reach them; world badges ================= */
 const worldOfRegion=r=>{let w=0;WREG.forEach((x,k)=>{if(r>=x)w=k});return w+1};
-const worldDone=w=>{const a=WSTART[w-1],b=WSTART[w]||LESSONS.length;for(let i=a;i<b;i++)for(let s=0;s<8;s++)if(!(S.best[i+'-'+s]>=1))return false;return true};
+const worldDone=w=>{const a=WSTART[w-1],b=WSTART[w]||LESSONS.length;for(const i of (window.SEQWL?SEQWL(w):Array.from({length:b-a},(_,k)=>a+k)))for(let s=0;s<8;s++)if(!(S.best[i+'-'+s]>=1))return false;return true};
 const _rm22=renderMap;renderMap=function(){_rm22();const cur=worldOf(Math.floor(nextStage()/8));
  const root=$('#s-map');let w=0;[...root.children].forEach(el=>{if(el.classList.contains('worldhead')){w++;if(w>cur+1)el.remove();else if(w===cur+1&&!el.classList.contains('shut'))w=w}else if(el.classList.contains('region')){if(w>cur)el.remove()}})};
 const _rh22=renderHome;renderHome=function(){_rh22();$('#s-home .gprog')?.remove();const b=$('#s-home .badges');if(!b)return;
@@ -2473,7 +2473,7 @@ const LSUM={caps:'Shift for capital letters',sent:'Type your first full sentence
 function lessonSummary(i){const L=LESSONS[i];if(LSUM[L.sp])return LSUM[L.sp];if(L.k){const ks=[...L.k].map(c=>c==='.'?'period':c===','?'comma':c===';'?'semicolon':c.toUpperCase());return 'New keys: '+(ks.length>1?ks.slice(0,-1).join(', ')+' and '+ks[ks.length-1]:ks[0])}return lessonTitle(i)}
 let SPLASH=null;
 function lessonSplash(i){const pl=document.getElementById('s-play');if(!pl)return;document.getElementById('lsplash')?.remove();
- const el=document.createElement('div');el.id='lsplash';el.innerHTML=`<div class="ls-box"><div class="ls-world">${esc(REGIONS[LESSONS[i].r]?.name||'')}</div><div class="ls-num">LESSON ${i+1}</div><div class="ls-title">${esc(lessonTitle(i))}</div><div class="ls-sum">${esc(lessonSummary(i))}</div><div class="ls-go">Press SPACE to start</div></div>`;
+ const el=document.createElement('div');el.id='lsplash';el.innerHTML=`<div class="ls-box"><div class="ls-world">${esc(REGIONS[LESSONS[i].r]?.name||'')}</div><div class="ls-num">LESSON ${typeof LNUM==='function'?LNUM(i):i+1}</div><div class="ls-title">${esc(lessonTitle(i))}</div><div class="ls-sum">${esc(lessonSummary(i))}</div><div class="ls-go">Press SPACE to start</div></div>`;
  pl.appendChild(el);SPLASH=el;[523,659,784,1047].forEach((f,k)=>setTimeout(()=>tone&&tone(f,.12,'square',.06),k*110));
  const done=()=>{if(SPLASH!==el)return;SPLASH=null;el.classList.add('out');setTimeout(()=>el.remove(),300)};el.addEventListener('click',done);el._done=done;setTimeout(()=>el.classList.add('ready'),700);setTimeout(done,6000)}
 addEventListener('keydown',e=>{if(!SPLASH)return;e.preventDefault();e.stopImmediatePropagation();if((e.key===' '||e.key==='Enter')&&SPLASH.classList.contains('ready'))SPLASH._done()},true);

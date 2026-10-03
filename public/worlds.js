@@ -35,7 +35,7 @@ function applyPerm(){
  try{Object.keys(KKC).forEach(k=>{if(/^[ekKs]\d+-/.test(k)||/^e\d/.test(k))delete KKC[k]})}catch(e){}}
 window.applyPerm=applyPerm;
 /* never lose access: everything up to the furthest stage you've passed stays open */
-function keepFrontier(){try{let far=-1;Object.entries(S.best||{}).forEach(([k,v])=>{if(v>=1){const[i,st]=k.split('-').map(Number);if(i<LESSONS.length&&st<NST)far=Math.max(far,i*NST+st)}});if(far>=0&&far>(S.skip||0)){S.skip=far;try{save()}catch(e){}}}catch(e){}}
+function keepFrontier(){try{let far=-1;Object.entries(S.best||{}).forEach(([k,v])=>{if(v>=1){const[i,st]=k.split('-').map(Number);if(i<LESSONS.length&&st<NST){const n=i*NST+st;if(far<0||(window.SEQP?SEQP(n)>SEQP(far):n>far))far=n}}});if(far>=0&&(window.SEQP?SEQP(far)>SEQP(S.skip||0):far>(S.skip||0))){S.skip=far;try{save()}catch(e){}}}catch(e){}}
 const _ld=load;load=function(){const r=_ld.apply(this,arguments);applyPerm();keepFrontier();return r};
 applyPerm();keepFrontier();
 

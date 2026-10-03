@@ -14,7 +14,7 @@ const STORY=[
 const storyState=()=>{S.story=S.story||{};S.story.intro=S.story.intro||{};S.story.taunt=S.story.taunt||{};S.story.shard=S.story.shard||{};return S.story};
 /* existing players: quietly credit shards they already earned so cutscenes don't pile up */
 function storyInit(){if(S.story&&S.story.v)return;const st=storyState();st.v=1;for(let w=1;w<=STORY.length;w++)if(shardWon(w)){st.shard[w]=1;st.intro[w]=1;st.taunt[w]=1}if(Object.keys(S.best||{}).length)st.intro[1]=st.intro[1]||0}
-const worldLast=w=>(WSTART[w]||LESSONS.length)-1;
+const worldLast=w=>window.SEQWL?SEQWL(w).slice(-1)[0]:(WSTART[w]||LESSONS.length)-1;
 const shardWon=w=>(S.best[worldLast(w)+'-7']||0)>=1;
 const shardCount=()=>STORY.slice(0,10).reduce((n,_,k)=>n+(shardWon(k+1)?1:0),0);
 const SHARD_COL=['#7fd8a0','#5aa04a','#a8a2c8','#5ab0d0','#e0b060','#bfe2f6','#a8c84a','#f0c860','#9ac4ea','#b8a0e8'];
