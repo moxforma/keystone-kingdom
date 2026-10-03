@@ -28,7 +28,7 @@ function arcadePhrase(value,includeSelected=false){
 }
 /* keep a word only if the toggles don't change it (no 'wednesdaymorning' mash-ups) */
 function arcadeWord(w){const t=arcadeToken(w);return(/\s/.test(String(w))||t!==String(w).toLowerCase())?'':t}
-const BEAST_CLEAN=['Seven sleepy sloths quietly juggled glowing jellyfish.','Zany wizards fix broken clocks with quartz and rhythm.','The sphinx asked a quizzical question about the fjord.','Brave knights rarely kneel beside gnomes in the labyrinth.','Jovial pirates sketched a kaleidoscope of whirling galaxies.','A shy rhinoceros waltzed through the misty archipelago.','Twelve plucky penguins zigzagged across the frozen lake.','The colonel recited a mnemonic about the mysterious pharaoh.'];
+const BEAST_CLEAN=["The blue whale is the largest animal that has ever lived on Earth.", "Honeybees beat their wings about two hundred times every second.", "Jupiter has a giant storm that is bigger than the whole Earth.", "An octopus can change the color of its skin in less than a second.", "Quick zebras and giraffes graze together on the African savanna.", "Lightning is a giant spark of electricity in the sky.", "Arctic terns fly from the far north to the far south every year.", "Chameleons can move each eye on its own to look two ways at once.", "The Sahara is the largest hot desert in the world.", "Sound cannot travel through empty space, so space is silent."];
 function beastBossText(){const okS=s=>(arcadeNumberOn()||!/\d/.test(s))&&(arcadeSymbolOn()||![...ARCADE_SYMBOLS].some(c=>s.includes(c)));
  const pool=BEAST_SENT.concat(BEAST_CLEAN).filter(okS);return arcadePhrase(rand(pool.length?pool:BEAST_CLEAN),true)}
 function arcadeBonus(index,interval){

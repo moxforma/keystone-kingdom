@@ -69,8 +69,14 @@ credit();const _ld=load;load=function(){const r=_ld.apply(this,arguments);credit
 /* ---- Keylori for the new lessons: Prism and Starlight cousins (legendary) ---- */
 const hx=c=>[1,3,5].map(k=>parseInt(c.slice(k,k+2),16)),lumv=c=>{const [r,g,b]=hx(c);return (r*.3+g*.59+b*.11)/255};
 const KEEPC=new Set(['k','w','e','m','n','p','r','o']);
-function prismPal(pal,seed){const o={};Object.entries(pal).forEach(([ch,c])=>{if(KEEPC.has(ch)||typeof c!=='string'||!/^#[0-9a-f]{6}$/i.test(c)){o[ch]=c;return}
-  const l=lumv(c);let h=(seed*47+l*380)%360;if(h>270&&h<345)h=(h+80)%360;o[ch]=hsl2hex(h,.62,Math.min(.9,.28+l*.62))});return o}
+const PRISM_MIN=.4;
+function prismPal(pal,seed){const mk=(spread,sat,lit)=>{const o={};Object.entries(pal).forEach(([ch,c])=>{if(KEEPC.has(ch)||typeof c!=='string'||!/^#[0-9a-f]{6}$/i.test(c)){o[ch]=c;return}
+  const l=lumv(c);let h=(seed*47+l*spread)%360;if(h>270&&h<345)h=(h+80)%360;o[ch]=hsl2hex(h,sat(l),lit(l))});return o};
+ const rainbow=mk(380,()=>.62,l=>Math.min(.9,.28+l*.62));
+ /* if the rainbow flips light and dark shades (looks speckled, like Prism Grifkin did), use a smooth version that keeps the shading */
+ const ks=Object.keys(pal).filter(ch=>!KEEPC.has(ch)&&/^#[0-9a-f]{6}$/i.test(pal[ch]||''));
+ const spread=P=>{const v=ks.map(ch=>lumv(P[ch]));return Math.max(...v)-Math.min(...v)};const ratio=spread(rainbow)/Math.max(.01,spread(pal));
+ return ratio<PRISM_MIN?mk(140,l=>.5+l*.2,l=>Math.min(.9,.1+l*.85)):rainbow}
 function starPal(pal){const o={};Object.entries(pal).forEach(([ch,c])=>{if(KEEPC.has(ch)||typeof c!=='string'||!/^#[0-9a-f]{6}$/i.test(c)){o[ch]=c;return}
   const l=lumv(c);o[ch]=hsl2hex(228+l*20,.5,Math.min(.72,.14+l*.55))});return o}
 const keys=[...new Set(KKDATA.order.slice(0,72))].sort();
@@ -82,7 +88,9 @@ NEWL.forEach((li,m)=>{const key=free[Math.floor(m*free.length/NEWL.length)],idx=
  EVO[li]=EVO[idx];if(typeof EVOLUTION_FLAVOR!=='undefined')EVOLUTION_FLAVOR[li]=EVOLUTION_FLAVOR[idx]});
 {const _ro=window.rarOf;window.rarOf=i=>i>=BASE?3:_ro(i)}
 /* sparkles for Prism, stars for Starlight */
-const _ev=evolvedV;evolvedV=function(i,f,tier,v){const c=_ev.apply(this,arguments);try{const k=KKDATA.order[i];if(!/^(pr|st)_/.test(k))return c;const g=c.getContext('2d'),d=g.getImageData(0,0,c.width,c.height).data,W=c.width;
+const SPK=new WeakMap();const _ev=evolvedV;evolvedV=function(i,f,tier,v){const c0=_ev.apply(this,arguments);let c=c0;try{const k=KKDATA.order[i];if(!/^(pr|st)_/.test(k))return c0;
+  /* the base canvas is cached, so sparkle a copy once instead of drawing on top again on every call */
+  if(SPK.has(c0))return SPK.get(c0);c=document.createElement('canvas');c.width=c0.width;c.height=c0.height;c.getContext('2d').drawImage(c0,0,0);SPK.set(c0,c);const g=c.getContext('2d'),d=g.getImageData(0,0,c.width,c.height).data,W=c.width;
   const pr=k.startsWith('pr_'),col=pr?['#ffffff','#fff6c8']:['#fff6e0','#9ad0ff'];let h=0;for(const ch of k)h=(h*31+ch.charCodeAt(0))>>>0;
   for(let n=0;n<(pr?7:12);n++){h=(h*1103515245+12345)>>>0;const x=4+h%(W-8);h=(h*1103515245+12345)>>>0;const y=4+h%(c.height-8);const a=d[(y*W+x)*4+3];if(a<200)continue;
    const p=(x2,y2,cc)=>{g.fillStyle=cc;g.fillRect(x2,y2,1,1)};p(x,y,col[0]);if(pr||n%3===0){p(x-1,y,col[1]);p(x+1,y,col[1]);p(x,y-1,col[1]);p(x,y+1,col[1])}}}catch(e){}return c};

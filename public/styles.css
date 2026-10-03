@@ -1,3 +1,5 @@
+@font-face{font-family:'Jersey 10';src:url(fonts/jersey10.woff) format('woff');font-display:block}
+@font-face{font-family:'Press Start 2P';src:url(fonts/pressstart2p.woff) format('woff');font-display:block}
 /* Layout: one-screen game shell in a centered 1100px column; screens swap in place over a night-sky adventure world. Single deliberate dark look. */
 :root{
   --night:#1b1626; --panel:#2a2238; --panel2:#3a2f4e; --line:#4a3d62;

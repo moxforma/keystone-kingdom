@@ -134,7 +134,7 @@ const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments)
 try{if(screen==='arcade')renderArcade()}catch(e){}
 setTimeout(()=>document.body.classList.add('kkready'),3500);
 /* show the home screen only once every script and the fonts have settled (stops the header jumping on load) */
-{const ready=()=>{try{if(screen==='home'){renderHome();fitHome()}}catch(e){}requestAnimationFrame(()=>document.body.classList.add('kkready'))};
+{const ready=()=>{try{if(screen==='home'){renderHome()}}catch(e){}requestAnimationFrame(()=>document.body.classList.add('kkready'))};
  /* wait for the web fonts the home screen actually uses (fonts.ready can resolve before they're even requested) */
  const fonts=()=>{if(!document.fonts||!document.fonts.load)return Promise.resolve();const want=new Set();
   document.querySelectorAll('#s-home, #s-home *').forEach(e=>{const c=getComputedStyle(e);want.add(c.fontStyle+' '+c.fontWeight+' 16px '+c.fontFamily)});
@@ -149,4 +149,10 @@ setTimeout(()=>document.body.classList.add('kkready'),3500);
    const back=h.querySelector('.icon-btn[data-act=go]');const b=document.createElement('button');b.className='icon-btn menubtn';b.dataset.act='go';b.dataset.to='home';b.setAttribute('aria-label','Menu');b.title='Main menu';
    b.innerHTML='<img src="'+HOUSE+'" alt=""><span>MENU</span>';back?back.insertAdjacentElement('afterend',b):h.prepend(b)})};
  setInterval(add,300);add()}
+
+/* the text-size picker lives in the header: put it back right away whenever the home screen redraws (stops the header jumping) */
+{const _rhF=renderHome;renderHome=function(){const r=_rhF.apply(this,arguments);try{window.addFs&&addFs();if(typeof fitHome==='function')fitHome()}catch(e){}return r}}
+
+/* About window links to the full landing page */
+{const _ab=ACT.about;if(_ab)ACT.about=function(){const r=_ab.apply(this,arguments);try{const rb=document.querySelector('#mbox .rbtns');if(rb&&!rb.querySelector('.aboutlink'))rb.insertAdjacentHTML('afterbegin','<a style="text-decoration:none" class="btn aboutlink" href="/about/" target="_blank" rel="noopener">How it works · For teachers</a>')}catch(e){}return r}}
 })();
