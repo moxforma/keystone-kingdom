@@ -38,17 +38,21 @@ function homeBanner(){const home=$('#s-home');if(!home||home.hidden)return;home.
 const asgFor=()=>{const a=CLS_INFO&&CLS_INFO.assign;if(!a||!S.cls)return null;if(!S.asga||S.asga.i!==a.i||S.asga.at!==a.at||S.asga.code!==S.cls.code){S.asga={code:S.cls.code,i:a.i,at:a.at,st:[]};save()}return S.asga};
 let ASG_RUN=false;
 ACT.clsPick=d=>{const i=+d.i,A=asgFor();let s=0;if(A&&A.i===i){for(;s<NST-1;s++)if(!A.st.includes(s))break}else{for(;s<NST-1;s++)if(!((S.best[i+'-'+s]||0)>=1))break}
- ASG_RUN=!!(A&&A.i===i);closeModal();startStage(i*NST+s)};
-const _shw=show;show=function(n){if(n!=='play')ASG_RUN=false;return _shw.apply(this,arguments)};
+ closeModal();startStage(i*NST+s)};
+const _ssA=startStage;startStage=function(n,mode){const r=_ssA.apply(this,arguments);try{const A=asgFor();ASG_RUN=!!(A&&typeof P!=='undefined'&&P.i===A.i&&!P.mode&&!P.practice)}catch(e){ASG_RUN=false}return r};
+function asgButtons(){const A=S.asga,box=document.querySelector('#mbox');if(!A||!box||!box.querySelector('.rstats')||typeof P==='undefined'||P.i!==A.i)return;
+ const plays=[...box.querySelectorAll('[data-act=play]')].filter(b=>!b.closest('.stpick')&&!/again/i.test(b.textContent));
+ if(A.st.length>=NST){if(box.querySelector('[data-act=asgDone]'))return;const first=plays[0];plays.forEach(b=>b.remove());
+  const html='<button class="btn nextbtn" data-act="asgDone">Lesson complete! Next ▸</button>';
+  if(first&&first.parentNode)first.insertAdjacentHTML('beforebegin',html);else(box.querySelector('.rbtns')||box).insertAdjacentHTML('afterbegin',html);
+  first&&first.remove()}
+ else{let nx=null;for(let q=0;q<NST;q++)if(!A.st.includes(q)){nx=q;break}if(nx!=null)plays.forEach(b=>b.dataset.n=A.i*NST+nx)}}
 const _res2=results;results=function(r){const out=_res2.apply(this,arguments);try{const A=S.asga;
- if(ASG_RUN&&A&&typeof P!=='undefined'&&!P.mode&&!P.practice&&P.i===A.i&&r&&!r._asg&&document.querySelector('#mbox .rstats')){r._asg=1;
+ if(ASG_RUN&&A&&typeof P!=='undefined'&&!P.mode&&!P.practice&&P.i===A.i&&r){
   if(r.pass&&!A.st.includes(P.s)){A.st.push(P.s);save()}
-  const box=document.querySelector('#mbox'),rb=box&&box.querySelector('.rbtns');
-  if(A.st.length>=NST){S.asgr=S.asgr||{};const prev=S.asgr[A.i];if(!prev||prev.at!==A.at){S.asgr[A.i]={at:A.at,d:Date.now(),w:r.wpm||0,a:r.acc||0}}
-   const k=Object.keys(S.asgr);if(k.length>60)delete S.asgr[k[0]];save();
-   if(rb){rb.querySelectorAll('[data-act=play],.nextbtn').forEach(b=>b.remove());rb.insertAdjacentHTML('afterbegin','<button class="btn nextbtn" data-act="asgDone">Lesson complete! Next</button>')}}
-  else if(rb&&r.pass){const nx=A.st.length<NST?(()=>{for(let q=0;q<NST;q++)if(!A.st.includes(q))return q})():null;rb.querySelectorAll('[data-act=play]').forEach(b=>{if(!b.closest('.stpick')&&nx!=null)b.dataset.n=A.i*NST+nx})}}}catch(e){console.warn(e)}return out};
-ACT.asgDone=()=>{const A=S.asga,R=S.asgr&&A&&S.asgr[A.i];
+  if(A.st.length>=NST){S.asgr=S.asgr||{};const prev=S.asgr[A.i];if(!prev||prev.at!==A.at){S.asgr[A.i]={at:A.at,d:Date.now(),w:r.wpm||0,a:r.acc||0};const k=Object.keys(S.asgr);if(k.length>60)delete S.asgr[k[0]];save()}}
+  asgButtons();[60,300,900,1800].forEach(t=>setTimeout(()=>{if(ASG_RUN)asgButtons()},t))}}catch(e){console.warn(e)}return out};
+ACT.asgDone=()=>{try{document.activeElement&&document.activeElement.blur()}catch(e){}const A=S.asga,R=S.asgr&&A&&S.asgr[A.i];
  modal(`<div class="asgdone"><h2>Lesson complete!</h2><p class="big">Lesson ${LNUM(A.i)}: ${esc(lessonTitle(A.i))}</p>${R?`<div class="rstats2"><div><b>${R.w}</b><span>WPM</span></div><div><b>${R.a}%</b><span>Accuracy</span></div></div>`:''}
  <p class="muted">Send it to your teacher, then head back to the menu.</p><div class="rbtns"><button class="btn nextbtn" data-act="asgSubmit">Submit to teacher</button></div></div>`)};
 ACT.asgSubmit=()=>{ASG_RUN=false;const b=document.querySelector('[data-act=asgSubmit]');if(b){b.disabled=true;b.textContent='Sending...'}
@@ -153,7 +157,7 @@ function drawDash(){const D=DASH,ms=D.members.slice().sort((a,b)=>(b.stats?.pos|
  modal(`<div class="dashv"><h2>${esc(D.name)} <span class="muted" style="font-size:18px">code ${D.code}</span></h2>
  ${ms.length?`<p class="muted cl-tip">Tap a name to see all their lessons. Updates every 10 seconds.</p><div class="cl-scroll"><table class="hs-tab"><tr><th>Name</th>${A?`<th>Lesson ${LNUM(A.i)}</th>`:''}<th>Adventure at</th><th>Stars</th><th>WPM</th><th>Acc.</th><th>Mins this week</th><th>Seen</th><th></th></tr>${ms.map(m=>{const s=m.stats||{},st=asgState(m,A);return `<tr><td><button class="linkbtn cl-kid" data-act="clsKid" data-p="${m.pid}">${esc(m.name)}</button></td>${A?`<td><span class="asg-${st.k}">${st.t}</span></td>`:''}<td>${esc(s.lesson||'–')}</td><td>${s.stars??'–'}</td><td>${s.wpm??'–'}</td><td>${s.acc!=null?s.acc+'%':'–'}</td><td>${s.mins??0}</td><td>${ago(s.seen||m.joined)}</td><td><button class="cl-x" data-act="clsRemove" data-p="${m.pid}" title="Remove ${esc(m.name)}">✕</button></td></tr>`}).join('')}</table></div>`:`<p class="muted">Nobody has joined yet. Share the code <b>${D.code}</b>.</p>`}
  <div class="cl-sec"><h3>Assign a lesson</h3><div class="cl-field"><select id="asg" class="cl-in wide">${opts}</select><button class="btn sm volt" data-act="clsAssign">Assign</button>${A?'<button class="btn sm alt" data-act="clsAssign" data-clear="1">Clear</button>':''}</div>${A?`<p class="muted" style="margin:4px 0 0">Assigned now: Lesson ${LNUM(A.i)}: ${esc(A.title)} · ${ms.filter(m=>asgState(m,A).k==='done').length} of ${ms.length} done</p>`:''}</div>
- <div class="cl-sec"><h3>Class race</h3><div class="seg cl-lvl">${lvlsFor(true).map(([v,t])=>`<button class="${RLVL===v?'on':''}" data-act="clsLvl" data-v="${v}">${t}</button>`).join('')}</div><div class="cl-btns"><button class="btn sm" data-act="clsRace">Open a class race</button></div></div>
+ <div class="cl-sec"><h3>Class race</h3><div class="seg cl-lvl">${lvlsFor(true).map(([v,t])=>`<button class="${RLVL===v?'on':''}" data-act="clsLvl" data-v="${v}">${t}</button>`).join('')}</div><div class="cl-btns cl-racebtn"><button class="btn" data-act="clsRace">OPEN A CLASS RACE</button></div></div>
  <div class="rbtns"><button class="btn sm alt" data-act="clsTeach">Back</button></div></div>`)}
 /* one student: every assignment + every lesson */
 ACT.clsKid=d=>{DVIEW=d.p;drawKid(d.p)};ACT.clsKidBack=()=>{DVIEW=null;drawDash()};
@@ -256,6 +260,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .cl-sec{margin:10px 0 0;text-align:left}.cl-sec h3{margin:0 0 6px;font-size:18px}.cl-btns{display:flex;gap:8px;flex-wrap:wrap}
 .cl-field{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}.cl-in{font:inherit;font-size:20px;padding:6px 10px;width:9ch;text-transform:uppercase;background:#1b1626;color:#fff6e0;border:3px solid #3a2f4e}.cl-in.wide{width:auto;flex:1;min-width:12ch;text-transform:none;font-size:17px}
 #mbox:has(.watch){max-width:860px!important;width:94vw}.watch .hs-tab th,.watch .hs-tab td{white-space:nowrap;padding-left:8px;padding-right:8px}.watch .hs-tab td:nth-child(3){min-width:110px}
+.cl-lvl{margin-bottom:14px}.cl-racebtn{justify-content:flex-start!important}.cl-racebtn .btn{min-width:300px;text-transform:uppercase;font-size:18px!important;padding:10px 26px!important}
 .cl-kid{font:inherit;font-weight:700;color:#7fe8ff;text-decoration:underline;background:none;border:0;padding:0;cursor:pointer}.cl-tip{margin:0 0 6px;font-size:14px}
 .asg-done{color:#6edc8c;font-weight:700}.asg-part{color:#f0c860}.asg-none{color:#9a8fb0}.asg-own{color:#a8d8a0}.clsban .cb-done{color:#6edc8c;font-weight:700;margin-left:auto}
 #mbox:has(.kidv),#mbox:has(.dashv){max-width:900px!important;width:94vw}

@@ -41,7 +41,12 @@ addEventListener('keydown',e=>{if(e.key!==' '&&e.key!=='Enter')return;const ae=d
  const why=()=>{if(window.KK_MOBILE||$('#lvlfx'))return '';if(CATCH_SKIP)return 'to skip';const m=$('#modal');if(!m||m.hidden)return '';
   const eb=$('#evoBtns');if(eb)return eb.style.visibility==='hidden'?'to skip':'to continue';
   const box=$('#mbox');if(!box||!(box.querySelector('.rstats')||box.querySelector('.cutscene')))return '';const fl=box.querySelector('#flip');if(fl&&!fl.classList.contains('go'))return 'to flip the card';return primaryBtn(box)?'to continue':''};
- let last='';setInterval(()=>{const t=why();if(t===last)return;last=t;pill.hidden=!t;if(t)pill.innerHTML='Press <b>SPACE</b> '+t},200)}
+ let last='';setInterval(()=>{const t=why();
+  /* also say it right under the buttons in the window */
+  const box=$('#mbox'),rb=box&&!$('#modal').hidden&&box.querySelector('.rbtns');if(rb&&t&&t!=='to skip'&&!box.querySelector('.spline')){rb.insertAdjacentHTML('afterend','<p class="spline">or press <b>SPACE</b> '+t+'</p>')}
+  const sl=box&&box.querySelector('.spline');if(sl&&!t)sl.remove();
+  if(t===last)return;last=t;pill.hidden=!t||!!sl;if(t)pill.innerHTML='Press <b>SPACE</b> '+t;if(sl&&t)sl.innerHTML='or press <b>SPACE</b> '+t},200);
+ document.head.insertAdjacentHTML('beforeend','<style>.spline{text-align:center;margin:8px 0 0;font-size:15px;color:#d8cce8}.spline b{background:#f0c860;color:#2a1d3e;padding:0 8px;letter-spacing:1px}body.mobile .spline{display:none}</style>')}
 
 /* ---------- boss phrases never repeat in one session ---------- */
 const SEEN=new Set();let depth=0;
@@ -122,3 +127,24 @@ try{if(screen==='home')renderHome()}catch(e){}
   if(w)[...w.children].forEach((b,k)=>{b.dataset.act='binderWorld';b.dataset.w=k+1;b.setAttribute('role','button')})}catch(e){}};
  ACT.binderWorld=d=>{const g=document.querySelector('#s-binder .binder'),i=WSTART[(+d.w)-1];const el=g&&g.children[i*3];if(el)el.scrollIntoView({behavior:'smooth',block:'start'})};
  const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments);requestAnimationFrame(set);setTimeout(set,200);return r};addEventListener('resize',set)})();
+
+/* ---------- Keyboard Camp + new-key instructions: as big as the arena allows, never cutting words ---------- */
+{document.head.insertAdjacentHTML('beforeend',`<style id="introfit">
+.arena .intro{grid-template-columns:minmax(90px,22%) 1fr;grid-template-rows:minmax(0,1fr);padding:10px 16px}
+.arena .intro .ib{--k:1;align-self:stretch;align-content:center;height:auto;min-height:0;overflow:hidden;box-sizing:border-box;padding:4px 0;gap:calc(6px*var(--k));word-break:normal;overflow-wrap:normal;hyphens:none}
+.arena .intro .ib .tag{font-size:calc(12px*var(--k))}
+.arena .intro .ib h3{font-size:calc(30px*var(--k));line-height:1.1;margin:0}
+.arena .intro .ib p{font-size:calc(21px*var(--k));max-width:none;line-height:1.25}
+.arena .intro .ib .row{gap:calc(14px*var(--k))}
+.arena .intro .ib .btn{font-size:calc(24px*var(--k))!important;padding:calc(8px*var(--k)) calc(22px*var(--k))!important}
+.arena .intro .ib .linkbtn{font-size:calc(22px*var(--k))!important}
+.arena .intro .ib .row>.muted{font-size:calc(16px*var(--k))!important}
+.arena .intro .ib .bigkey{font-size:calc(40px*var(--k))}
+</style>`);
+ const fits=ib=>{if(ib.scrollHeight>ib.clientHeight+1||ib.scrollWidth>ib.clientWidth+1)return false;for(const e of ib.querySelectorAll('*'))if(e.scrollWidth>e.clientWidth+1&&getComputedStyle(e).overflow!=='visible')return false;return true};
+ window.fitIntro=()=>{const ib=document.querySelector('.arena .intro .ib');if(!ib||!ib.clientHeight)return;let lo=1,hi=3.4;ib.style.setProperty('--k',hi);if(fits(ib))return;
+  for(let n=0;n<12;n++){const m=(lo+hi)/2;ib.style.setProperty('--k',m);if(fits(ib))lo=m;else hi=m}ib.style.setProperty('--k',lo);if(!fits(ib)){for(let k=lo;k>.6;k-=.05){ib.style.setProperty('--k',k);if(fits(ib))break}}};
+ const later=()=>{fitIntro();requestAnimationFrame(fitIntro);setTimeout(fitIntro,120)};
+ const _cp=camp;camp=function(){const r=_cp.apply(this,arguments);later();return r};
+ const _ri=renderIntro;renderIntro=function(){const r=_ri.apply(this,arguments);later();return r};
+ addEventListener('resize',()=>fitIntro());if(document.fonts)document.fonts.addEventListener?.('loadingdone',()=>fitIntro())}
