@@ -125,9 +125,15 @@ document.head.insertAdjacentHTML('beforeend',`<style id="arcartcss">
 #s-arcade .game .gart.zart{padding:0!important;background:none!important;overflow:hidden}
 .zart .zimg{width:100%;max-width:252px;aspect-ratio:${W}/${H};background-size:200% 100%;background-repeat:no-repeat;image-rendering:pixelated;border:3px solid #2a1d3e;border-radius:6px;box-sizing:border-box;animation:zartA .9s steps(1) infinite}
 @keyframes zartA{0%{background-position:0 0}50%{background-position:100% 0}}
+#s-arcade .game.panel.feature{border-color:var(--line);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+#s-arcade .game.panel.racecard{border-color:#58c870;box-shadow:0 0 0 3px rgba(88,200,112,.2),0 12px 30px rgba(0,0,0,.35)}
 body.mobile #s-arcade .game .gart.zart{transform:none!important;height:auto!important}
 </style>`);
 const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments);try{document.querySelectorAll('#s-arcade .game').forEach(card=>{const h=card.querySelector('h3'),k=h&&MAP[h.textContent.trim()],a=card.querySelector('.gart');
   if(!k||!a)return;const u=url(k);if(!u)return;a.className='gart zart';a.innerHTML=`<div class="zimg" style="background-image:url(${u})"></div>`})}catch(e){console.warn(e)}return r};
 try{if(screen==='arcade')renderArcade()}catch(e){}
+setTimeout(()=>document.body.classList.add('kkready'),3000);
+/* show the home screen only once every script and the fonts have settled (stops the header jumping on load) */
+{const ready=()=>{try{if(screen==='home'){renderHome();fitHome()}}catch(e){}requestAnimationFrame(()=>document.body.classList.add('kkready'))};
+ const fr=document.fonts&&document.fonts.ready;Promise.race([fr||Promise.resolve(),new Promise(r=>setTimeout(r,1500))]).then(ready)}
 })();

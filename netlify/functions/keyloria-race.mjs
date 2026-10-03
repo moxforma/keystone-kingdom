@@ -33,7 +33,7 @@ export default async req => {
   const meta = await store.get("r:" + room, { type: "json" });
   if (!meta || Date.now() - meta.created > 3 * 3600000) return json({ error: "Race not found" }, 404);
   const players = async () => { const { blobs } = await store.list({ prefix: "p:" + room + ":" }); return (await Promise.all(blobs.slice(0, 80).map(x => store.get(x.key, { type: "json" })))).filter(p => p && (p.round || 0) === (meta.round || 0)) };
-  const out = async () => ({ state: meta.state, startAt: meta.startAt, text: meta.text, host: meta.host, lvl: meta.lvl || "", round: meta.round || 0, spectate: !!meta.spectate, players: standings(await players()).map(p => ({ pid: p.pid, name: p.name, look: p.look || null, pos: p.pos, wpm: p.wpm, ft: p.ft, acc: p.acc })) });
+  const out = async () => ({ state: meta.state, startAt: meta.startAt, text: meta.text, host: meta.host, lvl: meta.lvl || "", round: meta.round || 0, spectate: !!meta.spectate, players: standings(await players()).map(p => ({ pid: p.pid, name: p.name, look: p.look || null, pos: p.pos, wpm: p.wpm, ft: p.ft, acc: p.acc, bad: p.bad || 0 })) });
   const key = "p:" + room + ":" + pid;
   if (a === "join") {
     if (meta.state !== "lobby") return json({ error: "That race already started" }, 409);
@@ -46,7 +46,7 @@ export default async req => {
     const old = await store.get(key, { type: "json" });
     if (old && meta.state === "go" && (old.round || 0) === (meta.round || 0)) {
       const len = meta.text.length, pos = num(b.pos, len), fin = pos >= len;
-      await store.setJSON(key, { ...old, pos: Math.max(old.pos, pos), wpm: num(b.wpm, 300), acc: num(b.acc, 100), ft: old.ft || (fin && Date.now() > meta.startAt ? Date.now() : 0), t: Date.now() });
+      await store.setJSON(key, { ...old, pos: Math.max(old.pos, pos), wpm: num(b.wpm, 300), acc: num(b.acc, 100), bad: Math.max(old.bad || 0, num(b.bad, 99999)), ft: old.ft || (fin && Date.now() > meta.startAt ? Date.now() : 0), t: Date.now() });
     }
     return json(await out());
   }

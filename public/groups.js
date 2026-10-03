@@ -180,17 +180,18 @@ function startNet(r){closeModal();const startLocal=r.startAt-OFF;
   if(G.start){const el=(performance.now()-G.start)/60000;$('#g-a').textContent=G.pos?Math.round(G.pos/5/Math.max(el,1/60)):0}
   G.raf=requestAnimationFrame(loop)};loop();
  const send=()=>{if(G!==g||screen!=='game'){clearInterval(g.net.iv);return}const el=G.start?(performance.now()-G.start)/60000:0;
-  post('/api/race',{a:'tick',room:g.net.room,pid:pid(),pos:G.pos,wpm:G.pos&&el?Math.round(G.pos/5/el):0,acc:G.pos?Math.round((G.pos-G.mist.size)/G.pos*100):100}).then(r=>{OFF=r.now-Date.now();g.net.all=r.players;r.players.forEach(p=>g.net.ps[p.pid]=p);
+  post('/api/race',{a:'tick',room:g.net.room,pid:pid(),pos:G.pos,wpm:G.pos&&el?Math.round(G.pos/5/el):0,acc:G.pos?Math.round((G.pos-G.mist.size)/G.pos*100):100,bad:g.net.bad||0}).then(r=>{OFF=r.now-Date.now();g.net.all=r.players;r.players.forEach(p=>g.net.ps[p.pid]=p);
    const me=r.players.findIndex(p=>p.pid===pid())+1;$('#g-b').textContent=me?ord(me):'';const L=$('#rlist');if(L)L.innerHTML=r.players.slice(0,8).map((p,k)=>`<div class="${p.pid===pid()?'me':''}"><b>${k+1}</b> ${esc(p.name)} ${p.ft?'✓':Math.round(p.pos/G.text.length*100)+'%'}</div>`).join('');
    if(g.net.fin)drawNetResult()}).catch(()=>{})};
  g.net.iv=setInterval(send,1500)}
-const _ri=raceInput;raceInput=function(ch,caps){if(G.net&&(Date.now()<G.net.startLocal||G.net.fin))return;return _ri.apply(this,arguments)};
+const _ri=raceInput;raceInput=function(ch,caps){if(G.net&&(Date.now()<G.net.startLocal||G.net.fin))return;const g=G,p0=g.pos,r=_ri.apply(this,arguments);if(g.net&&g.pos===p0&&!g.done)g.net.bad=(g.net.bad||0)+1;return r};
 const _er=endRace;endRace=function(){if(!G.net)return _er.apply(this,arguments);const g=G;G.done=true;setTarget(null);g.net.fin=true;
  const secs=(performance.now()-g.start)/1000,len=g.text.length;g.net.wpm=Math.round(len/5/Math.max(secs/60,1/60));g.net.acc=Math.round((len-g.mist.size)/len*100);
  S.hist.push({t:Date.now(),w:g.net.wpm,a:g.net.acc});if(S.hist.length>80)S.hist.shift();S.time+=Math.round(secs);S.xp+=len;sfx.win();
- post('/api/race',{a:'tick',room:g.net.room,pid:pid(),pos:len,wpm:g.net.wpm,acc:g.net.acc}).then(r=>{g.net.all=r.players;const place=r.players.findIndex(p=>p.pid===pid())+1;g.net.place=place;const gems=[3,2,1][place-1]||0;S.gems+=gems;if(place===1)S.netw=(S.netw||0)+1;S.netb=Math.max(S.netb||0,g.net.wpm||0);g.net.gems=gems;save();drawNetResult()}).catch(()=>{save();drawNetResult()});
+ post('/api/race',{a:'tick',room:g.net.room,pid:pid(),pos:len,wpm:g.net.wpm,acc:g.net.acc,bad:g.net.bad||0}).then(r=>{g.net.all=r.players;const place=r.players.findIndex(p=>p.pid===pid())+1;g.net.place=place;const gems=[3,2,1][place-1]||0;S.gems+=gems;if(place===1)S.netw=(S.netw||0)+1;S.netb=Math.max(S.netb||0,g.net.wpm||0);g.net.gems=gems;save();drawNetResult()}).catch(()=>{save();drawNetResult()});
  clearInterval(g.net.iv);g.net.iv=setInterval(()=>{if(!document.querySelector('#mbox .netres')||G!==g)return clearInterval(g.net.iv);post('/api/race',{a:'get',room:g.net.room,pid:pid()}).then(r=>{g.net.all=r.players;drawNetResult(true)}).catch(()=>{})},2500)};
-function standingsHTML(ps,len){return `<div class="cl-scroll"><table class="hs-tab"><tr><th>#</th><th>Racer</th><th>Progress</th><th>WPM</th></tr>${ps.map((p,k)=>`<tr class="${p.pid===pid()?'me':''}"><td><b>${k+1}</b></td><td><img class="cl-hero" src="${heroIcon(p.look)}" alt="" style="height:22px;vertical-align:middle;margin-right:6px">${esc(p.name)}</td><td>${p.ft?'Finished!':`<div class="cl-bar"><i style="width:${Math.round(p.pos/len*100)}%"></i></div>`}</td><td>${p.wpm||'–'}</td></tr>`).join('')}</table></div>`}
+const mmss=ms=>{const t=Math.max(0,Math.round(ms/1000));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
+function standingsHTML(ps,len,full){const st=full&&full.startAt,now=Date.now()+OFF;return `<div class="cl-scroll"><table class="hs-tab"><tr><th>#</th><th>Racer</th><th>Progress</th><th>WPM</th>${full?'<th>Accuracy</th><th>Time</th><th>Right / Wrong</th>':''}</tr>${ps.map((p,k)=>`<tr class="${p.pid===pid()?'me':''}"><td><b>${k+1}</b></td><td><img class="cl-hero" src="${heroIcon(p.look)}" alt="" style="height:22px;vertical-align:middle;margin-right:6px">${esc(p.name)}</td><td>${p.ft?'Finished!':`<div class="cl-bar"><i style="width:${Math.round(p.pos/len*100)}%"></i></div>`}</td><td>${p.wpm||'–'}</td>${full?`<td>${p.pos?(p.acc??100)+'%':'–'}</td><td>${st&&now>st?mmss((p.ft||now)-st):'–'}</td><td><span style="color:#6edc8c">${p.pos||0}</span> / <span style="color:#f07a6e">${p.bad||0}</span></td>`:''}</tr>`).join('')}</table></div>`}
 function drawNetResult(update){const g=G;if(!g||!g.net)return;const box=document.querySelector('#mbox .netres');if(update&&box){box.innerHTML=standingsHTML(g.net.all,g.text.length);return}
  if(update)return;const pl=g.net.place;
  modal(`<h2>${pl===1?'You won the race!':pl?ord(pl)+' place!':'Race finished!'}</h2>
@@ -200,7 +201,7 @@ function drawNetResult(update){const g=G;if(!g||!g.net)return;const box=document
 
 /* ---------- host watching a class race ---------- */
 function watch(){const len=(ROOM.last&&ROOM.last.text||'').length||1;const draw=r=>{const now=Date.now(),st=r.startAt-OFF;
-  const done=r.players.length&&r.players.every(p=>p.ft);modal(`<h2>Class race ${esc(ROOM.code)}</h2><div class="watch">${now<st?`<div class="cl-big">${Math.ceil((st-now)/1000)}</div>`:''}${standingsHTML(r.players,r.text.length||len)}</div><div class="rbtns">${done||now>st+20000?'<button class="btn nextbtn" data-act="raceRematch">Rematch</button>':''}<button class="btn alt" data-act="raceLeave">Close</button></div>`)};
+  const done=r.players.length&&r.players.every(p=>p.ft);modal(`<h2>Class race ${esc(ROOM.code)}</h2><div class="watch">${now<st?`<div class="cl-big">${Math.ceil((st-now)/1000)}</div>`:''}${standingsHTML(r.players,r.text.length||len,r)}</div><div class="rbtns">${done||now>st+20000?'<button class="btn nextbtn" data-act="raceRematch">Rematch</button>':''}<button class="btn alt" data-act="raceLeave">Close</button></div>`)};
  const tick=()=>post('/api/race',{a:'get',room:ROOM.code,pid:pid()}).then(r=>{OFF=r.now-Date.now();if(!document.querySelector('#mbox .watch')&&POLL)return stopPoll();draw(r);if(r.players.length&&r.players.every(p=>p.ft))stopPoll()}).catch(()=>{});
  modal('<h2>Class race</h2><div class="watch"><p class="muted">Getting ready...</p></div>');tick();POLL=setInterval(tick,1500)}
 
@@ -208,6 +209,9 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .clsban{margin:0 0 10px;padding:8px 12px;display:flex;flex-direction:column;gap:6px}.clsban .cb-name{font-size:15px;color:#b8a8d8}.clsban .cb-row{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
 .cl-sec{margin:10px 0 0;text-align:left}.cl-sec h3{margin:0 0 6px;font-size:18px}.cl-btns{display:flex;gap:8px;flex-wrap:wrap}
 .cl-field{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}.cl-in{font:inherit;font-size:20px;padding:6px 10px;width:9ch;text-transform:uppercase;background:#1b1626;color:#fff6e0;border:3px solid #3a2f4e}.cl-in.wide{width:auto;flex:1;min-width:12ch;text-transform:none;font-size:17px}
+#mbox:has(.watch){max-width:860px!important;width:94vw}.watch .hs-tab th,.watch .hs-tab td{white-space:nowrap;padding-left:8px;padding-right:8px}.watch .hs-tab td:nth-child(3){min-width:110px}
+select.cl-in option{font:inherit;font-size:17px;padding:4px 8px;background:#1b1626;color:#fff6e0}
+@supports (appearance:base-select){select.cl-in,select.cl-in::picker(select){appearance:base-select}select.cl-in::picker(select){background:#1b1626;border:3px solid #3a2f4e;max-height:60vh}select.cl-in option:checked,select.cl-in option:hover{background:#3a2f4e}}
 .cl-note{font-size:15px;margin:10px 0 0}.cl-big{font-size:46px;letter-spacing:.12em;color:#f0c860;margin:8px 0;text-align:center}
 .cl-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}.cl-chip{padding:3px 10px;background:#2a2340;border:2px solid #3a2f4e}.cl-chip.me{border-color:#7fe8ff}.cl-chip{display:inline-flex;align-items:center;gap:6px}.cl-hero{height:28px;width:auto;image-rendering:pixelated}
 .cl-list{display:flex;flex-wrap:wrap;gap:8px}.cl-scroll{max-height:44vh;overflow:auto}.cl-x{background:none;border:0;color:#b8a8d8;cursor:pointer;font:inherit}

@@ -1298,3 +1298,5 @@ body.lines2 .strip{position:relative}body.lines2 .strip::before{content:"";posit
 #s-binder .trophy{position:sticky;top:calc(var(--tbh,56px) + var(--wph,64px));z-index:28;background:#1b1626;margin-top:0;padding-top:6px}
 #s-binder .sprtile{scroll-margin-top:calc(var(--tbh,56px) + var(--wph,64px) + var(--trh,180px) + 20px)}
 @media (max-height:640px){#s-binder .trophy{position:static}#s-binder .sprtile{scroll-margin-top:calc(var(--tbh,56px) + var(--wph,64px) + 8px)}}
+
+body:not(.kkready) #s-home{visibility:hidden}
