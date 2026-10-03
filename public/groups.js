@@ -27,16 +27,20 @@ function homeBanner(){const home=$('#s-home');if(!home||home.hidden)return;home.
  if(!pick&&!race)return;const tb=home.querySelector('.topbar');const el=document.createElement('div');el.className='clsban panel';el.innerHTML=`<div class="cb-name">${esc(I.name||'My class')}</div>${pick}${race}`;
  tb?tb.insertAdjacentElement('afterend',el):home.prepend(el)}
 ACT.clsPick=d=>{const i=+d.i;let s=0;for(;s<NST-1;s++)if(!((S.best[i+'-'+s]||0)>=1))break;closeModal();startStage(i*NST+s)};
-const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const row=$('#s-home .hi-btns');if(row&&!row.querySelector('[data-act=clsHub]'))row.insertAdjacentHTML('beforeend','<button class="btn alt" data-act="clsHub">Class &amp; Races</button>');homeBanner();fetchInfo()}catch(e){}return r};
+const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const row=$('#s-home .hi-btns');row?.querySelector('[data-act=clsHub]')?.remove();if(row&&!row.querySelector('[data-act=raceHub]'))row.insertAdjacentHTML('beforeend','<button class="btn racebtn" data-act="raceHub">Race</button>');
+ const tb=$('#s-home .topbar');if(tb&&S.name&&!tb.querySelector('.clsbtn')){const after=tb.querySelector('.roamtog')||tb.querySelector('.selp');const h='<button class="btn clsbtn" data-act="clsHub">CLASS</button>';after?after.insertAdjacentHTML('afterend',h):tb.insertAdjacentHTML('afterbegin',h)}homeBanner();fetchInfo()}catch(e){}return r};
 setInterval(()=>{if(typeof screen!=='undefined'&&screen==='home'&&S.cls){lastInfo=0;fetchInfo()}},20000);
-const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments);try{const tb=$('#s-arcade .topbar');if(tb&&!tb.querySelector('[data-act=clsHub]'))tb.insertAdjacentHTML('beforeend','<button class="btn sm" data-act="clsHub">Race Friends</button>')}catch(e){}return r};
+const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments);try{const tb=$('#s-arcade .topbar');if(tb&&!tb.querySelector('[data-act=raceHub]'))tb.insertAdjacentHTML('beforeend','<button class="btn sm racebtn" data-act="raceHub">Race Friends</button>')}catch(e){}return r};
 
 /* ---------- hub ---------- */
 const field=(id,ph,act,label)=>`<div class="cl-field"><input id="${id}" class="cl-in" maxlength="6" placeholder="${ph}" autocomplete="off" autocapitalize="characters" data-enter="${act}"><button class="btn sm volt" data-act="${act}">${label}</button></div>`;
+ACT.raceHub=()=>{modal(`<h2>Race with friends</h2><p class="muted" style="margin:0 0 8px">Everyone types the same story at the same time. Up to 40 racers!</p>
+ <div class="cl-sec"><h3>Start a race</h3><div class="cl-btns"><button class="btn racebtn" data-act="raceMake">Make a race room</button></div></div>
+ <div class="cl-sec"><h3>Join a race</h3>${field('raceCode','ZAP12','raceJoin','Join race')}</div>
+ <p class="muted cl-note">Only first names are shared. There is no chat.</p><div class="rbtns"><button class="btn alt" data-act="close">Close</button></div>`)};
 ACT.clsHub=()=>{const c=S.cls;
- modal(`<h2>Class &amp; Races</h2>
+ modal(`<h2>My Class</h2>
  <div class="cl-sec"><h3>My class or friend group</h3>${c?`<p style="margin:0">You're in <b>${esc(c.name||'a class')}</b> <span class="muted">(code ${esc(c.code)})</span></p><div class="cl-btns"><button class="btn sm" data-act="clsBoard">Class leaderboard</button><button class="btn sm alt" data-act="clsLeave">Leave</button></div>`:`<p class="muted" style="margin:0 0 6px">Got a code from your teacher or a friend's grown-up?</p>${field('clsCode','ABC123','clsJoin','Join')}`}</div>
- <div class="cl-sec"><h3>Race with friends</h3><p class="muted" style="margin:0 0 6px">Everyone types the same story at the same time.</p><div class="cl-btns"><button class="btn sm" data-act="raceMake">Make a race room</button></div>${field('raceCode','ZAP12','raceJoin','Join race')}</div>
  <div class="cl-sec"><h3>Grown-ups</h3><div class="cl-btns"><button class="btn sm alt" data-act="clsTeach">Teacher / parent dashboard</button></div></div>
  <p class="muted cl-note">Only first names and typing scores are shared. There is no chat.</p>
  <div class="rbtns"><button class="btn alt" data-act="close">Close</button></div>`)};
@@ -63,7 +67,7 @@ function teachList(){const t=teach(),codes=Object.keys(t);
  <p class="muted cl-note">Kids join with the code. You'll see their progress here. Use the same device to come back to this dashboard.</p>
  <div class="rbtns"><button class="btn alt" data-act="clsHub">Back</button></div>`)}
 ACT.clsCreate=()=>{const name=val('clsName')||'Our class';post('/api/class',{a:'create',name}).then(r=>{const t=teach();t[r.code]={tk:r.tk,name};setTeach(t);
- modal(`<h2>${esc(name)} is ready!</h2><p style="margin:0">Kids tap <b>Class &amp; Races</b> on the home screen and enter:</p><div class="cl-big">${r.code}</div>
+ modal(`<h2>${esc(name)} is ready!</h2><p style="margin:0">Kids tap <b>CLASS</b> at the top of the home screen and enter:</p><div class="cl-big">${r.code}</div>
  <div class="rbtns"><button class="btn" data-act="clsDash" data-c="${r.code}">Open dashboard</button></div>`)}).catch(e=>toast(e.message))};
 let DASH=null,RLVL='easy';
 ACT.clsDash=d=>{const c=(d&&d.c)||DASH&&DASH.code,t=teach()[c];if(!t)return teachList();post('/api/class',{a:'dash',code:c,tk:t.tk}).then(r=>{DASH={code:c,tk:t.tk,...r};drawDash()}).catch(e=>toast(e.message))};
@@ -73,7 +77,7 @@ function drawDash(){const D=DASH,ms=D.members.slice().sort((a,b)=>(b.stats?.pos|
  modal(`<h2>${esc(D.name)} <span class="muted" style="font-size:18px">code ${D.code}</span></h2>
  ${ms.length?`<div class="cl-scroll"><table class="hs-tab"><tr><th>Name</th><th>Now on</th><th>Stars</th><th>WPM</th><th>Acc.</th><th>Mins this week</th><th>Seen</th><th></th></tr>${ms.map(m=>{const s=m.stats||{};return `<tr><td><b>${esc(m.name)}</b></td><td>${esc(s.lesson||'–')}</td><td>${s.stars??'–'}</td><td>${s.wpm??'–'}</td><td>${s.acc!=null?s.acc+'%':'–'}</td><td>${s.mins??0}</td><td>${ago(s.seen||m.joined)}</td><td><button class="cl-x" data-act="clsRemove" data-p="${m.pid}" title="Remove ${esc(m.name)}">✕</button></td></tr>`}).join('')}</table></div>`:`<p class="muted">Nobody has joined yet. Share the code <b>${D.code}</b>.</p>`}
  <div class="cl-sec"><h3>Assign a lesson</h3><div class="cl-field"><select id="asg" class="cl-in wide">${opts}</select><button class="btn sm volt" data-act="clsAssign">Assign</button>${D.assign?'<button class="btn sm alt" data-act="clsAssign" data-clear="1">Clear</button>':''}</div>${D.assign?`<p class="muted" style="margin:4px 0 0">Assigned now: Lesson ${LNUM(D.assign.i)}: ${esc(D.assign.title)}</p>`:''}</div>
- <div class="cl-sec"><h3>Class race</h3><div class="seg cl-lvl">${[['easy','Easy'],['medium','Medium'],['hard','Hard']].map(([v,t])=>`<button class="${RLVL===v?'on':''}" data-act="clsLvl" data-v="${v}">${t}</button>`).join('')}</div><div class="cl-btns"><button class="btn sm" data-act="clsRace">Open a class race</button></div></div>
+ <div class="cl-sec"><h3>Class race</h3><div class="seg cl-lvl">${lvlsFor(true).map(([v,t])=>`<button class="${RLVL===v?'on':''}" data-act="clsLvl" data-v="${v}">${t}</button>`).join('')}</div><div class="cl-btns"><button class="btn sm" data-act="clsRace">Open a class race</button></div></div>
  <div class="rbtns"><button class="btn sm" data-act="clsDash">Refresh</button><button class="btn sm alt" data-act="clsTeach">Back</button></div>`)}
 ACT.clsLvl=d=>{RLVL=d.v;drawDash()};
 ACT.clsAssign=d=>{const D=DASH,i=d&&d.clear?null:+val('asg');post('/api/class',{a:'assign',code:D.code,tk:D.tk,i,title:i==null?'':lessonTitle(i)}).then(r=>{Object.assign(DASH,r);toast(i==null?'Cleared':'Assigned!');drawDash()}).catch(e=>toast(e.message))};
@@ -83,7 +87,12 @@ ACT.clsRace=()=>{const D=DASH;makeRoom(RLVL,true,room=>post('/api/class',{a:'rac
 /* ---------- race text ---------- */
 const T=(typeof KK_TEXT!=='undefined'&&KK_TEXT)||{easy:[],medium:[],hard:[]};
 const pick=(a,n)=>a.slice().sort(()=>Math.random()-.5).slice(0,n);
-function raceText(lv){if(lv==='easy')return pick(T.easy,3).join(' ').toLowerCase().replace(/[^a-z ]/g,'').replace(/\s+/g,' ').trim();
+const IMP_SENT=['On 12/03 at 4:45pm, 37% of the 1,284 gnomes paid $9.50 each!','"Quick!" yelled Dr. O\'Malley. "Zap the #7 & #8 vortex (now)."','Jinxed wizards pluck 26 ivy twigs; @Max owes Fizzbin 3/4 of a jar.','Pack my box with five dozen liquor jugs? No: 48 jam jars & 19 kiwis.'];
+const LVLS=[['easy','Easy'],['medium','Medium'],['hard','Hard'],['beast','Beast'],['impossible','Impossible']];
+const beatRace=()=>{const h=(S.arc&&S.arc.high||{}).race;return h==='beast'||h==='insanity'||/^beast/.test(h||'')};
+const lvlsFor=teacher=>LVLS.filter(([v])=>teacher||v!=='impossible'||beatRace());
+function raceText(lv){const BS=typeof BEAST_SENT!=='undefined'?BEAST_SENT:T.hard;if(lv==='beast')return pick(BS,3).join(' ');if(lv==='impossible')return [...pick(BS,2),...pick(IMP_SENT,2)].sort(()=>Math.random()-.5).join(' ');
+if(lv==='easy')return pick(T.easy,3).join(' ').toLowerCase().replace(/[^a-z ]/g,'').replace(/\s+/g,' ').trim();
  if(lv==='medium')return pick(T.medium,3).join(' ');return pick(T.hard,2).join(' ')}
 const myLevel=()=>{const p=EI(lessonIdx());return p<16?'easy':p<44?'medium':'hard'};
 
@@ -91,7 +100,7 @@ const myLevel=()=>{const p=EI(lessonIdx());return p<16?'easy':p<44?'medium':'har
 let ROOM=null,OFF=0,POLL=null;
 const stopPoll=()=>{clearInterval(POLL);POLL=null};
 function makeRoom(lv,spectate,after){post('/api/race',{a:'make',pid:pid(),name:myName(),text:raceText(lv),spectate}).then(r=>{ROOM={code:r.room,host:true,spectate};after&&after(r.room);lobby()}).catch(e=>toast(e.message))}
-ACT.raceMake=()=>{const lv=myLevel();modal(`<h2>Make a race room</h2><p class="muted" style="margin:0 0 8px">Pick how hard the story is.</p><div class="cl-btns">${[['easy','Easy'],['medium','Medium'],['hard','Hard']].map(([v,t])=>`<button class="btn ${v===lv?'':'alt'}" data-act="raceMakeLv" data-v="${v}">${t}</button>`).join('')}</div><div class="rbtns"><button class="btn alt" data-act="clsHub">Back</button></div>`)};
+ACT.raceMake=()=>{const lv=myLevel();modal(`<h2>Make a race room</h2><p class="muted" style="margin:0 0 8px">Pick how hard the story is.</p><div class="cl-btns">${lvlsFor(false).map(([v,t])=>`<button class="btn lv-${v} ${v===lv?'':'alt'}" data-act="raceMakeLv" data-v="${v}">${t}</button>`).join('')}</div>${beatRace()?'':'<p class="muted cl-note">Win a Keylori Race on Beast mode to unlock Impossible.</p>'}<div class="rbtns"><button class="btn alt" data-act="clsHub">Back</button></div>`)};
 ACT.raceMakeLv=d=>makeRoom(d.v,false);
 ACT.raceJoin=()=>joinRoom(val('raceCode'));
 ACT.raceJoinCode=d=>joinRoom(d.r);
@@ -102,8 +111,12 @@ function drawLobby(r){const ps=r.players||[];
  modal(`<h2>Race room</h2><div class="lobby"><p style="margin:0">Friends join with this code:</p><div class="cl-big">${esc(ROOM.code)}</div>
  <div class="cl-chips">${ps.length?ps.map(p=>`<span class="cl-chip ${p.pid===pid()?'me':''}">${esc(p.name)}</span>`).join(''):'<span class="muted">Waiting for racers...</span>'}</div>
  <p class="muted" style="margin:6px 0 0">${ROOM.host?(ps.length?`${ps.length} racer${ps.length>1?'s':''} ready. Start when everyone is in!`:'Waiting for racers...'):'Waiting for the host to start...'}</p></div>
+ <div class="cl-btns" style="justify-content:center;margin-top:8px"><button class="btn sm racebtn" data-act="raceShare">Share invite link</button></div>
  <div class="rbtns">${ROOM.host?`<button class="btn" data-act="raceStart" ${ps.length?'':'disabled'}>Start race!</button>`:''}<button class="btn alt" data-act="raceLeave">Leave</button></div>`)}
 ACT.raceStart=()=>post('/api/race',{a:'start',room:ROOM.code,pid:pid()}).then(r=>{OFF=r.now-Date.now();stopPoll();ROOM.spectate?watch():startNet(r)}).catch(e=>toast(e.message));
+ACT.raceShare=()=>{if(!ROOM)return;const url=location.origin+location.pathname+'?race='+ROOM.code,text=`Join my Keyloria typing race! Code ${ROOM.code}`;
+ if(navigator.share)navigator.share({title:'Race me in Keyloria!',text,url}).catch(()=>{});
+ else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast('Invite link copied! Paste it to a friend.')).catch(()=>toast(url));else toast(url)};
 ACT.raceLeave=()=>{stopPoll();ROOM=null;closeModal()};
 
 /* ---------- racing ---------- */
@@ -111,11 +124,11 @@ const ORD=['1st','2nd','3rd'];const ord=n=>ORD[n-1]||n+'th';
 function startNet(r){closeModal();const startLocal=r.startAt-OFF;
  try{startRace()}catch(e){console.warn(e)}
  if(G.raf)cancelAnimationFrame(G.raf);
- const others=r.players.filter(p=>p.pid!==pid()),lanes=others.slice(0,4);
+ const others=r.players.filter(p=>p.pid!==pid()),lanes=others.slice(0,9);
  G.text=r.text;G.pos=0;G.mist=new Set();G.start=0;G.done=false;G.racers=[];
  G.net={room:ROOM.code,startLocal,ps:{},lanes:lanes.map(p=>p.pid),all:r.players,fin:false};
  const met=Object.keys(S.cards).sort(()=>Math.random()-.5);
- $('#garena').innerHTML=`<div class="finish"></div><div class="lane"><div class="runner" id="rn0">${zookSVG()}<span class="rname">${esc(myName())}</span></div></div>`+lanes.map((p,k)=>{const [a,b]=(met[k]||'0-0').split('-').map(Number);return `<div class="lane"><div class="runner" id="rq${k}">${creatureSVG(a,b)}<span class="rname">${esc(p.name)}</span></div></div>`}).join('')+`<div class="cdown" id="cdown"></div><div class="rlist" id="rlist"></div>`;
+ $('#garena').innerHTML=`<div class="finish"></div><div class="lane"><div class="runner" id="rn0">${zookSVG()}<span class="rname">${esc(myName())}</span></div></div>`+lanes.map((p,k)=>{const [a,b]=(met[k]||'0-0').split('-').map(Number);return `<div class="lane"><div class="runner" id="rq${k}">${creatureSVG(a,b)}<span class="rname">${esc(p.name)}</span></div></div>`}).join('')+`<div class="cdown" id="cdown"></div><div class="rlist" id="rlist"></div>`;$('#garena').style.setProperty('--lanes',lanes.length+1);$('#garena').classList.add('netrace');
  $('#gstripIn').innerHTML=[...G.text].map(c=>`<span class="${c===' '?'sp':''}">${c===' '?'·':esc(c)}</span>`).join('');raceStrip();
  const g=G;const loop=()=>{if(G!==g||G.done)return;const now=Date.now();const cd=$('#cdown');
   if(now<startLocal){if(cd)cd.textContent=Math.ceil((startLocal-now)/1000)}else{if(cd&&cd.textContent!=='GO!'&&!G.start){cd.textContent='GO!';setTimeout(()=>cd&&cd.remove(),700)}if(!G.start)G.start=performance.now()}
@@ -139,7 +152,7 @@ function drawNetResult(update){const g=G;if(!g||!g.net)return;const box=document
  modal(`<h2>${pl===1?'You won the race!':pl?ord(pl)+' place!':'Race finished!'}</h2>
  <div class="rstats"><div><b>${pl?ord(pl):'–'}</b><span>Place</span></div><div><b>${g.net.wpm}</b><span>WPM</span></div><div><b>${g.net.acc}%</b><span>Accuracy</span></div><div><b>+${g.net.gems||0}</b><span>Diamonds</span></div></div>
  <div class="netres">${standingsHTML(g.net.all,g.text.length)}</div>
- <div class="rbtns"><button class="btn" data-act="clsHub">Race again</button><button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`)}
+ <div class="rbtns"><button class="btn" data-act="raceHub">Race again</button><button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`)}
 
 /* ---------- host watching a class race ---------- */
 function watch(){const len=(ROOM.last&&ROOM.last.text||'').length||1;const draw=r=>{const now=Date.now(),st=r.startAt-OFF;
@@ -157,7 +170,21 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .cl-bar{height:10px;background:#2a2340;border:2px solid #3a2f4e;min-width:80px}.cl-bar i{display:block;height:100%;background:#7fe8ff}
 .runner .rname{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);font-size:12px;white-space:nowrap;background:rgba(27,22,38,.8);padding:0 4px;color:#fff6e0}
 .cdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:72px;color:#f0c860;text-shadow:4px 4px 0 #1b1626;pointer-events:none;z-index:5}
+.netrace .lane{height:calc(100% / var(--lanes,4))}.netrace .runner .rname{font-size:11px}
+.btn.racebtn{background:#f0c860!important;color:#2a1d3e!important;box-shadow:0 4px 0 #a8802a!important}
+.btn.clsbtn{background:#7fd8c8!important;color:#1b2a2e!important;box-shadow:4px 4px 0 rgba(4,6,24,.65)!important;height:42px;font-family:var(--title)!important;font-size:12px!important;padding:0 14px!important;letter-spacing:.05em}
+#s-home .btn.selp{background:#b8a0e8!important;color:#2a1d3e!important}
+#s-home .roamtog.arcade-switch{display:inline-flex;align-items:center;gap:7px;border:2px solid #8862b6;border-radius:10px;background:#2a1d3e;color:#e9dcfa;padding:0 10px;height:42px;cursor:pointer;font:400 12px/1.2 var(--title);letter-spacing:.05em;margin-right:auto;box-shadow:4px 4px 0 rgba(4,6,24,.65)}
+#s-home .roamtog.on{background:#6e3f9d;color:#fff;border-color:#c9a4f1}
+#s-home .roamtog .switch-track{position:relative;display:inline-block;width:37px;height:19px;border-radius:20px;background:#766887;border:2px solid #d4bfec;box-sizing:border-box}
+#s-home .roamtog .switch-thumb{position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:#fff;transition:left .15s}
+#s-home .roamtog.on .switch-track{background:#bce984}#s-home .roamtog.on .switch-thumb{left:20px;background:#294014}
+.btn.lv-beast{background:#c8402e!important;color:#fff!important}.btn.lv-impossible{background:#4a1a6a!important;color:#fff!important}
+#s-arcade .game > p{min-height:2.9em}
 .rlist{position:absolute;right:6px;top:6px;font-size:13px;background:rgba(27,22,38,.8);padding:4px 8px;z-index:4}.rlist .me{color:#7fe8ff}
 </style>`);
+/* opening an invite link joins the race */
+{const q=(new URLSearchParams(location.search).get('race')||'').trim();if(/^[a-z]{3,4}[0-9]{2}$/i.test(q)){try{history.replaceState(null,'',location.pathname)}catch(e){}
+ let n=0;const tryJoin=()=>{if(S.name&&typeof screen!=='undefined'&&screen==='home'&&$('#modal').hidden)return joinRoom(q);if(++n<240)setTimeout(tryJoin,500)};setTimeout(tryJoin,800)}}
 try{if(screen==='home')renderHome();if(screen==='arcade')renderArcade()}catch(e){}
 })();

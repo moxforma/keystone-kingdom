@@ -149,7 +149,7 @@ function roamPlats(){const sel=[['#s-home .hero-info',0,0],['#s-home .tcard',0,0
  {const hi=document.querySelector('#s-home .hero-info'),tc=document.querySelector('#s-home .tcard');if(hi&&tc){const A=hi.getBoundingClientRect(),B=tc.getBoundingClientRect();const l=Math.min(A.right,B.right),r=Math.max(A.left,B.left);
   if(r>l)ROAM.plats.push({l:l+scrollX-2,r:r+scrollX+2,t:Math.min(A.top,B.top)+scrollY,b:Math.max(A.bottom,B.bottom)+scrollY,gap:1})}}
  const boxes=[...document.querySelectorAll('#s-home .tcard,#s-home .hero-info')].map(e=>e.getBoundingClientRect().bottom+scrollY);ROAM.floor=boxes.length?Math.max(...boxes):Math.max(document.documentElement.scrollHeight,innerHeight)-4;ROAM.W=document.documentElement.clientWidth}
-function roamStart(){roamStop();roamToggleBtn();if(typeof screen==='undefined'||screen!=='home'||!S.name||S.set.hideRoam)return;const list=roamPick();if(!list.length)return;
+function roamStart(){roamStop();roamToggleBtn();if(typeof screen==='undefined'||screen!=='home'||!S.name||S.set.hideRoam||window.KK_MOBILE||document.body.classList.contains('mobile')||innerWidth<=760)return;const list=roamPick();if(!list.length)return;
  let layer=document.getElementById('roam');if(!layer){layer=document.createElement('div');layer.id='roam';document.body.appendChild(layer)}layer.innerHTML='';roamPlats();
  ROAM.els=list.map((k,n)=>{const el=document.createElement('div');el.className='roamer';el.innerHTML=creatureSVG(k.i,k.f,'px',k.tier);layer.appendChild(el);
   const sz=[112,132,156][k.f];el.style.width=sz+'px';el.style.height=sz+'px';
@@ -187,8 +187,8 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnima
 if(typeof screen!=='undefined'&&screen==='home')setTimeout(roamStart,400);
 
 function roamToggleBtn(){const tb=$('#s-home .topbar');if(!tb||!S.name)return;let b=tb.querySelector('.roamtog');const n=roamPick().length;if(!n){b&&b.remove();return}
- if(!b){tb.querySelector('.selp')?.insertAdjacentHTML('afterend','<button class="btn roamtog" data-act="roamToggle"></button>');b=tb.querySelector('.roamtog')}
- if(b)b.textContent=S.set.hideRoam?'SHOW KEYLORI':'HIDE KEYLORI'}
+ if(!b){tb.querySelector('.selp')?.insertAdjacentHTML('afterend','<button class="roamtog arcade-switch" data-act="roamToggle"></button>');b=tb.querySelector('.roamtog')}
+ if(b){const on=!S.set.hideRoam;b.className='roamtog arcade-switch '+(on?'on':'');b.setAttribute('role','switch');b.setAttribute('aria-checked',on);b.setAttribute('aria-label','Show Keylori on the home screen');b.innerHTML=`<span>KEYLORI</span><span class="switch-track"><span class="switch-thumb"></span></span><span class="switch-state">${on?'ON':'OFF'}</span>`}}
 ACT.roamToggle=()=>{S.set.hideRoam=!S.set.hideRoam;save();sfx.click&&sfx.click();roamStart()};
 
 function roamDrag(c){c.el.addEventListener('pointerdown',e=>{e.preventDefault();c.held=true;c.ground=null;c.el.setPointerCapture(e.pointerId);c.el.classList.add('held');
