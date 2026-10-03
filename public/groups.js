@@ -35,8 +35,45 @@ ACT.clsPick=d=>{const i=+d.i;let s=0;for(;s<NST-1;s++)if(!((S.best[i+'-'+s]||0)>
 const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const row=$('#s-home .hi-btns');row?.querySelector('[data-act=clsHub]')?.remove();
  const tb=$('#s-home .topbar');if(tb&&S.name&&!tb.querySelector('.clsbtn')){const after=tb.querySelector('.roamtog')||tb.querySelector('.selp');const h=`<button class="btn clsbtn" data-act="clsHub"><img class="bico hico" src="${BOOK}" alt="">CLASS</button>`;after?after.insertAdjacentHTML('afterend',h):tb.insertAdjacentHTML('afterbegin',h)}homeBanner();fetchInfo()}catch(e){}return r};
 setInterval(()=>{if(typeof screen!=='undefined'&&screen==='home'&&S.cls){lastInfo=0;fetchInfo()}},20000);
+/* Race with Others card art: two heroes charging toward the camera with anime speed lines (2-frame run cycle) */
+function raceArt(){const W=72,H=56,c=document.createElement('canvas');c.width=W*2;c.height=H;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+ const me=typeof heroNow==='function'?heroNow():'pop',other=['rexo','juno','pip','ember','mochi'].find(h=>h!==me&&HEROES[h])||'pip';
+ const px=(x,y,col)=>{g.fillStyle=col;g.fillRect(x,y,1,1)},rect=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(x,y,w,h)};
+ /* head sprite + its colors */
+ function headOf(cv){const d=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data;let x0=99,x1=-1,y0=99,y1=-1;const cnt={};
+  for(let y=0;y<cv.height;y++)for(let x=0;x<cv.width;x++){const k=(y*cv.width+x)*4;if(d[k+3]<200)continue;x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);const hex='#'+[d[k],d[k+1],d[k+2]].map(v=>v.toString(16).padStart(2,'0')).join('');cnt[hex]=(cnt[hex]||0)+1}
+  const cols=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);const lum=h=>{const n=parseInt(h.slice(1),16);return (n>>16)*.3+(n>>8&255)*.59+(n&255)*.11};
+  const body=cols.find(h=>lum(h)>60&&lum(h)<200)||cols[0],dark=cols.slice().sort((a,b)=>lum(a)-lum(b))[0];return{cv,x0,x1,y0,y1,body,dark}}
+ const shade=(h,a)=>typeof shadeHex==='function'?shadeHex(h,a):h;
+ /* a chibi runner charging at the camera: head on top, body, swinging arms, one knee up */
+ function runner(H_,cx,top,f){const hw=H_.x1-H_.x0+1,hh=H_.y1-H_.y0+1,hx=cx-Math.floor(hw/2);
+  const by=top+hh-1,B=H_.body,D=shade(B,-.35),O=H_.dark,SH='#2a2340',SL='#5a4e70';
+  /* legs (drawn first, under the body) */
+  const L=f?[[-4,7,1],[2,3,0]]:[[-4,3,0],[2,7,1]];
+  L.forEach(([dx,len,near])=>{const lx=cx+dx;rect(lx-1,by+5,4,len+2,O);rect(lx,by+5,2,len,D);
+   const fy=by+5+len,fw=near?6:4;rect(lx-1-(near?1:0),fy-1,fw+1,near?4:3,O);rect(lx-(near?1:0),fy,fw-1,near?2:1,SH);px(lx-(near?1:0),fy,SL)});
+  /* torso */
+  rect(cx-6,by-1,12,8,O);rect(cx-5,by,10,6,B);rect(cx+2,by,3,6,D);rect(cx-5,by+4,10,2,D);
+  /* arms swinging */
+  const A=f?[[-8,-3],[6,2]]:[[-8,2],[6,-3]];A.forEach(([dx,dy])=>{rect(cx+dx-1,by+dy-1,4,7,O);rect(cx+dx,by+dy,2,5,B);rect(cx+dx,by+dy+(dy<0?0:4),2,2,'#ffd8b0')});
+  /* head on top */
+  g.drawImage(H_.cv,H_.x0,H_.y0,hw,hh,hx,top,hw,hh)}
+ const F=headOf(heroCanvas(S.equip||{},me,S.color)),Bk=headOf(heroCanvas({},other,null));
+ for(let f=0;f<2;f++){const ox=f*W;g.save();g.beginPath();g.rect(ox,0,W,H);g.clip();
+  /* anime speed lines */
+  const cx=ox+W/2,cy=22;for(let k=0;k<34;k++){const a=k/34*Math.PI*2+(f?.05:0),len=k%3===0?18:k%3===1?11:7,r0=25+((k*7+f*4)%7);
+   for(let t=r0;t<r0+len;t++){const x=Math.round(cx+Math.cos(a)*t*1.5),y=Math.round(cy+Math.sin(a)*t);px(x,y,k%3===0?'#fff6e0':k%3===1?'#c8bff0':'#7a6fb0')}}
+  /* shadows */
+  rect(ox+12,38,20,2,"rgba(10,6,24,.55)");rect(ox+34,52,26,2,"rgba(10,6,24,.55)");
+  /* chaser behind, leader in front */
+  runner(Bk,ox+22,2+(f?1:0),f?0:1);runner(F,ox+46,15+(f?0:1),f);
+  /* dust puffs + sweat */
+  const dust='#e8dcc4';(f?[[ox+38,52],[ox+14,35]]:[[ox+56,52],[ox+30,35]]).forEach(([x,y])=>{px(x,y,dust);px(x+1,y-1,dust);px(x-1,y-1,dust);px(x,y-2,'#fff6e0')});
+  px(ox+60,22,'#7fe8ff');px(ox+60,23,'#7fe8ff');px(ox+61,21,'#bff4ff');
+  g.restore()}
+ return c.toDataURL()}
 const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments);try{const gs=$('#s-arcade .games');if(gs&&!gs.querySelector('.racecard')){const own=Object.keys(S.cards||{}).slice(0,2).map(k=>k.split('-').map(Number));while(own.length<2)own.push([[3,5][own.length],1]);
- gs.insertAdjacentHTML('beforeend',`<div class="game panel racecard"><div class="gart race">${own.map(([i,f])=>creatureSVG(i,f,'big')).join('')}</div><h3>Race with Others</h3><p>Race friends and classmates live!</p><div class="arcade-stats"><div class="arcade-stat"><b>${S.netw||0}</b><span>Races won</span></div><div class="arcade-stat"><b>${S.netb||0}</b><span>Best WPM</span></div><div class="arcade-stat level"><b>Up to 40</b><span>Racers per room</span></div></div><button class="btn" data-act="raceHub">Play</button></div>`)}}catch(e){console.warn(e)}return r};
+ gs.insertAdjacentHTML('beforeend',`<div class="game panel racecard"><div class="gart raceart-wrap"><div class="raceart" style="background-image:url(${raceArt()})"></div></div><h3>Race with Others</h3><p>Race friends and classmates live!</p><div class="arcade-stats"><div class="arcade-stat"><b>${S.netw||0}</b><span>Races won</span></div><div class="arcade-stat"><b>${S.netb||0}</b><span>Best WPM</span></div><div class="arcade-stat level"><b>Up to 40</b><span>Racers per room</span></div></div><button class="btn" data-act="raceHub">Play</button></div>`)}}catch(e){console.warn(e)}return r};
 
 /* ---------- hub ---------- */
 const field=(id,ph,act,label)=>`<div class="cl-field"><input id="${id}" class="cl-in" maxlength="6" placeholder="${ph}" autocomplete="off" autocapitalize="characters" data-enter="${act}"><button class="btn sm volt" data-act="${act}">${label}</button></div>`;
@@ -189,6 +226,14 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .btn.sharebtn{background:#6edc8c!important;color:#14301e!important;box-shadow:0 4px 0 #3a9a5a!important}
 .raceHubBox .cl-sec{text-align:center}.raceHubBox .cl-btns,.raceHubBox .cl-field{justify-content:center}
 .cl-btns.lvlrow{flex-wrap:nowrap;justify-content:center;gap:6px}.cl-btns.lvlrow .btn{padding:8px 10px!important;font-size:15px!important;flex:1 1 0;min-width:0;white-space:nowrap}
+.raceart{width:180px;height:140px;background-size:360px 140px;background-repeat:no-repeat;image-rendering:pixelated;animation:raceRun .32s steps(2) infinite}
+@keyframes raceRun{from{background-position:0 0}to{background-position:-360px 0}}
+#s-arcade .game .gart{height:140px;flex:none;display:flex;align-items:center;justify-content:center;overflow:visible}
+#s-arcade .game > h3{flex:none}#s-arcade .game > p{min-height:2.7em;flex:none}
+#s-arcade .game .arcade-stats{margin-top:6px!important;margin-bottom:12px!important}
+#s-arcade .game .arcade-stat.level{min-height:76px;display:flex;flex-direction:column;justify-content:center;grid-column:1/-1}
+#s-arcade .game .arcade-stats ~ *{margin-top:auto}
+#s-arcade .game .arcade-stats ~ * ~ *{margin-top:0}
 .btn.lv-beast{background:#c8402e!important;color:#fff!important}.btn.lv-impossible{background:#4a1a6a!important;color:#fff!important}
 #s-arcade .game > p{min-height:2.9em}
 .rlist{position:absolute;right:6px;top:6px;font-size:13px;background:rgba(27,22,38,.8);padding:4px 8px;z-index:4}.rlist .me{color:#7fe8ff}
