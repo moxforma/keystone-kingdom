@@ -110,6 +110,10 @@ section{padding:44px 0;border-top:4px solid #241c36}
 .arc .an{width:100%;aspect-ratio:84/50;background-size:200% 100%;background-repeat:no-repeat;image-rendering:pixelated;border:3px solid #2a1d3e;animation:af .9s steps(1) infinite}
 @keyframes af{0%{background-position:0 0}50%{background-position:100% 0}}
 .arc figcaption{margin-top:8px;font-size:24px}.arc figure.net{border-color:#58c870}
+.feat,.safe div{position:relative;padding-left:96px!important;min-height:110px}
+.fico{position:absolute;left:18px;top:18px;width:60px;height:60px;display:block;background:#1b1626;border:3px solid var(--line)}
+.fico svg{display:block;width:100%;height:100%}
+@media (max-width:600px){.feat,.safe div{padding-left:84px!important}.fico{width:52px;height:52px;left:14px}}
 /* multiplayer */
 .mp{display:grid;grid-template-columns:1fr 1.1fr;gap:calc(var(--gap)*2);align-items:center}
 .mp ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
@@ -203,19 +207,19 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
    <p class="cap" id="cap"></p></div>
  </div>
  <div class="feats">
-  <div class="feat"><h4>Assign any lesson</h4><p>Pick from 117 lessons. Kids see your pick on their home screen and finish with a Submit to teacher button.</p></div>
-  <div class="feat"><h4>Live dashboard</h4><p>Updates every 10 seconds: where each child is, stars, words per minute, accuracy and minutes this week.</p></div>
-  <div class="feat"><h4>Every lesson, every child</h4><p>Tap a name to see every assignment and a map of all lessons: complete, started or not yet.</p></div>
-  <div class="feat"><h4>Class races</h4><p>Open a race for the whole room and watch progress, accuracy, time, and right and wrong keys.</p></div>
-  <div class="feat"><h4>Class controls</h4><p>Switch on Focus mode for the whole class: no arcade, outfits or extra animations, just typing.</p></div>
-  <div class="feat"><h4>Works on school devices</h4><p>Runs in any modern browser on Chromebooks, laptops and desktops.</p></div>
+  <div class="feat"><i class="fico" data-ico="clip"></i><h4>Assign any lesson</h4><p>Pick from 117 lessons. Kids see your pick on their home screen and finish with a Submit to teacher button.</p></div>
+  <div class="feat"><i class="fico" data-ico="chart"></i><h4>Live dashboard</h4><p>Updates every 10 seconds: where each child is, stars, words per minute, accuracy and minutes this week.</p></div>
+  <div class="feat"><i class="fico" data-ico="grid"></i><h4>Every lesson, every child</h4><p>Tap a name to see every assignment and a map of all lessons: complete, started or not yet.</p></div>
+  <div class="feat"><i class="fico" data-ico="flag"></i><h4>Class races</h4><p>Open a race for the whole room and watch progress, accuracy, time, and right and wrong keys.</p></div>
+  <div class="feat"><i class="fico" data-ico="toggle"></i><h4>Class controls</h4><p>Switch on Focus mode for the whole class: no arcade, outfits or extra animations, just typing.</p></div>
+  <div class="feat"><i class="fico" data-ico="laptop"></i><h4>Works on school devices</h4><p>Runs in any modern browser on Chromebooks, laptops and desktops.</p></div>
  </div>
  <div class="subh"><span class="tagbox" style="--c:var(--orange);--c2:var(--orange2)"><b><i>SAFE BY DESIGN</i></b></span><p style="color:var(--mute);margin:0;font-size:26px">Built for young typists, with grown-ups in control.</p></div>
  <div class="safe">
-  <div><h4>First names only</h4><p>Only a first name and typing stats are shared with a class. No emails, no passwords, no profiles.</p></div>
-  <div><h4>No chat</h4><p>Kids can't message each other or strangers. Races show names and progress, nothing else.</p></div>
-  <div><h4>Focus mode</h4><p>Parents and teachers can turn off the arcade, Hero Closet, catch and evolve animations, the Keylori walking on the menu and more, so it is strictly a learning game. Teachers can lock it for the whole class.</p></div>
-  <div><h4>Grown-up check</h4><p>Settings and teacher tools sit in Teachers, behind a quick grown-up check, and only the class creator can see the dashboard.</p></div>
+  <div><i class="fico" data-ico="tag"></i><h4>First names only</h4><p>Only a first name and typing stats are shared with a class. No emails, no passwords, no profiles.</p></div>
+  <div><i class="fico" data-ico="nochat"></i><h4>No chat</h4><p>Kids can't message each other or strangers. Races show names and progress, nothing else.</p></div>
+  <div><i class="fico" data-ico="target"></i><h4>Focus mode</h4><p>Parents and teachers can turn off the arcade, Hero Closet, catch and evolve animations, the Keylori walking on the menu and more, so it is strictly a learning game. Teachers can lock it for the whole class.</p></div>
+  <div><i class="fico" data-ico="shield"></i><h4>Grown-up check</h4><p>Settings and teacher tools sit in Teachers, behind a quick grown-up check, and only the class creator can see the dashboard.</p></div>
  </div>
 </div></section>
 
@@ -236,6 +240,22 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
 const hdr=document.getElementById('hdr');
 new IntersectionObserver(es=>hdr.classList.toggle('showlogo',!es[0].isIntersecting),{rootMargin:'-70px 0px 0px 0px'}).observe(document.getElementById('biglogo'));
 new IntersectionObserver(es=>{const on=!es[0].isIntersecting;hdr.classList.toggle('showplay',on);hdr.querySelector('.hp a').tabIndex=on?0:-1},{rootMargin:'-70px 0px 0px 0px'}).observe(document.querySelector('.hero .cta .prism'));
+/* pixel icons for the feature cards */
+const PAL={o:'#2a1d3e',w:'#fff6e0',g:'#f0c860',G:'#c8981e',t:'#7fe8d0',T:'#3fa894',r:'#f07a6e',R:'#b8483e',b:'#7fc8f0',B:'#3a78b0',l:'#b8a0f0',n:'#6edc8c',N:'#3e9a5a',k:'#8a7aa8'};
+const ICO={
+clip:['....oooo....','..ooggggoo..','.oowwwwwwoo.','.owwwwwwwwo.','.owooooowwo.','.owwwwwwwwo.','.owoooowwwo.','.owwwwwwwwo.','.owooooowwo.','.owwwwwwwwo.','.owwwwwwwwo.','.oooooooooo.'],
+chart:['oooooooooooo','owwwwwwwwwwo','owwwwwwwwnwo','owwwwwwwnnwo','owwwwbwwnnwo','owwwwbwwnnwo','owwgwbwwnnwo','owwgwbwrnnwo','owwgwbwrnnwo','owwgwbwrnnwo','owwwwwwwwwwo','oooooooooooo'],
+grid:['............','.oooooooooo.','.onnonnoggo.','.onnonnoggo.','.oooooooooo.','.onnoggokko.','.onnoggokko.','.oooooooooo.','.oggokkokko.','.oggokkokko.','.oooooooooo.','............'],
+flag:['Gg..........','GgwwkkwwkkG.','GgkkwwkkwwG.','GgwwkkwwkkG.','GgkkwwkkwwG.','GgwwkkwwkkG.','GgGGGGGGGGG.','Gg..........','Gg..........','Gg..........','Gg..........','GGGG........'],
+toggle:['............','..oo........','kkoggokkkkkk','..oo........','............','.......oo...','kkkkkkonnokk','.......oo...','............','....oo......','kkkkorrokkkk','....oo......'],
+laptop:['............','.oooooooooo.','.obbbbbbbbo.','.obwbbbbbbo.','.obbbbbbbbo.','.obbbbbbbbo.','.obbbbbbbbo.','.oooooooooo.','oKKKKKKKKKKo','okkkkkkkkkko','oooooooooooo','............'],
+tag:['............','....oooooooo','...ogggggggo','..oggggggggo','.oogowwwwggo','oggggggggggo','oggggggggggo','.oogowwwggo.','..oggggggggo','...ogggggggo','....oooooooo','............'],
+nochat:['............','.oooooooo...','owwwwwwwwo..','owrrwwwrrwo.','owwrrwrrwwo.','owwwrrrwwwo.','owwrrwrrwwo.','owrrwwwrrwo.','owwwwwwwwo..','.ooowooooo..','...owo......','...oo.......'],
+target:['...oooooo...','..orrrrrro..','.orrwwwwrro.','orrwwrrwwrro','orwwrrrrwwro','orwrrwwrrwro','orwrrwwrrwro','orwwrrrrwwro','orrwwrrwwrro','.orrwwwwrro.','..orrrrrro..','...oooooo...'],
+shield:['..oooooooo..','.onnnnnnNNo.','.onnnnnnNNo.','.onnnnnwNNo.','.onnnnwwNNo.','.onwnwwnNNo.','.onwwwnnNNo.','.onnwnnnNNo.','..onnnnNNo..','..onnnnNNo..','...onnNNo...','....oooo....']};
+PAL.K='#5a4a7a';
+document.querySelectorAll('.fico').forEach(el=>{const g=ICO[el.dataset.ico];if(!g)return;let r='';g.forEach((row,y)=>[...row].forEach((c,x)=>{if(PAL[c])r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${PAL[c]}"/>`}));
+ el.innerHTML=`<svg viewBox="-1 -1 14 14" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`});
 /* tabs: the hero stays, the nav swaps the section below it */
 const TABS=['play','arcade','race','classroom'];
 function tab(id,scroll){if(id==='safety')id='classroom';if(!TABS.includes(id))id='play';
@@ -278,9 +298,9 @@ document.getElementById('track').insertAdjacentHTML('beforeend',R.map(([n,h,d],k
 const STEPS=[
  ['Create a class','Get a short class code',0,'Open <b>Teachers</b>, pass the quick check and name your class. You get a code like <b>FOX123</b>.'],
  ['Kids join','No accounts needed',13.4,'Kids tap <b>Class</b> and type the code. They show up on your dashboard right away.'],
- ['Assign a lesson','Pick from 117 lessons',24.47,'Choose a lesson and press <b>Assign</b>. It appears as <b>Teacher\'s pick</b> on every child\'s home screen.'],
- ['Watch progress','Live, every 10 seconds',29.17,'See who is done, who is working and how fast. Tap a name for every lesson they have played.'],
- ['Race the class','Up to 40 racers',48.96,'Open a class race and watch live: progress, words per minute, accuracy, time, right and wrong keys.']];
+ ['Assign a lesson','Pick from 117 lessons',20.61,'Choose a lesson and press <b>Assign</b>. It appears as <b>Teacher\'s pick</b> on every child\'s home screen.'],
+ ['Watch progress','Live, every 10 seconds',25.97,'See who is done, who is working and how fast. Tap a name for every lesson they have played.'],
+ ['Race the class','Up to 40 racers',45.76,'Open a class race and watch live: progress, words per minute, accuracy, time, right and wrong keys.']];
 const stepsEl=document.getElementById('steps'),vid=document.getElementById('vid'),cap=document.getElementById('cap');let cur=-1;
 stepsEl.innerHTML=STEPS.map((s,i)=>`<button data-i="${i}"><b>${i+1}</b><span>${s[0]}<small>${s[1]}</small></span><div class="prog"><i></i></div></button>`).join('');
 const btns=[...stepsEl.querySelectorAll('button')];

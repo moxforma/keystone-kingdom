@@ -90,9 +90,9 @@ const _set=ACT.settings;ACT.settings=function(){const r=_set.apply(this,argument
  if(mode==='devices'){box.querySelectorAll('.setsec').forEach(s=>{if(!s.classList.contains('famsec')&&!s.classList.contains('dangersec'))s.remove()});
   const h=box.querySelector('h2');if(h)h.textContent='Family code and reset';
   const done=[...box.querySelectorAll('[data-act=close]')].pop();if(done)done.outerHTML='<button class="btn" data-act="grownups">BACK</button>'}
- else{box.querySelectorAll('.famsec,.parsec,.dangersec,.parrow').forEach(s=>s.remove());
+ else{box.querySelectorAll('.parsec,.dangersec,.parrow').forEach(s=>s.remove());
   const done=[...box.querySelectorAll('[data-act=close]')].pop();
-  if(done&&!box.querySelector('.gurow'))done.insertAdjacentHTML('beforebegin','<section class="setsec gurow"><div class="setrow"><span>Teachers<small class="muted" style="display:block">Progress report, focus mode, teacher dashboard, players, family code</small></span><button class="btn sm volt" data-act="grownups">OPEN</button></div></section>')}
+  if(done&&!box.querySelector('.gurow'))done.insertAdjacentHTML('beforebegin','<section class="setsec gurow"><div class="setrow"><span>Teachers<small class="muted" style="display:block">Progress report, focus mode, teacher dashboard, players, reset</small></span><button class="btn sm volt" data-act="grownups">OPEN</button></div></section>')}
  }catch(e){console.warn(e)}return r};
 /* closing anything leaves "devices" mode */
 const _md=modal;modal=function(){const mb=document.getElementById('mbox');if(mb)mb.classList.remove('guwide');const r=_md.apply(this,arguments);
@@ -138,6 +138,10 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #mbox .dashv .cl-lvl{justify-content:center}
 #mbox .dashv>.rbtns{margin-top:26px!important}
 .tcounts{display:inline-flex;align-items:center;gap:14px}.tcount{display:inline-flex;align-items:center;gap:6px}.tcount .tico{width:22px;height:22px;image-rendering:pixelated}
+#s-home .clsban{max-width:680px;margin:6px auto 12px!important;background:#1c2f6e!important;border:4px solid #7fc8f0!important;box-shadow:6px 6px 0 #0d0a16!important;padding:10px 18px!important;color:#fff6e0}
+#s-home .clsban .cb-name{color:#bfe2f6!important;font-size:16px}
+#s-home .clsban .cb-row{gap:16px;padding:4px 0}#s-home .clsban .cb-row>span:first-child{font-size:22px;color:#fff6e0}#s-home .clsban .cb-row b{color:#f0c860;font-weight:400}
+#s-home .clsban .cb-row .btn{margin:6px 0!important;min-width:120px}
 #mbox .cl-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 #mbox .btn .muted{color:#4a3a1a!important;opacity:1!important}
 #mbox.guwide{width:min(900px,94vw)!important;max-width:none!important}
@@ -146,7 +150,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #s-home .hbtns{display:grid!important;grid-template-columns:1fr 1fr!important;gap:11px!important}
 #s-home .hbtns>.btn{grid-column:1/-1!important;width:100%!important;margin:0!important}
 #s-home .hbtns>.btn.half{grid-column:auto!important}
-#s-home .hbtns>.homehs{background:#f0c860!important;color:#2a1d3e!important}
+#s-home .hbtns>.homehs{background:#c83a5c!important;color:#fff6e0!important;box-shadow:inset 0 -5px 0 #8a2240!important}
 .nxcard{font:inherit;color:inherit;text-align:left;cursor:pointer;display:grid;grid-template-columns:84px 1fr;gap:14px;align-items:center;width:100%;padding:8px 14px;margin:0 0 10px;background:#1b1626;border:3px solid #3a2f4e;border-left:10px solid var(--rc);box-sizing:border-box}
 .nxcard:hover{background:#241c36}.nx-art{width:84px;height:72px;overflow:hidden;position:relative;background:#120e1e;border:3px solid #3a2f4e}.nx-art>svg{position:absolute!important;left:50%!important;top:50%!important;width:210px!important;height:210px!important;max-width:none!important;margin:-112px 0 0 -105px!important;transform:none!important}.nx-art>svg.sil{filter:brightness(0) drop-shadow(0 0 3px #7fe8ff)!important;opacity:.85!important}
 .nx-txt{display:flex;flex-direction:column;gap:3px;min-width:0}.nx-txt small{font-size:15px;color:var(--rc);letter-spacing:.06em}.nx-txt b{font-size:24px;color:#fff6e0;font-weight:400;line-height:1.1}
@@ -162,7 +166,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .guall{width:100%;border-collapse:collapse;margin:0 0 14px;font-size:18px}.guall th,.guall td{padding:6px 10px;border-bottom:2px solid #3a2f4e;text-align:left}.guall tr.on td{color:#f0c860}
 #s-home .herobtns{display:grid!important;grid-template-columns:1fr;gap:8px}
 #s-home .herobtns>.btn{width:100%;margin:0!important}
-#s-home .hbtns>.homehs{background:#f0c860!important;color:#2a1d3e!important}
+#s-home .hbtns>.homehs{background:#c83a5c!important;color:#fff6e0!important;box-shadow:inset 0 -5px 0 #8a2240!important}
 #s-home .closetbtn{background:#a8d878!important;color:#2a1d3e!important}
 </style>`);
 try{if(screen==='home')renderHome()}catch(e){}
