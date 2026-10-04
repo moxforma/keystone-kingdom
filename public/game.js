@@ -687,7 +687,7 @@ function renderParents(){
  chart+=`<text x="${W/2}" y="${H-4}" text-anchor="middle" class="ct">last ${h.length} rounds</text>`;
  const heat=['1234567890','qwertyuiop','asdfghjkl;','zxcvbnm,.'].map((r,ri)=>`<div class="hrow" style="padding-left:${ri*14}px">${[...r].map(c=>{const k=S.ks[c],n=k?k.h+k.m:0,a=n?k.h/n:0,col=n<5?'#2a3270':a>=.95?'#4de08a':a>=.85?'#ffd84d':'#ff6b7a';return `<div class="hk" style="background:${col};color:${n<5?'#a3acdf':'#0b1033'}"><b>${c.toUpperCase()}</b><span>${n<5?'–':Math.round(a*100)+'%'}</span></div>`}).join('')}</div>`).join('');
  const weak=Object.entries(S.ks).filter(([c,k])=>k.h+k.m>=8).map(([c,k])=>[c,k.h/(k.h+k.m)]).sort((a,b)=>a[1]-b[1]).slice(0,5).filter(x=>x[1]<.9);
- $('#s-parents').innerHTML=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Grown-ups: Progress Report</h2><button class="btn sm alt" data-act="grownups">Grown-ups menu</button></div>
+ $('#s-parents').innerHTML=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Progress Report</h2><button class="btn sm alt" data-act="grownups">Teachers&#39; Lounge</button></div>
  <div class="ptiles">${[[Math.round(S.time/60)+' min','Time typing'],[S.rounds,'Rounds played'],[done+'/'+(LESSONS.length*8),'Levels passed'],[avg(last,x=>x.a)+'%','Accuracy (last 10)'],[avg(last,x=>x.w),'WPM (last 10)'],[stars,'Stars earned']].map(([v,l])=>`<div class="panel"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
  <div class="pgrid"><div class="panel pbox"><h3>Typing speed</h3><div class="chartwrap"><svg viewBox="0 0 ${W} ${H}" class="chart">${h.length?chart:`<text x="${W/2}" y="${H/2}" text-anchor="middle" class="ct">Play a few rounds to see speed here</text>`}</svg></div></div>
  <div class="panel pbox"><h3>Accuracy by key</h3><div class="heat">${heat}</div><p class="note">Green is 95% or better, yellow 85 to 94%, red below 85%. Grey keys need more practice data.</p>
@@ -2392,7 +2392,7 @@ function cleanText(txt){if(typeof txt!=='string')return txt;return txt.split(' '
 const _gt39=genText;genText=function(){return cleanText(_gt39.apply(this,arguments))};
 if(typeof comboText==='function'){const _ct39=comboText;comboText=function(){return cleanText(_ct39.apply(this,arguments))}}
 /* ================= V41: feedback + about ================= */
-const _rh41=renderHome;renderHome=function(){_rh41();const g=$('#s-home .home-grid');if(g&&!$('#s-home .footbtns'))g.insertAdjacentHTML('afterend','<div class="footbtns"><button class="btn alt sm" data-act="feedback">Feedback / Report a bug</button><button class="btn alt sm" data-act="about">About</button></div>')};
+const _rh41=renderHome;renderHome=function(){_rh41();const g=$('#s-home .home-grid');if(g&&!$('#s-home .footbtns'))g.insertAdjacentHTML('afterend','<div class="footbtns"><button class="btn alt sm" data-act="feedback">Feedback / Report a bug</button><a class="btn alt sm" style="text-decoration:none" href="/" target="_blank" rel="noopener">How to play</a></div>')};
 ACT.feedback=()=>{modal(`<h2>Feedback</h2><p class="muted" style="margin:0">Found a bug or have an idea? Tell us!</p>
  <div class="seg fbtype" style="justify-content:center"><button class="on" data-act="fbType" data-v="Bug">Bug</button><button data-act="fbType" data-v="Idea">Idea</button><button data-act="fbType" data-v="Other">Other</button></div>
  <textarea id="fbmsg" rows="5" maxlength="2000" placeholder="What happened?"></textarea>
