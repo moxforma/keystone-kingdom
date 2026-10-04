@@ -1,16 +1,25 @@
 /* Mobile mode: phones/tablets type with their own keyboard (no on-screen keyboard), single-column layouts */
 (function(){
 const MOB=/[?&]mobile=1/.test(location.search)||(!/[?&]mobile=0/.test(location.search)&&matchMedia('(pointer:coarse)').matches&&Math.min(window.screen.width,window.screen.height)<=900);
-/* Mobile mode is on ice: phones get a "use a real keyboard" notice instead. Set to true to bring the mobile layout back. */
-const MOBILE_MODE_ENABLED=false;
-if(MOB&&!MOBILE_MODE_ENABLED){window.KK_MOBILE=false;
- let ok=false;try{ok=sessionStorage.getItem('kk-kbok')==='1'}catch(e){}if(ok)return;
+/* Phones and tablets first choose: a real keyboard (desktop layout, turn sideways) or play on the phone (mobile layout, phone keyboard) */
+let pick=null;try{pick=sessionStorage.getItem('kk-mob')||(sessionStorage.getItem('kk-kbok')==='1'?'kb':null)}catch(e){}
+if(/[?&]mobile=1/.test(location.search))pick='phone';
+const remember=v=>{try{sessionStorage.setItem('kk-mob',v)}catch(e){}};
+function landscape(){window.KK_WANTLAND=true;document.body.classList.add('wantland');if(document.getElementById('rotnote'))return;
+ const r=document.createElement('div');r.id='rotnote';
+ r.innerHTML=`<div class="kbn-box"><div class="rot-dev"></div><h2>Turn it sideways</h2><p>Keyloria fits best in landscape. Turn your device sideways to keep playing.</p><button class="btn" id="rotGo">Continue anyway</button></div>`;
+ document.body.appendChild(r);document.getElementById('rotGo').onclick=()=>{document.body.classList.remove('wantland')}}
+document.head.insertAdjacentHTML('beforeend','<style>#rotnote{display:none;position:fixed;inset:0;z-index:100001;background:#171226;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;text-align:center}@media (orientation:portrait){body.wantland #rotnote{display:flex}}#rotnote .kbn-box{max-width:420px;background:#2a2238;border:4px solid #3a2f4e;padding:24px;color:#fff6e0}#rotnote h2{font-family:var(--title,monospace);font-size:20px;margin:16px 0 10px}#rotnote p{font-size:20px;color:#c8bce0;margin:0 0 16px}#rotnote .rot-dev{width:44px;height:72px;margin:6px auto;border:6px solid #f0c860;border-radius:0;animation:rotdev 2.4s steps(1) infinite}@keyframes rotdev{0%{transform:rotate(0)}50%{transform:rotate(90deg)}}</style>');
+if(MOB&&!pick){window.KK_MOBILE=false;
  const el=document.createElement('div');el.id='kbnotice';
- el.innerHTML=`<div class="kbn-box"><div class="kbn-key">⌨</div><h2>Grab a keyboard!</h2><p>Keyloria Kingdom teaches typing, so it needs a real keyboard. Please play on a computer, laptop or Chromebook.</p><p class="kbn-small">Using a tablet with a keyboard attached?</p><button class="btn" id="kbnGo">I have a keyboard</button><a class="kbn-link" href="/">See how the game works</a></div>`;
- document.head.insertAdjacentHTML('beforeend','<style>body.kbnote>*:not(#kbnotice){display:none!important}body.kbnote{min-width:0!important;overflow:hidden}#kbnotice{position:fixed;inset:0;z-index:100000;background:#171226;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overflow:auto}#kbnotice .kbn-box{max-width:420px;text-align:center;background:#2a2238;border:4px solid #3a2f4e;box-shadow:0 8px 0 #120e1e;padding:24px 20px;color:#fff6e0}#kbnotice h2{color:#f0c860;margin:8px 0 10px;font-size:28px}#kbnotice p{font-size:20px;line-height:1.3;margin:0 0 14px}#kbnotice .kbn-key{font-size:56px;line-height:1}#kbnotice .kbn-small{font-size:16px;color:#b8a8d8;margin:16px 0 8px}#kbnotice .btn{font-size:18px}#kbnotice .kbn-link{display:block;margin-top:16px;color:#7fe8d0;font-size:18px}</style>');
- document.body.appendChild(el);document.body.classList.add('kbnote');document.getElementById('kbnGo').onclick=()=>{try{sessionStorage.setItem('kk-kbok','1')}catch(e){}el.remove();document.body.classList.remove('kbnote')};
+ el.innerHTML=`<div class="kbn-box"><div class="kbn-key">⌨</div><h2>Grab a keyboard!</h2><p>Keyloria Kingdom teaches typing, so it works best with a real keyboard on a computer, laptop or Chromebook.</p><p class="kbn-small">Using a tablet with a keyboard attached?</p><button class="btn" id="kbnGo">I have a keyboard</button><button class="btn alt" id="kbnPhone" style="margin-top:10px">Play on this device anyway</button><a class="kbn-link" href="/">See how the game works</a></div>`;
+ document.head.insertAdjacentHTML('beforeend','<style>body.kbnote>*:not(#kbnotice){display:none!important}body.kbnote{min-width:0!important;overflow:hidden}#kbnotice{position:fixed;inset:0;z-index:100000;background:#171226;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overflow:auto}#kbnotice .kbn-box{max-width:420px;text-align:center;background:#2a2238;border:4px solid #3a2f4e;padding:24px;color:#fff6e0;display:flex;flex-direction:column;align-items:center}#kbnotice .kbn-key{font-size:56px;line-height:1}#kbnotice h2{font-family:var(--title,monospace);font-size:20px;margin:14px 0 10px}#kbnotice p{font-size:20px;color:#c8bce0;margin:0 0 12px}#kbnotice .kbn-small{font-size:18px}#kbnotice .btn{width:100%}#kbnotice .kbn-link{margin-top:14px;color:#7fe8d0;font-size:18px}</style>');
+ document.body.appendChild(el);document.body.classList.add('kbnote');
+ document.getElementById('kbnGo').onclick=()=>{remember('kb');el.remove();document.body.classList.remove('kbnote');landscape()};
+ document.getElementById('kbnPhone').onclick=()=>{remember('phone');location.reload()};
  return}
-window.KK_MOBILE=MOB;if(!MOB)return;
+if(MOB&&pick==='kb'){window.KK_MOBILE=false;landscape();return}
+const PHONE=pick==='phone'&&(MOB||/[?&]mobile=1/.test(location.search));window.KK_MOBILE=PHONE;if(!PHONE)return;
 document.body.classList.add('mobile');try{roamStop&&roamStop();document.getElementById('roam')?.remove()}catch(e){}
 
 /* ---------- typing through the phone's own keyboard ---------- */
@@ -43,8 +52,13 @@ document.head.insertAdjacentHTML('beforeend',`<style id="mobcss">
 body.mobile .screen{zoom:1!important;padding-left:10px!important;padding-right:10px!important;max-width:100vw!important;box-sizing:border-box}
 body.mobile #kbwrap,body.mobile .kbwrap,body.mobile #roam,body.mobile .roamtog,body.mobile .linesw{display:none!important}
 body.mobile #s-home{transform:none!important}
-body.mobile #s-home .topbar{flex-wrap:wrap;gap:6px;justify-content:flex-start}
-body.mobile #s-home .topbar .selp{margin-right:auto!important}
+body.mobile #s-home .topbar{flex-wrap:wrap!important;gap:5px!important;justify-content:center!important;padding-left:0!important;padding-right:0!important}
+body.mobile #s-home .topbar .selp{margin-right:0!important}
+body.mobile #s-home .topbar .fsz{display:none!important}
+body.mobile #s-home .topbar .btn,body.mobile #s-home .topbar .btn *{font-size:10px!important;letter-spacing:0!important}body.mobile #s-home .topbar .btn{padding:0 7px!important;height:36px!important}body.mobile #s-home .topbar .btn img{height:16px!important}
+body.mobile #s-home .topbar .icon-btn{width:32px!important;height:36px!important}body.mobile #s-home .topbar .gem{font-size:18px!important;padding:0 2px!important}
+body.mobile .gugrid{grid-template-columns:1fr!important}body.mobile #mbox.guwide{width:94vw!important}
+body.mobile .guitem b{font-size:20px}
 body.mobile #s-home .logo{display:flex!important;justify-content:center!important;align-items:center;width:100%!important;max-width:none!important;margin:0 auto 6px!important;transform:none!important;left:auto!important}body.mobile #s-home .logo>*{max-width:82%!important;height:auto;margin-left:auto!important;margin-right:auto!important}
 body.mobile #s-home .home-grid{display:flex!important;flex-direction:column;gap:12px!important}
 body.mobile #s-home .hero-big{width:100%!important;max-width:none!important;display:flex;flex-direction:column;align-items:center}

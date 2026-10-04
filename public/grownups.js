@@ -39,6 +39,40 @@ ACT.guDevices=()=>{window.__guMode='devices';ACT.settings()};
 /* the parent-settings gate inside Settings now opens the hub's parent settings directly once checked */
 const _pg=ACT.parGate;ACT.parGate=function(){if(window.__gu)return parPanel();return _pg.apply(this,arguments)};
 
+
+/* ---- Teacher password: protects the teacher dashboard (and class controls) on a shared device ---- */
+const TPW='kl-teach-pw';
+const tpw=()=>{try{return JSON.parse(localStorage.getItem(TPW)||'null')}catch(e){return null}};
+const hash=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('keyloria:'+t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
+const needPw=()=>!!tpw()&&!window.__tpwOk;
+let PW_NEXT=null;
+const pwAsk=next=>{PW_NEXT=next;modal(`<h2>TEACHER PASSWORD</h2><p class="muted" style="margin:0 0 10px">The teacher dashboard on this device is locked.</p>
+ <div class="pgatebox"><input id="tpwin" class="pgin" type="password" autocomplete="off" aria-label="Teacher password" style="width:260px;letter-spacing:.1em"></div>
+ <div class="rbtns"><button class="btn" data-act="tpwCheck">UNLOCK</button><button class="btn alt" data-act="grownups">BACK</button></div>
+ <p class="muted" style="margin:10px 0 0"><button class="linkbtn" data-act="tpwForgot">Forgot the password?</button></p>`);setTimeout(()=>document.getElementById('tpwin')?.focus(),50)};
+ACT.tpwCheck=async()=>{const p=tpw(),v=document.getElementById('tpwin')?.value||'';if(p&&await hash(v)===p.h){window.__tpwOk=1;const n=PW_NEXT;PW_NEXT=null;return n?n():window.teachList()}
+ try{sfx.bad()}catch(e){}toast('Wrong password');const i=document.getElementById('tpwin');if(i){i.value='';i.focus()}};
+ACT.tpwForgot=()=>modal(`<h2>FORGOT PASSWORD</h2><p class="muted" style="margin:0 0 10px">Type the recovery code you saved when you set the password.</p>
+ <div class="pgatebox"><input id="tpwrec" class="pgin" autocomplete="off" maxlength="9" aria-label="Recovery code" style="width:260px;text-transform:uppercase"></div>
+ <div class="rbtns"><button class="btn" data-act="tpwRecover">REMOVE PASSWORD</button><button class="btn alt" data-act="grownups">BACK</button></div>`);
+ACT.tpwRecover=async()=>{const p=tpw(),v=(document.getElementById('tpwrec')?.value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+ if(p&&await hash('rec:'+v)===p.r){try{localStorage.removeItem(TPW)}catch(e){}window.__tpwOk=1;toast('Password removed');return window.teachList()}toast('That code does not match')};
+ACT.tpwSet=()=>{const has=!!tpw();modal(`<h2>${has?'CHANGE':'SET A'} TEACHER PASSWORD</h2><p class="muted" style="margin:0 0 10px">Locks the teacher dashboard and class controls on this device, so students can't change them even if they pass the maths question.</p>
+ <div class="pgatebox" style="display:grid;gap:10px;justify-items:center"><input id="tpw1" class="pgin" type="password" autocomplete="new-password" placeholder="Password" aria-label="New password" style="width:280px"><input id="tpw2" class="pgin" type="password" autocomplete="new-password" placeholder="Type it again" aria-label="Repeat password" style="width:280px"></div>
+ <div class="rbtns"><button class="btn" data-act="tpwSave">SAVE</button>${has?'<button class="btn alt" data-act="tpwOff">TURN OFF</button>':''}<button class="btn alt" data-act="tpwBack">BACK</button></div>`);setTimeout(()=>document.getElementById('tpw1')?.focus(),50)};
+ACT.tpwBack=()=>ACT.clsDash?ACT.clsDash({}):window.teachList();
+ACT.tpwOff=()=>{try{localStorage.removeItem(TPW)}catch(e){}toast('Password turned off');ACT.tpwBack()};
+ACT.tpwSave=async()=>{const a=document.getElementById('tpw1')?.value||'',b=document.getElementById('tpw2')?.value||'';
+ if(a.length<4)return toast('Use at least 4 characters');if(a!==b)return toast('The two passwords do not match');
+ const AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',rnd=crypto.getRandomValues(new Uint8Array(8)),rec=[...rnd].map(x=>AL[x%AL.length]).join('');
+ try{localStorage.setItem(TPW,JSON.stringify({h:await hash(a),r:await hash('rec:'+rec)}))}catch(e){return toast('Could not save')}window.__tpwOk=1;
+ modal(`<h2>PASSWORD SAVED</h2><p class="muted" style="margin:0 0 8px">Write down this recovery code. It is the only way to remove the password if you forget it.</p><div class="cl-big">${rec.slice(0,4)}-${rec.slice(4)}</div>
+ <div class="rbtns"><button class="btn" data-act="tpwBack">I WROTE IT DOWN</button></div>`)};
+const _gt=ACT.guTeach;ACT.guTeach=function(){if(needPw())return pwAsk(()=>_gt());return _gt.apply(this,arguments)};
+const _ct=ACT.clsTeach;if(_ct)ACT.clsTeach=function(){if(needPw())return pwAsk(()=>_ct());return _ct.apply(this,arguments)};
+const _cd=ACT.clsDash;ACT.clsDash=function(d){if(needPw()&&!(d&&d.quiet))return pwAsk(()=>ACT.clsDash(d));const r=_cd.apply(this,arguments);
+return r};
+document.addEventListener('keydown',e=>{const id=e.target&&e.target.id;if(e.key!=='Enter')return;const m={tpwin:'tpwCheck',tpwrec:'tpwRecover',tpw2:'tpwSave'}[id];if(m){e.preventDefault();e.stopPropagation();ACT[m]()}},true);
 /* ---- Settings: kid things only, unless opened as "Devices and reset" from the hub ---- */
 const _set=ACT.settings;ACT.settings=function(){const r=_set.apply(this,arguments);try{const box=document.getElementById('mbox');if(!box)return r;
  const mode=window.__guMode;
@@ -50,7 +84,11 @@ const _set=ACT.settings;ACT.settings=function(){const r=_set.apply(this,argument
   if(done&&!box.querySelector('.gurow'))done.insertAdjacentHTML('beforebegin','<section class="setsec gurow"><div class="setrow"><span>Teachers&#39; Lounge<small class="muted" style="display:block">Progress report, parent settings, teacher dashboard, players, family code</small></span><button class="btn sm volt" data-act="grownups">OPEN</button></div></section>')}
  }catch(e){console.warn(e)}return r};
 /* closing anything leaves "devices" mode */
-const _md=modal;modal=function(){const mb=document.getElementById('mbox');if(mb)mb.classList.remove('guwide');return _md.apply(this,arguments)};
+const _md=modal;modal=function(){const mb=document.getElementById('mbox');if(mb)mb.classList.remove('guwide');const r=_md.apply(this,arguments);
+ try{const box=document.getElementById('mbox'),dash=box.querySelector('.dashv'),ready=box.querySelector('.cl-big')&&/is ready/.test(box.querySelector('h2')?.textContent||'');
+  if((dash||ready)&&!box.querySelector('.tpwrow')){const on=!!tpw(),rb=[...box.querySelectorAll('.rbtns')].pop();
+   if(rb)rb.insertAdjacentHTML('beforebegin',`<p class="muted tpwrow" style="text-align:center;margin:12px 0 0">${on?'Teacher password is on.':ready?'Students use this device too?':'Shared device?'} <button class="linkbtn" data-act="tpwSet">${on?'Change teacher password':'Set a teacher password'}</button></p>`)}}catch(e){}
+ return r};
 const _cm=closeModal;closeModal=function(){window.__guMode='';return _cm.apply(this,arguments)};
 
 /* ---- Players: deleting only from the Grown-ups hub ---- */
@@ -77,6 +115,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .guitem{font:inherit;display:flex;flex-direction:column;gap:4px;padding:14px 16px;background:#1b1626;border:3px solid #3a2f4e;border-left-width:10px;color:#fff6e0;cursor:pointer;text-align:left}
 .guitem:hover{background:#2a2238}.guitem b{font-size:22px}.guitem small{font-size:16px;color:#c8bce0}
 .guitem.c1{border-left-color:#7fe8d0}.guitem.c2{border-left-color:#f0c860}.guitem.c3{border-left-color:#7fc8f0}.guitem.c4{border-left-color:#b8a0f0}.guitem.c5{border-left-color:#f07a6e}
+#mbox .cl-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+#mbox .btn .muted{color:#4a3a1a!important;opacity:1!important}
 #mbox.guwide{width:min(900px,94vw)!important;max-width:none!important}
 .gusupport{margin:12px 0 0;font-size:17px;color:#c8bce0}.gusupport a{color:#f07a6e}
 .gugrid .guitem:last-child:nth-child(odd){grid-column:1/-1}
