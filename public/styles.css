@@ -1074,7 +1074,7 @@ svg.zk,svg.zk image{pointer-events:none}
 .fb-card small{color:#c8d4ff;font-size:16px;text-transform:uppercase}
 @keyframes fbcard{0%{transform:scale(.3);opacity:0}15%{transform:scale(1.1);opacity:1}25%,80%{transform:scale(1);opacity:1}100%{opacity:0}}
 /* grown-up switches */
-body.no-arcade [data-to=arcade],body.no-visitor .visrow,body.no-roam #roam,body.no-trophies .trophy,body.no-challenge [data-act=copyRun],body.no-story .shards{display:none!important}
+body.no-arcade [data-to=arcade],body.no-closet [data-to=shop],body.no-roam .roamtog,body.no-visitor .visrow,body.no-roam #roam,body.no-trophies .trophy,body.no-challenge [data-act=copyRun],body.no-story .shards{display:none!important}
 body.no-streak .daily .frz{display:none}
 body.no-rarity .cr[class*=rar]{filter:none!important;animation:none!important}body.no-rarity .rtag,body.no-rarity .rdot,body.no-rarity .rarban{display:none!important}body.no-rarity .card[class*=rar],body.no-rarity .sprtile[class*=rar]{box-shadow:none!important;animation:none!important}
 .parrow{border-top:2px dashed var(--line);padding-top:10px}
@@ -1304,3 +1304,7 @@ body.lines2 .strip{position:relative}body.lines2 .strip::before{content:"";posit
 body:not(.kkready) #s-home{visibility:hidden}
 
 .hud .ht .partno{font-style:normal;color:#f0c860;font-weight:700;font-size:1.25em}
+
+/* Focus mode: no decorative motion */
+body.no-fx .zk,body.no-fx .hero .zk,body.no-fx .hero-big *,body.no-fx .card.holo::after,body.no-fx .sprtile.holo::after,body.no-fx .fthumb.holo::after,body.no-fx .sky,body.no-fx .sky *{animation:none!important}
+body.no-fx .speech,body.no-fx .bubble-say{display:none!important}

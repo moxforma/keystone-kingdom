@@ -22,13 +22,17 @@ function stats(){const i=lessonIdx(),h=(S.hist||[]).slice(-8),avg=f=>h.length?Ma
  return{lesson:`Lesson ${LNUM(i)}: ${lessonTitle(i)}`,pos:LNUM(i),world:worldOf(i),stars:Object.values(S.best||{}).reduce((a,b)=>a+b,0),wpm:avg(x=>x.w),acc:avg(x=>x.a),mins:Math.round(((S.time||0)-S.wk.base)/60),arc,prog,
   asg:S.asgr||{},cur:A?{i:A.i,at:A.at,n:(A.st||[]).length}:null}}
 let lastRep=0;
-function report(force){if(!S.cls||(!force&&Date.now()-lastRep<15000))return;lastRep=Date.now();post('/api/class',{a:'report',code:S.cls.code,pid:pid(),name:myName(),stats:stats()}).then(info=>{CLS_INFO=info;homeBanner()}).catch(()=>{})}
+function report(force){if(!S.cls||(!force&&Date.now()-lastRep<15000))return;lastRep=Date.now();post('/api/class',{a:'report',code:S.cls.code,pid:pid(),name:myName(),stats:stats()}).then(info=>{CLS_INFO=info;setLock(info);homeBanner()}).catch(()=>{})}
 const _res=results;results=function(){const r=_res.apply(this,arguments);setTimeout(report,1500);return r};
 const _md=modal;modal=function(){const r=_md.apply(this,arguments);try{if(screen==='game'&&$('#mbox .rstats'))setTimeout(report,1500)}catch(e){}return r};
 
+/* class-wide grown-up switches from the teacher */
+try{window.CLS_LOCK=S.cls&&S.cls.lock||null;applyPar&&applyPar()}catch(e){}
+const _ldL=load;load=function(){const r=_ldL.apply(this,arguments);try{window.CLS_LOCK=S.cls&&S.cls.lock||null;applyPar&&applyPar()}catch(e){}return r};
+function setLock(i){const L=i&&i.lock||null,was=JSON.stringify(window.CLS_LOCK||null);window.CLS_LOCK=S.cls?L:null;if(S.cls&&JSON.stringify(S.cls.lock||null)!==JSON.stringify(L)){S.cls.lock=L;save()}if(JSON.stringify(window.CLS_LOCK||null)!==was){try{applyPar&&applyPar();if(screen==='home')renderHome()}catch(e){}}}
 /* ---------- home: class banner (teacher's pick + open class race) ---------- */
 let CLS_INFO=null,lastInfo=0;
-function fetchInfo(){if(!S.cls||Date.now()-lastInfo<15000)return;lastInfo=Date.now();post('/api/class',{a:'info',code:S.cls.code}).then(i=>{CLS_INFO=i;S.cls.name=i.name;homeBanner()}).catch(e=>{if(/not found/i.test(e.message)){S.cls=null;save()}})}
+function fetchInfo(){if(!S.cls||Date.now()-lastInfo<15000)return;lastInfo=Date.now();post('/api/class',{a:'info',code:S.cls.code}).then(i=>{CLS_INFO=i;setLock(i);S.cls.name=i.name;homeBanner()}).catch(e=>{if(/not found/i.test(e.message)){S.cls=null;save()}})}
 function homeBanner(){const home=$('#s-home');if(!home||home.hidden)return;home.querySelector('.clsban')?.remove();if(!S.cls||!CLS_INFO)return;const I=CLS_INFO;
  const pick=I.assign&&LESSONS[I.assign.i]?`<div class="cb-row"><span>Teacher's pick: <b>Lesson ${LNUM(I.assign.i)}: ${esc(lessonTitle(I.assign.i))}</b></span>${(()=>{const R=S.asgr&&S.asgr[I.assign.i];return R&&R.at===I.assign.at?'<span class="cb-done">Done ✓</span>':''})()}<button class="btn sm volt" data-act="clsPick" data-i="${I.assign.i}">Play</button></div>`:'';
  const race=I.race?`<div class="cb-row"><span>A class race is open!</span><button class="btn sm" data-act="raceJoinCode" data-r="${esc(I.race.room)}">Join race</button></div>`:'';
@@ -115,8 +119,8 @@ ACT.clsHub=()=>{const c=S.cls;
  <div class="rbtns"><button class="btn alt" data-act="close">Close</button></div>`)};
 document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t&&t.dataset&&t.dataset.enter){e.preventDefault();e.stopPropagation();ACT[t.dataset.enter]&&ACT[t.dataset.enter]({})}},true);
 const val=id=>(document.getElementById(id)?.value||'').trim();
-ACT.clsJoin=()=>{const code=val('clsCode');if(!code)return toast('Type the class code');post('/api/class',{a:'join',code,pid:pid(),name:myName()}).then(i=>{S.cls={code:code.toUpperCase(),name:i.name};CLS_INFO=i;save();toast('You joined '+i.name+'!');report(true);ACT.clsHub()}).catch(e=>toast(e.message))};
-ACT.clsLeave=()=>{const c=S.cls;if(!c)return;post('/api/class',{a:'leave',code:c.code,pid:pid()}).catch(()=>{});S.cls=null;CLS_INFO=null;save();ACT.clsHub()};
+ACT.clsJoin=()=>{const code=val('clsCode');if(!code)return toast('Type the class code');post('/api/class',{a:'join',code,pid:pid(),name:myName()}).then(i=>{S.cls={code:code.toUpperCase(),name:i.name};CLS_INFO=i;setLock(i);save();toast('You joined '+i.name+'!');report(true);ACT.clsHub()}).catch(e=>toast(e.message))};
+ACT.clsLeave=()=>{const c=S.cls;if(!c)return;post('/api/class',{a:'leave',code:c.code,pid:pid()}).catch(()=>{});S.cls=null;CLS_INFO=null;setLock(null);save();ACT.clsHub()};
 let BTAB='all',BROWS=null;
 ACT.clsBoard=d=>{if(d&&d.g){BTAB=d.g;return drawBoard()}if(!S.cls)return;post('/api/class',{a:'board',code:S.cls.code}).then(b=>{BROWS=b;drawBoard()}).catch(e=>toast(e.message))};
 function drawBoard(){const b=BROWS;if(!b)return;const rows=(BTAB==='all'?b.rows:b.rows.filter(x=>x.g===BTAB)).slice(0,15),medal=['#f0c860','#c8d0dc','#d08a50'];
@@ -157,6 +161,7 @@ function drawDash(){const D=DASH,ms=D.members.slice().sort((a,b)=>(b.stats?.pos|
  modal(`<div class="dashv"><h2>${esc(D.name)} <span class="muted" style="font-size:18px">code ${D.code}</span></h2>
  ${ms.length?`<p class="muted cl-tip">Tap a name to see all their lessons. Updates every 10 seconds.</p><div class="cl-scroll"><table class="hs-tab"><tr><th>Name</th>${A?`<th>Lesson ${LNUM(A.i)}</th>`:''}<th>Adventure at</th><th>Stars</th><th>WPM</th><th>Acc.</th><th>Mins this week</th><th>Seen</th><th></th></tr>${ms.map(m=>{const s=m.stats||{},st=asgState(m,A);return `<tr><td><button class="linkbtn cl-kid" data-act="clsKid" data-p="${m.pid}">${esc(m.name)}</button></td>${A?`<td><span class="asg-${st.k}">${st.t}</span></td>`:''}<td>${esc(s.lesson||'–')}</td><td>${s.stars??'–'}</td><td>${s.wpm??'–'}</td><td>${s.acc!=null?s.acc+'%':'–'}</td><td>${s.mins??0}</td><td>${ago(s.seen||m.joined)}</td><td><button class="cl-x" data-act="clsRemove" data-p="${m.pid}" title="Remove ${esc(m.name)}">✕</button></td></tr>`}).join('')}</table></div>`:`<p class="muted">Nobody has joined yet. Share the code <b>${D.code}</b>.</p>`}
  <div class="cl-sec"><h3>Assign a lesson</h3><div class="cl-field"><select id="asg" class="cl-in wide">${opts}</select><button class="btn sm volt" data-act="clsAssign">Assign</button>${A?'<button class="btn sm alt" data-act="clsAssign" data-clear="1">Clear</button>':''}</div>${A?`<p class="muted" style="margin:4px 0 0">Assigned now: Lesson ${LNUM(A.i)}: ${esc(A.title)} · ${ms.filter(m=>asgState(m,A).k==='done').length} of ${ms.length} done</p>`:''}</div>
+ <div class="cl-sec"><h3>Class controls</h3><p class="muted" style="margin:0 0 6px;font-size:15px">Turn extras off for everyone in this class. Focus mode keeps it to typing lessons only.</p><div class="cl-btns" style="justify-content:flex-start;margin-bottom:6px"><button class="btn sm" data-act="clsLockAll" data-v="0">Focus mode: all off</button><button class="btn sm alt" data-act="clsLockAll" data-v="1">All on</button></div><div class="lockgrid">${(window.PAR_LIST||[]).map(([k,t])=>{const on=!(D.lock&&D.lock[k]===0);return `<button class="lockbtn ${on?'on':'off'}" data-act="clsLock" data-k="${k}">${esc(t)}<b>${on?'ON':'OFF'}</b></button>`}).join('')}</div></div>
  <div class="cl-sec"><h3>Class race</h3><div class="seg cl-lvl">${lvlsFor(true).map(([v,t])=>`<button class="${RLVL===v?'on':''}" data-act="clsLvl" data-v="${v}">${t}</button>`).join('')}</div><div class="cl-btns cl-racebtn"><button class="btn" data-act="clsRace">OPEN A CLASS RACE</button></div></div>
  <div class="rbtns"><button class="btn sm" data-act="clsRefresh">↻ Refresh</button><button class="btn sm alt" data-act="clsTeach">Back</button></div></div>`)}
 /* one student: every assignment + every lesson */
@@ -173,6 +178,9 @@ function drawKid(p){const D=DASH,m=D.members.find(x=>x.pid===p);if(!m){DVIEW=nul
  <div class="cl-sec"><h3>All lessons <span class="muted" style="font-size:15px">${done} complete · ${part} started · ${O.length-done-part} not started</span></h3>
  <div class="kleg"><span class="kl kl-done">✓</span> complete <span class="kl kl-part">½</span> started <span class="kl kl-none">·</span> not started</div>${s.prog?grid:'<p class="muted">Their lesson list shows up after they play once with the new version.</p>'}</div>
  <div class="rbtns"><button class="btn sm" data-act="clsRefresh">↻ Refresh</button><button class="btn sm alt" data-act="clsKidBack">Back to class</button></div></div>`)}
+ACT.clsLock=d=>{const D=DASH,L=Object.assign({},D.lock||{});L[d.k]=L[d.k]===0?1:0;sendLock(L)};
+ACT.clsLockAll=d=>{const L={};(window.PAR_LIST||[]).forEach(([k])=>L[k]=+d.v);sendLock(L)};
+function sendLock(L){const D=DASH;post('/api/class',{a:'lock',code:D.code,tk:D.tk,lock:L}).then(r=>{Object.assign(DASH,r);toast('Saved for the class');redraw()}).catch(e=>toast(e.message))}
 ACT.clsLvl=d=>{RLVL=d.v;drawDash()};
 ACT.clsAssign=d=>{const D=DASH,i=d&&d.clear?null:+val('asg');post('/api/class',{a:'assign',code:D.code,tk:D.tk,i,title:i==null?'':lessonTitle(i)}).then(r=>{Object.assign(DASH,r);DASH._justAssigned=1;toast(i==null?'Cleared':'Assigned!');ACT.clsDash({c:D.code,quiet:1})}).catch(e=>toast(e.message))};
 ACT.clsRemove=d=>{const D=DASH;DVIEW=null;post('/api/class',{a:'remove',code:D.code,tk:D.tk,pid:d.p}).then(()=>ACT.clsDash({c:D.code})).catch(e=>toast(e.message))};
@@ -271,6 +279,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .kl{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 4px;font-size:13px;border:2px solid #2a1d3e;box-sizing:border-box}
 .kl-done{background:#58a848;color:#fff}.kl-part{background:#f0c860;color:#2a1d3e}.kl-none{background:#3a2f4e;color:#9a8fb0}.kleg{display:flex;gap:8px;align-items:center;font-size:13px;margin:4px 0 6px;flex-wrap:wrap}
 .asgdone{text-align:center}.asgdone .big{font-size:20px;margin:4px 0}.rstats2{display:flex;gap:12px;justify-content:center;margin:10px 0}.rstats2 div{background:#1b1626;padding:8px 16px;display:flex;flex-direction:column}.rstats2 b{font-size:26px;color:#f0c860}
+.lockgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}.lockbtn{font:inherit;font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;background:#1b1626;color:#fff6e0;border:3px solid #3a2f4e;cursor:pointer;text-align:left}.lockbtn b{font-size:13px;padding:1px 6px}.lockbtn.on b{background:#6edc8c;color:#1b1626}.lockbtn.off b{background:#f07a6e;color:#1b1626}.lockbtn.off{opacity:.8}
 select.cl-in option{font:inherit;font-size:17px;padding:4px 8px;background:#1b1626;color:#fff6e0}
 @supports (appearance:base-select){select.cl-in,select.cl-in::picker(select){appearance:base-select}select.cl-in::picker(select){background:#1b1626;border:3px solid #3a2f4e;max-height:60vh}select.cl-in option:checked,select.cl-in option:hover{background:#3a2f4e}}
 .cl-note{font-size:15px;margin:10px 0 0}.cl-big{font-size:46px;letter-spacing:.12em;color:#f0c860;margin:8px 0;text-align:center}

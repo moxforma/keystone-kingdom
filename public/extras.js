@@ -149,7 +149,7 @@ function roamPlats(){const sel=[['#s-home .hero-info',0,0],['#s-home .tcard',0,0
  {const hi=document.querySelector('#s-home .hero-info'),tc=document.querySelector('#s-home .tcard');if(hi&&tc){const A=hi.getBoundingClientRect(),B=tc.getBoundingClientRect();const l=Math.min(A.right,B.right),r=Math.max(A.left,B.left);
   if(r>l)ROAM.plats.push({l:l+scrollX-2,r:r+scrollX+2,t:Math.min(A.top,B.top)+scrollY,b:Math.max(A.bottom,B.bottom)+scrollY,gap:1})}}
  const boxes=[...document.querySelectorAll('#s-home .tcard,#s-home .hero-info')].map(e=>e.getBoundingClientRect().bottom+scrollY);ROAM.floor=boxes.length?Math.max(...boxes):Math.max(document.documentElement.scrollHeight,innerHeight)-4;ROAM.W=document.documentElement.clientWidth}
-function roamStart(){roamStop();roamToggleBtn();if(typeof screen==='undefined'||screen!=='home'||!S.name||S.set.hideRoam||window.KK_MOBILE||document.body.classList.contains('mobile')||innerWidth<=760)return;const list=roamPick();if(!list.length)return;
+function roamStart(){roamStop();roamToggleBtn();if((window.parOn&&!parOn('roam'))||typeof screen==='undefined'||screen!=='home'||!S.name||S.set.hideRoam||window.KK_MOBILE||document.body.classList.contains('mobile')||innerWidth<=760)return;const list=roamPick();if(!list.length)return;
  let layer=document.getElementById('roam');if(!layer){layer=document.createElement('div');layer.id='roam';document.body.appendChild(layer)}layer.innerHTML='';roamPlats();
  ROAM.els=list.map((k,n)=>{const el=document.createElement('div');el.className='roamer';el.innerHTML=creatureSVG(k.i,k.f,'px',k.tier);layer.appendChild(el);
   const sz=[112,132,156][k.f];el.style.width=sz+'px';el.style.height=sz+'px';

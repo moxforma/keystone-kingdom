@@ -1,14 +1,18 @@
 /* Collection hooks (world rewards, trophy shelf, friendship) + Grown-up feature switches */
 (function(){
 /* ---------- grown-up switches ---------- */
-const PAR=[['arcade','Arcade games'],['story','Story cutscenes'],['visitor','Daily visitor'],['streak','Streak rewards'],['roam','Keylori walking on the menu'],['rarity','Rare Keylori glow'],['trophies','Trophy shelf'],['friends','Friendship levels'],['challenge','Share and challenge links']];
-const par=k=>!S.par||S.par[k]!==0;window.parOn=par;
+const PAR=[['arcade','Arcade games'],['closet','Hero Closet and outfits'],['fx','Catch and evolve animations'],['story','Story cutscenes'],['visitor','Daily visitor'],['streak','Streak rewards'],['roam','Keylori walking on the menu'],['rarity','Rare Keylori glow'],['trophies','Trophy shelf'],['friends','Friendship levels'],['challenge','Share and challenge links']];
+/* a feature is on unless this player's grown-up OR their class teacher turned it off */
+const par=k=>!(S.par&&S.par[k]===0)&&!(window.CLS_LOCK&&window.CLS_LOCK[k]===0);window.parOn=par;window.PAR_LIST=PAR;
 /* worlds moved: quietly credit shards already earned */
 function creditShards(){try{if(!S.story||typeof shardWon!=='function')return;const st=storyState();for(let w=1;w<=10;w++)if(shardWon(w)&&!st.shard[w]){st.shard[w]=1;st.intro[w]=1;st.taunt[w]=1}}catch(e){}}
 function applyPar(){creditShards();document.body.classList.toggle('little',!!(S&&S.little));const b=document.body;PAR.forEach(([k])=>b.classList.toggle('no-'+k,!par(k)))}
 window.applyPar=applyPar;
 const _ld=load;load=function(){const r=_ld.apply(this,arguments);applyPar();return r};applyPar();
-const _show=show;show=function(id){if(id==='arcade'&&!par('arcade'))id='home';const r=_show.call(this,id);applyPar();return r};
+const _show=show;show=function(id){if((id==='arcade'&&!par('arcade'))||(id==='shop'&&!par('closet')))id='home';const r=_show.call(this,id);applyPar();return r};
+if(typeof catchAnim==='function'){const _ca=catchAnim;catchAnim=function(done){if(!par('fx')){done&&done();return}return _ca.apply(this,arguments)}}
+if(typeof evolveAnim==='function'){const _ea=evolveAnim;evolveAnim=function(i,from,to,done){if(!par('fx')){done&&done();return}return _ea.apply(this,arguments)}}
+if(typeof levelUpFX==='function'){const _lu=levelUpFX;levelUpFX=function(L,done){if(!par('fx')){done&&done();return}return _lu.apply(this,arguments)}}
 if(typeof cutscene==='function'){const _cut=cutscene;cutscene=function(w,lines,kind,done){if(!par('story')){done&&done();return}return _cut.apply(this,arguments)}}
 
 let GATE=null;
@@ -17,10 +21,13 @@ ACT.parGate=()=>{const a=6+Math.floor(Math.random()*4),b=3+Math.floor(Math.rando
  <div class="rbtns"><button class="btn" data-act="parCheck">OK</button><button class="btn alt" data-act="settings">BACK</button></div>`);setTimeout(()=>$('#pgate')?.focus(),50)};
 ACT.parCheck=()=>{const v=+($('#pgate')?.value||0);if(v!==GATE){sfx.bad&&sfx.bad();toast('Not quite. Ask a grown-up!');return ACT.settings()}parPanel()};
 function parPanel(){S.par=S.par||{};
+ const cls=window.CLS_LOCK&&Object.values(window.CLS_LOCK).some(v=>v===0);
  modal(`<h2>GROWN-UP SETTINGS</h2><p class="muted" style="margin:0">Turn features on or off for ${esc(S.name||'this player')}.</p>
+ <div class="setrow focusrow"><span>Focus mode<small class="muted" style="display:block;font-size:16px">Typing lessons only: turns every extra below off</small></span><div class="seg"><button data-act="parFocus" data-v="1">ALL OFF</button><button data-act="parFocus" data-v="0">ALL ON</button></div></div>${cls?'<p class="muted" style="margin:4px 0">Some features are turned off by your class teacher.</p>':''}
  ${PAR.map(([k,t])=>`<div class="setrow"><span>${t}</span><div class="seg"><button class="${par(k)?'on':''}" data-act="parSet" data-k="${k}" data-v="1">ON</button><button class="${par(k)?'':'on'}" data-act="parSet" data-k="${k}" data-v="0">OFF</button></div></div>`).join('')}
  <div class="rbtns"><button class="btn" data-act="parDone">DONE</button></div>`)}
 ACT.parLittle=d=>{setLittle(d.v==='1');save();applyPar();parPanel()};
+ACT.parFocus=d=>{S.par=S.par||{};PAR.forEach(([k])=>S.par[k]=d.v==='1'?0:1);save();applyPar();parPanel()};
 ACT.parSet=d=>{S.par=S.par||{};S.par[d.k]=+d.v;save();applyPar();parPanel()};
 ACT.parDone=()=>{closeModal();try{({home:renderHome,binder:renderBinder,map:renderMap}[screen]||(()=>{}))()}catch(e){}};
 const _set=ACT.settings;ACT.settings=function(){_set.apply(this,arguments);const box=$('#modal .mbox')||$('#modal');const done=box&&[...box.querySelectorAll('[data-act=close]')].pop();

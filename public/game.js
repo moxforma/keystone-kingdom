@@ -1078,6 +1078,8 @@ function evolved(i,f,tier){
  if(feats.includes('crown'))draw(OVL.crown,ox+cx-6,oy+AN.med2(cx-3,cx+3)-3,gp,false);
  if(f===2||tier){const sp=tier==='diamond'?['#ffffff','#bfe2f6']:['#fff4c8','#f6d050'];[[2,3],[Wd-4,6],[1,H-12],[Wd-2,H-8],[Wd-10,1]].forEach(([x,y])=>{put(x,y,sp[0]);put(x-1,y,sp[1]);put(x+1,y,sp[1]);put(x,y-1,sp[1]);put(x,y+1,sp[1])})}
  return c}
+/* store sprites already blown up with hard pixel edges, so they stay crisp even if the browser smooths a scaled image (zoom, 125% screens) */
+function upPx(c,n){const o=document.createElement('canvas');o.width=c.width*n;o.height=c.height*n;const g=o.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(c,0,0,o.width,o.height);return o}
 function creatureSVG(i,form,cls='',tier){const k=KKDATA.order[i],w=KKDATA.spr[k][0].length,Wd=w+16,H=w+8,s=[.6,.8,1][form],fit=/\bfit\b/.test(cls);
  const unit=fit?Math.min(5,200/Wd/1)*(w/24>1?24/w*1.05:1):5,iw=Wd*unit*s,ih=H*unit*s,u=kku('e'+i+'-'+form+(tier||''),()=>evolved(i,form,tier));
  const y=fit?(200-ih)/2+ih*.06:200-ih;
@@ -1620,7 +1622,7 @@ function evolvedV(i,f,tier,v={}){const D=KKDATA,k=D.order[i],rows=D.spr[k],w=row
  if(f===2||tier||v.cw){const sp=tier==='diamond'?['#ffffff','#bfe2f6']:v.cw&&!tier?['#ffffff','#c8e8f0']:['#fff4c8','#f6d050'];[[2,3],[Wd-4,6],[1,H-12],[Wd-2,H-8],[Wd-10,1]].forEach(([x,y])=>{put(x,y,sp[0]);put(x-1,y,sp[1]);put(x+1,y,sp[1]);put(x,y-1,sp[1]);put(x,y+1,sp[1])})}
  return c}
 function creatureSVG(i,form,cls='',tier){const k=KKDATA.order[i],w=KKDATA.spr[k][0].length,Wd=w+16,H=w+8,px=/\bpx\b/.test(cls),s=px||/\bbig\b/.test(cls)?1:[.6,.8,1][form],fit=/\bfit\b/.test(cls);
- const v=(S.kv&&S.kv[i])||{},unit=fit?Math.min(5,200/Wd)*(w/24>1&&!/\bbig\b/.test(cls)?24/w*1.05:1):px?5*Math.min(1,30/w):5,iw=Wd*unit*s,ih=H*unit*s,u=kku('e10'+i+'-'+form+(tier||'')+(v.cw||'')+(v.prop||''),()=>evolvedV(i,form,tier,v));
+ const v=(S.kv&&S.kv[i])||{},unit=fit?Math.min(5,200/Wd)*(w/24>1&&!/\bbig\b/.test(cls)?24/w*1.05:1):px?5*Math.min(1,30/w):5,iw=Wd*unit*s,ih=H*unit*s,u=kku('e11'+i+'-'+form+(tier||'')+(v.cw||'')+(v.prop||''),()=>upPx(evolvedV(i,form,tier,v),6));
  const y=fit?(200-ih)/2+ih*.06:200-ih;
  return `<svg class="cr ${cls} ${tier||''}" viewBox="0 0 200 200" aria-hidden="true" style="overflow:visible"><image href="${u}" x="${(200-iw)/2}" y="${y}" width="${iw}" height="${ih}"/></svg>`}
 /* --- rare finds --- */

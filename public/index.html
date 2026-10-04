@@ -1,58 +1,271 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A pixel-art typing adventure in Keyloria. Befriend Keylori, beat the Scramblers, and learn to type!"><meta property="og:type" content="website"><meta property="og:url" content="https://keystone-kingdom.netlify.app/"><meta property="og:title" content="Keyloria Kingdom"><meta property="og:description" content="A pixel-art typing adventure in Keyloria. Befriend Keylori, beat the Scramblers, and learn to type!"><meta property="og:image" content="https://keystone-kingdom.netlify.app/og.png?v=3"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://keystone-kingdom.netlify.app/og.png?v=3"><link rel="apple-touch-icon" href="/icon.png">
-<title>Keyloria Kingdom</title>
-<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABWElEQVR4AeyVsQ3CQAxFDWMwCkOg1IzCGBRUVBRMwAyICiEmQIxAQRvkwiksyzlDGuyPZJ3uzk7i/98dcyr+gwDFASAQAAKKK4AjUBwAXII4AjgCxRXAESgOAP4Fyh0BTTwE0IpUm4MAcXy9pF6H7I2Nuo7nVg2vt0RrrZVnrVnvlDwQIEpUHUFAVeelb5eA963rdVgXyn7XkY7WPF3H89ZaK09/L8+lWWt0BbAKsq1BgGyORvsBAVHF+JLSYT1D5/D8tVlQS3CujtZ3WHneGgjw1MmwN9YDCBhTKPu+S8D9cqUp47E6UUtM+U5+lmeiK4BXmGUPAmRx8ts+QICn3PbwpAzh9QgCPHUq7IGACi57PQ4EHM80qxQiyiCALFQbIUA2x6P9gICoYtnyQUA2R6P9gICoYtnyQUA2R6P9gICoYtnyQUA2R6P9gICoYtnyQcC/O/rr938AAAD//5INWYcAAAAGSURBVAMAH2nqkK2AVCoAAAAASUVORK5CYII=">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Jersey+15&family=Pixelify+Sans:wght@500;700&family=Lilita+One&family=Lexend:wght@400;600;700&family=Atkinson+Hyperlegible+Mono:wght@500;700&display=swap">
-<link rel="preload" href="fonts/jersey10.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="fonts/pressstart2p.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="styles.css">
+<script>/* old game links (race invites, challenges) still open the game */if(/[?&](race|c|ghost|mobile)=/.test(location.search))location.replace('/play/'+location.search+location.hash)</script>
+<title>Keyloria Kingdom · Typing adventure for kids and classrooms</title>
+<meta name="description" content="A free pixel-art typing adventure for kids. Learn every key, befriend Keylori, race friends live and run your typing class with a live dashboard.">
+<meta property="og:type" content="website"><meta property="og:url" content="https://keyloria.online/"><meta property="og:title" content="Keyloria Kingdom · Typing adventure for kids and classrooms"><meta property="og:description" content="A free pixel-art typing adventure for kids and classrooms."><meta property="og:image" content="https://keyloria.online/og.png?v=3"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/icon.png"><link rel="apple-touch-icon" href="/icon.png">
+<link rel="preload" href="/fonts/jersey10.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="/fonts/pressstart2p.woff" as="font" type="font/woff" crossorigin>
+<style>
+@font-face{font-family:'Jersey 10';src:url(/fonts/jersey10.woff) format('woff');font-display:swap}
+@font-face{font-family:'Press Start 2P';src:url(/fonts/pressstart2p.woff) format('woff');font-display:swap}
+:root{--bg:#171226;--panel:#2a2238;--line:#3a2f4e;--ink:#fff6e0;--mute:#c8bce0;--gold:#f0c860;--gold2:#c8981e;--teal:#7fe8d0;--teal2:#3fa894;--green:#6edc8c;--green2:#3e9a5a;--red:#f07a6e;--red2:#b8483e;--lav:#b8a0f0;--lav2:#7a62b8;--blue:#7fc8f0;--blue2:#3e88b8;--orange:#f0a060;--orange2:#b86a30;
+ --px:'Jersey 10',system-ui,sans-serif;--title:'Press Start 2P','Jersey 10',monospace;--W:1180px;--gut:24px;--gap:20px}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 24px/1.35 var(--px);letter-spacing:.02em}
+img{image-rendering:pixelated;max-width:100%}a{color:var(--teal)}
+.wrap{max-width:var(--W);margin:0 auto;padding:0 var(--gut)}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(2px 2px at 20px 30px,#fff6e0aa 50%,transparent 51%),radial-gradient(2px 2px at 140px 90px,#b8a8d8aa 50%,transparent 51%),radial-gradient(2px 2px at 260px 160px,#fff6e077 50%,transparent 51%);background-size:300px 220px;opacity:.5}
+main,header,footer{position:relative;z-index:1}
 
-<div class="sky" aria-hidden="true"></div>
-<main class="app">
-  <section id="s-home" class="screen"></section>
-  <section id="s-map" class="screen" hidden></section>
-  <section id="s-play" class="screen" hidden>
-    <header class="hud" id="hud"></header>
-    <div class="arena" id="arena"></div>
-    <div class="strip-wrap"><div class="strip" id="strip"><div class="strip-in" id="stripIn"></div></div><div class="fhint" id="fhint"></div></div>
-    <div class="kbwrap" id="kbwrap"><div id="kb" class="kb"></div><div id="hands" class="hands"></div></div>
-  </section>
-  <section id="s-game" class="screen" hidden><div id="gnotice" hidden></div><header class="hud" id="ghud"></header><div class="garena" id="garena"></div><div class="strip-wrap" id="gsw"><div class="strip" id="gstrip"><div class="strip-in" id="gstripIn"></div></div></div><div class="fhint" id="ghint"></div></section>
-  <section id="s-arcade" class="screen" hidden></section>
-  <section id="s-parents" class="screen" hidden></section>
-  <section id="s-binder" class="screen" hidden></section>
-  <section id="s-shop" class="screen" hidden></section>
+/* ---------- pixel buttons ---------- */
+.pbtn{--c:var(--gold);--c2:var(--gold2);--t:#2a1d3e;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:12px;font:400 26px/1 var(--px);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--t);background:var(--c);border:0;padding:14px 26px 16px;cursor:pointer;
+ clip-path:polygon(0 6px,6px 6px,6px 0,calc(100% - 6px) 0,calc(100% - 6px) 6px,100% 6px,100% calc(100% - 6px),calc(100% - 6px) calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,6px calc(100% - 6px),0 calc(100% - 6px));
+ box-shadow:inset 0 -6px 0 var(--c2),inset 0 4px 0 #ffffff55;transition:transform .08s;white-space:nowrap}
+.pbtn:hover{transform:translateY(-3px)}.pbtn:active{transform:translateY(2px)}
+.pbtn img{height:30px;width:auto}
+.c-gold{--c:var(--gold);--c2:var(--gold2)}.c-teal{--c:var(--teal);--c2:var(--teal2)}.c-lav{--c:var(--lav);--c2:var(--lav2)}.c-blue{--c:var(--blue);--c2:var(--blue2)}.c-green{--c:var(--green);--c2:var(--green2)}.c-orange{--c:var(--orange);--c2:var(--orange2)}.c-red{--c:var(--red);--c2:var(--red2);--t:#fff6e0}
+.prism{position:relative;display:inline-flex;padding:5px;isolation:isolate}
+.prism::before{content:"";position:absolute;inset:-6px;z-index:-1;background:linear-gradient(90deg,#ff7a8a,#f0c860,#6edc8c,#7fe8d0,#7fc8f0,#b8a0f0,#ff7a8a);background-size:300% 100%;filter:blur(10px);opacity:.95;animation:prism 3s linear infinite}
+.prism::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#ff7a8a,#f0c860,#6edc8c,#7fe8d0,#7fc8f0,#b8a0f0,#ff7a8a);background-size:300% 100%;animation:prism 3s linear infinite;clip-path:polygon(0 8px,8px 8px,8px 0,calc(100% - 8px) 0,calc(100% - 8px) 8px,100% 8px,100% calc(100% - 8px),calc(100% - 8px) calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,8px calc(100% - 8px),0 calc(100% - 8px))}
+@keyframes prism{to{background-position:300% 0}}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:20;background:#171226ee;backdrop-filter:blur(4px);border-bottom:4px solid #241c36}
+nav{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 0;flex-wrap:wrap}
+nav .lg{display:block;height:48px;width:auto;opacity:0;max-width:0;transition:opacity .25s,max-width .25s;overflow:hidden}
+header.small nav .lg{opacity:1;max-width:200px}
+nav .lgl{display:flex}
+nav .pbtn{font-size:24px;padding:10px 16px 12px}
+nav .prism .pbtn{font-size:29px;padding:12px 22px 14px}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--gap)*2);align-items:center;padding:28px 0 56px}
+.biglogo{display:block;width:min(100%,520px);margin:0 0 22px}
+.hero h1{font:400 30px/1.45 var(--title);margin:0 0 18px;text-shadow:4px 4px 0 #2a1d3e}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero .lead{font-size:30px;color:var(--mute);margin:0 0 28px}
+.cta{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.tiny{font-size:20px;color:var(--mute);margin:18px 0 0}
+.scene{position:relative;aspect-ratio:16/8.5;background:linear-gradient(#5aa0d8 0 50%,#58a848 50% 100%);border:4px solid #2a1d3e;box-shadow:0 0 0 4px var(--line),0 20px 40px #0008;overflow:hidden}
+.scene .path{position:absolute;left:-5%;right:-5%;top:64%;height:18%;background:#c8a060;transform:skewY(-3deg)}
+.scene .cloud{position:absolute;width:90px;height:22px;background:#fff6e0;box-shadow:20px -12px 0 #fff6e0,44px 0 0 #fff6e0;opacity:.85;animation:drift 18s linear infinite}
+@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(700px)}}
+.scene .hs{position:absolute;left:6%;bottom:8%;width:23%;animation:bob 1.2s steps(2) infinite}
+.scene .vs{position:absolute;right:8%;bottom:12%;width:17%;animation:bob 1s steps(2) infinite}
+.scene .vs.hit{animation:hit .35s steps(2) 2}
+@keyframes bob{50%{transform:translateY(-6px)}}@keyframes hit{50%{transform:translateX(10px);filter:brightness(2.5)}}
+.scene .beam{position:absolute;left:28%;right:25%;bottom:30%;height:10px;background:linear-gradient(90deg,#fff6a0,#7fe8d0);box-shadow:0 0 12px #7fe8d0;transform-origin:left;transform:scaleX(0);opacity:0}
+.scene .beam.go{animation:beam .35s ease-out}@keyframes beam{0%{transform:scaleX(0);opacity:1}60%{transform:scaleX(1);opacity:1}100%{opacity:0}}
+.scene .bar{position:absolute;right:8%;bottom:46%;width:17%;height:12px;background:#2a1d3e;border:2px solid #2a1d3e}.scene .bar i{display:block;height:100%;background:var(--red);transition:width .3s}
+.scene .strip{position:absolute;left:4%;right:4%;top:6%;background:#0d1236;border:3px solid #2a1d3e;padding:4px 12px;font:400 34px var(--px);letter-spacing:.12em;white-space:nowrap;overflow:hidden;color:#6a6890}
+.scene .strip b{color:var(--green);font-weight:400}.scene .strip u{text-decoration:none;color:var(--gold);border-bottom:4px solid var(--gold)}
+.scene .say{position:absolute;left:5%;bottom:52%;background:#fff6e0;color:#2a1d3e;font-size:20px;padding:2px 10px;border:3px solid #2a1d3e;opacity:0;transition:opacity .2s}.scene .say.on{opacity:1}
+.kb{margin-top:14px;display:grid;gap:5px}
+.kb .row{display:flex;gap:5px;justify-content:center}
+.kb span{flex:1;max-width:46px;aspect-ratio:1;display:grid;place-items:center;background:#2a2238;border:3px solid #3a2f4e;font-size:22px;color:var(--mute)}
+.kb span.home{border-bottom-color:var(--gold)}.kb span.sp{max-width:none;flex:0 0 46%;aspect-ratio:auto;height:40px}
+.kb span.on{background:var(--gold);color:#2a1d3e;border-color:#2a1d3e;transform:translateY(3px)}
+
+/* ---------- sections ---------- */
+section{padding:64px 0;border-top:4px solid #241c36}
+.sec-h{text-align:center;margin-bottom:36px}
+.tagbox{display:inline-block;font:400 24px/1.4 var(--title);letter-spacing:.06em;color:#2a1d3e;background:var(--c,var(--gold));padding:12px 20px 14px;margin-bottom:20px;box-shadow:inset 0 -6px 0 var(--c2,var(--gold2));
+ clip-path:polygon(0 6px,6px 6px,6px 0,calc(100% - 6px) 0,calc(100% - 6px) 6px,100% 6px,100% calc(100% - 6px),calc(100% - 6px) calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,6px calc(100% - 6px),0 calc(100% - 6px))}
+.sec-h h2{font:400 24px/1.5 var(--title);margin:0 0 14px}
+.sec-h p{color:var(--mute);margin:0;font-size:28px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap)}
+.card{background:var(--panel);border:3px solid var(--line);box-shadow:0 8px 0 #120e1e;padding:18px;display:flex;flex-direction:column}
+.card .num{font:400 13px var(--title);color:var(--teal);margin-top:18px}
+.card h3{font:400 30px var(--px);margin:8px 0 6px;color:var(--gold);letter-spacing:.05em}
+.card p{margin:0;color:var(--mute);font-size:22px}
+.stage{position:relative;height:170px;background:#1b1626;border:3px solid #120e1e;overflow:hidden;display:grid;place-items:center}
+.cycle{position:relative;width:120px;height:110px}.cycle img{position:absolute;inset:0;width:100%;opacity:0;animation:cyc 8s steps(1) infinite}
+@keyframes cyc{0%{opacity:1}12.5%{opacity:0}100%{opacity:0}}
+.mini-strip{font:400 32px var(--px);letter-spacing:.14em;color:#6a6890}.mini-strip b{color:var(--green);font-weight:400}.mini-strip u{text-decoration:none;color:var(--gold);border-bottom:3px solid var(--gold)}
+.flipc{width:110px;height:140px;perspective:600px}.flipc .in{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:flip 4s ease-in-out infinite}
+.flipc .f,.flipc .b{position:absolute;inset:0;backface-visibility:hidden;border:4px solid #2a1d3e;display:grid;place-items:center}
+.flipc .f{background:repeating-linear-gradient(45deg,#3a2f4e 0 8px,#2a2238 8px 16px)}.flipc .f::after{content:'?';font:400 40px var(--title);color:var(--gold)}
+.flipc .b{background:#f0e0b8;transform:rotateY(180deg)}.flipc .b img{width:90%}
+@keyframes flip{0%,25%{transform:rotateY(0)}45%,85%{transform:rotateY(180deg)}100%{transform:rotateY(360deg)}}
+.evo{position:relative;width:150px;height:130px}.evo img{position:absolute;inset:0;margin:auto;width:100%;opacity:0;animation:evo 6s steps(1) infinite}
+.evo img:nth-child(2){animation-delay:2s}.evo img:nth-child(3){animation-delay:4s}
+.evo .fl{position:absolute;inset:0;background:#fff;opacity:0;animation:fl 2s infinite}
+@keyframes evo{0%{opacity:1}33.3%{opacity:0}}@keyframes fl{0%,88%{opacity:0}94%{opacity:.85}100%{opacity:0}}
+.arc{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap)}
+.arc figure{margin:0;background:var(--panel);border:3px solid var(--line);padding:10px;text-align:center}
+.arc .an{width:100%;aspect-ratio:84/50;background-size:200% 100%;background-repeat:no-repeat;image-rendering:pixelated;border:3px solid #2a1d3e;animation:af .9s steps(1) infinite}
+@keyframes af{0%{background-position:0 0}50%{background-position:100% 0}}
+.arc figcaption{margin-top:8px;font-size:24px}.arc figure.net{border-color:#58c870}
+/* multiplayer */
+.mp{display:grid;grid-template-columns:1fr 1.1fr;gap:calc(var(--gap)*2);align-items:center}
+.mp ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.mp li{background:var(--panel);border:3px solid var(--line);padding:12px 16px;font-size:24px;color:var(--mute)}.mp li b{color:var(--ink);font-weight:400}
+.track{position:relative;background:#c8a060;border:4px solid #2a1d3e;box-shadow:0 0 0 4px var(--line);padding:10px 0}
+.track .ln{position:relative;height:74px;border-bottom:3px dashed #a07840}.track .ln:last-child{border-bottom:0}
+.track .flag{position:absolute;right:28px;top:0;bottom:0;width:14px;background:repeating-linear-gradient(#fff 0 10px,#2a1d3e 10px 20px);z-index:1}
+.track .rr{position:absolute;left:2%;top:4px;width:70px;animation:run var(--d) linear infinite;z-index:2}
+.track .rr img{width:62px;animation:bob .3s steps(2) infinite}.track .rr small{position:absolute;left:0;right:0;bottom:-6px;text-align:center;font-size:16px;color:#fff6e0;text-shadow:2px 2px 0 #2a1d3e}
+@keyframes run{0%{left:2%}80%,100%{left:calc(100% - 100px)}}
+.track .cd{position:absolute;inset:0;display:grid;place-items:center;font:400 54px var(--title);color:var(--gold);text-shadow:4px 4px 0 #2a1d3e;pointer-events:none;z-index:3;animation:cdn 8s steps(1) infinite}
+/* classroom */
+.cls{display:grid;grid-template-columns:330px 1fr;gap:calc(var(--gap)*1.5);align-items:start}
+.steps{display:flex;flex-direction:column;gap:10px;position:sticky;top:100px}
+.steps button{all:unset;cursor:pointer;display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;background:var(--panel);border:3px solid var(--line);padding:12px 14px}
+.steps button b{font:400 14px var(--title);color:#2a1d3e;background:var(--mute);width:40px;height:40px;display:grid;place-items:center}
+.steps button span{font-size:26px;line-height:1.1}.steps button small{display:block;color:var(--mute);font-size:19px}
+.steps button.on{border-color:var(--gold);background:#3a2f4e}.steps button.on b{background:var(--gold)}
+.steps .prog{height:4px;background:#120e1e;margin-top:6px;grid-column:1/-1;display:none}.steps button.on .prog{display:block}.steps .prog i{display:block;height:100%;width:0;background:var(--gold)}
+.screen{background:#120e1e;border:4px solid #2a1d3e;box-shadow:0 0 0 4px var(--line),0 20px 40px #0008}
+.screen .bar{display:flex;gap:8px;align-items:center;padding:8px 12px;background:#241c36;font-size:19px;color:var(--mute)}.screen .bar i{width:12px;height:12px;background:#3a2f4e;display:inline-block}
+.screen video{display:block;width:100%;aspect-ratio:960/640;background:#1b1626}
+.cap{margin:16px 0 0;font-size:26px}.cap b{color:var(--gold);font-weight:400}
+.feats,.safe{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap);margin-top:36px}
+.safe{grid-template-columns:repeat(2,1fr);margin-top:0}
+.feat,.safe div{background:var(--panel);border:3px solid var(--line);padding:18px}
+.feat h4,.safe h4{margin:0 0 6px;font:400 28px var(--px);letter-spacing:.05em}.feat h4{color:var(--teal)}.safe h4{color:var(--green)}
+.feat p,.safe p{margin:0;color:var(--mute);font-size:22px}
+.nums{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--gap);text-align:center}
+.nums div{background:var(--panel);border:3px solid var(--line);padding:18px 8px}.nums b{display:block;font:400 26px var(--title);color:var(--gold);margin-bottom:10px}.nums span{color:var(--mute);font-size:22px}
+.end{text-align:center;padding:72px 0}.end>img{width:150px}.end h2{font:400 24px/1.5 var(--title);margin:16px 0 26px}
+footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-size:20px;text-align:center}
+@media (max-width:1000px){.hero,.mp,.cls{grid-template-columns:1fr}.grid4,.arc{grid-template-columns:1fr 1fr}.steps{position:static}.feats{grid-template-columns:1fr 1fr}.nums{grid-template-columns:repeat(3,1fr)}.hero h1{font-size:24px}.biglogo{margin:0 auto 22px}}
+@media (max-width:600px){:root{--gut:16px}.grid4,.arc,.feats,.safe{grid-template-columns:1fr}.nums{grid-template-columns:1fr 1fr}nav .pbtn{font-size:16px;padding:8px 10px 10px}.tagbox,.sec-h h2{font-size:16px}.kb span{font-size:15px;border-width:2px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body><div class="stars"></div>
+<header id="hdr"><div class="wrap"><nav>
+ <a class="lgl" href="/play/" aria-label="Play Keyloria Kingdom"><img class="lg" src="/site/img/logo.png" alt="Keyloria Kingdom"></a>
+ <a class="pbtn c-teal" href="#play">How to play</a><a class="pbtn c-lav" href="#arcade">Arcade</a><a class="pbtn c-green" href="#race">Multiplayer</a><a class="pbtn c-blue" href="#classroom">For classrooms</a><a class="pbtn c-orange" href="#safety">Safety</a>
+ <span class="prism"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span>
+</nav></div></header>
+<main>
+<div class="wrap hero">
+ <div><a href="/play/"><img class="biglogo" id="biglogo" src="/site/img/logo.png" alt="Keyloria Kingdom"></a>
+ <h1>Learn to type on a <em>pixel adventure</em></h1>
+ <p class="lead">Kids zap Scramblers, befriend Keylori and master every key, one short lesson at a time.</p>
+ <div class="cta"><span class="prism"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span><a class="pbtn c-teal" href="#classroom"><img src="/site/img/ico_book.png" alt="">For classrooms</a></div>
+ <p class="tiny">Free · Runs in the browser · No downloads · No ads</p></div>
+ <div><div class="scene"><div class="cloud" style="top:14%"></div><div class="cloud" style="top:30%;animation-delay:-9s"></div><div class="path"></div>
+  <div class="strip" id="strip"></div><div class="say" id="say">Zap!</div>
+  <img class="hs" src="/site/img/hero_pop.png" alt=""><div class="bar"><i id="hp" style="width:100%"></i></div><img class="vs" id="vs" src="/site/img/v_imp.png" alt=""><div class="beam" id="beam"></div></div>
+  <div class="kb" id="kb"></div></div>
+</div>
+
+<section id="play"><div class="wrap">
+ <div class="sec-h"><span class="tagbox" style="--c:var(--teal);--c2:var(--teal2)">HOW TO PLAY</span><h2>Four steps to fast fingers</h2><p>Every lesson is a quick battle. Typing the right keys powers your hero, and true fun facts make every sentence worth reading.</p></div>
+ <div class="grid4">
+  <div class="card"><div class="stage"><div class="cycle" id="cyc"></div></div><span class="num">STEP 1</span><h3>Pick a hero</h3><p>Choose a buddy, dress them up in the Hero Closet, and set off across Keyloria.</p></div>
+  <div class="card"><div class="stage"><div class="mini-strip" id="mini"></div></div><span class="num">STEP 2</span><h3>Type to zap</h3><p>Fingers home on F and J. Each right key zaps a Scrambler. Colors show which finger to use.</p></div>
+  <div class="card"><div class="stage"><div class="flipc"><div class="in"><div class="f"></div><div class="b"><img src="/site/img/k_sproutle_0.png" alt=""></div></div></div></div><span class="num">STEP 3</span><h3>Befriend Keylori</h3><p>Win a stage and a Keylori joins your collection. There are over 100 to find.</p></div>
+  <div class="card"><div class="stage"><div class="evo"><img src="/site/img/k_embit_0.png" alt=""><img src="/site/img/k_embit_1.png" alt=""><img src="/site/img/k_embit_2.png" alt=""><div class="fl"></div></div></div><span class="num">STEP 4</span><h3>Evolve and level up</h3><p>Keep practicing and your Keylori evolve. Stars, diamonds and trophies show progress.</p></div>
+ </div>
+</div></section>
+
+<section id="arcade"><div class="wrap">
+ <div class="sec-h"><span class="tagbox" style="--c:var(--lav);--c2:var(--lav2)">ARCADE</span><h2>Eight games for extra practice</h2><p>Short, replayable games with high scores for every player on the device, from easy all the way to Beast mode.</p></div>
+ <div class="arc" id="arc"></div>
+</div></section>
+
+<section id="race"><div class="wrap">
+ <div class="sec-h"><span class="tagbox" style="--c:var(--green);--c2:var(--green2)">MULTIPLAYER</span><h2>Race your friends live</h2><p>Host a race, share the link, and everyone types the same fun fact at the same time, each as their own hero.</p></div>
+ <div class="mp">
+  <ul>
+   <li><b>Host a race</b> and get a short room code, or tap <b>Copy invite link</b> to send it.</li>
+   <li><b>Up to 40 racers</b> in one room, each shown with their own hero and outfit.</li>
+   <li><b>Five difficulty levels</b>, from Easy to Impossible.</li>
+   <li><b>Rematch</b> with one tap: everyone goes straight back to the race room.</li>
+   <li><b>Friend challenges</b>: share your arcade score and a friend races your ghost.</li>
+  </ul>
+  <div class="track" id="track"><div class="flag"></div></div>
+ </div>
+</div></section>
+
+<section id="classroom"><div class="wrap">
+ <div class="sec-h"><span class="tagbox" style="--c:var(--blue);--c2:var(--blue2)">FOR CLASSROOMS</span><h2>Run your typing class in minutes</h2><p>No student accounts or emails. Kids join with a short code, and you see everyone's progress live on your dashboard.</p></div>
+ <div class="cls">
+  <div class="steps" id="steps"></div>
+  <div><div class="screen"><div class="bar"><i></i><i></i><i></i>&nbsp;keyloria.online</div>
+   <video id="vid" muted playsinline preload="metadata" poster="/site/clips/classroom.jpg"><source src="/site/clips/classroom.webm" type="video/webm"><source src="/site/clips/classroom.mp4" type="video/mp4"></video></div>
+   <p class="cap" id="cap"></p></div>
+ </div>
+ <div class="feats">
+  <div class="feat"><h4>Assign any lesson</h4><p>Pick from 117 lessons. Kids see your pick on their home screen and finish with a Submit to teacher button.</p></div>
+  <div class="feat"><h4>Live dashboard</h4><p>Updates every 10 seconds: where each child is, stars, words per minute, accuracy and minutes this week.</p></div>
+  <div class="feat"><h4>Every lesson, every child</h4><p>Tap a name to see every assignment and a map of all lessons: complete, started or not yet.</p></div>
+  <div class="feat"><h4>Class races</h4><p>Open a race for the whole room and watch progress, accuracy, time, and right and wrong keys.</p></div>
+  <div class="feat"><h4>Class controls</h4><p>Switch on Focus mode for the whole class: no arcade, outfits or extra animations, just typing.</p></div>
+  <div class="feat"><h4>Works on school devices</h4><p>Runs in any modern browser on Chromebooks, laptops and desktops.</p></div>
+ </div>
+</div></section>
+
+<section><div class="wrap"><div class="nums">
+ <div><b>117</b><span>lessons</span></div><div><b>12</b><span>worlds</span></div><div><b>100+</b><span>Keylori to collect</span></div><div><b>600+</b><span>fun facts to type</span></div><div><b>40</b><span>racers per room</span></div>
+</div></div></section>
+
+<section id="safety"><div class="wrap">
+ <div class="sec-h"><span class="tagbox" style="--c:var(--orange);--c2:var(--orange2)">SAFE BY DESIGN</span><h2>Made for kids</h2><p>Built for young typists, with grown-ups in control.</p></div>
+ <div class="safe">
+  <div><h4>First names only</h4><p>Only a first name and typing stats are shared with a class. No emails, no passwords, no profiles.</p></div>
+  <div><h4>No chat</h4><p>Kids can't message each other or strangers. Races show names and progress, nothing else.</p></div>
+  <div><h4>Focus mode</h4><p>Parents and teachers can turn off the arcade, Hero Closet, catch and evolve animations, the Keylori walking on the menu and more, so it is strictly a learning game. Teachers can lock it for the whole class.</p></div>
+  <div><h4>Grown-up gate</h4><p>Settings and teacher tools sit behind a quick grown-up check, and only the class creator can see the dashboard.</p></div>
+ </div>
+</div></section>
+
+<div class="wrap end"><img src="/site/img/hero_pip.png" alt=""><h2>Ready to start typing?</h2><div class="cta" style="justify-content:center"><span class="prism"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span><a class="pbtn c-teal" href="#classroom"><img src="/site/img/ico_book.png" alt="">For classrooms</a></div></div>
 </main>
-<div id="modal" class="modal" hidden><div class="mbox" id="mbox"></div></div>
-<div id="toast" class="toast" hidden></div>
+<footer class="wrap">Keyloria Kingdom · <a href="/play/">Play now</a></footer>
 
-<script src="pixel-art.js"></script>
-<script src="flavor-text.js"></script>
-<script src="game.js"></script>
-<script src="worlds.js"></script>
-<script src="navigation.js"></script>
-<script src="arcade-options.js"></script>
-<script src="ghost-race.js"></script>
-<script src="extras.js"></script>
-<script src="story.js"></script>
-<script src="bosses.js"></script>
-<script src="daily.js"></script>
-<script src="phase3.js"></script>
-<script src="heroes2.js"></script>
-<script src="texts.js"></script>
-<script src="practice2.js"></script>
-<script src="bridge.js"></script>
-<script src="insanity.js"></script>
-<script src="results2.js"></script>
-<script src="settings2.js"></script>
-<script src="stats.js"></script>
-<script src="fixes.js"></script>
-<script src="hiscores.js"></script>
-<script src="lessons9.js"></script>
-<script src="groups.js"></script>
-<script src="mobile.js"></script>
-<script src="arcart.js"></script>
+<script>
+/* header logo shows once the big logo scrolls away */
+const hdr=document.getElementById('hdr');new IntersectionObserver(es=>hdr.classList.toggle('small',!es[0].isIntersecting),{rootMargin:'-70px 0px 0px 0px'}).observe(document.getElementById('biglogo'));
 
-<form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="type"><textarea name="message"></textarea><input name="email"><input name="bot-field"></form>
+/* hero scene: type a fact, zap on each word */
+const FACTS=['bees make honey','the sun is a star','owls hunt at night','frogs can jump far','whales breathe air'];
+const VILL=['v_imp','v_inkblob','v_inkling','v_quill'];
+const strip=document.getElementById('strip'),beam=document.getElementById('beam'),vs=document.getElementById('vs'),hp=document.getElementById('hp'),say=document.getElementById('say'),kb=document.getElementById('kb');
+kb.innerHTML=['qwertyuiop','asdfghjkl;','zxcvbnm,./'].map(r=>`<div class="row">${[...r].map(c=>`<span class="${c==='f'||c==='j'?'home':''}" data-k="${c}">${c.toUpperCase()}</span>`).join('')}</div>`).join('')+'<div class="row"><span class="sp" data-k=" ">SPACE</span></div>';
+let fi=0,pos=0,hits=0;
+function draw(t){strip.innerHTML=`<b>${t.slice(0,pos).replace(/ /g,'·')}</b>${pos<t.length?`<u>${t[pos]===' '?'&nbsp;':t[pos]}</u>`+t.slice(pos+1).replace(/ /g,'·'):''}`}
+function step(){const t=FACTS[fi];if(pos>=t.length){hp.style.width='0%';setTimeout(()=>{fi=(fi+1)%FACTS.length;pos=0;hits=0;hp.style.width='100%';vs.src='/site/img/'+VILL[fi%VILL.length]+'.png';draw(FACTS[fi]);setTimeout(step,600)},900);return}
+ const ch=t[pos],k=kb.querySelector(`[data-k="${ch}"]`);if(k){k.classList.add('on');setTimeout(()=>k.classList.remove('on'),130)}
+ pos++;draw(t);
+ if(ch===' '||pos===t.length){hits++;beam.classList.remove('go');void beam.offsetWidth;beam.classList.add('go');vs.classList.remove('hit');void vs.offsetWidth;vs.classList.add('hit');
+  hp.style.width=Math.max(0,100-hits/t.split(' ').length*100)+'%';say.classList.add('on');setTimeout(()=>say.classList.remove('on'),500)}
+ setTimeout(step,ch===' '?260:150+Math.random()*90)}
+draw(FACTS[0]);setTimeout(step,800);
+
+/* step cards */
+const H=['pop','pip','rexo','juno','ember','bruno','mochi','inky'];
+document.getElementById('cyc').innerHTML=H.map((h,i)=>`<img src="/site/img/hero_${h}.png" style="animation-delay:${i}s" alt="">`).join('');
+const mini=document.getElementById('mini');let mp=0;const MW='fjfj ff jj';
+setInterval(()=>{mp=(mp+1)%(MW.length+4);const p=Math.min(mp,MW.length);mini.innerHTML=`<b>${MW.slice(0,p).replace(/ /g,'·')}</b>${p<MW.length?`<u>${MW[p]===' '?'·':MW[p]}</u>`+MW.slice(p+1).replace(/ /g,'·'):''}`},260);
+
+/* arcade */
+const ARC=[['glitch','Scrambler Attack'],['meteor','Meteor Zap'],['race','Keylori Race'],['bubble','Bubble Pop'],['dig','Treasure Dig'],['keeper','Keylori Keeper'],['bridge','Story Bridge'],['racenet','Race with Others']];
+document.getElementById('arc').innerHTML=ARC.map(([k,n])=>`<figure class="${k==='racenet'?'net':''}"><div class="an" style="background-image:url(/site/img/arc_${k}.png)"></div><figcaption>${n}</figcaption></figure>`).join('');
+
+/* multiplayer: four heroes racing to the flag */
+const R=[['Mia','pop',5.2],['Leo','rexo',6.1],['Ava','juno',4.6],['Kai','ember',5.7]];
+document.getElementById('track').insertAdjacentHTML('beforeend',R.map(([n,h,d],k)=>`<div class="ln"><div class="rr" style="--d:${d+2}s;animation-delay:${-k*.1}s"><img src="/site/img/hero_${h}.png" alt=""><small>${n}</small></div></div>`).join(''));
+
+/* classroom walkthrough: one continuous video, each step jumps to its part */
+const STEPS=[
+ ['Create a class','Get a short class code',0,'Open <b>Class</b>, pass the grown-up check and name your class. You get a code like <b>FOX123</b>.'],
+ ['Kids join','No accounts needed',14.67,'Kids tap <b>Class</b> and type the code. They show up on your dashboard right away.'],
+ ['Assign a lesson','Pick from 117 lessons',23.75,'Choose a lesson and press <b>Assign</b>. It appears as <b>Teacher\'s pick</b> on every child\'s home screen.'],
+ ['Watch progress','Live, every 10 seconds',36.67,'See who is done, who is working and how fast. Tap a name for every lesson they have played.'],
+ ['Race the class','Up to 40 racers',53.38,'Open a class race and watch live: progress, words per minute, accuracy, time, right and wrong keys.']];
+const stepsEl=document.getElementById('steps'),vid=document.getElementById('vid'),cap=document.getElementById('cap');let cur=-1;
+stepsEl.innerHTML=STEPS.map((s,i)=>`<button data-i="${i}"><b>${i+1}</b><span>${s[0]}<small>${s[1]}</small></span><div class="prog"><i></i></div></button>`).join('');
+const btns=[...stepsEl.querySelectorAll('button')];
+function mark(i){if(i===cur)return;cur=i;btns.forEach((b,k)=>b.classList.toggle('on',k===i));cap.innerHTML=STEPS[i][3]}
+vid.addEventListener('timeupdate',()=>{const t=vid.currentTime;let i=0;STEPS.forEach((s,k)=>{if(t>=s[2]-.05)i=k});mark(i);
+ const end=i<STEPS.length-1?STEPS[i+1][2]:(vid.duration||t+1),bar=btns[i].querySelector('.prog i');bar.style.width=Math.min(100,(t-STEPS[i][2])/(end-STEPS[i][2])*100)+'%'});
+vid.addEventListener('ended',()=>{vid.currentTime=0;vid.play().catch(()=>{})});
+stepsEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i;vid.currentTime=STEPS[i][2]+.01;mark(i);vid.play().catch(()=>{})});
+mark(0);
+new IntersectionObserver(es=>{es[0].isIntersecting?vid.play().catch(()=>{}):vid.pause()},{threshold:.35}).observe(vid);
+</script>
+</body></html>

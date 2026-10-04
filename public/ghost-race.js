@@ -25,7 +25,7 @@ const ghostIncoming=ghostDecode(new URLSearchParams(location.search).get('ghost'
 let ghostToStart=null;
 let challengeToStart=ghostIncoming;
 const ghostSettings=()=>({d:(S.set.arcd||'auto').startsWith('beast')?'beast':S.set.arcd||'auto',n:S.set.arcNumbers===true,s:S.set.arcSymbols===true,l:S.set.len});
-const ghostFooterHTML=()=>`<a class="ghost-home" href="/"><img src="${LOGO_URL}" alt="Keyloria Kingdom"><span>Explore the kingdom<small>More typing adventures await.</small></span></a>`;
+const ghostFooterHTML=()=>`<a class="ghost-home" href="/play/"><img src="${LOGO_URL}" alt="Keyloria Kingdom"><span>Explore the kingdom<small>More typing adventures await.</small></span></a>`;
 function ghostFooterMount(){ $('#s-game > .ghost-home')?.remove();if(G.ghostInvite)$('#s-game').insertAdjacentHTML('beforeend',ghostFooterHTML()) }
 const ghostElapsed=()=>Math.max(1,Math.round((performance.now()-G.ghostStartTime)/100));
 const ghostMeteorWord=index=>arcadeBonus(index,5)||(G.words&&Math.random()<.6?rand(G.words):rand(G.set));

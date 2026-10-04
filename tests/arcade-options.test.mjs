@@ -80,7 +80,7 @@ test('race text and meteor pool follow the saved choices', () => {
 });
 
 test('page loads external styles and game scripts in order', () => {
- const html = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
+ const html = readFileSync(new URL('../public/play/index.html', import.meta.url), 'utf8');
  const files = ['styles.css', 'pixel-art.js', 'game.js', 'arcade-options.js'];
  let last = -1;
  for (const file of files) {
