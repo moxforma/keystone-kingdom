@@ -587,7 +587,7 @@ function renderArcade(){
  <div class="games">
   <div class="game panel feature"><div class="gart dark">${badSVG("inkblob",false,1)}${badSVG("imp",false,1)}</div><h3>Scrambler Attack</h3><p>Type the words. Zap the bad guys!</p><p class="note">Best score: ${S.arc.glitch} · Wins: ${S.arc.gwin}</p><button class="btn" data-act="glitch">Play</button></div>
   <div class="game panel"><div class="gart">${meteorArt()}</div><h3>Meteor Zap</h3><p>Type to zap the rocks!</p><p class="note">Best score: ${S.arc.meteor}</p><button class="btn" data-act="meteor">Play</button></div>
-  <div class="game panel"><div class="gart race">${creatureSVG(2,1,"big")}${creatureSVG(0,1,"big")}</div><h3>Keylori Race</h3><p>Type fast to win the race!</p><p class="note">Races won: ${S.arc.race}</p><button class="btn" data-act="race">Play</button></div>
+  <div class="game panel"><div class="gart race">${creatureSVG(2,1,"big")}${creatureSVG(0,1,"big")}</div><h3>Race with Keylori</h3><p>Type fast to win the race!</p><p class="note">Races won: ${S.arc.race}</p><button class="btn" data-act="race">Play</button></div>
  </div>`;
 }
 function mountGame(title,sub,la,lb){
@@ -647,7 +647,7 @@ function startRace(){
  const i=arcadeLesson(),ls=learned(i),letters=[...ls].filter(c=>/[a-z]/.test(c)),ok=WORDS.filter(w=>[...w].every(c=>ls.has(c))),len=Math.round(45*S.set.len);
  const text=i>=16?fillSent(i>=19?MSENT:SENT,len):ok.length>=6?fillWords(ok,len):groups(()=>rand(letters),len,2,3);
  const met=Object.keys(S.cards).sort(()=>Math.random()-.5),avg=avgWpm();
- mountGame('Keylori Race','Type to run!','Speed (WPM)','Place');
+ mountGame('Race with Keylori','Type to run!','Speed (WPM)','Place');
  G={type:'race',text,pos:0,mist:new Set(),start:0,done:false,order:0,next:null,racers:[.72,.92,1.08].map((f,k)=>{const [a,b]=(met[k]||['0-1','1-1','2-1'][k]).split('-').map(Number);return{a,b,w:avg*f*(.95+Math.random()*.1),p:0,fin:0}})};
  $('#gsw').hidden=false;$('#garena').className='garena race-arena';
  $('#garena').innerHTML=`<div class="finish"></div>`+[null,...G.racers].map((r,k)=>`<div class="lane"><div class="runner" id="rn${k}">${k?creatureSVG(r.a,r.b):zookSVG()}</div></div>`).join('');
@@ -1418,7 +1418,7 @@ setTimeout(syncPull,400);
 
 /* ================= V13: arcade diamonds + progress trackers ================= */
 let runShareText='',runShareChallenge=null;
-function shareRunHTML(game,stats){const arcadeGame={ 'Meteor Zap':'meteor','Scrambler Attack':'glitch','Keylori Race':'race','Bubble Pop':'bubble' }[game];runShareChallenge=arcadeGame&&G.challengeData?.g===arcadeGame?G.challengeData:null;const challenge=!!runShareChallenge,rematch=challenge&&typeof ghostRematchWon==='function'&&ghostRematchWon();runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${rematch?'I beat your ghost! Can you beat mine?':challenge?'Can you beat my arcade ghost?':'Come explore Keyloria Kingdom and try it yourself!'}`;return `<button class="btn alt" data-act="copyRun">${rematch?'Send rematch challenge':arcadeGame?'Challenge a friend':'Share result'}</button>`}
+function shareRunHTML(game,stats){const arcadeGame={ 'Meteor Zap':'meteor','Scrambler Attack':'glitch','Race with Keylori':'race','Bubble Pop':'bubble' }[game];runShareChallenge=arcadeGame&&G.challengeData?.g===arcadeGame?G.challengeData:null;const challenge=!!runShareChallenge,rematch=challenge&&typeof ghostRematchWon==='function'&&ghostRematchWon();runShareText=`Keyloria Kingdom — ${game}\n${stats}\n${rematch?'I beat your ghost! Can you beat mine?':challenge?'Can you beat my arcade ghost?':'Come explore Keyloria Kingdom and try it yourself!'}`;return `<button class="btn alt" data-act="copyRun">${rematch?'Send rematch challenge':arcadeGame?'Challenge a friend':'Share result'}</button>`}
 ACT.copyRun=async()=>{try{await navigator.clipboard.writeText(runShareText);toast('Result copied!')}catch(e){toast('Could not copy the result')}};
 let ARC_X=()=>({easy:.75,medium:1,hard:1.5})[S.set.arcd]||1;
 function arcReward(parts){const x=ARC_X();let tot=0;const rows=parts.filter(p=>p[1]>0).map(([t,n])=>{tot+=n;return `<div><span>${t}</span><b>+${n}</b></div>`});
@@ -1439,7 +1439,7 @@ endRace=function(){G.done=true;setTarget(null);const secs=(performance.now()-G.s
  const r=arcReward([['Place',[5,3,2,1][pl-1]],['Speed',Math.floor(wpm/8)],['Accuracy',accPts(acc)]]);S.xp+=len;if(pl===1)S.arc.race++;S.hist.push({t:Date.now(),w:wpm,a:acc});if(S.hist.length>80)S.hist.shift();S.time+=Math.round(secs);sessionSecs+=secs;const egg=dailyEgg();save();sfx.win();
  setTimeout(()=>modal(`<h2>${pl===1?'You won the race!':ORD[pl-1]+' place!'}</h2><div class="hero-mini">${zookSVG()}</div>${eggBanner(egg)}
  <h3>Your run</h3><div class="rstats"><div><b>${ORD[pl-1]}</b><span>Place</span></div><div><b>${wpm}</b><span>Words per minute</span></div><div><b>${acc}%</b><span>Accuracy</span></div></div>${typeof ghostRaceSummary==='function'?ghostRaceSummary():''}${r.html}
- <div class="rbtns"><button class="btn" data-act="race">Race again</button>${shareRunHTML('Keylori Race',`${ORD[pl-1]} place · ${wpm} WPM · ${acc}% accuracy`)}<button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`),600)};
+ <div class="rbtns"><button class="btn" data-act="race">Race again</button>${shareRunHTML('Race with Keylori',`${ORD[pl-1]} place · ${wpm} WPM · ${acc}% accuracy`)}<button class="btn alt" data-act="go" data-to="arcade">Arcade</button></div>`),600)};
 endGlitch=function(win){G.done=true;setTarget(null);const acc=G.hits+G.errs?Math.round(G.hits/(G.hits+G.errs)*100):100;const grade=win&&acc>=95&&G.hearts>=4?'S':acc>=90&&win?'A':acc>=80?'B':'C';
  const mins=Math.max((performance.now()-(G.runStart||G.t0||performance.now()))/60000,1/60),wpm=Math.round(G.hits/5/mins);
  const best=G.score>S.arc.glitch;if(best)S.arc.glitch=G.score;if(win)S.arc.gwin++;
@@ -2392,7 +2392,7 @@ function cleanText(txt){if(typeof txt!=='string')return txt;return txt.split(' '
 const _gt39=genText;genText=function(){return cleanText(_gt39.apply(this,arguments))};
 if(typeof comboText==='function'){const _ct39=comboText;comboText=function(){return cleanText(_ct39.apply(this,arguments))}}
 /* ================= V41: feedback + about ================= */
-const _rh41=renderHome;renderHome=function(){_rh41();const g=$('#s-home .home-grid');if(g&&!$('#s-home .footbtns'))g.insertAdjacentHTML('afterend','<div class="footbtns"><button class="btn alt sm" data-act="feedback">Feedback / Report a bug</button><button class="btn alt sm howtobtn" data-act="howto">How to play</button></div>')};
+const _rh41=renderHome;renderHome=function(){_rh41();const g=$('#s-home .home-grid');if(g&&!$('#s-home .footbtns'))g.insertAdjacentHTML('afterend','<div class="footbtns"><button class="btn alt sm" data-act="feedback">Feedback / Report a bug</button><button class="btn alt sm howtobtn" data-act="howto">How to play</button><button class="btn alt sm kofibtn" data-act="kofi"><img src="/site/img/ico_cup.png" alt="">Support Keyloria</button></div>')};
 ACT.feedback=()=>{modal(`<h2>Feedback</h2><p class="muted" style="margin:0">Found a bug or have an idea? Tell us!</p>
  <div class="seg fbtype" style="justify-content:center"><button class="on" data-act="fbType" data-v="Bug">Bug</button><button data-act="fbType" data-v="Idea">Idea</button><button data-act="fbType" data-v="Other">Other</button></div>
  <textarea id="fbmsg" rows="5" maxlength="2000" placeholder="What happened?"></textarea>

@@ -18,6 +18,7 @@ ACT.grownups=()=>{if(window.__gu)return openHub();const a=6+Math.floor(Math.rand
  <div class="rbtns"><button class="btn" data-act="guCheck">OK</button><button class="btn alt" data-act="close">BACK</button></div>`);setTimeout(()=>document.getElementById('gugate')?.focus(),50)};
 ACT.guCheck=()=>{const v=+(document.getElementById('gugate')?.value||0);if(v!==GATE){try{sfx.bad()}catch(e){}toast('Not quite. Ask a grown-up!');return ACT.grownups()}openHub()};
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='gugate'){e.preventDefault();e.stopPropagation();ACT.guCheck()}},true);
+ACT.kofi=()=>{window.open('https://ko-fi.com/keyloria','_blank','noopener')};
 ACT.howto=()=>{window.open('/','_blank','noopener')};
 ACT.guReport=()=>{window.__repId=null;closeModal();show('parents')};
 /* progress report covers every player on this device: an overview table + a tab per player */
@@ -158,6 +159,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .nx-part{font-size:17px;color:#c8bce0}.nx-pips{display:flex;gap:4px;margin:2px 0}.nx-pips i{width:16px;height:8px;background:#3a2f4e}.nx-pips i.done{background:#f0c860}.nx-pips i.cur{background:#7fe8d0;box-shadow:0 0 0 2px #fff6e0}
 .nxcard .minikeys{display:flex;gap:4px;margin-top:2px}.nxcard .minikeys span{min-width:24px;height:24px;display:grid;place-items:center;font-size:15px;background:var(--fc);color:#2a1d3e;padding:0 4px}
 #s-home .hbtns>.btn.big{margin-bottom:10px!important}
+#s-home .footbtns .kofibtn{background:#f07a6e!important;color:#2a1d3e!important;display:inline-flex;align-items:center;gap:6px}#s-home .footbtns .kofibtn img{height:16px;image-rendering:pixelated}
 #s-home .footbtns .howtobtn{background:#6edc8c!important;color:#16301e!important}
 #s-home .topbar .btn.selp,#s-home .topbar .btn.clsbtn,#s-home .topbar .btn.gubtn{font-family:var(--display)!important;font-size:22px!important;letter-spacing:.06em!important;text-transform:uppercase}
 #mbox :is(p,small,li,td,label,.note,.muted,.cl-note,.setrow span):not(.pgq){font-size:20px!important}

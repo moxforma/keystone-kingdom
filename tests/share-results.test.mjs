@@ -31,7 +31,7 @@ test('only Arcade result links open ghost challenges', async () => {
  assert.match(copied.at(-1), /3 stars\nCome explore Keyloria Kingdom and try it yourself!\nhttps:\/\/keystone-kingdom\.netlify\.app\/$/);
  assert.doesNotMatch(copied.at(-1), /ghost|challenge/i);
 
- for(const [name,kind] of [['Meteor Zap','meteor'],['Scrambler Attack','glitch'],['Keylori Race','race']]){
+ for(const [name,kind] of [['Meteor Zap','meteor'],['Scrambler Attack','glitch'],['Race with Keylori','race']]){
   context.G={challengeData:{g:kind,v:2,r:100}};
   assert.match(context.share(name,'100 points'),/Challenge a friend/);
   await context.ACT.copyRun();

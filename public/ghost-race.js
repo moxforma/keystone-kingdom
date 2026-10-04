@@ -296,7 +296,7 @@ ACT.copyRun=async()=>{
 };
 function ghostInviteModal(data){
  challengeToStart=data;
- const name={race:'Keylori Race',meteor:'Meteor Zap',glitch:'Scrambler Attack'}[data.g||'race'];
+ const name={race:'Race with Keylori',meteor:'Meteor Zap',glitch:'Scrambler Attack'}[data.g||'race'];
  const description=data.g==='race'||!data.g?'Race your friend’s typing ghost on the same words.':
   data.g==='glitch'&&data.q?'Type the same words in the same order while your friend’s score and wave bar replay.':
   data.g==='meteor'&&data.q?'Zap the same meteors in the same order while your friend’s score replays.':

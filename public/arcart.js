@@ -50,7 +50,7 @@ ART.meteor=()=>{const [c,g]=mk(),T=tools(g),K=keyl('glowbit'),K2=keyl('sparkewt'
   if(f){const pts=[[ox+31,24],[ox+34,19],[ox+31,15],[ox+36,12],[ox+mx-2,my+3]];for(let i=0;i<pts.length-1;i++){T.line(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],'#fff6a0');T.line(pts[i][0]+1,pts[i][1],pts[i+1][0]+1,pts[i+1][1],'#f0c860')}
    for(let a=0;a<10;a++){const t=a/10*Math.PI*2;T.px(ox+mx+Math.cos(t)*7,my+Math.sin(t)*7,'#fff6e0');T.px(ox+mx+Math.cos(t)*6,my+Math.sin(t)*6,'#f0c860')}}}
  return c};
-/* 3. Keylori Race */
+/* 3. Race with Keylori */
 ART.race=()=>{const [c,g]=mk(),T=tools(g),A=keyl('dunelet'),B=keyl('zipp'),C=keyl('beetix');
  for(let f=0;f<2;f++){const ox=f*W;grass(T,ox,0,H,7);T.rect(ox,16,W,30,'#c8a060');T.rect(ox,16,W,1,'#a07840');T.rect(ox,45,W,1,'#a07840');
   for(let x=0;x<W;x+=8)T.rect(ox+x+(f?4:0),31,4,1,'#e8d0a0');
@@ -117,7 +117,7 @@ ART.racenet=()=>{const [c,g]=mk(),T=tools(g),me=typeof heroNow==='function'?hero
  return c};
 window.ARCART=ART;
 /* put the art on the arcade cards: 2-frame back-and-forth */
-const MAP={'Scrambler Attack':'glitch','Meteor Zap':'meteor','Keylori Race':'race','Bubble Pop':'bubble','Treasure Dig':'dig','Keylori Keeper':'keeper','Story Bridge':'bridge','Race with Others':'racenet'};
+const MAP={'Scrambler Attack':'glitch','Meteor Zap':'meteor','Race with Keylori':'race','Bubble Pop':'bubble','Treasure Dig':'dig','Keylori Keeper':'keeper','Story Bridge':'bridge','Race with Others':'racenet'};
 const CACHE={};let ck='';
 function url(k){let who='';try{who=JSON.stringify([heroNow(),S.color,S.equip])}catch(e){}if(who!==ck){ck=who;for(const x in CACHE)delete CACHE[x]}
  if(!CACHE[k])try{CACHE[k]=ART[k]().toDataURL()}catch(e){console.warn('arcart',k,e);CACHE[k]=''}return CACHE[k]}
@@ -155,4 +155,10 @@ setTimeout(()=>document.body.classList.add('kkready'),3500);
 
 /* About window links to the full landing page */
 {const _ab=ACT.about;if(_ab)ACT.about=function(){const r=_ab.apply(this,arguments);try{const rb=document.querySelector('#mbox .rbtns');if(rb&&!rb.querySelector('.aboutlink'))rb.insertAdjacentHTML('afterbegin','<a style="text-decoration:none" class="btn aboutlink" href="/" target="_blank" rel="noopener">How to play</a><a style="text-decoration:none;background:#f07a6e;color:#2a1d3e" class="btn aboutlink" href="https://ko-fi.com/keyloria" target="_blank" rel="noopener">Support Keyloria</a>')}catch(e){}return r}}
+
+/* Arcade order: multiplayer first, then the core typing games */
+{const ORDER=['Race with Others','Scrambler Attack','Story Bridge','Race with Keylori','Meteor Zap','Bubble Pop','Treasure Dig','Keylori Keeper'];
+ const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments);try{const g=document.querySelector('#s-arcade .games');if(g){const items=[...g.children];
+  const rank=el=>{const t=(el.querySelector('h3')?.textContent||'').trim();const k=ORDER.indexOf(t);return k<0?99:k};
+  items.sort((a,b)=>rank(a)-rank(b)).forEach(el=>g.appendChild(el))}}catch(e){console.warn(e)}return r}}
 })();

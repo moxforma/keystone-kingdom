@@ -337,7 +337,7 @@ const mini=document.getElementById('mini');let mp=0;const MW='fjfj ff jj';
 setInterval(()=>{mp=(mp+1)%(MW.length+4);const p=Math.min(mp,MW.length);mini.innerHTML=`<b>${MW.slice(0,p).replace(/ /g,'·')}</b>${p<MW.length?`<u>${MW[p]===' '?'·':MW[p]}</u>`+MW.slice(p+1).replace(/ /g,'·'):''}`},260);
 
 /* arcade */
-const ARC=[['glitch','Scrambler Attack'],['meteor','Meteor Zap'],['race','Keylori Race'],['bubble','Bubble Pop'],['dig','Treasure Dig'],['keeper','Keylori Keeper'],['bridge','Story Bridge'],['racenet','Race with Others']];
+const ARC=[['racenet','Race with Others'],['glitch','Scrambler Attack'],['bridge','Story Bridge'],['race','Race with Keylori'],['meteor','Meteor Zap'],['bubble','Bubble Pop'],['dig','Treasure Dig'],['keeper','Keylori Keeper']];
 document.getElementById('arc').innerHTML=ARC.map(([k,n])=>`<figure class="${k==='racenet'?'net':''}"><div class="an" style="background-image:url(/site/img/arc_${k}.png)"></div><figcaption>${n}</figcaption></figure>`).join('');
 
 /* multiplayer: four heroes racing to the flag */

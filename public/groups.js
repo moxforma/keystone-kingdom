@@ -205,7 +205,7 @@ const myLevel=()=>{const p=EI(lessonIdx());return p<16?'easy':p<44?'medium':'har
 let ROOM=null,OFF=0,POLL=null;
 const stopPoll=()=>{clearInterval(POLL);POLL=null};
 function makeRoom(lv,spectate,after){post('/api/race',{a:'make',pid:pid(),name:myName(),look:myLook(),text:raceText(lv),lvl:lv,spectate}).then(r=>{ROOM={code:r.room,host:true,spectate,lvl:lv};after&&after(r.room);lobby()}).catch(e=>toast(e.message))}
-ACT.raceMake=()=>{const lv=myLevel();modal(`<h2>Host a race</h2><p class="muted" style="margin:0 0 8px">Choose your difficulty</p><div class="cl-btns lvlrow">${lvlsFor(false).map(([v,t])=>`<button class="btn lv-${v} ${v===lv?'':'alt'}" data-act="raceMakeLv" data-v="${v}">${t}</button>`).join('')}</div>${beatRace()?'':'<p class="muted cl-note">Win a Keylori Race on Beast mode to unlock Impossible.</p>'}<div class="rbtns"><button class="btn alt" data-act="raceHub">Back</button></div>`)};
+ACT.raceMake=()=>{const lv=myLevel();modal(`<h2>Host a race</h2><p class="muted" style="margin:0 0 8px">Choose your difficulty</p><div class="cl-btns lvlrow">${lvlsFor(false).map(([v,t])=>`<button class="btn lv-${v} ${v===lv?'':'alt'}" data-act="raceMakeLv" data-v="${v}">${t}</button>`).join('')}</div>${beatRace()?'':'<p class="muted cl-note">Win a Race with Keylori on Beast mode to unlock Impossible.</p>'}<div class="rbtns"><button class="btn alt" data-act="raceHub">Back</button></div>`)};
 ACT.raceMakeLv=d=>makeRoom(d.v,false);
 ACT.raceJoin=()=>joinRoom(val('raceCode'));
 ACT.raceJoinCode=d=>joinRoom(d.r);
