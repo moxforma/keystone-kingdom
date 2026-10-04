@@ -2,12 +2,13 @@
    teacher dashboard, players, devices and reset. Kid Settings keeps only kid things. Home buttons put learning first. */
 (function(){
 const ICO=PXG(["..oooo..",".oPPPPo.",".oPPPPo.","..oooo..",".oTTTTo.","oTTTTTTo","oTTTTTTo","oooooooo"],{o:'#2a1d3e',P:'#f2cc8c',T:'#b8a0f0'}).toDataURL();
+const CUP=PXG(['oooooooooooo','oYYYYYYYYYYo','oYoYYYYYYoYo','oYoYYYYYYoYo','.ooYYYYYYoo.','..oYYYYYYo..','...oYYYYo...','....oYYo....','...oooooo...','..oYYYYYYo..','..oooooooo..'],{o:'#2a1d3e',Y:'#f0c860'}).toDataURL();
 let GATE=0;
 const openHub=()=>{window.__gu=1;window.__clsOk=1;window.__guMode='';
  const card=(act,t,d,c)=>`<button class="guitem ${c}" data-act="${act}"><b>${t}</b><small>${d}</small></button>`;
- modal(`<h2>TEACHERS&#39; LOUNGE</h2><p class="muted" style="margin:0 0 10px">Settings and tools for parents and teachers.</p><div class="gugrid">
+ modal(`<h2>TEACHERS</h2><p class="muted" style="margin:0 0 10px">Settings and tools for parents and teachers.</p><div class="gugrid">
  ${card('guReport','Progress report','Speed, accuracy and tricky keys for every player','c1')}
- ${card('guParent','Parent settings','Focus mode and turning game features on or off','c2')}
+ ${card('guParent','Focus mode','Turn the arcade, outfits and other extras on or off','c2')}
  ${card('guTeach','Teacher dashboard','Make a class, assign lessons, watch progress, class races','c3')}
  ${card('guPlayers','Players','Add, switch or delete players on this device','c4')}
  ${card('guDevices','Family code and reset','Play on more than one device with a family code, or start over from zero','c5')}
@@ -17,6 +18,7 @@ ACT.grownups=()=>{if(window.__gu)return openHub();const a=6+Math.floor(Math.rand
  <div class="rbtns"><button class="btn" data-act="guCheck">OK</button><button class="btn alt" data-act="close">BACK</button></div>`);setTimeout(()=>document.getElementById('gugate')?.focus(),50)};
 ACT.guCheck=()=>{const v=+(document.getElementById('gugate')?.value||0);if(v!==GATE){try{sfx.bad()}catch(e){}toast('Not quite. Ask a grown-up!');return ACT.grownups()}openHub()};
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='gugate'){e.preventDefault();e.stopPropagation();ACT.guCheck()}},true);
+ACT.howto=()=>{window.open('/','_blank','noopener')};
 ACT.guReport=()=>{window.__repId=null;closeModal();show('parents')};
 /* progress report covers every player on this device: an overview table + a tab per player */
 ACT.guRep=d=>{window.__repId=d.id;renderParents();scrollTo(0,0)};
@@ -73,6 +75,15 @@ const _ct=ACT.clsTeach;if(_ct)ACT.clsTeach=function(){if(needPw())return pwAsk((
 const _cd=ACT.clsDash;ACT.clsDash=function(d){if(needPw()&&!(d&&d.quiet))return pwAsk(()=>ACT.clsDash(d));const r=_cd.apply(this,arguments);
 return r};
 document.addEventListener('keydown',e=>{const id=e.target&&e.target.id;if(e.key!=='Enter')return;const m={tpwin:'tpwCheck',tpwrec:'tpwRecover',tpw2:'tpwSave'}[id];if(m){e.preventDefault();e.stopPropagation();ACT[m]()}},true);
+
+/* ---- Keylori Collection: holo / gold / diamond counts get their icons ---- */
+const TI={holo:PXG(['..ooo..','.oRYGo.','oRYGBPo','oYGBPRo','oGBPRYo','.oPRYo.','..ooo..'],{o:'#2a1d3e',R:'#ff8a9a',Y:'#f0e070',G:'#7fe8a0',B:'#7fc8f0',P:'#c8a0f0'}).toDataURL(),
+ gold:PXG(['..ooo..','.oYYYo.','oYWYYDo','oYYYYDo','oYYYDDo','.oDDDo.','..ooo..'],{o:'#2a1d3e',Y:'#f0c860',W:'#fff6c0',D:'#c8981e'}).toDataURL(),
+ diamond:PXG(['..ooooo..','.oWCCCBo.','oWCCCCCBo','ooooooooo','.oCCCCBo.','..oCCBo..','...oBo...','....o....'],{o:'#2a1d3e',W:'#ffffff',C:'#bfe2f6',B:'#7fb8e0'}).toDataURL()};
+const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments);try{const sp=document.querySelector('#s-binder .topbar>span.muted');if(sp&&!sp.querySelector('.tico')){
+ const C=Object.values(S.cards),n=C.length,holo=C.filter(x=>x.holo).length,gold=C.filter(x=>x.tier==='gold').length,dia=C.filter(x=>x.tier==='diamond').length;
+ const it=(k,v,l)=>`<span class="tcount" title="${l}"><img class="tico" src="${TI[k]}" alt="">${v} ${l}</span>`;
+ sp.innerHTML=`${n}/${typeof TOTAL!=='undefined'?TOTAL:''} ${it('holo',holo,'holo')}${it('gold',gold,'gold')}${it('diamond',dia,'diamond')}`;sp.classList.add('tcounts')}}catch(e){console.warn(e)}return r};
 /* ---- Settings: kid things only, unless opened as "Devices and reset" from the hub ---- */
 const _set=ACT.settings;ACT.settings=function(){const r=_set.apply(this,arguments);try{const box=document.getElementById('mbox');if(!box)return r;
  const mode=window.__guMode;
@@ -81,7 +92,7 @@ const _set=ACT.settings;ACT.settings=function(){const r=_set.apply(this,argument
   const done=[...box.querySelectorAll('[data-act=close]')].pop();if(done)done.outerHTML='<button class="btn" data-act="grownups">BACK</button>'}
  else{box.querySelectorAll('.famsec,.parsec,.dangersec,.parrow').forEach(s=>s.remove());
   const done=[...box.querySelectorAll('[data-act=close]')].pop();
-  if(done&&!box.querySelector('.gurow'))done.insertAdjacentHTML('beforebegin','<section class="setsec gurow"><div class="setrow"><span>Teachers&#39; Lounge<small class="muted" style="display:block">Progress report, parent settings, teacher dashboard, players, family code</small></span><button class="btn sm volt" data-act="grownups">OPEN</button></div></section>')}
+  if(done&&!box.querySelector('.gurow'))done.insertAdjacentHTML('beforebegin','<section class="setsec gurow"><div class="setrow"><span>Teachers<small class="muted" style="display:block">Progress report, focus mode, teacher dashboard, players, family code</small></span><button class="btn sm volt" data-act="grownups">OPEN</button></div></section>')}
  }catch(e){console.warn(e)}return r};
 /* closing anything leaves "devices" mode */
 const _md=modal;modal=function(){const mb=document.getElementById('mbox');if(mb)mb.classList.remove('guwide');const r=_md.apply(this,arguments);
@@ -94,36 +105,56 @@ const _cm=closeModal;closeModal=function(){window.__guMode='';return _cm.apply(t
 /* ---- Players: deleting only from the Grown-ups hub ---- */
 const _pl=ACT.players;ACT.players=function(){const r=_pl.apply(this,arguments);try{const box=document.getElementById('mbox');
  if(window.__guMode!=='players')box.querySelectorAll('.pldel').forEach(b=>b.remove());
- else{const c=[...box.querySelectorAll('[data-act=close]')].pop();if(c&&!box.querySelector('.guback'))c.insertAdjacentHTML('beforebegin','<button class="btn alt guback" data-act="grownups">TEACHERS&#39; LOUNGE</button>')}}catch(e){}return r};
+ else{const c=[...box.querySelectorAll('[data-act=close]')].pop();if(c&&!box.querySelector('.guback'))c.insertAdjacentHTML('beforebegin','<button class="btn alt guback" data-act="grownups">TEACHERS</button>')}}catch(e){}return r};
 
 /* ---- Home: Grown-ups in the header, hero things on the hero card, learning first ---- */
 const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const home=document.getElementById('s-home');if(!home||!S.name)return r;
  const tb=home.querySelector('.topbar');
- if(tb&&!tb.querySelector('.gubtn')){const anchor=tb.querySelector('.clsbtn')||tb.querySelector('.selp');const html=`<button class="btn gubtn" data-act="grownups"><img src="${ICO}" alt="">TEACHERS&#39; LOUNGE</button>`;anchor?anchor.insertAdjacentHTML('afterend',html):tb.insertAdjacentHTML('beforeend',html)}
+ if(tb&&!tb.querySelector('.gubtn')){const anchor=tb.querySelector('.clsbtn')||tb.querySelector('.selp');const html=`<button class="btn gubtn" data-act="grownups"><img src="${ICO}" alt="">TEACHERS</button>`;anchor?anchor.insertAdjacentHTML('afterend',html):tb.insertAdjacentHTML('beforeend',html)}
  home.querySelectorAll('.linkbtn[data-to=parents]').forEach(l=>(l.closest('p')||l).remove());
  const hb=home.querySelector('.hbtns'),shop=hb&&hb.querySelector('[data-to=shop]'),change=home.querySelector('[data-act=heroes]');
  if(shop&&change){shop.classList.add('closetbtn');change.insertAdjacentElement('afterend',shop);change.parentElement.classList.add('herobtns')}
  if(hb){const q=s=>hb.querySelector(s);const order=[q('[data-act=play]'),q('[data-to=arcade]'),q('[data-to=map]'),q('[data-act=practice]'),q('[data-to=binder]')].filter(Boolean);
-  if(typeof ACT.hiscores==='function'&&(typeof par!=='function'||par('arcade'))){let hs=q('.homehs');if(!hs){hb.insertAdjacentHTML('beforeend','<button class="btn homehs" data-act="hiscores">High Scores</button>');hs=q('.homehs')}order.push(hs)}
+  if(typeof ACT.hiscores==='function'&&(typeof par!=='function'||par('arcade'))){let hs=q('.homehs');if(!hs){hb.insertAdjacentHTML('beforeend',`<button class="btn homehs" data-act="hiscores"><img class="bico" src="${CUP}" alt="">High Scores</button>`);hs=q('.homehs')}const bi=order.indexOf(q('[data-to=binder]'));order.splice(bi<0?order.length:bi,0,hs)}
+  hb.classList.add('hgrid');const pr=q('[data-act=practice]');if(pr)pr.classList.toggle('half',!!q('.homehs'));const hs2=q('.homehs');if(hs2)hs2.classList.add('half');
   order.forEach(b=>{b.classList.remove('arcbig');if(b.dataset.act!=='play')b.classList.remove('big');hb.appendChild(b)})}
- const bd=home.querySelector('.badges.rbadges2');if(bd&&!home.querySelector('.bdglbl'))bd.insertAdjacentHTML('beforebegin','<div class="bdglbl">Region badges<small>finish every lesson in a region to earn its badge</small></div>');
+ home.querySelectorAll('.badges.rbadges2,.bdglbl').forEach(x=>x.remove());
+ /* preview of the lesson they're on, at the top of the right-hand box */
+ const tc=home.querySelector('.tcard .tc-l')||home.querySelector('.tcard');
+ if(tc&&!home.querySelector('.nxcard')){try{const n=nextStage(),NS=typeof NST!=='undefined'?NST:8,i=Math.floor(n/NS),s=n%NS,L=LESSONS[i],R=REGIONS[L.r]||{};
+  const f=typeof formNow==='function'?formNow(i):0,has=!!S.cards[i+'-'+f];
+  const keys=L.k?[...L.k].map(c=>`<span style="--fc:${fcol(fingerOf(c))}">${c.toUpperCase()}</span>`).join(''):'';
+  const pips=Array.from({length:NS},(_,k)=>`<i class="${(S.best[i+'-'+k]||0)>0?'done':''} ${k===s?'cur':''}"></i>`).join('');
+  tc.insertAdjacentHTML('afterbegin',`<button class="nxcard" data-act="play" data-n="${n}" style="--rc:${R.color||'#7fe8d0'}"><span class="nx-art">${creatureSVG(i,f,'fit '+(has?'':'sil'))}</span><span class="nx-txt"><small>UP NEXT · ${esc(R.name||'')}</small><b>Lesson ${typeof LNUM==='function'?LNUM(i):i+1}: ${esc(lessonTitle(i))}</b><span class="nx-part">Part ${s+1} of ${NS} · ${esc(stageName(i,s))}</span><span class="nx-pips">${pips}</span>${keys?`<span class="minikeys">${keys}</span>`:''}</span></button>`)}catch(e){console.warn(e)}}
  }catch(e){console.warn(e)}return r};
 document.head.insertAdjacentHTML('beforeend',`<style>
-#s-home .topbar .btn.gubtn{background:#f0c860!important;color:#2a1d3e!important;box-shadow:4px 4px 0 rgba(4,6,24,.65)!important;height:42px!important;font-family:var(--title)!important;font-size:13px!important;padding:0 10px!important;letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;margin:0!important;min-height:0!important;line-height:1!important}
+#s-home .topbar .btn.gubtn{background:#f0c860!important;color:#2a1d3e!important;box-shadow:4px 4px 0 rgba(4,6,24,.65)!important;height:42px!important;font-family:var(--title)!important;font-size:11px!important;padding:0 10px!important;letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;margin:0!important;min-height:0!important;line-height:1!important}
 #s-home .topbar .btn.gubtn img{height:18px;image-rendering:pixelated}
 .gugrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left}
 .guitem{font:inherit;display:flex;flex-direction:column;gap:4px;padding:14px 16px;background:#1b1626;border:3px solid #3a2f4e;border-left-width:10px;color:#fff6e0;cursor:pointer;text-align:left}
 .guitem:hover{background:#2a2238}.guitem b{font-size:22px}.guitem small{font-size:16px;color:#c8bce0}
 .guitem.c1{border-left-color:#7fe8d0}.guitem.c2{border-left-color:#f0c860}.guitem.c3{border-left-color:#7fc8f0}.guitem.c4{border-left-color:#b8a0f0}.guitem.c5{border-left-color:#f07a6e}
+#mbox .dashv .cl-racebtn{display:flex;justify-content:center;margin-top:12px}#mbox .dashv .cl-racebtn .btn{width:100%;font-family:var(--title)!important;font-size:18px!important;letter-spacing:.06em;padding:16px 12px!important;text-transform:uppercase}
+#mbox .dashv .cl-lvl{justify-content:center}
+#mbox .dashv>.rbtns{margin-top:26px!important}
+.tcounts{display:inline-flex;align-items:center;gap:14px}.tcount{display:inline-flex;align-items:center;gap:6px}.tcount .tico{width:22px;height:22px;image-rendering:pixelated}
 #mbox .cl-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 #mbox .btn .muted{color:#4a3a1a!important;opacity:1!important}
 #mbox.guwide{width:min(900px,94vw)!important;max-width:none!important}
 .gusupport{margin:12px 0 0;font-size:17px;color:#c8bce0}.gusupport a{color:#f07a6e}
 .gugrid .guitem:last-child:nth-child(odd){grid-column:1/-1}
-#s-home .hbtns{display:flex!important;flex-direction:column!important;gap:8px!important}
-#s-home .hbtns>.btn{grid-column:1/-1!important;flex:0 0 auto!important;width:100%!important;margin:0!important}
-.bdglbl{font-size:18px;color:#fff6e0;margin:6px 0 0}.bdglbl small{display:block;font-size:15px;color:#c8bce0}
-#s-home .footbtns a.btn{font-size:inherit;display:inline-flex;align-items:center}
+#s-home .hbtns{display:grid!important;grid-template-columns:1fr 1fr!important;gap:11px!important}
+#s-home .hbtns>.btn{grid-column:1/-1!important;width:100%!important;margin:0!important}
+#s-home .hbtns>.btn.half{grid-column:auto!important}
+#s-home .hbtns>.homehs{background:#f0c860!important;color:#2a1d3e!important}
+.nxcard{font:inherit;color:inherit;text-align:left;cursor:pointer;display:grid;grid-template-columns:84px 1fr;gap:14px;align-items:center;width:100%;padding:8px 14px;margin:0 0 10px;background:#1b1626;border:3px solid #3a2f4e;border-left:10px solid var(--rc);box-sizing:border-box}
+.nxcard:hover{background:#241c36}.nx-art{width:84px;height:72px;overflow:hidden;position:relative;background:#120e1e;border:3px solid #3a2f4e}.nx-art>svg{position:absolute!important;left:50%!important;top:50%!important;width:210px!important;height:210px!important;max-width:none!important;margin:-112px 0 0 -105px!important;transform:none!important}.nx-art>svg.sil{filter:brightness(0) drop-shadow(0 0 3px #7fe8ff)!important;opacity:.85!important}
+.nx-txt{display:flex;flex-direction:column;gap:3px;min-width:0}.nx-txt small{font-size:15px;color:var(--rc);letter-spacing:.06em}.nx-txt b{font-size:24px;color:#fff6e0;font-weight:400;line-height:1.1}
+.nx-part{font-size:17px;color:#c8bce0}.nx-pips{display:flex;gap:4px;margin:2px 0}.nx-pips i{width:16px;height:8px;background:#3a2f4e}.nx-pips i.done{background:#f0c860}.nx-pips i.cur{background:#7fe8d0;box-shadow:0 0 0 2px #fff6e0}
+.nxcard .minikeys{display:flex;gap:4px;margin-top:2px}.nxcard .minikeys span{min-width:24px;height:24px;display:grid;place-items:center;font-size:15px;background:var(--fc);color:#2a1d3e;padding:0 4px}
+#s-home .hbtns>.btn.big{margin-bottom:10px!important}
+#s-home .footbtns .howtobtn{background:#6edc8c!important;color:#16301e!important}
+#s-home .topbar .btn.selp,#s-home .topbar .btn.clsbtn,#s-home .topbar .btn.gubtn{font-family:var(--display)!important;font-size:22px!important;letter-spacing:.06em!important;text-transform:uppercase}
 #mbox :is(p,small,li,td,label,.note,.muted,.cl-note,.setrow span):not(.pgq){font-size:20px!important}
 #mbox .cl-sec,#mbox .raceHubBox{text-align:center}#mbox .cl-sec .cl-btns,#mbox .cl-sec .clfield,#mbox .cl-sec>div{justify-content:center;margin-left:auto;margin-right:auto}
 .gurepname{text-align:center;margin:18px 0 10px}

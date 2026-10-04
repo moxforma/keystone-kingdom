@@ -89,7 +89,7 @@ body.mobile #s-arcade .game .gart{transform:scale(.7);transform-origin:center}
 body.mobile #s-arcade .game h3{font-size:17px}body.mobile #s-arcade .game > p{font-size:13px;min-height:3.2em}
 body.mobile #s-arcade .topbar{flex-wrap:wrap;gap:6px}
 body.mobile #s-map .wpick{grid-template-columns:repeat(6,1fr)!important;gap:4px}
-body.mobile #s-map .wpick .wp small{font-size:10px}
+body.mobile #s-map .wpick .wp small{font-size:14px}
 body.mobile #s-map .lessons{grid-template-columns:1fr!important}
 body.mobile #mbox{max-width:94vw!important;box-sizing:border-box}
 body.mobile #mbox .fcols{grid-template-columns:1fr!important;display:block}

@@ -33,9 +33,14 @@ main,header,footer{position:relative;z-index:1}
 header{position:sticky;top:0;z-index:20;background:#171226ee;backdrop-filter:blur(4px);border-bottom:4px solid #241c36}
 header .wrap{max-width:1400px}
 nav{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
-nav .lg{display:block;height:48px;width:auto;opacity:0;max-width:0;transition:opacity .25s,max-width .25s;overflow:hidden}
-header.small nav .lg{opacity:1;max-width:170px}
-nav .lg{height:42px}
+nav .lg{display:block;height:42px;width:auto;max-width:none}
+nav .lgl,nav .hp{flex:0 0 auto;max-width:0;opacity:0;overflow:hidden;transition:max-width .25s,opacity .25s,padding .25s;pointer-events:none}
+nav .hp{padding:0}
+header.showlogo nav .lgl{max-width:150px;opacity:1;pointer-events:auto}
+header.showplay nav .hp{max-width:230px;padding:5px;opacity:1;pointer-events:auto;overflow:visible}
+header.showplay nav .hp .pbtn{font-size:22px;padding:9px 14px 11px}
+@media (max-width:1050px){header.showlogo nav .lgl{max-width:0;opacity:0}}
+@media (max-width:900px){header.showplay nav .hp{max-width:0;padding:0;opacity:0}}
 nav .lgl{display:flex}
 nav .pbtn{font-size:22px;padding:9px 14px 11px;flex:0 0 auto}
 nav .prism{flex:0 0 auto}nav .prism .pbtn{font-size:25px;padding:10px 18px 12px}
@@ -143,7 +148,9 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
 </style></head>
 <body><div class="stars"></div>
 <header id="hdr"><div class="wrap"><nav>
+ <a class="lgl" href="/play/" aria-label="Play Keyloria Kingdom"><img class="lg" src="/site/img/logo.png" alt="Keyloria Kingdom"></a>
  <a class="pbtn c-red" href="#play" data-tab="play">How to play</a><a class="pbtn c-lav" href="#arcade" data-tab="arcade">Arcade</a><a class="pbtn c-green" href="#race" data-tab="race">Multiplayer</a><a class="pbtn c-gold" href="#classroom" data-tab="classroom">For classrooms</a>
+ <span class="prism hp"><a class="pbtn c-gold" href="/play/" tabindex="-1"><img src="/site/img/ico_play.png" alt="">Play free</a></span>
 </nav></div></header>
 <main>
 <div class="wrap hero">
@@ -208,7 +215,7 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
   <div><h4>First names only</h4><p>Only a first name and typing stats are shared with a class. No emails, no passwords, no profiles.</p></div>
   <div><h4>No chat</h4><p>Kids can't message each other or strangers. Races show names and progress, nothing else.</p></div>
   <div><h4>Focus mode</h4><p>Parents and teachers can turn off the arcade, Hero Closet, catch and evolve animations, the Keylori walking on the menu and more, so it is strictly a learning game. Teachers can lock it for the whole class.</p></div>
-  <div><h4>Grown-up check</h4><p>Settings and teacher tools sit in the Teachers&#39; Lounge, behind a quick grown-up check, and only the class creator can see the dashboard.</p></div>
+  <div><h4>Grown-up check</h4><p>Settings and teacher tools sit in Teachers, behind a quick grown-up check, and only the class creator can see the dashboard.</p></div>
  </div>
 </div></section>
 
@@ -225,13 +232,17 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
 /* header logo shows once the big logo scrolls away */
 
 
+/* header logo and Play free appear once their big versions scroll away */
+const hdr=document.getElementById('hdr');
+new IntersectionObserver(es=>hdr.classList.toggle('showlogo',!es[0].isIntersecting),{rootMargin:'-70px 0px 0px 0px'}).observe(document.getElementById('biglogo'));
+new IntersectionObserver(es=>{const on=!es[0].isIntersecting;hdr.classList.toggle('showplay',on);hdr.querySelector('.hp a').tabIndex=on?0:-1},{rootMargin:'-70px 0px 0px 0px'}).observe(document.querySelector('.hero .cta .prism'));
 /* tabs: the hero stays, the nav swaps the section below it */
 const TABS=['play','arcade','race','classroom'];
 function tab(id,scroll){if(id==='safety')id='classroom';if(!TABS.includes(id))id='play';
  TABS.forEach(t=>document.getElementById(t).classList.toggle('on',t===id));
  document.querySelectorAll('nav [data-tab]').forEach(a=>a.classList.toggle('on',a.dataset.tab===id));
  const v=document.getElementById('vid');if(v){if(id==='classroom')v.play().catch(()=>{});else v.pause()}
- if(scroll)document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+ if(scroll){const top=document.getElementById(id).getBoundingClientRect().top+scrollY-(parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0);scrollTo({top,behavior:scrollY>top?'instant':'smooth'})}}
 document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const id=a.getAttribute('href').slice(1);if(!id)return;e.preventDefault();history.replaceState(null,'','#'+id);tab(id,true)});
 addEventListener('hashchange',()=>tab(location.hash.slice(1),true));
 /* hero scene: type a fact, zap on each word */
@@ -265,11 +276,11 @@ document.getElementById('track').insertAdjacentHTML('beforeend',R.map(([n,h,d],k
 
 /* classroom walkthrough: one continuous video, each step jumps to its part */
 const STEPS=[
- ['Create a class','Get a short class code',0,'Open the <b>Teachers&#39; Lounge</b>, pass the quick check and name your class. You get a code like <b>FOX123</b>.'],
- ['Kids join','No accounts needed',13.78,'Kids tap <b>Class</b> and type the code. They show up on your dashboard right away.'],
- ['Assign a lesson','Pick from 117 lessons',26.08,'Choose a lesson and press <b>Assign</b>. It appears as <b>Teacher\'s pick</b> on every child\'s home screen.'],
- ['Watch progress','Live, every 10 seconds',30.95,'See who is done, who is working and how fast. Tap a name for every lesson they have played.'],
- ['Race the class','Up to 40 racers',50.67,'Open a class race and watch live: progress, words per minute, accuracy, time, right and wrong keys.']];
+ ['Create a class','Get a short class code',0,'Open <b>Teachers</b>, pass the quick check and name your class. You get a code like <b>FOX123</b>.'],
+ ['Kids join','No accounts needed',13.4,'Kids tap <b>Class</b> and type the code. They show up on your dashboard right away.'],
+ ['Assign a lesson','Pick from 117 lessons',24.47,'Choose a lesson and press <b>Assign</b>. It appears as <b>Teacher\'s pick</b> on every child\'s home screen.'],
+ ['Watch progress','Live, every 10 seconds',29.17,'See who is done, who is working and how fast. Tap a name for every lesson they have played.'],
+ ['Race the class','Up to 40 racers',48.96,'Open a class race and watch live: progress, words per minute, accuracy, time, right and wrong keys.']];
 const stepsEl=document.getElementById('steps'),vid=document.getElementById('vid'),cap=document.getElementById('cap');let cur=-1;
 stepsEl.innerHTML=STEPS.map((s,i)=>`<button data-i="${i}"><b>${i+1}</b><span>${s[0]}<small>${s[1]}</small></span><div class="prog"><i></i></div></button>`).join('');
 const btns=[...stepsEl.querySelectorAll('button')];

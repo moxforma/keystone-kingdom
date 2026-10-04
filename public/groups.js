@@ -114,7 +114,7 @@ ACT.raceHub=()=>{modal(`<h2>Race with Others</h2><div class="raceHubBox"><p clas
 ACT.clsHub=()=>{const c=S.cls;
  modal(`<h2>My Class</h2>
  <div class="cl-sec"><h3>My class or friend group</h3>${c?`<p style="margin:0">You're in <b>${esc(c.name||'a class')}</b> <span class="muted">(code ${esc(c.code)})</span></p><div class="cl-btns"><button class="btn sm" data-act="clsBoard">Class leaderboard</button><button class="btn sm alt" data-act="clsLeave">Leave</button></div>`:`<p class="muted" style="margin:0 0 6px">Got a code from your teacher or a friend's grown-up?</p>${field('clsCode','ABC123','clsJoin','Join')}`}</div>
- <p class="muted cl-note" style="margin-top:10px">Teachers and parents: the class dashboard is in the <button class="linkbtn" data-act="grownups">Teachers' Lounge</button>.</p>
+ <p class="muted cl-note" style="margin-top:10px">Teachers and parents: the class dashboard is in the <button class="linkbtn" data-act="grownups">Teachers</button>.</p>
  <p class="muted cl-note">Only first names and typing scores are shared. There is no chat.</p>
  <div class="rbtns"><button class="btn alt" data-act="close">Close</button></div>`)};
 document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t&&t.dataset&&t.dataset.enter){e.preventDefault();e.stopPropagation();ACT[t.dataset.enter]&&ACT[t.dataset.enter]({})}},true);

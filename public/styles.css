@@ -482,7 +482,7 @@ canvas.fx{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixel
 @keyframes blink{50%{opacity:.4}}
 .badge{clip-path:none!important;background-color:transparent!important;background-position:center!important;background-size:contain!important;background-repeat:no-repeat!important;color:transparent!important;image-rendering:pixelated;width:40px!important;height:40px!important}
 .card,.key,.btn,.panel,.mbox,.stat,.icon-btn,.toast{box-shadow:none}.btn{box-shadow:0 5px 0 #b3850f!important}.btn.alt{box-shadow:0 5px 0 #0a0f2e!important}.btn.volt{box-shadow:0 5px 0 #1a9fb3!important}
-.toast{box-shadow:5px 5px 0 #0d0a14!important}.panel,.mbox,.stat,.icon-btn{box-shadow:5px 5px 0 rgba(4,6,24,.65)!important}
+.toast{box-shadow:0 0 0 4px #2a1d3e,8px 8px 0 4px #0d0a14!important;border-radius:0!important}
 .heroes h3,.mbox h3{font-family:var(--title);font-size:14px}
 
 /* ---------- V10 legibility ---------- */
@@ -856,7 +856,7 @@ svg.zk,svg.zk image{pointer-events:none}
 .worldhead.shut .globe{filter:grayscale(1) brightness(.55)}
 .wpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin:0 0 14px}
 .wp{display:grid;justify-items:center;gap:2px;background:#2a2238;border:3px solid #3a2f4e;padding:6px 4px;cursor:pointer;color:var(--ink);font-family:var(--body)}
-.wp .globe{width:56px;height:56px}.wp small{font-size:15px;line-height:1.1;text-align:center}
+.wp .globe{width:56px;height:56px}.wp small{font-size:19px;line-height:1.05;text-align:center;letter-spacing:.02em}
 .wp.cur{border-color:#f0c860}.wp:hover:not([disabled]) .globe{transform:translateY(-3px)}
 .wp.lockd{opacity:.55;cursor:not-allowed}.wp.lockd .globe{filter:brightness(0);opacity:.6}
 

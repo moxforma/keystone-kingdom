@@ -23,5 +23,5 @@ function organize(){const box=$('#mbox');if(!box||box.querySelector('.setsec'))r
  if(done)box.insertBefore(frag,done);else box.appendChild(frag)}
 /* wording: grown-up -> parent */
 const _gate=ACT.parGate;if(_gate)ACT.parGate=function(){_gate.apply(this,arguments);const h=$('#mbox h2');if(h)h.textContent='PARENTS ONLY'};
-const _modal=modal;modal=function(html){if(typeof html==='string')html=html.replace('<h2>GROWN-UP SETTINGS</h2>','<h2>PARENT SETTINGS</h2>');const r=_modal.call(this,html);const b=$('#mbox');if(b&&/PARENT SETTINGS/.test(b.innerHTML))b.classList.add('setwide','parpanel');return r};
+const _modal=modal;modal=function(html){if(typeof html==='string')html=html.replace('<h2>GROWN-UP SETTINGS</h2>','<h2>FOCUS MODE</h2>');const r=_modal.call(this,html);const b=$('#mbox');if(b&&/FOCUS MODE<\/h2>/.test(b.innerHTML))b.classList.add('setwide','parpanel');return r};
 })();
