@@ -114,7 +114,7 @@ ACT.raceHub=()=>{modal(`<h2>Race with Others</h2><div class="raceHubBox"><p clas
 ACT.clsHub=()=>{const c=S.cls;
  modal(`<h2>My Class</h2>
  <div class="cl-sec"><h3>My class or friend group</h3>${c?`<p style="margin:0">You're in <b>${esc(c.name||'a class')}</b> <span class="muted">(code ${esc(c.code)})</span></p><div class="cl-btns"><button class="btn sm" data-act="clsBoard">Class leaderboard</button><button class="btn sm alt" data-act="clsLeave">Leave</button></div>`:`<p class="muted" style="margin:0 0 6px">Got a code from your teacher or a friend's grown-up?</p>${field('clsCode','ABC123','clsJoin','Join')}`}</div>
- <div class="cl-sec"><h3>Grown-ups</h3><div class="cl-btns"><button class="btn sm alt" data-act="clsTeach">Teacher / parent dashboard</button></div></div>
+ <p class="muted cl-note" style="margin-top:10px">Teachers and parents: the class dashboard is in <button class="linkbtn" data-act="grownups">Grown-ups</button>.</p>
  <p class="muted cl-note">Only first names and typing scores are shared. There is no chat.</p>
  <div class="rbtns"><button class="btn alt" data-act="close">Close</button></div>`)};
 document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t&&t.dataset&&t.dataset.enter){e.preventDefault();e.stopPropagation();ACT[t.dataset.enter]&&ACT[t.dataset.enter]({})}},true);
@@ -126,7 +126,7 @@ ACT.clsBoard=d=>{if(d&&d.g){BTAB=d.g;return drawBoard()}if(!S.cls)return;post('/
 function drawBoard(){const b=BROWS;if(!b)return;const rows=(BTAB==='all'?b.rows:b.rows.filter(x=>x.g===BTAB)).slice(0,15),medal=['#f0c860','#c8d0dc','#d08a50'];
  modal(`<h2>${esc(b.name)}: this week</h2><div class="hs-tabs">${['all',...Object.keys(GN)].map(g=>`<button class="${g===BTAB?'on':''}" data-act="clsBoard" data-g="${g}">${g==='all'?'All games':GN[g]}</button>`).join('')}</div>
  ${rows.length?`<table class="hs-tab"><tr><th>#</th><th>Player</th>${BTAB==='all'?'<th>Game</th>':''}<th>WPM</th><th>Accuracy</th></tr>${rows.map((x,k)=>`<tr class="${x.n===myName()?'me':''}"><td><b style="color:${medal[k]||'inherit'}">${k+1}</b></td><td>${esc(x.n)}</td>${BTAB==='all'?`<td>${GN[x.g]||x.g}</td>`:''}<td><b>${x.wpm}</b></td><td>${x.acc}%</td></tr>`).join('')}</table>`:'<p class="muted">No arcade scores yet this week.</p>'}
- <div class="rbtns"><button class="btn alt" data-act="clsHub">Back</button></div>`)}
+ <div class="rbtns"><button class="btn alt" data-act="${window.__gu?'grownups':'clsHub'}">Back</button></div>`)}
 
 /* ---------- grown-up gate + dashboard ---------- */
 let GATE2=0;
@@ -134,6 +134,7 @@ ACT.clsTeach=()=>{if(window.__clsOk)return teachList();const a=6+Math.floor(Math
  modal(`<h2>GROWN-UPS ONLY</h2><div class="pgatebox"><p class="pgq">What is ${a} × ${b}?</p><input id="pgate2" class="pgin" inputmode="numeric" autocomplete="off" maxlength="3" data-enter="clsGateOk" aria-label="Answer"></div>
  <div class="rbtns"><button class="btn" data-act="clsGateOk">OK</button><button class="btn alt" data-act="clsHub">Back</button></div>`);setTimeout(()=>$('#pgate2')?.focus(),50)};
 ACT.clsGateOk=()=>{if(+val('pgate2')!==GATE2){toast('Not quite. Ask a grown-up!');return ACT.clsHub()}window.__clsOk=1;teachList()};
+window.teachList=()=>teachList();
 function teachList(){const t=teach(),codes=Object.keys(t);
  modal(`<h2>Teacher / Parent</h2>${codes.length?`<div class="cl-list">${codes.map(c=>`<button class="btn sm" data-act="clsDash" data-c="${c}">${esc(t[c].name)} <span class="muted">${c}</span></button>`).join('')}</div>`:'<p class="muted">You have no classes on this device yet.</p>'}
  <div class="cl-sec"><h3>Make a new class or friend group</h3><div class="cl-field"><input id="clsName" class="cl-in wide" maxlength="40" placeholder="Room 4, or Cousins" autocomplete="off" data-enter="clsCreate"><button class="btn sm volt" data-act="clsCreate">Make it</button></div></div>

@@ -146,7 +146,7 @@ setTimeout(()=>document.body.classList.add('kkready'),3500);
  document.head.insertAdjacentHTML('beforeend','<style>.menubtn{display:inline-flex!important;align-items:center;gap:6px;padding:0 10px!important;width:auto!important}.menubtn img{width:22px;height:20px;image-rendering:pixelated}.menubtn span{font-size:14px;letter-spacing:.06em}body.mobile .menubtn span{display:none}</style>');
  const add=()=>{if(typeof screen==='undefined'||screen==='home')return;
   document.querySelectorAll('.screen:not([hidden]):not(#s-home) .topbar, #hud, #ghud').forEach(h=>{if(h.querySelector('.menubtn')||h.closest('[hidden]'))return;
-   const back=h.querySelector('.icon-btn[data-act=go]');const b=document.createElement('button');b.className='icon-btn menubtn';b.dataset.act='go';b.dataset.to='home';b.setAttribute('aria-label','Menu');b.title='Main menu';
+   const back=h.querySelector('.icon-btn[data-act=go]');if(back&&back.dataset.to==='home')return;const b=document.createElement('button');b.className='icon-btn menubtn';b.dataset.act='go';b.dataset.to='home';b.setAttribute('aria-label','Menu');b.title='Main menu';
    b.innerHTML='<img src="'+HOUSE+'" alt=""><span>MENU</span>';back?back.insertAdjacentElement('afterend',b):h.prepend(b)})};
  setInterval(add,300);add()}
 
