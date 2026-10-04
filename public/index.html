@@ -149,6 +149,55 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
 @media (max-width:1000px){.hero,.mp,.cls{grid-template-columns:1fr}.grid4,.arc{grid-template-columns:1fr 1fr}.steps{position:static}.feats{grid-template-columns:1fr 1fr}.nums{grid-template-columns:repeat(3,1fr)}.hero h1{font-size:24px}.biglogo{margin:0 auto 22px}}
 @media (max-width:600px){:root{--gut:16px}.grid4,.arc,.feats,.safe{grid-template-columns:1fr}.nums{grid-template-columns:1fr 1fr}nav .pbtn{font-size:16px;padding:7px 9px 9px}nav{justify-content:flex-start}.tagbox,.sec-h h2{font-size:16px}.kb span{font-size:15px;border-width:2px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- phones: compact, simple ---------- */
+.kbnote{display:none}
+@media (max-width:700px){
+ body{font-size:19px}
+ html{scroll-padding-top:58px}
+ header .wrap{padding:0 8px}
+ nav{display:grid!important;grid-template-columns:repeat(4,1fr);gap:5px;padding:7px 0;overflow:visible}
+ nav .lgl,nav .hp{display:none!important}
+ nav .pbtn{font-size:13px!important;padding:8px 2px 10px!important;letter-spacing:.02em;white-space:normal;line-height:1.05;text-align:center;min-height:42px}
+ nav .pbtn.on{outline-width:3px;outline-offset:2px}
+ .hero{padding:14px var(--gut) 18px!important;gap:14px!important;text-align:center}
+ .biglogo{width:min(78%,300px);margin:0 auto 10px!important}
+ .hero h1{font-size:16px!important;line-height:1.5;margin-bottom:8px}
+ .hero .lead{font-size:19px!important;margin:0 0 14px}
+ .hero .cta{justify-content:center;gap:10px}
+ .hero .cta .pbtn{font-size:19px;padding:11px 16px 13px}
+ .hero .cta>.pbtn.c-teal{display:none}
+ .tiny{font-size:15px;margin-top:10px}
+ .kbnote{display:block;margin:10px auto 0;max-width:340px;font-size:16px;color:var(--ink);background:#2a2238;border:3px solid var(--line);border-left:6px solid var(--gold);padding:8px 10px;text-align:left}
+ .scene{aspect-ratio:16/8}.scene .strip{font-size:22px}
+ .kb{display:none}
+ section{padding:26px 0}
+ .sec-h{margin-bottom:18px}
+ .tagbox{font-size:14px!important;margin:0 30px 18px!important}.tagbox b{padding:9px 16px 11px}
+ .tagbox::before,.tagbox::after{width:34px;top:10px;bottom:-10px}.tagbox::before{left:-28px}.tagbox::after{right:-28px}
+ .sec-h h2{font-size:15px!important;margin-bottom:8px}
+ .sec-h p{font-size:18px}
+ .grid4{grid-template-columns:1fr!important;gap:10px}
+ .card{display:grid;grid-template-columns:76px 1fr;column-gap:12px;padding:10px;box-shadow:0 4px 0 #120e1e}
+ .card .stage{grid-row:1/4;height:76px;width:76px}.card .cycle,.card .evo{zoom:.58}.card .flipc{zoom:.48}.card .mini-strip{font-size:15px}
+ .card .num{margin:0;font-size:10px}.card h3{font-size:21px;margin:2px 0}.card p{font-size:16px}
+ .arc{grid-template-columns:1fr 1fr!important;gap:8px}.arc figure{padding:6px}.arc figcaption{font-size:15px;margin-top:4px}
+ .mp{gap:16px}.mp li{font-size:16px;padding:8px 10px}.mp ul{gap:6px}
+ .track .ln{height:48px}.track .rr{width:48px}.track .rr img{width:42px}.track .rr small{font-size:12px}
+ .cls{display:flex!important;flex-direction:column-reverse;gap:10px}
+ .steps{display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:6px;position:static}
+ .steps button{grid-template-columns:auto;padding:6px 8px;gap:0}.steps button b{display:none}.steps button span{font-size:14px}.steps button small,.steps .prog{display:none!important}
+ .cap{font-size:17px;margin-top:8px}
+ .screen .bar{font-size:14px;padding:4px 8px}
+ .feats,.safe{grid-template-columns:1fr!important;gap:8px;margin-top:16px}
+ .feat,.safe div{padding:10px 10px 10px 64px!important;min-height:0}
+ .fico{width:42px!important;height:42px!important;left:10px!important;top:10px!important}
+ .feat h4,.safe h4{font-size:20px}.feat p,.safe p{font-size:15px}
+ .subh{margin:28px 0 14px}.subh p{font-size:17px!important}
+ .nums{grid-template-columns:repeat(3,1fr)!important;gap:6px}.nums div{padding:8px 4px}.nums b{font-size:14px;margin-bottom:4px}.nums span{font-size:14px}
+ .end{padding:30px 0}.end>img{width:84px}.end h2{font-size:15px;margin:10px 0 16px}.end .cta .pbtn{font-size:18px;padding:10px 14px 12px}
+ footer{font-size:16px;padding:16px 0 26px}
+}
 </style></head>
 <body><div class="stars"></div>
 <header id="hdr"><div class="wrap"><nav>
@@ -162,7 +211,8 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
  <h1>Learn to type on a <em>pixel adventure</em></h1>
  <p class="lead">Kids zap Scramblers, befriend Keylori and master every key, one short lesson at a time.</p>
  <div class="cta"><span class="prism"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span><a class="pbtn c-teal" href="#classroom"><img src="/site/img/ico_book.png" alt="">For classrooms</a></div>
- <p class="tiny">Free · Runs in the browser · No downloads · No ads</p></div>
+ <p class="tiny">Free · Runs in the browser · No downloads · No ads</p>
+ <p class="kbnote">Made to be played with a keyboard, ideally on a computer or an iPad with a keyboard.</p></div>
  <div><div class="scene"><div class="cloud" style="top:14%"></div><div class="cloud" style="top:30%;animation-delay:-9s"></div><div class="path"></div>
   <div class="strip" id="strip"></div><div class="say" id="say">Zap!</div>
   <img class="hs" src="/site/img/hero_pop.png" alt=""><div class="bar"><i id="hp" style="width:100%"></i></div><img class="vs" id="vs" src="/site/img/v_imp.png" alt=""><div class="beam" id="beam"></div></div>
@@ -297,10 +347,10 @@ document.getElementById('track').insertAdjacentHTML('beforeend',R.map(([n,h,d],k
 /* classroom walkthrough: one continuous video, each step jumps to its part */
 const STEPS=[
  ['Create a class','Get a short class code',0,'Open <b>Teachers</b>, pass the quick check and name your class. You get a code like <b>FOX123</b>.'],
- ['Kids join','No accounts needed',13.4,'Kids tap <b>Class</b> and type the code. They show up on your dashboard right away.'],
- ['Assign a lesson','Pick from 117 lessons',20.61,'Choose a lesson and press <b>Assign</b>. It appears as <b>Teacher\'s pick</b> on every child\'s home screen.'],
- ['Watch progress','Live, every 10 seconds',25.97,'See who is done, who is working and how fast. Tap a name for every lesson they have played.'],
- ['Race the class','Up to 40 racers',45.76,'Open a class race and watch live: progress, words per minute, accuracy, time, right and wrong keys.']];
+ ['Kids join','No accounts needed',13.75,'Kids tap <b>Class</b> and type the code. They show up on your dashboard right away.'],
+ ['Assign a lesson','Pick from 117 lessons',20.98,'Choose a lesson and press <b>Assign</b>. It pops up as <b>Teacher\'s pick</b> at the top of every child\'s home screen.'],
+ ['Watch progress','Live, every 10 seconds',33.5,'See who is done, who is working and how fast. Tap a name for every lesson they have played.'],
+ ['Race the class','Up to 40 racers',53.33,'Open a class race and watch live: progress, words per minute, accuracy, time, right and wrong keys.']];
 const stepsEl=document.getElementById('steps'),vid=document.getElementById('vid'),cap=document.getElementById('cap');let cur=-1;
 stepsEl.innerHTML=STEPS.map((s,i)=>`<button data-i="${i}"><b>${i+1}</b><span>${s[0]}<small>${s[1]}</small></span><div class="prog"><i></i></div></button>`).join('');
 const btns=[...stepsEl.querySelectorAll('button')];
