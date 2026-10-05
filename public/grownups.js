@@ -2,7 +2,7 @@
    teacher dashboard, players, devices and reset. Kid Settings keeps only kid things. Home buttons put learning first. */
 (function(){
 const ICO=PXG(["..oooo..",".oPPPPo.",".oPPPPo.","..oooo..",".oTTTTo.","oTTTTTTo","oTTTTTTo","oooooooo"],{o:'#2a1d3e',P:'#f2cc8c',T:'#b8a0f0'}).toDataURL();
-const CUP=PXG(['oooooooooooo','oYYYYYYYYYYo','oYoYYYYYYoYo','oYoYYYYYYoYo','.ooYYYYYYoo.','..oYYYYYYo..','...oYYYYo...','....oYYo....','...oooooo...','..oYYYYYYo..','..oooooooo..'],{o:'#2a1d3e',Y:'#f0c860'}).toDataURL();
+const CUP=PXG(['oooooooooooo','oYYYYYYYYYYo','oYoYYYYYYoYo','oYoYYYYYYoYo','.ooYYYYYYoo.','..oYYYYYYo..','...oYYYYo...','....oYYo....','...oooooo...','..oYYYYYYo..','..oooooooo..'],{o:'#2a1d3e',Y:'#f0c860'}).toDataURL();window.KK_CUP=CUP;
 let GATE=0;
 const openHub=()=>{window.__gu=1;window.__clsOk=1;window.__guMode='';
  const card=(act,t,d,c)=>`<button class="guitem ${c}" data-act="${act}"><b>${t}</b><small>${d}</small></button>`;
@@ -247,3 +247,7 @@ document.head.insertAdjacentHTML('beforeend','<style>#s-home .hero-info,#s-home.
 const _s=save;save=function(){fill();return _s.apply(this,arguments)};
 const _r=renderHome;renderHome=function(){fill();return _r.apply(this,arguments)};
 const _m=modal;modal=function(){fill();return _m.apply(this,arguments)};fill()})();
+/* arcade header: trophy icon on the High Scores button (shown alone on phones) */
+(function(){const add=()=>{document.querySelectorAll('.hsbtn:not(.hascup)').forEach(b=>{b.classList.add('hascup');const t=b.textContent.trim();b.setAttribute('aria-label',t);b.title=t;b.innerHTML=`<img class="bico mcup" src="${window.KK_CUP}" alt=""><span class="hslbl">${t}</span>`})};
+const _sh=show;show=function(){const r=_sh.apply(this,arguments);setTimeout(add,0);return r};add();
+document.head.insertAdjacentHTML('beforeend','<style>.hsbtn .mcup{display:none}body.mobile .hsbtn .mcup{display:block;height:20px;width:auto;margin:0;image-rendering:pixelated}body.mobile .hsbtn .hslbl{display:none}body.mobile .hsbtn{width:40px;padding:0!important;display:inline-flex;align-items:center;justify-content:center}</style>')})();
