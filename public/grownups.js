@@ -3,6 +3,8 @@
 (function(){
 const ICO=PXG(["..oooo..",".oPPPPo.",".oPPPPo.","..oooo..",".oTTTTo.","oTTTTTTo","oTTTTTTo","oooooooo"],{o:'#2a1d3e',P:'#f2cc8c',T:'#b8a0f0'}).toDataURL();
 const CUP=PXG(['oooooooooooo','oYYYYYYYYYYo','oYoYYYYYYoYo','oYoYYYYYYoYo','.ooYYYYYYoo.','..oYYYYYYo..','...oYYYYo...','....oYYo....','...oooooo...','..oYYYYYYo..','..oooooooo..'],{o:'#2a1d3e',Y:'#f0c860'}).toDataURL();window.KK_CUP=CUP;
+const CHART=PXG(['............','.........oo.','.........oGo','......oo.oGo','......oGooGo','...oo.oGooGo','...oGooGooGo','oo.oGooGooGo','oGooGooGooGo','oGooGooGooGo','oooooooooooo'],{o:'#2a1d3e',G:'#3a8a3a'}).toDataURL();
+ACT.myReport=()=>{window.__repId=null;closeModal();show('parents')};
 let GATE=0;
 const openHub=()=>{window.__gu=1;window.__clsOk=1;window.__guMode='';
  const card=(act,t,d,c)=>`<button class="guitem ${c}" data-act="${act}"><b>${t}</b><small>${d}</small></button>`;
@@ -145,6 +147,7 @@ const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try
  if(shop&&change){shop.classList.add('closetbtn');change.insertAdjacentElement('afterend',shop);change.parentElement.classList.add('herobtns')}
  if(hb){const q=s=>hb.querySelector(s);const order=[q('[data-act=play]'),q('[data-to=arcade]'),q('[data-to=map]'),q('[data-act=practice]'),q('[data-to=binder]')].filter(Boolean);
   if(typeof ACT.hiscores==='function'&&(typeof par!=='function'||par('arcade'))){let hs=q('.homehs');if(!hs){hb.insertAdjacentHTML('beforeend',`<button class="btn homehs" data-act="hiscores"><img class="bico" src="${CUP}" alt="">High Scores</button>`);hs=q('.homehs')}const bi=order.indexOf(q('[data-to=binder]'));order.splice(bi<0?order.length:bi,0,hs)}
+  {let pg=q('.homeprog');if(!pg){hb.insertAdjacentHTML('beforeend',`<button class="btn homeprog half" data-act="myReport"><img class="bico" src="${CHART}" alt="">Progress Report</button>`);pg=q('.homeprog')}order.push(pg);const bd=q('[data-to=binder]');if(bd)bd.classList.add('half')}
   hb.classList.add('hgrid');const pr=q('[data-act=practice]');if(pr)pr.classList.toggle('half',!!q('.homehs'));const hs2=q('.homehs');if(hs2)hs2.classList.add('half');
   order.forEach(b=>{b.classList.remove('arcbig');if(b.dataset.act!=='play')b.classList.remove('big');hb.appendChild(b)})}
  home.querySelectorAll('.badges.rbadges2,.bdglbl').forEach(x=>x.remove());
@@ -251,3 +254,4 @@ const _m=modal;modal=function(){fill();return _m.apply(this,arguments)};fill()})
 (function(){const add=()=>{document.querySelectorAll('.hsbtn:not(.hascup)').forEach(b=>{b.classList.add('hascup');const t=b.textContent.trim();b.setAttribute('aria-label',t);b.title=t;b.innerHTML=`<img class="bico mcup" src="${window.KK_CUP}" alt=""><span class="hslbl">${t}</span>`})};
 const _sh=show;show=function(){const r=_sh.apply(this,arguments);setTimeout(add,0);return r};add();
 document.head.insertAdjacentHTML('beforeend','<style>.hsbtn .mcup{display:none}body.mobile .hsbtn .mcup{display:block;height:20px;width:auto;margin:0;image-rendering:pixelated}body.mobile .hsbtn .hslbl{display:none}body.mobile .hsbtn{width:40px;padding:0!important;display:inline-flex;align-items:center;justify-content:center}</style>')})();
+document.head.insertAdjacentHTML('beforeend','<style>#s-home .homeprog{background:#a8d878!important;color:#2a1d3e!important;box-shadow:inset 0 -6px 0 #6fa048!important}</style>');
