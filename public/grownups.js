@@ -26,6 +26,7 @@ function masterUnlock(){try{const NS=typeof NST!=='undefined'?NST:8;
  S.rareOwn={drakko:1,kitsu:1,nyx:1};S.rareSeen={drakko:1,kitsu:1,nyx:1};S.placed=true;S.camp=true;
  S.story=S.story||{};S.story.shard=S.story.shard||{};for(let w=1;w<=12;w++)S.story.shard[w]=1;
  save();toast('Master code accepted: everything is unlocked!')}catch(e){console.warn(e);toast('Could not unlock everything')}}
+window.masterUnlock=masterUnlock;
 ACT.guCheck=()=>{if((document.getElementById('gugate')?.value||'').trim().toLowerCase()==='moxforma'){masterUnlock();try{renderHome()}catch(e){}return openHub()}const v=+(document.getElementById('gugate')?.value||0);if(v!==GATE){try{sfx.bad()}catch(e){}toast('Not quite. Ask a grown-up!');return ACT.grownups()}openHub()};
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='gugate'){e.preventDefault();e.stopPropagation();ACT.guCheck()}},true);
 ACT.insta=()=>{window.open('https://www.instagram.com/keyloria.kingdom','_blank','noopener')};
@@ -234,3 +235,8 @@ body.mobile #s-home .homebot{grid-template-columns:1fr}
 </style>`);
 try{if(screen==='home')renderHome()}catch(e){}
 })();
+/* master code works at every grown-up math check */
+document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.classList&&t.classList.contains('pgin')&&t.maxLength<10)t.maxLength=10},true);
+const isMaster=id=>((document.getElementById(id)||{}).value||'').trim().toLowerCase()==='moxforma';
+if(ACT.clsGateOk){const _c=ACT.clsGateOk;ACT.clsGateOk=function(){if(isMaster('pgate2')){window.masterUnlock();try{renderHome()}catch(e){}window.__clsOk=1;closeModal();return}return _c.apply(this,arguments)}}
+if(ACT.parCheck){const _p=ACT.parCheck;ACT.parCheck=function(){if(isMaster('pgate')){window.masterUnlock();try{renderHome()}catch(e){}closeModal();return}return _p.apply(this,arguments)}}
