@@ -14,9 +14,19 @@ const openHub=()=>{window.__gu=1;window.__clsOk=1;window.__guMode='';
  ${card('guDevices','Family code and reset','Play on more than one device with a family code, or start over from zero','c5')}
  </div><p class="gusupport">Keyloria is free with no ads. Enjoying it? <a href="https://ko-fi.com/keyloria" target="_blank" rel="noopener">Support Keyloria on Ko-fi</a></p><div class="rbtns"><button class="btn" data-act="close">DONE</button></div>`);const mb=document.getElementById('mbox');if(mb)mb.classList.add('guwide');try{fitModal()}catch(e){}};
 ACT.grownups=()=>{if(window.__gu)return openHub();const a=6+Math.floor(Math.random()*4),b=3+Math.floor(Math.random()*7);GATE=a*b;
- modal(`<h2>TEACHERS AND PARENTS</h2><p class="muted" style="margin:0 0 8px">Quick check before you go in.</p><div class="pgatebox"><p class="pgq">What is ${a} × ${b}?</p><input id="gugate" class="pgin" inputmode="numeric" autocomplete="off" maxlength="3" aria-label="Answer"></div>
+ modal(`<h2>TEACHERS AND PARENTS</h2><p class="muted" style="margin:0 0 8px">Quick check before you go in.</p><div class="pgatebox"><p class="pgq">What is ${a} × ${b}?</p><input id="gugate" class="pgin" inputmode="numeric" autocomplete="off" maxlength="10" aria-label="Answer"></div>
  <div class="rbtns"><button class="btn" data-act="guCheck">OK</button><button class="btn alt" data-act="close">BACK</button></div>`);setTimeout(()=>document.getElementById('gugate')?.focus(),50)};
-ACT.guCheck=()=>{const v=+(document.getElementById('gugate')?.value||0);if(v!==GATE){try{sfx.bad()}catch(e){}toast('Not quite. Ask a grown-up!');return ACT.grownups()}openHub()};
+/* master code: typing it into the grown-up check unlocks everything for this player */
+function masterUnlock(){try{const NS=typeof NST!=='undefined'?NST:8;
+ for(let i=0;i<LESSONS.length;i++)for(let s=0;s<NS;s++){const k=sk(i,s);if(!(S.best[k]>=1))S.best[k]=1}
+ S.arc=S.arc||{};S.arc.high=S.arc.high||{};['meteor','glitch','race','bubble','dig','keeper','bridge'].forEach(g=>{if(S.arc.high[g]!=='insanity')S.arc.high[g]='beast'});
+ S.daily=S.daily||{day:'',secs:0,streak:0,met:'',lastT:S.time||0};S.daily.best=Math.max(S.daily.best||0,60);
+ S.owned=S.owned||[];Object.keys(ACC).forEach(id=>{if(!S.owned.includes(id))S.owned.push(id)});
+ const top=Math.max(1,...Object.values(ACC).map(a=>a.lvl||0));if(S.xp<needXP(top))S.xp=needXP(top);
+ S.rareOwn={drakko:1,kitsu:1,nyx:1};S.rareSeen={drakko:1,kitsu:1,nyx:1};S.placed=true;S.camp=true;
+ S.story=S.story||{};S.story.shard=S.story.shard||{};for(let w=1;w<=12;w++)S.story.shard[w]=1;
+ save();toast('Master code accepted: everything is unlocked!')}catch(e){console.warn(e);toast('Could not unlock everything')}}
+ACT.guCheck=()=>{if((document.getElementById('gugate')?.value||'').trim().toLowerCase()==='moxforma'){masterUnlock();try{renderHome()}catch(e){}return openHub()}const v=+(document.getElementById('gugate')?.value||0);if(v!==GATE){try{sfx.bad()}catch(e){}toast('Not quite. Ask a grown-up!');return ACT.grownups()}openHub()};
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='gugate'){e.preventDefault();e.stopPropagation();ACT.guCheck()}},true);
 ACT.insta=()=>{window.open('https://www.instagram.com/keyloria.kingdom','_blank','noopener')};
 ACT.kofi=()=>{window.open('https://ko-fi.com/keyloria','_blank','noopener')};
