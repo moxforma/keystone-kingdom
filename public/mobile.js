@@ -66,11 +66,11 @@ document.head.insertAdjacentHTML('beforeend',`<style id="mobcss">
 body.mobile .screen{zoom:1!important;padding-left:10px!important;padding-right:10px!important;max-width:100vw!important;box-sizing:border-box}
 body.mobile #kbwrap,body.mobile .kbwrap,body.mobile #roam,body.mobile .roamtog,body.mobile .linesw{display:none!important}
 body.mobile #s-home{transform:none!important}
-body.mobile #s-home .topbar{flex-wrap:wrap!important;gap:5px!important;justify-content:center!important;padding-left:0!important;padding-right:0!important}
+body.mobile #s-home .topbar{flex-wrap:wrap!important;gap:3px!important;justify-content:center!important;padding-left:0!important;padding-right:0!important}
 body.mobile #s-home .topbar .selp{margin-right:0!important}
 body.mobile #s-home .topbar .fsz{display:none!important}
 body.mobile #s-home .topbar .btn,body.mobile #s-home .topbar .btn *{font-size:10px!important;letter-spacing:0!important}body.mobile #s-home .topbar .btn{padding:0 7px!important;height:36px!important}body.mobile #s-home .topbar .btn img{height:16px!important}
-body.mobile #s-home .topbar .icon-btn{width:32px!important;height:36px!important}body.mobile #s-home .topbar .gem{font-size:18px!important;padding:0 2px!important}
+body.mobile #s-home .topbar .icon-btn{width:28px!important;height:36px!important}body.mobile #s-home .topbar .gem{font-size:16px!important;padding:0 1px!important;min-width:0!important}
 body.mobile .gugrid{grid-template-columns:1fr!important}body.mobile #mbox.guwide{width:94vw!important}
 body.mobile .guitem b{font-size:20px}
 body.mobile #s-home .logo{display:flex!important;justify-content:center!important;align-items:center;width:100%!important;max-width:none!important;margin:0 auto 6px!important;transform:none!important;left:auto!important}body.mobile #s-home .logo>*{max-width:82%!important;height:auto;margin-left:auto!important;margin-right:auto!important}

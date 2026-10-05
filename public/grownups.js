@@ -90,8 +90,10 @@ const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments)
 /* ---- Keylori roaming the home screen: off by default, no header switch, secret invisible toggle right of Settings ---- */
 try{if(S.set&&S.set.roamOn===undefined){S.set.roamOn=false;S.set.hideRoam=true;save()}}catch(e){}
 ACT.roamSecret=()=>{S.set.roamOn=!S.set.roamOn;S.set.hideRoam=!S.set.roamOn;save();try{sfx.click&&sfx.click()}catch(e){}try{roamStart()}catch(e){}};
-function addSecret(){try{if(S.set&&S.set.roamOn===undefined){S.set.roamOn=false;S.set.hideRoam=true;save();try{roamStart()}catch(e){}}}catch(e){}const tb=document.querySelector('#s-home .topbar');if(!tb||tb.querySelector('.secretroam'))return;
- tb.insertAdjacentHTML('beforeend','<span class="secretgap" aria-hidden="true"></span><button class="secretroam" data-act="roamSecret" tabindex="-1" aria-hidden="true"></button>')}
+function addSecret(){try{if(S.set&&S.set.roamOn===undefined){S.set.roamOn=false;S.set.hideRoam=true;save();try{roamStart()}catch(e){}}}catch(e){}
+ const img=document.querySelector('#s-home .logo .pxlogo');if(!img||img.parentElement.classList.contains('lgwrap'))return;
+ const w=document.createElement('span');w.className='lgwrap';img.replaceWith(w);w.appendChild(img);
+ w.insertAdjacentHTML('beforeend','<button class="secretroam" data-act="roamSecret" tabindex="-1" aria-hidden="true"></button>')}
 /* ---- Teacher banner: a big book on each side ---- */
 const BOOKIMG=PXG(['.oooooo..oooooo.','oWWWWWWooWWWWWWo','oWLLLLWooWLLLLWo','oWWWWWWooWWWWWWo','oWLLLLWooWLLLLWo','oWWWWWWooWWWWWWo','oWLLLWWooWWLLLWo','oWWWWWWooWWWWWWo','oWLLLLWooWLLLLWo','oWWWWWWooWWWWWWo','oBBBBBBooBBBBBBo','.oBBBBBBBBBBBBo.','..oooooooooooo..'],{o:'#1a2448',W:'#fff6e0',L:'#9ab0e0',B:'#4a7ac8'}).toDataURL();
 function bookBanner(){const b=document.querySelector('#s-home .clsban');if(!b||b.querySelector('.cbbook'))return;
@@ -160,9 +162,12 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #s-home .clsban .cb-row .btn{margin:3px 0 5px!important;min-width:110px;padding-top:6px!important;padding-bottom:6px!important}
 #s-home .clsban .cb-name{line-height:1;margin:0}
 #s-home .roamtog{display:none!important}
-#s-home .topbar .secretgap{display:inline-block;width:42px;height:42px;flex:none}
-body.mobile #s-home .topbar .secretgap{width:6px}body.mobile #s-home .topbar .secretroam{width:32px;height:36px}
-#s-home .topbar .secretroam{all:unset;display:inline-block;width:42px;height:42px;flex:none;cursor:default;opacity:0}
+#s-home .visrow,body.mobile #s-home .visrow{display:none!important}
+#s-home .tcard:has(>.tc-r){grid-template-rows:auto 1fr!important}#s-home .tc-r{grid-template-rows:1fr auto!important;align-self:stretch!important;align-content:stretch!important}
+#s-home .hbtns{flex:1 1 auto!important;grid-template-rows:1.4fr repeat(4,1fr)!important;align-content:stretch!important;margin-top:8px!important}#s-home .hbtns>.btn{min-height:52px!important;height:auto!important;font-size:22px!important}#s-home .hbtns>.btn.big{font-size:24px!important}
+#s-home .nxcard{margin-bottom:16px!important}#s-home .tc-l .daily{margin-bottom:14px}
+#s-home .lgwrap{position:relative;display:inline-block;line-height:0}
+#s-home .lgwrap .secretroam{all:unset;position:absolute;left:77.9%;top:36%;width:3.4%;height:10%;cursor:default;opacity:0;z-index:2}
 #s-home .clsban.hasbook{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center;gap:14px;max-width:760px}
 #s-home .clsban .cbmain{flex:1;min-width:0;display:grid;gap:2px}
 #s-home .clsban .cbbook{width:64px;height:auto;image-rendering:pixelated;flex:none;filter:drop-shadow(3px 3px 0 #0d0a16)}
