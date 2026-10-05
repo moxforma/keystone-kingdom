@@ -8,7 +8,7 @@ const lookOk=l=>{l=l||{};const h=typeof HEROES!=='undefined'&&HEROES[l.h]?l.h:'p
 const heroIcon=l=>{const L=lookOk(l);try{return kku('hi'+L.h+(L.c||'')+JSON.stringify(L.eq),()=>heroCanvas(L.eq,L.h,L.c))}catch(e){return ''}};
 const heroBig=l=>{const L=lookOk(l);try{return zookSVG(L.eq,L.h,L.c)}catch(e){return zookSVG()}};
 const BOOK=PXG(["............",".oooo..oooo.","oWWWWooWWWWo","oWLLWooWLLWo","oWWWWooWWWWo","oWLLWooWLLWo","oWWWWooWWWWo","oWWWWooWWWWo","oBBBBooBBBBo",".oooo..oooo.",".....oo....."],{o:'#1b2a2e',W:'#fff6e0',L:'#8ab8c8',B:'#c8604a'}).toDataURL();
-const GN={meteor:'Meteor Zap',race:'Typing Race',glitch:'Scrambler Attack',bubble:'Bubble Pop',dig:'Treasure Dig',keeper:'Keylori Keeper',bridge:'Story Bridge'};
+const GN={meteor:'Meteor Zap',race:'Race with Keylori',glitch:'Scrambler Attack',bubble:'Bubble Pop',dig:'Treasure Dig',keeper:'Keylori Keeper',bridge:'Story Bridge'};
 const TEACH='kl-teach';const teach=()=>{try{return JSON.parse(localStorage.getItem(TEACH)||'{}')}catch(e){return{}}};const setTeach=t=>{try{localStorage.setItem(TEACH,JSON.stringify(t))}catch(e){}};
 const weekStart=()=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()};
 const lessonIdx=()=>Math.floor(nextStage()/NST);

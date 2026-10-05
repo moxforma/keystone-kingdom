@@ -1,6 +1,6 @@
 /* Arcade high scores shared across every player on this device/account */
 (function(){
-const GN={meteor:'Meteor Zap',race:'Typing Race',glitch:'Scrambler Attack',bubble:'Bubble Pop',dig:'Treasure Dig',keeper:'Keylori Keeper',bridge:'Story Bridge'};
+const GN={meteor:'Meteor Zap',race:'Race with Keylori',glitch:'Scrambler Attack',bubble:'Bubble Pop',dig:'Treasure Dig',keeper:'Keylori Keeper',bridge:'Story Bridge'};
 const DIFF=d=>(d||'auto').startsWith('beast')?'Beast':d==='easy'?'Easy':d==='hard'?'Hard':d==='med'||d==='medium'?'Medium':'Auto';
 function record(){try{if(screen!=='game'||typeof G==='undefined'||!G||G._hs||!GN[G.type])return;const box=$('#mbox');if(!box||!box.querySelector('.rstats'))return;
  const a=window.kkArcStats&&window.kkArcStats();if(!a||a.good<15)return;G._hs=1;
@@ -15,7 +15,7 @@ function allScores(){const out=[];let prof={list:['p1'],cur:'p1'};try{prof=JSON.
 let TAB='all';
 ACT.hiscores=d=>{if(d&&d.g)TAB=d.g;const all=allScores(),rows=(TAB==='all'?all:all.filter(x=>x.g===TAB)).slice(0,10);const medal=['#f0c860','#c8d0dc','#d08a50'];
  modal(`<h2>High Scores</h2><div class="hs-tabs">${['all',...Object.keys(GN)].map(g=>`<button class="${g===TAB?'on':''}" data-act="hiscores" data-g="${g}">${g==='all'?'All games':GN[g]}</button>`).join('')}</div>
- ${rows.length?`<table class="hs-tab"><tr><th>#</th><th>Player</th>${TAB==='all'?'<th>Game</th>':''}<th>WPM</th><th>Accuracy</th><th>Level</th><th>Date</th></tr>${rows.map((x,k)=>`<tr class="${x.me?'me':''}"><td><b style="color:${medal[k]||'inherit'}">${k+1}</b></td><td>${esc(x.n)}</td>${TAB==='all'?`<td>${GN[x.g]}</td>`:''}<td><b>${x.wpm}</b></td><td>${x.acc}%</td><td>${x.d}</td><td>${new Date(x.t).toLocaleDateString()}</td></tr>`).join('')}</table>`:`<p class="muted">No scores yet. Play an arcade game to get on the board!</p>`}
+ ${rows.length?`<table class="hs-tab"><tr><th>#</th><th>Player</th>${TAB==='all'?'<th>Game</th>':''}<th>WPM</th><th>Accuracy</th><th>Level</th><th>Date</th></tr>${rows.map((x,k)=>`<tr class="${x.me?'me':''}"><td><b style="color:${medal[k]||'inherit'}">${k+1}</b></td><td>${esc(x.n)}</td>${TAB==='all'?`<td>${GN[x.g]}</td>`:''}<td><b>${x.wpm}</b></td><td>${x.acc}%</td><td>${x.d}</td><td style="white-space:nowrap">${new Date(x.t).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</td></tr>`).join('')}</table>`:`<p class="muted">No scores yet. Play an arcade game to get on the board!</p>`}
  <p class="muted" style="font-size:16px;margin:6px 0 0">Everyone who plays on this device is on the board.</p><div class="rbtns"><button class="btn" data-act="close">Close</button></div>`)};
 const _md=modal;modal=function(){const r=_md.apply(this,arguments);setTimeout(record,120);return r};
 const _ra=renderArcade;renderArcade=function(){const r=_ra.apply(this,arguments);try{const tb=$('#s-arcade .topbar');if(tb&&!tb.querySelector('[data-act=hiscores]'))tb.insertAdjacentHTML('beforeend','<button class="btn sm volt hsbtn" data-act="hiscores">High Scores</button>')}catch(e){}return r};

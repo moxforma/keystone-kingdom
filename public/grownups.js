@@ -100,6 +100,8 @@ const _md=modal;modal=function(){const mb=document.getElementById('mbox');if(mb)
  try{const box=document.getElementById('mbox'),dash=box.querySelector('.dashv'),ready=box.querySelector('.cl-big')&&/is ready/.test(box.querySelector('h2')?.textContent||'');
   if((dash||ready)&&!box.querySelector('.tpwrow')){const on=!!tpw(),rb=[...box.querySelectorAll('.rbtns')].pop();
    if(rb)rb.insertAdjacentHTML('beforebegin',`<p class="muted tpwrow" style="text-align:center;margin:12px 0 0">${on?'Teacher password is on.':ready?'Students use this device too?':'Shared device?'} <button class="linkbtn" data-act="tpwSet">${on?'Change teacher password':'Set a teacher password'}</button></p>`)}}catch(e){}
+/* anything too wide for the popup gets a wider popup instead of being cut off */
+ try{const box=document.getElementById('mbox');const fit=()=>{if(box&&!box.classList.contains('guwide')&&box.scrollWidth>box.clientWidth+2){box.classList.add('guwide');try{fitModal()}catch(e){}}};fit();requestAnimationFrame(fit);setTimeout(fit,150)}catch(e){}
  return r};
 const _cm=closeModal;closeModal=function(){window.__guMode='';return _cm.apply(this,arguments)};
 
@@ -146,7 +148,10 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #s-home .clsban .cb-name{line-height:1;margin:0}
 #mbox .cl-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 #mbox .btn .muted{color:#4a3a1a!important;opacity:1!important}
-#mbox.guwide{width:min(900px,94vw)!important;max-width:none!important}
+#mbox.guwide{width:min(940px,96vw)!important;max-width:none!important;overflow-x:auto}
+#mbox .hs-tab td,#mbox .hs-tab th{padding-left:8px;padding-right:8px}
+#mbox .hs-tabs{flex-wrap:wrap!important}
+@media (max-width:600px){#mbox .hs-tab{font-size:14px!important;width:100%}#mbox table.hs-tab.hs-tab td,#mbox table.hs-tab.hs-tab th{padding:4px 3px!important;font-size:15px!important}#mbox .hs-tab th:nth-last-child(1),#mbox .hs-tab td:nth-last-child(1),#mbox .hs-tab th:nth-last-child(2),#mbox .hs-tab td:nth-last-child(2){display:none}#mbox .hs-tabs button{font-size:13px!important;padding:4px 6px!important}}
 .gusupport{margin:12px 0 0;font-size:17px;color:#c8bce0}.gusupport a{color:#f07a6e}
 .gugrid .guitem:last-child:nth-child(odd){grid-column:1/-1}
 #s-home .hbtns{display:grid!important;grid-template-columns:1fr 1fr!important;row-gap:11px!important;column-gap:6px!important}

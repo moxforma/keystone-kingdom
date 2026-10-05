@@ -10,5 +10,6 @@ function tune(g){if(typeof G==='undefined'||!G||G.type!==g)return;const t=(T[g]|
  if((g==='dig'||g==='keeper')&&!G.tuned){const m={hard:.85,beast:.72,imp:.8}[lvl()];if(m&&G.left)G.left=Math.round(G.left*m);if(g==='keeper'&&lvl()==='imp')G.life=30;G.tuned=1}
  if(!t)return;Object.assign(G,t);
  try{if(g==='meteor'&&t.shields)gUpdate();if(g==='glitch'&&t.hearts)gUp()}catch(e){}}
-['meteor','glitch','race','dig','keeper'].forEach(g=>{const f=ACT[g];if(!f)return;ACT[g]=function(){const r=f.apply(this,arguments);try{tune(g)}catch(e){console.warn(e)}return r}});
+/* every game start (incl. Play again) clears the end-of-game popup first */
+['meteor','glitch','race','bubble','dig','keeper','bridge'].forEach(g=>{const f=ACT[g];if(!f)return;ACT[g]=function(){try{closeModal()}catch(e){}const r=f.apply(this,arguments);try{tune(g)}catch(e){console.warn(e)}return r}});
 })();
