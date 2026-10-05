@@ -125,7 +125,7 @@ let BTAB='all',BROWS=null;
 ACT.clsBoard=d=>{if(d&&d.g){BTAB=d.g;return drawBoard()}if(!S.cls)return;post('/api/class',{a:'board',code:S.cls.code}).then(b=>{BROWS=b;drawBoard()}).catch(e=>toast(e.message))};
 function drawBoard(){const b=BROWS;if(!b)return;const rows=(BTAB==='all'?b.rows:b.rows.filter(x=>x.g===BTAB)).slice(0,15),medal=['#f0c860','#c8d0dc','#d08a50'];
  modal(`<h2>${esc(b.name)}: this week</h2><div class="hs-tabs">${['all',...Object.keys(GN)].map(g=>`<button class="${g===BTAB?'on':''}" data-act="clsBoard" data-g="${g}">${g==='all'?'All games':GN[g]}</button>`).join('')}</div>
- ${rows.length?`<table class="hs-tab"><tr><th>#</th><th>Player</th>${BTAB==='all'?'<th>Game</th>':''}<th>WPM</th><th>Accuracy</th></tr>${rows.map((x,k)=>`<tr class="${x.n===myName()?'me':''}"><td><b style="color:${medal[k]||'inherit'}">${k+1}</b></td><td>${esc(x.n)}</td>${BTAB==='all'?`<td>${GN[x.g]||x.g}</td>`:''}<td><b>${x.wpm}</b></td><td>${x.acc}%</td></tr>`).join('')}</table>`:'<p class="muted">No arcade scores yet this week.</p>'}
+ ${rows.length?`<table class="hs-tab"><tr><th>#</th><th>Player</th>${BTAB==='all'?'<th>Game</th>':''}<th>WPM</th><th>Accuracy</th></tr>${rows.map((x,k)=>`<tr class="${x.n===myName()?'me':''}"><td>${k<3?`<span class="medal m${k+1}">${k+1}</span>`:`<b>${k+1}</b>`}</td><td>${esc(x.n)}</td>${BTAB==='all'?`<td>${GN[x.g]||x.g}</td>`:''}<td><b>${x.wpm}</b></td><td>${x.acc}%</td></tr>`).join('')}</table>`:'<p class="muted">No arcade scores yet this week.</p>'}
  <div class="rbtns"><button class="btn alt" data-act="${window.__gu?'grownups':'clsHub'}">Back</button></div>`)}
 
 /* ---------- grown-up gate + dashboard ---------- */

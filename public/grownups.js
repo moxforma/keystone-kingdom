@@ -144,7 +144,16 @@ const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try
   const keys=L.k?[...L.k].map(c=>`<span style="--fc:${fcol(fingerOf(c))}">${c.toUpperCase()}</span>`).join(''):'';
   const pips=Array.from({length:NS},(_,k)=>`<i class="${(S.best[i+'-'+k]||0)>0?'done':''} ${k===s?'cur':''}"></i>`).join('');
   tc.insertAdjacentHTML('afterbegin',`<button class="nxcard" data-act="play" data-n="${n}" style="--rc:${R.color||'#7fe8d0'}"><span class="nx-art">${creatureSVG(i,f,'fit '+(has?'':'sil'))}</span><span class="nx-txt"><small>UP NEXT · ${esc(R.name||'')}</small><b>Lesson ${typeof LNUM==='function'?LNUM(i):i+1}: ${esc(lessonTitle(i))}</b><span class="nx-part">Part ${s+1} of ${NS} · ${esc(stageName(i,s))}</span><span class="nx-pips">${pips}</span>${keys?`<span class="minikeys">${keys}</span>`:''}</span></button>`)}catch(e){console.warn(e)}}
+ /* layout from Andy's mockup: egg + keystone move under the mode buttons, closet above change hero, arcade|map share a row */
+ try{const tr=home.querySelector('.tc-r')||home.querySelector('.tcard'),egg=home.querySelector('.eggrow'),ks=home.querySelector('.shards');
+  if(tr&&(egg||ks)){let bot=home.querySelector('.homebot');if(!bot){bot=document.createElement('div');bot.className='homebot'}const hbb=home.querySelector('.hbtns');if(hbb&&hbb.nextElementSibling!==bot)hbb.insertAdjacentElement('afterend',bot);else if(!hbb&&!bot.parentElement)tr.appendChild(bot)
+   if(egg&&egg.parentElement!==bot)bot.appendChild(egg);if(ks&&ks.parentElement!==bot)bot.appendChild(ks)}
+  const hbx=home.querySelector('.herobtns'),cl=hbx&&hbx.querySelector('.closetbtn');if(cl&&hbx.firstElementChild!==cl)hbx.insertBefore(cl,hbx.firstElementChild);
+  if(hb){['[data-to=arcade]','[data-to=map]'].forEach(s=>{const b=hb.querySelector(s);b&&b.classList.add('half')})}
+ }catch(e){console.warn(e)}
  }catch(e){console.warn(e)}return r};
+/* the home's two-column fitter re-sorts children; keep the egg/keystone row right under the mode buttons */
+if(typeof homeCols==='function'){const _hc=homeCols;homeCols=function(){const r=_hc.apply(this,arguments);try{const b=document.querySelector('#s-home .homebot'),h=document.querySelector('#s-home .hbtns');if(b&&h&&h.nextElementSibling!==b)h.insertAdjacentElement('afterend',b)}catch(e){}return r}}
 document.head.insertAdjacentHTML('beforeend',`<style>
 #s-home .topbar .btn.gubtn{background:#f0c860!important;color:#2a1d3e!important;box-shadow:4px 4px 0 rgba(4,6,24,.65)!important;height:42px!important;font-family:var(--title)!important;font-size:11px!important;padding:0 10px!important;letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;margin:0!important;min-height:0!important;line-height:1!important}
 #s-home .topbar .btn.gubtn img{height:18px;image-rendering:pixelated}
@@ -163,9 +172,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #s-home .clsban .cb-name{line-height:1;margin:0}
 #s-home .roamtog{display:none!important}
 #s-home .topbar{justify-content:flex-start!important}#s-home .topbar>.selp{margin-right:auto!important}
-#s-home .visrow,body.mobile #s-home .visrow{display:none!important}
-#s-home .tcard:has(>.tc-r){grid-template-rows:auto 1fr!important}#s-home .tc-r{grid-template-rows:1fr auto!important;align-self:stretch!important;align-content:stretch!important}
-#s-home .hbtns{flex:1 1 auto!important;grid-template-rows:1.4fr repeat(4,1fr)!important;align-content:stretch!important;margin-top:8px!important}#s-home .hbtns>.btn{min-height:52px!important;height:auto!important;font-size:22px!important}#s-home .hbtns>.btn.big{font-size:24px!important}
+#s-home .visrow,body.mobile #s-home .tcard .visrow,body.mobile #s-home .visrow.visrow{display:none!important}
+#s-home .hbtns{grid-template-rows:none!important;grid-auto-rows:auto!important;margin-top:10px!important}#s-home .hbtns>.btn{min-height:52px!important;height:auto!important;font-size:22px!important}#s-home .hbtns>.btn.big{font-size:24px!important}
 #s-home .nxcard{margin-bottom:16px!important}#s-home .tc-l .daily{margin-bottom:14px}
 #s-home .lgwrap{position:relative;display:inline-block;line-height:0}
 #s-home .lgwrap .secretroam{all:unset;position:absolute;left:77.9%;top:36%;width:3.4%;height:10%;cursor:default;opacity:0;z-index:2}
@@ -173,6 +181,16 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #s-home .clsban .cbmain{flex:1;min-width:0;display:grid;gap:2px}
 #s-home .clsban .cbbook{width:64px;height:auto;image-rendering:pixelated;flex:none;filter:drop-shadow(3px 3px 0 #0d0a16)}
 body.mobile #s-home .clsban .cbbook{width:40px}
+.medal{display:inline-grid;place-items:center;width:30px;height:30px;font:400 15px/1 var(--title,monospace);color:#241c34!important;box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.5)!important;clip-path:polygon(30% 0,70% 0,70% 7%,85% 7%,85% 15%,93% 15%,93% 30%,100% 30%,100% 70%,93% 70%,93% 85%,85% 85%,85% 93%,70% 93%,70% 100%,30% 100%,30% 93%,15% 93%,15% 85%,7% 85%,7% 70%,0 70%,0 30%,7% 30%,7% 15%,15% 15%,15% 7%,30% 7%);padding-top:1px;box-sizing:border-box}
+.medal.m1{background:#f0c860}.medal.m2{background:#c8d0dc}.medal.m3{background:#d08a50}
+#s-home .homebot{display:grid;grid-template-columns:1fr auto;gap:12px;margin-top:14px;align-items:stretch}
+#s-home .homebot .eggrow{margin:0!important;display:flex;align-items:center;gap:14px;padding:12px 16px!important}
+#s-home .homebot .eggrow b{font-size:24px}#s-home .homebot .eggrow .note{font-size:19px}
+#s-home .homebot .shards{margin:0!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 14px!important;min-width:0}
+#s-home .homebot .shards .sh-row{display:grid!important;grid-template-columns:repeat(5,auto);gap:6px 8px}
+#s-home .homebot .shards .sh-lab{font-size:18px}
+#s-home .herobtns{margin-top:14px}
+body.mobile #s-home .homebot{grid-template-columns:1fr}
 #mbox .cl-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 #mbox .btn .muted{color:#4a3a1a!important;opacity:1!important}
 #mbox.guwide{width:min(940px,96vw)!important;max-width:none!important;overflow-x:auto}

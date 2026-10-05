@@ -319,7 +319,7 @@ function renderHome(){
   <div class="trow"><div><b>${S.xp}</b>XP</div><div><b>${cards}/${TOTAL}</b>Keylori</div><div><b>${holo}</b>Holo cards</div><div><b>${Object.values(S.best).reduce((a,b)=>a+b,0)}</b>Stars</div></div>
   <div class="badges">${REGIONS.map((r,k)=>`<div class="badge ${S.badges.includes(k)?'got':''}" style="--bc:${r.color}" title="${r.name} badge">${k+1}</div>`).join('')}</div>
   <div class="hbtns"><button class="btn big" data-act="play" data-n="${n}">${S.xp?'Continue':'Start adventure'}: ${lessonTitle(Math.floor(n/8))} · ${stageName(Math.floor(n/8),n%8)}</button>
-   <button class="btn volt" data-act="go" data-to="map">Adventure Map</button><button class="btn volt" data-act="go" data-to="arcade">Arcade Mode</button><button class="btn alt" data-act="go" data-to="binder">Keylori Collection</button><button class="btn alt" data-act="go" data-to="shop">Hero Closet</button></div>
+   <button class="btn volt" data-act="go" data-to="map">Lesson Quests</button><button class="btn volt" data-act="go" data-to="arcade">Arcade Mode</button><button class="btn alt" data-act="go" data-to="binder">Keylori Collection</button><button class="btn alt" data-act="go" data-to="shop">Hero Closet</button></div>
   <div class="eggrow">${eggSVG(S.egg.w)}<div><b>Daily Egg · ${S.egg.w} of 3 warm</b><span class="note">${S.egg.day===new Date().toDateString()?'Come back tomorrow!':'Play today to warm it.'}</span></div></div>
   ${!S.placed&&S.xp<200?`<p class="note" style="margin:0"><button class="linkbtn" data-act="place">Can you type already? Take a test</button></p>`:''}
   <p class="note" style="margin:0"><button class="linkbtn" data-act="go" data-to="parents">Grown-ups: see the progress report</button></p>
@@ -327,7 +327,7 @@ function renderHome(){
 }
 function renderMap(){
  const nx=nextStage();
- let h=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Adventure Map</h2><button class="btn sm volt" data-act="practice">Practice</button>${gemsHTML()}</div>`;
+ let h=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Lesson Quests</h2><button class="btn sm volt" data-act="practice">Practice</button>${gemsHTML()}</div>`;
  REGIONS.forEach((R,r)=>{
   h+=(WREG.includes(r)?worldHead(r):'')+`<section class="region" style="--rc:${R.color}"><div class="rhead"><div class="badge ${S.badges.includes(r)?'got':''}" style="--bc:${R.color}">${r+1}</div><div><h3>${R.name}</h3><p class="muted">${R.desc}</p></div></div><div class="lessons">`;
   LESSONS.forEach((L,i)=>{if(L.r!==r)return;
@@ -1663,7 +1663,7 @@ const _res8=results;results=function(r){_res8(r);if(P.practice||!r.pass)return;c
 /* --- map: 8 levels per lesson + evolution meter --- */
 function renderMap(){
  const nx=nextStage();
- let h=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Adventure Map</h2><button class="btn sm volt" data-act="practice">Practice</button>${gemsHTML()}</div>`;
+ let h=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Lesson Quests</h2><button class="btn sm volt" data-act="practice">Practice</button>${gemsHTML()}</div>`;
  REGIONS.forEach((R,r)=>{
   h+=(WREG.includes(r)?worldHead(r):'')+`<section class="region" style="--rc:${R.color}"><div class="rhead"><div class="badge ${S.badges.includes(r)?'got':''}" style="--bc:${R.color}">${r+1}</div><div><h3>${R.name}</h3><p class="muted">${R.desc}</p></div></div><div class="lessons l8s">`;
   (window.ORDER||LESSONS.map((_,k)=>k)).forEach(i=>{const L=LESSONS[i];if(L.r!==r)return;
