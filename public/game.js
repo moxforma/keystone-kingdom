@@ -2392,7 +2392,7 @@ function cleanText(txt){if(typeof txt!=='string')return txt;return txt.split(' '
 const _gt39=genText;genText=function(){return cleanText(_gt39.apply(this,arguments))};
 if(typeof comboText==='function'){const _ct39=comboText;comboText=function(){return cleanText(_ct39.apply(this,arguments))}}
 /* ================= V41: feedback + about ================= */
-const _rh41=renderHome;renderHome=function(){_rh41();const g=$('#s-home .home-grid');if(g&&!$('#s-home .footbtns'))g.insertAdjacentHTML('afterend','<div class="footbtns"><button class="btn alt sm" data-act="feedback">Feedback / Report a bug</button><button class="btn alt sm howtobtn" data-act="howto">How to play</button><button class="btn alt sm kofibtn" data-act="kofi"><img src="/site/img/ico_cup.png" alt="">Support Keyloria</button></div>')};
+const _rh41=renderHome;renderHome=function(){_rh41();const g=$('#s-home .home-grid');if(g&&!$('#s-home .footbtns'))g.insertAdjacentHTML('afterend','<div class="footbtns"><button class="btn alt sm" data-act="feedback">Feedback / Report a bug</button><button class="btn alt sm howtobtn" data-act="howto">How to play</button><button class="btn alt sm instabtn" data-act="insta">Instagram</button><button class="btn alt sm kofibtn" data-act="kofi"><img src="/site/img/ico_cup.png" alt="">Support Keyloria</button></div>')};
 ACT.feedback=()=>{modal(`<h2>Feedback</h2><p class="muted" style="margin:0">Found a bug or have an idea? Tell us!</p>
  <div class="seg fbtype" style="justify-content:center"><button class="on" data-act="fbType" data-v="Bug">Bug</button><button data-act="fbType" data-v="Idea">Idea</button><button data-act="fbType" data-v="Other">Other</button></div>
  <textarea id="fbmsg" rows="5" maxlength="2000" placeholder="What happened?"></textarea>
