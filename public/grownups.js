@@ -98,7 +98,7 @@ function addSecret(){try{if(S.set&&S.set.roamOn===undefined){S.set.roamOn=false;
 const BOOKIMG=PXG(['.oooooo..oooooo.','oWWWWWWooWWWWWWo','oWLLLLWooWLLLLWo','oWWWWWWooWWWWWWo','oWLLLLWooWLLLLWo','oWWWWWWooWWWWWWo','oWLLLWWooWWLLLWo','oWWWWWWooWWWWWWo','oWLLLLWooWLLLLWo','oWWWWWWooWWWWWWo','oBBBBBBooBBBBBBo','.oBBBBBBBBBBBBo.','..oooooooooooo..'],{o:'#1a2448',W:'#fff6e0',L:'#9ab0e0',B:'#4a7ac8'}).toDataURL();
 function bookBanner(){const b=document.querySelector('#s-home .clsban');if(!b||b.querySelector('.cbbook'))return;
  const inner=document.createElement('div');inner.className='cbmain';while(b.firstChild)inner.appendChild(b.firstChild);
- b.insertAdjacentHTML('beforeend',`<img class="cbbook" src="${BOOKIMG}" alt="">`);b.appendChild(inner);b.insertAdjacentHTML('beforeend',`<img class="cbbook" src="${BOOKIMG}" alt="">`);b.classList.add('hasbook')}
+ b.insertAdjacentHTML('beforeend',`<img class="cbbook" src="${BOOKIMG}" alt="">`);b.appendChild(inner);b.classList.add('hasbook')}
 new MutationObserver(()=>{try{addSecret();bookBanner()}catch(e){}}).observe(document.body,{childList:true,subtree:true});
 /* ---- Settings: kid things only, unless opened as "Devices and reset" from the hub ---- */
 const _set=ACT.settings;ACT.settings=function(){const r=_set.apply(this,arguments);try{const box=document.getElementById('mbox');if(!box)return r;
@@ -162,6 +162,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #s-home .clsban .cb-row .btn{margin:3px 0 5px!important;min-width:110px;padding-top:6px!important;padding-bottom:6px!important}
 #s-home .clsban .cb-name{line-height:1;margin:0}
 #s-home .roamtog{display:none!important}
+#s-home .topbar{justify-content:flex-start!important}#s-home .topbar>.selp{margin-right:auto!important}
 #s-home .visrow,body.mobile #s-home .visrow{display:none!important}
 #s-home .tcard:has(>.tc-r){grid-template-rows:auto 1fr!important}#s-home .tc-r{grid-template-rows:1fr auto!important;align-self:stretch!important;align-content:stretch!important}
 #s-home .hbtns{flex:1 1 auto!important;grid-template-rows:1.4fr repeat(4,1fr)!important;align-content:stretch!important;margin-top:8px!important}#s-home .hbtns>.btn{min-height:52px!important;height:auto!important;font-size:22px!important}#s-home .hbtns>.btn.big{font-size:24px!important}
