@@ -25,11 +25,14 @@ function masterUnlock(){try{const NS=typeof NST!=='undefined'?NST:8;
  S.daily=S.daily||{day:'',secs:0,streak:0,met:'',lastT:S.time||0};S.daily.best=Math.max(S.daily.best||0,60);
  S.owned=S.owned||[];Object.keys(ACC).forEach(id=>{if(!S.owned.includes(id))S.owned.push(id)});
  const top=Math.max(1,...Object.values(ACC).map(a=>a.lvl||0));if(S.xp<needXP(top))S.xp=needXP(top);
- S.infGems=1;S.gems=99999;S.cards=S.cards||{};for(let i=0;i<LESSONS.length;i++)for(let f=0;f<3;f++){const k=i+'-'+f;S.cards[k]=Object.assign(S.cards[k]||{},{holo:true})}S.rareOwn={drakko:1,kitsu:1,nyx:1};S.rareSeen={drakko:1,kitsu:1,nyx:1};S.placed=true;S.camp=true;
+ S.infGems=1;S.gems=99999;S.codeOn=true;S.cards=S.cards||{};for(let i=0;i<LESSONS.length;i++)for(let f=0;f<3;f++){const k=i+'-'+f;S.cards[k]=Object.assign(S.cards[k]||{},{holo:true})}S.rareOwn={drakko:1,kitsu:1,nyx:1};S.rareSeen={drakko:1,kitsu:1,nyx:1};S.placed=true;S.camp=true;
  S.story=S.story||{};S.story.shard=S.story.shard||{};for(let w=1;w<=12;w++)S.story.shard[w]=1;
  save();toast('Master code accepted: everything is unlocked!')}catch(e){console.warn(e);toast('Could not unlock everything')}}
 window.masterUnlock=masterUnlock;
-ACT.guCheck=()=>{if((document.getElementById('gugate')?.value||'').trim().toLowerCase()==='moxforma'){masterUnlock();try{renderHome()}catch(e){}return openHub()}const v=+(document.getElementById('gugate')?.value||0);if(v!==GATE){try{sfx.bad()}catch(e){}toast('Not quite. Ask a grown-up!');return ACT.grownups()}openHub()};
+/* secret codes typed into the grown-up math box. Add new ones with KK_CODES.word=()=>{...}; return true if the code opened its own screen */
+window.KK_CODES=window.KK_CODES||{};KK_CODES.moxforma=()=>{masterUnlock();try{renderHome()}catch(e){}return false};
+window.kkCode=id=>{const v=((document.getElementById(id)||{}).value||'').trim().toLowerCase(),f=v&&Object.prototype.hasOwnProperty.call(KK_CODES,v)&&KK_CODES[v];if(!f)return null;return f()?'own':'done'};
+ACT.guCheck=()=>{const c=kkCode('gugate');if(c==='own')return;if(c==='done')return openHub();const v=+(document.getElementById('gugate')?.value||0);if(v!==GATE){try{sfx.bad()}catch(e){}toast('Not quite. Ask a grown-up!');return ACT.grownups()}openHub()};
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='gugate'){e.preventDefault();e.stopPropagation();ACT.guCheck()}},true);
 ACT.insta=()=>{window.open('https://www.instagram.com/keyloria.kingdom','_blank','noopener')};
 ACT.kofi=()=>{window.open('https://ko-fi.com/keyloria','_blank','noopener')};
@@ -240,9 +243,9 @@ try{if(screen==='home')renderHome()}catch(e){}
 })();
 /* master code works at every grown-up math check */
 document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.classList&&t.classList.contains('pgin')&&t.maxLength<10)t.maxLength=10},true);
-const isMaster=id=>((document.getElementById(id)||{}).value||'').trim().toLowerCase()==='moxforma';
-if(ACT.clsGateOk){const _c=ACT.clsGateOk;ACT.clsGateOk=function(){if(isMaster('pgate2')){window.masterUnlock();try{renderHome()}catch(e){}window.__clsOk=1;closeModal();return}return _c.apply(this,arguments)}}
-if(ACT.parCheck){const _p=ACT.parCheck;ACT.parCheck=function(){if(isMaster('pgate')){window.masterUnlock();try{renderHome()}catch(e){}closeModal();return}return _p.apply(this,arguments)}}
+
+if(ACT.clsGateOk){const _c=ACT.clsGateOk;ACT.clsGateOk=function(){const c=kkCode('pgate2');if(c){if(c==='done'){window.__clsOk=1;closeModal()}return}return _c.apply(this,arguments)}}
+if(ACT.parCheck){const _p=ACT.parCheck;ACT.parCheck=function(){const c=kkCode('pgate');if(c){if(c==='done')closeModal();return}return _p.apply(this,arguments)}}
 /* wider stats column so 5-digit XP and 3-digit Keylori never touch */
 document.head.insertAdjacentHTML('beforeend','<style>#s-home .hero-info,#s-home.wide .hero-info{max-width:380px!important}#s-home .hero-info .trow{grid-template-columns:auto auto auto!important;justify-content:space-between;column-gap:26px!important;padding:0 6px;box-sizing:border-box}#s-home .hero-info .trow div{white-space:nowrap}</style>');
 /* unlimited diamonds after the master code: topped back up whenever they're spent */
