@@ -23,7 +23,7 @@ function masterUnlock(){try{const NS=typeof NST!=='undefined'?NST:8;
  S.daily=S.daily||{day:'',secs:0,streak:0,met:'',lastT:S.time||0};S.daily.best=Math.max(S.daily.best||0,60);
  S.owned=S.owned||[];Object.keys(ACC).forEach(id=>{if(!S.owned.includes(id))S.owned.push(id)});
  const top=Math.max(1,...Object.values(ACC).map(a=>a.lvl||0));if(S.xp<needXP(top))S.xp=needXP(top);
- S.rareOwn={drakko:1,kitsu:1,nyx:1};S.rareSeen={drakko:1,kitsu:1,nyx:1};S.placed=true;S.camp=true;
+ S.infGems=1;S.gems=99999;S.rareOwn={drakko:1,kitsu:1,nyx:1};S.rareSeen={drakko:1,kitsu:1,nyx:1};S.placed=true;S.camp=true;
  S.story=S.story||{};S.story.shard=S.story.shard||{};for(let w=1;w<=12;w++)S.story.shard[w]=1;
  save();toast('Master code accepted: everything is unlocked!')}catch(e){console.warn(e);toast('Could not unlock everything')}}
 window.masterUnlock=masterUnlock;
@@ -242,3 +242,8 @@ if(ACT.clsGateOk){const _c=ACT.clsGateOk;ACT.clsGateOk=function(){if(isMaster('p
 if(ACT.parCheck){const _p=ACT.parCheck;ACT.parCheck=function(){if(isMaster('pgate')){window.masterUnlock();try{renderHome()}catch(e){}closeModal();return}return _p.apply(this,arguments)}}
 /* wider stats column so 5-digit XP and 3-digit Keylori never touch */
 document.head.insertAdjacentHTML('beforeend','<style>#s-home .hero-info,#s-home.wide .hero-info{max-width:380px!important}#s-home .hero-info .trow{grid-template-columns:auto auto auto!important;justify-content:space-between;column-gap:26px!important;padding:0 6px;box-sizing:border-box}#s-home .hero-info .trow div{white-space:nowrap}</style>');
+/* unlimited diamonds after the master code: topped back up whenever they're spent */
+(function(){const fill=()=>{try{if(S&&S.infGems&&S.gems<99999)S.gems=99999}catch(e){}};
+const _s=save;save=function(){fill();return _s.apply(this,arguments)};
+const _r=renderHome;renderHome=function(){fill();return _r.apply(this,arguments)};
+const _m=modal;modal=function(){fill();return _m.apply(this,arguments)};fill()})();
