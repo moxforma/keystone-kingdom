@@ -86,6 +86,18 @@ const _rb=renderBinder;renderBinder=function(){const r=_rb.apply(this,arguments)
  const C=Object.values(S.cards),n=C.length,holo=C.filter(x=>x.holo).length,gold=C.filter(x=>x.tier==='gold').length,dia=C.filter(x=>x.tier==='diamond').length;
  const it=(k,v,l)=>`<span class="tcount" title="${l}"><img class="tico" src="${TI[k]}" alt="">${v} ${l}</span>`;
  sp.innerHTML=`${n}/${typeof TOTAL!=='undefined'?TOTAL:''} ${it('holo',holo,'holo')}${it('gold',gold,'gold')}${it('diamond',dia,'diamond')}`;sp.classList.add('tcounts')}}catch(e){console.warn(e)}return r};
+
+/* ---- Keylori roaming the home screen: off by default, no header switch, secret invisible toggle right of Settings ---- */
+try{if(S.set&&S.set.roamOn===undefined){S.set.roamOn=false;S.set.hideRoam=true;save()}}catch(e){}
+ACT.roamSecret=()=>{S.set.roamOn=!S.set.roamOn;S.set.hideRoam=!S.set.roamOn;save();try{sfx.click&&sfx.click()}catch(e){}try{roamStart()}catch(e){}};
+function addSecret(){try{if(S.set&&S.set.roamOn===undefined){S.set.roamOn=false;S.set.hideRoam=true;save();try{roamStart()}catch(e){}}}catch(e){}const tb=document.querySelector('#s-home .topbar');if(!tb||tb.querySelector('.secretroam'))return;
+ tb.insertAdjacentHTML('beforeend','<span class="secretgap" aria-hidden="true"></span><button class="secretroam" data-act="roamSecret" tabindex="-1" aria-hidden="true"></button>')}
+/* ---- Teacher banner: a big book on each side ---- */
+const BOOKIMG=PXG(['.oooooo..oooooo.','oWWWWWWooWWWWWWo','oWLLLLWooWLLLLWo','oWWWWWWooWWWWWWo','oWLLLLWooWLLLLWo','oWWWWWWooWWWWWWo','oWLLLWWooWWLLLWo','oWWWWWWooWWWWWWo','oWLLLLWooWLLLLWo','oWWWWWWooWWWWWWo','oBBBBBBooBBBBBBo','.oBBBBBBBBBBBBo.','..oooooooooooo..'],{o:'#1a2448',W:'#fff6e0',L:'#9ab0e0',B:'#4a7ac8'}).toDataURL();
+function bookBanner(){const b=document.querySelector('#s-home .clsban');if(!b||b.querySelector('.cbbook'))return;
+ const inner=document.createElement('div');inner.className='cbmain';while(b.firstChild)inner.appendChild(b.firstChild);
+ b.insertAdjacentHTML('beforeend',`<img class="cbbook" src="${BOOKIMG}" alt="">`);b.appendChild(inner);b.insertAdjacentHTML('beforeend',`<img class="cbbook" src="${BOOKIMG}" alt="">`);b.classList.add('hasbook')}
+new MutationObserver(()=>{try{addSecret();bookBanner()}catch(e){}}).observe(document.body,{childList:true,subtree:true});
 /* ---- Settings: kid things only, unless opened as "Devices and reset" from the hub ---- */
 const _set=ACT.settings;ACT.settings=function(){const r=_set.apply(this,arguments);try{const box=document.getElementById('mbox');if(!box)return r;
  const mode=window.__guMode;
@@ -147,6 +159,14 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #s-home .clsban .cb-row{gap:12px;padding:0;margin:0!important}#s-home .clsban .cb-row>span:first-child{font-size:20px;color:#fff6e0;line-height:1.1}#s-home .clsban .cb-row b{color:#f0c860;font-weight:400}
 #s-home .clsban .cb-row .btn{margin:3px 0 5px!important;min-width:110px;padding-top:6px!important;padding-bottom:6px!important}
 #s-home .clsban .cb-name{line-height:1;margin:0}
+#s-home .roamtog{display:none!important}
+#s-home .topbar .secretgap{display:inline-block;width:42px;height:42px;flex:none}
+body.mobile #s-home .topbar .secretgap{width:6px}body.mobile #s-home .topbar .secretroam{width:32px;height:36px}
+#s-home .topbar .secretroam{all:unset;display:inline-block;width:42px;height:42px;flex:none;cursor:default;opacity:0}
+#s-home .clsban.hasbook{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center;gap:14px;max-width:760px}
+#s-home .clsban .cbmain{flex:1;min-width:0;display:grid;gap:2px}
+#s-home .clsban .cbbook{width:64px;height:auto;image-rendering:pixelated;flex:none;filter:drop-shadow(3px 3px 0 #0d0a16)}
+body.mobile #s-home .clsban .cbbook{width:40px}
 #mbox .cl-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 #mbox .btn .muted{color:#4a3a1a!important;opacity:1!important}
 #mbox.guwide{width:min(940px,96vw)!important;max-width:none!important;overflow-x:auto}
