@@ -240,3 +240,5 @@ document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.classList&&t.cl
 const isMaster=id=>((document.getElementById(id)||{}).value||'').trim().toLowerCase()==='moxforma';
 if(ACT.clsGateOk){const _c=ACT.clsGateOk;ACT.clsGateOk=function(){if(isMaster('pgate2')){window.masterUnlock();try{renderHome()}catch(e){}window.__clsOk=1;closeModal();return}return _c.apply(this,arguments)}}
 if(ACT.parCheck){const _p=ACT.parCheck;ACT.parCheck=function(){if(isMaster('pgate')){window.masterUnlock();try{renderHome()}catch(e){}closeModal();return}return _p.apply(this,arguments)}}
+/* wider stats column so 5-digit XP and 3-digit Keylori never touch */
+document.head.insertAdjacentHTML('beforeend','<style>#s-home .hero-info,#s-home.wide .hero-info{max-width:380px!important}#s-home .hero-info .trow{grid-template-columns:auto auto auto!important;justify-content:space-between;column-gap:26px!important;padding:0 6px;box-sizing:border-box}#s-home .hero-info .trow div{white-space:nowrap}</style>');
