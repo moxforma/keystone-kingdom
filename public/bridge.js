@@ -4,12 +4,12 @@ const TXT=(typeof KK_TEXT!=='undefined'&&KK_TEXT)||{para:[]};
 const UNLOCK=14;
 const progLesson=()=>{const p=Math.floor(Math.max(0,nextStage())/NST);return typeof EI==='function'?EI(p):p};
 const SYM='!?@#$%&*+-=/';
-function prepText(t){const p=progLesson();
- if(p<15)t=t.toLowerCase();
- if(p<22)t=t.replace(/[!?]/g,'.').replace(/["']/g,'');
+function prepText(t){const p=progLesson(),I=!!window.INSANE;
+ if(p<15&&!I)t=t.toLowerCase();
+ if(p<22&&!I)t=t.replace(/[!?]/g,'.').replace(/["']/g,'');
  if(typeof arcadeNumberOn==='function'){if(!arcadeNumberOn())t=t.replace(/\d/g,'');if(!arcadeSymbolOn())t=t.replace(/[!?;:]/g,'.').replace(/[^A-Za-z0-9\s.,]/g,'')}
  return t.replace(/\s+/g,' ').replace(/\.\.+/g,'.').trim()}
-function wpmTarget(){const d=S.set.arcd||'auto';if(window.INSANE)return 85;return d==='beast'?48:d==='hard'?30:d==='medium'?20:d==='easy'?12:Math.max(10,Math.min(40,Math.round((typeof avgWpm==='function'?avgWpm():12)*.85)))}
+function wpmTarget(){const d=S.set.arcd||'auto';if(window.INSANE)return 72;return d==='beast'?50:d==='hard'?34:d==='medium'?20:d==='easy'?12:Math.max(10,Math.min(40,Math.round((typeof avgWpm==='function'?avgWpm():12)*.85)))}
 let LASTP=null;
 let BGHOST=null;
 function learnedStory(){const p=progLesson(),ls=learned(Math.min(LESSONS.length-1,p));const ok=w=>[...w.toLowerCase()].every(c=>ls.has(c));
@@ -21,8 +21,8 @@ function learnedStory(){const p=progLesson(),ls=learned(Math.min(LESSONS.length-
  if(words.length>=6){const out=[];for(let k=0;k<5;k++){out.push(Array.from({length:4},()=>rand(words)).join(' '))}return out.join(' ')}
  const lets=[...ls].filter(c=>/[a-z]/.test(c));return Array.from({length:24},()=>Array.from({length:2+Math.floor(Math.random()*2)},()=>rand(lets)).join('')).join(' ')}
 ACT.bridge=()=>{let raw=learnedStory();
- if(S.set.arcd==='beast'&&progLesson()>=UNLOCK){const two=rand(TXT.para.filter(x=>x!==raw));if(two)raw+=' '+two}
- const text=BGHOST?BGHOST.t:prepText(raw),words=text.split(' '),wpm=wpmTarget(),limit=Math.round(text.length/5/wpm*60+6);
+ if(S.set.arcd==='beast'&&!window.INSANE&&progLesson()>=UNLOCK){const two=rand(TXT.para.filter(x=>x!==raw));if(two)raw+=' '+two}
+ const text=BGHOST?BGHOST.t:prepText(raw),words=text.split(' '),wpm=wpmTarget(),limit=Math.round(text.length/5/wpm*60+(window.INSANE?0:S.set.arcd==='beast'?3:6));
  mountGame('Story Bridge','Type the story to build the bridge!','Words','Rope');
  G={type:'bridge',frames:[[0,0]],ghostInvite:BGHOST,text,pos:0,mist:new Set(),words,wi:0,limit,left:limit,done:false,start:0,score:0,combo:0,arcLevel:typeof arcadeLevelNow==='function'?arcadeLevelNow():'auto'};
  $('#gsw').hidden=true;const ar=$('#garena');ar.className='garena bridge-arena';
@@ -57,7 +57,7 @@ const _gi=gameInput;gameInput=function(ch,caps){if(!(typeof G!=='undefined'&&G&&
  const t=G.text[G.pos];if(t===undefined)return;
  if(matchKey(ch,t,caps)){const el=$('#bc'+G.pos);el&&el.classList.add(G.mist.has(G.pos)?'bad':'ok');G.pos++;G.combo++;try{sfx.ok(G.combo)}catch(e){}
   if(t===' '||G.pos>=G.text.length)wordDone();if(G.pos>=G.text.length){paint();return finish(true)}paint()}
- else{G.mist.add(G.pos);G.combo=0;try{sfx.bad()}catch(e){}const pl=$('#bp'+G.wi);if(pl){pl.classList.remove('wob');void pl.offsetWidth;pl.classList.add('wob')}const el=$('#bc'+G.pos);if(el){el.classList.remove('err');void el.offsetWidth;el.classList.add('err')}}};
+ else{G.mist.add(G.pos);G.combo=0;{const pen=window.INSANE?2:{beast:1,hard:.5}[S.set.arcd]||0;if(pen){G.limit-=pen;const rp=$('#brrope');if(rp){rp.classList.remove('wob');void rp.offsetWidth;rp.classList.add('wob')}}}try{sfx.bad()}catch(e){}const pl=$('#bp'+G.wi);if(pl){pl.classList.remove('wob');void pl.offsetWidth;pl.classList.add('wob')}const el=$('#bc'+G.pos);if(el){el.classList.remove('err');void el.offsetWidth;el.classList.add('err')}}};
 
 /* arcade card */
 const _ra=renderArcade;renderArcade=function(){_ra.apply(this,arguments);const g=$('#s-arcade .games');if(!g||g.querySelector('[data-act=bridge]'))return;const lock=false;

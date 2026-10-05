@@ -607,12 +607,12 @@ function startMeteor(){
  $('#garena').innerHTML=`${cityHTML()}<div class="gz">${zookSVG()}</div>`;
  gUpdate();G.last=performance.now();G.raf=requestAnimationFrame(mTick);
 }
-function spawnMeteor(){const txt=G.wordDeck?.[G.spawned]||arcadeBonus(G.spawned,5)||(G.words&&Math.random()<.6?rand(G.words):rand(G.set)),el=document.createElement('div');el.className='met';el.style.left=(10+Math.random()*74)+'%';
+function spawnMeteor(){const pickT=()=>G.wordDeck?.[G.spawned]||arcadeBonus(G.spawned,5)||(G.words&&Math.random()<(G.wordP||.6)?rand(G.words):rand(G.set));const busy=new Set(G.m.map(x=>x.txt[0]));let txt=pickT();for(let k=0;k<30&&busy.has(txt[0]);k++){txt=(G.words&&Math.random()<.7?rand(G.words):rand(G.set))}if(busy.has(txt[0]))return;const el=document.createElement('div');el.className='met';el.style.left=(10+Math.random()*74)+'%';
  el.innerHTML=`<span class="rock"></span><span class="mt">${[...txt].map(c=>`<i>${esc(c)}</i>`).join('')}</span>`;$('#garena').appendChild(el);G.m.push({txt,typed:0,y:-70,el});G.spawned++;mHint()}
 function mTick(now){
  if(G.done||G.type!=='meteor')return;const dt=Math.min(.05,(now-G.last)/1000);G.last=now;
  const H=$('#garena').clientHeight,v=(G.words?13:19)*G.speed;G.spawnT-=dt;
- if(G.spawnT<=0&&G.spawned<G.total&&G.m.length<(G.words?3:4)){spawnMeteor();G.spawnT=Math.max(1.3,3.4/G.speed)}
+ if(G.spawnT<=0&&G.spawned<G.total&&G.m.length<(G.maxOn||(G.words?3:4))){spawnMeteor();G.spawnT=Math.max(G.minGap||1.3,3.4/G.speed)}
  for(const m of [...G.m]){m.y+=v*dt;m.el.style.transform=`translateY(${m.y}px)`;if(m.y>H-110)landed(m)}
  if((G.spawned>=G.total&&!G.m.length)||G.shields<=0)return endMeteor();
  G.raf=requestAnimationFrame(mTick);
@@ -632,7 +632,7 @@ function gameInput(ch,caps){
  if(caps)ch=ch.toLowerCase();
  let m=G.tgt;if(!m){const c=G.m.filter(x=>matchKey(ch,x.txt[0],caps));if(c.length)m=c.reduce((a,b)=>a.y>b.y?a:b)}
  if(m&&matchKey(ch,m.txt[m.typed],caps)){G.tgt=m;m.typed++;G.hits++;const s=m.el.querySelectorAll('i');s[m.typed-1].className='on';zapTo(m);sfx.ok(G.hits%20);
-  if(m.typed>=m.txt.length){G.score+=10*m.txt.length+Math.round(G.speed*5);G.zapped++;G.speed=Math.min(3,G.speed+.07);removeMet(m,'boom');if(G.zapped%5===0)gsay(rand(PRAISE))}else mHint();gUpdate()}
+  if(m.typed>=m.txt.length){G.score+=10*m.txt.length+Math.round(G.speed*5);G.zapped++;G.speed=Math.min(G.maxSpeed||3,G.speed+.07);removeMet(m,'boom');if(G.zapped%5===0)gsay(rand(PRAISE))}else mHint();gUpdate()}
  else{G.errs++;sfx.bad();gsay(G.next?`That was ${esc(disp(ch))}. ${fingerSay(G.next)}`:'Wait for a meteor!',true)}
 }
 function endMeteor(){

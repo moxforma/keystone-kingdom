@@ -1,0 +1,14 @@
+/* Difficulty tuning: Hard is a real step up, Beast is fierce, Impossible is for the very best typists */
+(function(){
+const lvl=()=>window.INSANE?'imp':(S.set.arcd||'auto');
+const T={
+ meteor:{hard:{speed:2.1,maxSpeed:3.6,maxOn:4,minGap:1},beast:{speed:4.8,maxSpeed:6.5,maxOn:5,minGap:.75},imp:{speed:7.2,maxSpeed:10,maxOn:6,minGap:.5,shields:1,wordP:.9}},
+ glitch:{hard:{speed:1.9},beast:{speed:4},imp:{speed:6.8,hearts:1}},
+};
+function tune(g){if(typeof G==='undefined'||!G||G.type!==g)return;const t=(T[g]||{})[lvl()];
+ if(g==='race'&&G.racers){const L=lvl();if(L==='hard')G.racers.forEach((r,k)=>r.w=Math.max(r.w*1.25,[26,32,38][k]||30));const w={beast:[80,92,104],imp:[115,130,150]}[L];if(w)w.forEach((v,k)=>G.racers[k]&&(G.racers[k].w=v))}
+ if((g==='dig'||g==='keeper')&&!G.tuned){const m={hard:.85,beast:.72,imp:.8}[lvl()];if(m&&G.left)G.left=Math.round(G.left*m);if(g==='keeper'&&lvl()==='imp')G.life=30;G.tuned=1}
+ if(!t)return;Object.assign(G,t);
+ try{if(g==='meteor'&&t.shields)gUpdate();if(g==='glitch'&&t.hearts)gUp()}catch(e){}}
+['meteor','glitch','race','dig','keeper'].forEach(g=>{const f=ACT[g];if(!f)return;ACT[g]=function(){const r=f.apply(this,arguments);try{tune(g)}catch(e){console.warn(e)}return r}});
+})();
