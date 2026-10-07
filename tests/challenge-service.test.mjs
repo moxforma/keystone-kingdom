@@ -6,11 +6,11 @@ import { runInNewContext } from 'node:vm';
 
 const source = readFileSync(new URL('../netlify/functions/arcade-challenge.mjs', import.meta.url), 'utf8');
 const scripted = source.replace(/^import .*\n/m, '').replaceAll('export const ', 'const ')
- .replace('export default async req =>', 'const handler = async req =>');
+ .replace('export default async (req, context) =>', 'const handler = async (req, context) =>');
 
 function service() {
  const records = new Map();
- const context = { URL, Response, Buffer, crypto: webcrypto,
+ const context = { URL, Response, Buffer, TextEncoder, Uint8Array, Promise, crypto: webcrypto,
   getStore: () => ({
    get: async id => records.get(id) || null,
    setJSON: async (id, data) => records.set(id, data)

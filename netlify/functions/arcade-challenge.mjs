@@ -50,7 +50,18 @@ export const validChallenge = data => {
   (data.g === "meteor" || data.g === "bubble" ? validMeteorWords(data) : validGlitchWords(data));
 };
 
-export default async req => {
+
+/* simple per-IP limits (the IP is hashed, never stored as-is) */
+async function limited(store, req, context, bucket, max) {
+  const ip = (context && context.ip) || req.headers.get("x-nf-client-connection-ip") || "x", slot = Math.floor(Date.now() / 3600000), key = "rl:" + bucket + ":" + slot;
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("keyloria-ip:" + ip));
+  const h = [...new Uint8Array(d)].slice(0, 5).map(x => x.toString(16).padStart(2, "0")).join(""), m = (await store.get(key, { type: "json" })) || {};
+  m[h] = (m[h] || 0) + 1; await store.setJSON(key, m);
+  if (m[h] === 1 && store.delete) Promise.resolve(store.delete("rl:" + bucket + ":" + (slot - 2))).catch(() => {});
+  return m[h] > max;
+}
+
+export default async (req, context) => {
  const url = new URL(req.url);
  const store = getStore({ name: "keyloria-arcade-challenges", consistency: "strong" });
  if (req.method === "GET") {
@@ -66,6 +77,7 @@ export default async req => {
   let data;
   try { data = JSON.parse(body); } catch { return Response.json({ error: "Invalid challenge" }, { status: 400 }); }
   if (!validChallenge(data)) return Response.json({ error: "Invalid challenge" }, { status: 400 });
+  if (await limited(store, req, context, "make", 30)) return Response.json({ error: "Too many challenges. Try again later." }, { status: 429 });
   for (let attempt = 0; attempt < 3; attempt++) {
    const id = Buffer.from(crypto.getRandomValues(new Uint8Array(9))).toString("base64url");
    if (await store.get(id)) continue;

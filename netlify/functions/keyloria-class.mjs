@@ -12,7 +12,7 @@ async function limited(store, context, bucket, max) {
   const ip = (context && context.ip) || "x", slot = Math.floor(Date.now() / 3600000), key = "rl:" + bucket + ":" + slot;
   const h = (await digest("ip:" + ip)).slice(0, 10), m = (await store.get(key, { type: "json" })) || {};
   m[h] = (m[h] || 0) + 1; await store.setJSON(key, m);
-  if (m[h] === 1) store.delete("rl:" + bucket + ":" + (slot - 2)).catch(() => {});
+  if (m[h] === 1 && store.delete) Promise.resolve(store.delete("rl:" + bucket + ":" + (slot - 2))).catch(() => {});
   return m[h] > max;
 }
 const cleanName = v => String(v || "").replace(/[^A-Za-z0-9 '\-]/g, "").trim().slice(0, 14) || "Player";

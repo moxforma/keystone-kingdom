@@ -10,7 +10,7 @@ async function limited(store, context, bucket, max) {
   const ip = (context && context.ip) || "x", slot = Math.floor(Date.now() / 3600000), key = "rl:" + bucket + ":" + slot;
   const h = (await pubId("ip:" + ip)).slice(0, 10), m = (await store.get(key, { type: "json" })) || {};
   m[h] = (m[h] || 0) + 1; await store.setJSON(key, m);
-  if (m[h] === 1) store.delete("rl:" + bucket + ":" + (slot - 2)).catch(() => {});
+  if (m[h] === 1 && store.delete) Promise.resolve(store.delete("rl:" + bucket + ":" + (slot - 2))).catch(() => {});
   return m[h] > max;
 }
 const json = (v, s = 200) => Response.json({ ...v, now: Date.now() }, { status: s, headers: { "Cache-Control": "no-store" } });

@@ -7,7 +7,7 @@ import { webcrypto } from 'node:crypto';
 const source = readFileSync(new URL('../netlify/functions/keystone-sync.mjs', import.meta.url), 'utf8')
   .replace(/^import \{ getStore \} from "@netlify\/blobs";\r?\n/, '')
   .replace('export const mergeBundles =', 'const mergeBundles =')
-  .replace('export default async (req) =>', 'const handler = async (req) =>')
+  .replace('export default async (req, context) =>', 'const handler = async (req, context) =>')
   .replace(/export const config = \{ path: "\/api\/keystone-sync" \};?/, '');
 
 function fixture() {
