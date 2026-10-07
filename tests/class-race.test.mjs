@@ -6,7 +6,7 @@ import { runInNewContext } from 'node:vm';
 
 function load(file){
  const src=readFileSync(new URL('../netlify/functions/'+file,import.meta.url),'utf8')
-  .replace(/^import .*\r?\n/,'').replace('export default async req =>','const handler=async req =>')
+  .replace(/^import .*\r?\n/,'').replace(/export default async \(?req(, context)?\)? =>/,'const handler=async (req, context) =>')
   .replace(/export const config = .*?;\s*$/s,'').replace(/export const /g,'const ');
  const stores=new Map();
  const getStore=({name})=>{if(!stores.has(name))stores.set(name,new Map());const m=stores.get(name);
@@ -55,4 +55,45 @@ test('rematch resets the room to a new lobby round with only the players who cam
  await call({a:'join',room:r,pid:'kid0002',name:'Leo'});await call({a:'join',room:r,pid:'kid0003',name:'Zed'});
  await call({a:'start',room:r,pid:'kid0001'});
  assert.equal((await call({a:'rematch',room:r,pid:'kid0002',name:'Leo',text})).status,409);
+});
+
+test('race: players only see hashed ids, strangers cannot reset or forge',async()=>{
+ const {call}=load('keyloria-race.mjs');
+ const text='the fox ran up the hill and sat in the sun';
+ const r=(await call({a:'make',pid:'host001',name:'Teach',text})).body.room;
+ await call({a:'join',room:r,pid:'kid0001',name:'Mia'});
+ const lob=(await call({a:'get',room:r,pid:'kid0001'})).body;
+ assert.ok(!lob.players.some(p=>p.pid==='host001'||p.pid==='kid0001'));assert.notEqual(lob.host,'host001');
+ const mia=lob.players.find(p=>p.name==='Mia');assert.equal(mia.pid,lob.me);
+ assert.equal((await call({a:'start',room:r,pid:lob.host})).status,403);
+ await call({a:'start',room:r,pid:'host001'});
+ const before=(await call({a:'rematch',room:r,pid:'stranger1',text})).body;
+ assert.ok(before.error||before.state==='go');
+ const g=(await call({a:'get',room:r,pid:'host001'})).body;assert.equal(g.state,'go');assert.equal(g.round,0);
+});
+
+test('race: expired rooms are reused so codes never run out',async()=>{
+ const {call,stores}=load('keyloria-race.mjs');
+ const text='the fox ran up the hill and sat in the sun';
+ const m=()=>stores.get('keyloria-races');
+ await call({a:'make',pid:'host001',name:'T',text});
+ for(const [k,v] of m())if(k.startsWith('r:'))v.created=Date.now()-4*3600000;
+ let ok=0;for(let i=0;i<30;i++)if((await call({a:'make',pid:'host00'+(i%9+1),name:'T',text})).status===200)ok++;
+ assert.equal(ok,30);
+});
+
+test('class: teacher can delete the class and all kids in it',async()=>{
+ const {call,stores}=load('keyloria-class.mjs');
+ const {code,tk}=(await call({a:'create',name:'Room 9'})).body;
+ await call({a:'join',code,pid:'kid0001',name:'Mia'});
+ assert.equal((await call({a:'delete',code,tk:'0'.repeat(32)})).status,403);
+ assert.equal((await call({a:'delete',code,tk})).status,200);
+ assert.equal((await call({a:'info',code})).status,404);
+ assert.ok(![...stores.get('keyloria-classes').keys()].some(k=>k.startsWith('m:')||k.startsWith('c:')));
+});
+
+test('class: guessing codes gets blocked',async()=>{
+ const {call}=load('keyloria-class.mjs');
+ let last;for(let i=0;i<45;i++)last=(await call({a:'info',code:'ant'+String(i).padStart(3,'0')})).status;
+ assert.equal(last,429);
 });

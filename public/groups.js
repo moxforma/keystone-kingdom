@@ -1,6 +1,8 @@
 /* Classes, friend groups and live race rooms. Only first names + typing stats leave the device. No chat. */
 (function(){
-const post=(u,b)=>fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Could not connect');return j});
+const post=(u,b)=>fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Could not connect');
+ /* the race server only shares hashed ids; map "me" back to my own id so the rest of the code works unchanged */
+ if(j&&j.me&&b&&b.pid){if(j.host===j.me)j.host=b.pid;(j.players||[]).forEach(p=>{if(p.pid===j.me)p.pid=b.pid})}return j});
 const pid=()=>{if(!S.cid||!/^[a-z0-9]{6,24}$/.test(S.cid)){S.cid=(Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).replace(/[^a-z0-9]/g,'').slice(0,16);save()}return S.cid};
 const myName=()=>S.name||'Player';
 const myLook=()=>({h:typeof heroNow==='function'?heroNow():S.hero,c:S.color||null,eq:S.equip||{}});
@@ -9,7 +11,7 @@ const heroIcon=l=>{const L=lookOk(l);try{return kku('hi'+L.h+(L.c||'')+JSON.stri
 const heroBig=l=>{const L=lookOk(l);try{return zookSVG(L.eq,L.h,L.c)}catch(e){return zookSVG()}};
 const BOOK=PXG(["............",".oooo..oooo.","oWWWWooWWWWo","oWLLWooWLLWo","oWWWWooWWWWo","oWLLWooWLLWo","oWWWWooWWWWo","oWWWWooWWWWo","oBBBBooBBBBo",".oooo..oooo.",".....oo....."],{o:'#1b2a2e',W:'#fff6e0',L:'#8ab8c8',B:'#c8604a'}).toDataURL();
 const GN={meteor:'Meteor Zap',race:'Race with Keylori',glitch:'Scrambler Attack',bubble:'Bubble Pop',dig:'Treasure Dig',keeper:'Keylori Keeper',bridge:'Story Bridge'};
-const TEACH='kl-teach';const teach=()=>{try{return JSON.parse(localStorage.getItem(TEACH)||'{}')}catch(e){return{}}};const setTeach=t=>{try{localStorage.setItem(TEACH,JSON.stringify(t))}catch(e){}};
+document.head.insertAdjacentHTML('beforeend','<style>.btn.red{background:#c83a5c!important;color:#fff6e0!important;box-shadow:0 5px 0 #8a2240!important}.cl-row{display:flex;gap:6px;align-items:stretch}.cl-row>.btn:first-child{flex:1}.cl-del{flex:none;width:44px;padding:0!important}</style>');const TEACH='kl-teach';const teach=()=>{try{return JSON.parse(localStorage.getItem(TEACH)||'{}')}catch(e){return{}}};const setTeach=t=>{try{localStorage.setItem(TEACH,JSON.stringify(t))}catch(e){}};
 const weekStart=()=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()};
 const lessonIdx=()=>Math.floor(nextStage()/NST);
 
@@ -136,13 +138,15 @@ ACT.clsTeach=()=>{if(window.__clsOk)return teachList();const a=6+Math.floor(Math
 ACT.clsGateOk=()=>{if(+val('pgate2')!==GATE2){toast('Not quite. Ask a grown-up!');return ACT.clsHub()}window.__clsOk=1;teachList()};
 window.teachList=()=>teachList();
 function teachList(){const t=teach(),codes=Object.keys(t);
- modal(`<h2>Teacher dashboard</h2>${codes.length?`<div class="cl-list">${codes.map(c=>`<button class="btn sm" data-act="clsDash" data-c="${c}">${esc(t[c].name)} <span class="muted">${c}</span></button>`).join('')}</div>`:'<p class="muted">You have no classes on this device yet.</p>'}
+ modal(`<h2>Teacher dashboard</h2>${codes.length?`<div class="cl-list">${codes.map(c=>`<div class="cl-row"><button class="btn sm" data-act="clsDash" data-c="${c}">${esc(t[c].name)} <span class="muted">${c}</span></button><button class="btn sm alt cl-del" data-act="clsDelAsk" data-c="${c}" aria-label="Delete ${esc(t[c].name)}" title="Delete class">✕</button></div>`).join('')}</div>`:'<p class="muted">You have no classes on this device yet.</p>'}
  <div class="cl-sec"><h3>Make a new class or friend group</h3><div class="cl-field"><input id="clsName" class="cl-in wide" maxlength="40" placeholder="Room 4, or Cousins" autocomplete="off" data-enter="clsCreate"><button class="btn sm volt" data-act="clsCreate">Make it</button></div></div>
  <p class="muted cl-note">Kids join with the code. You'll see their progress here. Use the same device to come back to this dashboard.</p>
  <div class="rbtns"><button class="btn alt" data-act="clsHub">Back</button></div>`)}
 ACT.clsCreate=()=>{const name=val('clsName')||'Our class';post('/api/class',{a:'create',name}).then(r=>{const t=teach();t[r.code]={tk:r.tk,name};setTeach(t);
  modal(`<h2>${esc(name)} is ready!</h2><p style="margin:0">Kids tap <b>CLASS</b> at the top of the home screen and enter:</p><div class="cl-big">${r.code}</div>
  <div class="rbtns"><button class="btn" data-act="clsDash" data-c="${r.code}">Open dashboard</button></div>`)}).catch(e=>toast(e.message))};
+ACT.clsDelAsk=d=>{const t=teach()[d.c];if(!t)return teachList();modal(`<h2>Delete ${esc(t.name)}?</h2><p>This removes the class <b>${d.c}</b> and every kid's progress in it from our server. Kids keep their own game progress. This can't be undone.</p><div class="rbtns"><button class="btn red" data-act="clsDel" data-c="${d.c}">Delete class</button><button class="btn alt" data-act="clsTeach">Cancel</button></div>`)};
+ACT.clsDel=d=>{const t=teach(),c=d.c;if(!t[c])return teachList();post('/api/class',{a:'delete',code:c,tk:t[c].tk}).catch(e=>{if(!/not found/i.test(e.message))throw e}).then(()=>{delete t[c];setTeach(t);toast('Class deleted');teachList()}).catch(e=>toast(e.message))};
 let DASH=null,RLVL='easy';
 ACT.clsDash=d=>{const c=(d&&d.c)||DASH&&DASH.code,t=teach()[c];if(!t)return teachList();const quiet=d&&d.quiet;
  return post('/api/class',{a:'dash',code:c,tk:t.tk}).then(r=>{DASH={code:c,tk:t.tk,...r};if(!quiet||!document.querySelector('#mbox .dashv'))DVIEW=quiet?DVIEW:null;redraw();dashPoll()}).catch(e=>{if(!quiet)toast(e.message)})};

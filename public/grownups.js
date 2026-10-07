@@ -258,3 +258,13 @@ const _m=modal;modal=function(){fill();return _m.apply(this,arguments)};fill()})
 const _sh=show;show=function(){const r=_sh.apply(this,arguments);setTimeout(add,0);return r};add();
 document.head.insertAdjacentHTML('beforeend','<style>.hsbtn .mcup{display:none}body.mobile .hsbtn .mcup{display:block;height:20px;width:auto;margin:0;image-rendering:pixelated}body.mobile .hsbtn .hslbl{display:none}body.mobile .hsbtn{width:40px;padding:0!important;display:inline-flex;align-items:center;justify-content:center}</style>')})();
 document.head.insertAdjacentHTML('beforeend','<style>#s-home .homeprog{background:#a8d878!important;color:#2a1d3e!important;box-shadow:0 5px 0 #6fa048!important}#s-home .homeprog:active{box-shadow:0 2px 0 #6fa048!important}</style>');
+/* one reusable grown-up check (same math box, same secret codes) for anything kids shouldn't open alone */
+(function(){let NEXT=null,ANS=0;
+window.kkGate=(cb,why)=>{if(window.__gu)return cb();NEXT=cb;const a=6+Math.floor(Math.random()*4),b=3+Math.floor(Math.random()*7);ANS=a*b;
+ modal(`<h2>GROWN-UPS ONLY</h2><p class="muted" style="margin:0 0 8px">${why||'Quick check before you go in.'}</p><div class="pgatebox"><p class="pgq">What is ${a} × ${b}?</p><input id="kkgate" class="pgin" inputmode="numeric" autocomplete="off" maxlength="10" aria-label="Answer" data-enter="kkGateOk"></div>
+ <div class="rbtns"><button class="btn" data-act="kkGateOk">OK</button><button class="btn alt" data-act="close">BACK</button></div>`);setTimeout(()=>document.getElementById('kkgate')?.focus(),50)};
+ACT.kkGateOk=()=>{const c=window.kkCode?kkCode('kkgate'):null;if(c==='own')return;const v=+(document.getElementById('kkgate')?.value||0);
+ if(c!=='done'&&v!==ANS){try{sfx.bad()}catch(e){}toast('Not quite. Ask a grown-up!');return closeModal()}window.__gu=1;const f=NEXT;NEXT=null;closeModal();f&&f()};
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='kkgate'){e.preventDefault();e.stopPropagation();ACT.kkGateOk()}},true);
+if(ACT.feedback){const _fb=ACT.feedback;ACT.feedback=function(){const args=arguments;kkGate(()=>{_fb.apply(this,args);const m=document.querySelector('#mbox .muted:last-of-type');const p=[...document.querySelectorAll('#mbox p.muted')].find(x=>/Only your message/.test(x.textContent));if(p)p.innerHTML='For grown-ups. Only your message, type and optional email are sent. Please leave out children\'s full names. <a href="/privacy/" target="_blank" style="color:#7fe8d0">Privacy</a>'},'Feedback is sent to the game maker, so a grown-up should write it.')}}
+})();
