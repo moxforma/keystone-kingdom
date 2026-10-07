@@ -84,3 +84,23 @@ test('malformed save bundles are rejected', async () => {
   const { handler, request } = fixture();
   assert.equal((await handler(request('PUT', strong, { saves: null, prof: { list: [] } }))).status, 400);
 });
+
+test('sync never loses earned progress when device clocks disagree', () => {
+ const a = { name: 'Mia', upd: 100, xp: 500, gems: 9, best: { '0-0': 3, '0-1': 1 }, cards: { '0-0': { holo: true } }, owned: ['cap'] };
+ const b = { name: 'Mia', upd: 999, xp: 200, gems: 4, best: { '0-1': 2, '1-0': 1 }, cards: { '0-0': { holo: false, tier: 'gold' }, '1-0': {} }, owned: ['scarf'] };
+ const { mergeBundles } = fixture();
+ const m = JSON.parse(JSON.stringify(mergeBundles({ prof: { list: ['p1'], del: [] }, saves: { p1: a } }, { prof: { list: ['p1'], del: [] }, saves: { p1: b } }).saves.p1));
+ assert.deepEqual(m.best, { '0-0': 3, '0-1': 2, '1-0': 1 });
+ assert.equal(m.xp, 500); assert.equal(m.gems, 4); assert.equal(m.upd, 999);
+ assert.equal(m.cards['0-0'].holo, true); assert.equal(m.cards['0-0'].tier, 'gold'); assert.ok(m.cards['1-0']);
+ assert.deepEqual([...m.owned].sort(), ['cap', 'scarf']);
+});
+
+test('the game and the server merge saves the same way', () => {
+ const ctx = {}; runInNewContext(readFileSync(new URL('../public/savemerge.js', import.meta.url), 'utf8'), ctx);
+ const a = { name: 'Leo', upd: 5, xp: 10, best: { '2-0': 2 }, daily: { best: 9 }, arc: { meteor: 50, high: { meteor: 'beast' } } };
+ const b = { name: 'Leo', upd: 3, xp: 40, best: { '2-0': 1, '2-1': 3 }, daily: { best: 20 }, arc: { meteor: 80 } };
+ const { mergeBundles } = fixture();
+ const server = mergeBundles({ prof: { list: ['p'], del: [] }, saves: { p: a } }, { prof: { list: ['p'], del: [] }, saves: { p: b } }).saves.p;
+ assert.equal(JSON.stringify(ctx.mergeSave(a, b)), JSON.stringify(server));
+});

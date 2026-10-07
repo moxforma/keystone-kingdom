@@ -65,7 +65,7 @@ function stagePick(){const box=$('#mbox');if(!box||screen==='game'||typeof P==='
  const el=`<div class="stpick"><div class="stp-h">This lesson: <b>${done} done</b> · <em>${NST-done} to go</em> · tap one to play</div><div class="stp-row">${h}</div></div>`;
  const R=box.querySelector('.fcol-r .rstats')||box.querySelector('.rstats');R.insertAdjacentHTML('afterend',el);
  requestAnimationFrame(()=>dispatchEvent(new Event('resize')))}
-const _res=results;results=function(){const r=_res.apply(this,arguments);try{stagePick()}catch(e){console.warn(e)}return r};
+const _res=results;results=function(){const r=kkSafe(_res,this,arguments);try{stagePick()}catch(e){console.warn(e)}return r};
 
 /* ---------- bonus worlds 11 + 12 (harder than Starfall Citadel) ---------- */
 const BW=[

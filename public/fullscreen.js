@@ -13,7 +13,7 @@ ACT.fullscreen=()=>window.kkFullscreen();
 const btnHTML=()=>`<button class="icon-btn fsbtn" data-act="fullscreen" aria-label="${isFs()?'Exit full screen':'Full screen'}" title="${isFs()?'Exit full screen':'Full screen'}">${isFs()?OFF:ON}</button>`;
 function place(){if(!can)return;const tb=document.querySelector('#s-home .topbar');if(!tb)return;const old=tb.querySelector('.fsbtn');
  if(old){old.outerHTML=btnHTML();return}const gear=tb.querySelector('[data-act=settings]');gear?gear.insertAdjacentHTML('beforebegin',btnHTML()):tb.insertAdjacentHTML('beforeend',btnHTML())}
-const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{place()}catch(e){}return r};
+const _rh=renderHome;renderHome=function(){const r=kkSafe(_rh,this,arguments);try{place()}catch(e){}return r};
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,place));
 document.head.insertAdjacentHTML('beforeend','<style>.fsbtn svg{display:block;margin:auto;image-rendering:pixelated}</style>');
 try{place()}catch(e){}

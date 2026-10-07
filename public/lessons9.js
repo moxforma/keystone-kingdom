@@ -55,7 +55,7 @@ const _ss=startStage;startStage=function(n,mode){const r=_ss.apply(this,argument
  if(LESSONS[j].sp==='caps'||j>15)[...'abcdefghijklmnopqrstuvwxyz;,.'].forEach(c=>set.add(c));setAvail(set,j>=15);if(j>=20)setAvail(new Set([...keyEls.keys()]),true);applyLabels()}}catch(e){}return r};
 
 /* ---- Boss Test prize + correct "Next" button ---- */
-const _res=results;results=function(r){const out=_res.apply(this,arguments);try{const box=$('#mbox');if(!box||typeof P==='undefined'||P.practice||P.mode)return out;
+const _res=results;results=function(r){const out=kkSafe(_res,this,arguments);try{const box=$('#mbox');if(!box||typeof P==='undefined'||P.practice||P.mode)return out;
  const nx=nextInOrder(P.n);box.querySelectorAll('[data-act=play]').forEach(b=>{if(+b.dataset.n===P.n+1&&!b.closest('.stpick')){if(nx==null)b.remove();else b.dataset.n=nx}});
  const L=LESSONS[P.i];if(r&&r.pass&&L&&L.bt&&P.s===NST-1&&!r._bt){r._bt=1;S.btp=S.btp||{};if(!S.btp[P.i]){S.btp[P.i]=1;const g=25+(r.stars===3?10:0);S.gems+=g;save();
    const b=box.querySelector('.bigstars');b&&b.insertAdjacentHTML('afterend',`<div class="banner gold">Boss Test beaten! Prize: +${g} diamonds</div>`)}}}catch(e){console.warn(e)}return out};

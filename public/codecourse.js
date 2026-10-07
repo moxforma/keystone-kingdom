@@ -45,7 +45,7 @@ const _fin=finish;finish=function(){let k=null,gems=0;try{if(P&&P.mode==='code')
   try{renderHome()}catch(e){}},50)}
  return r};
 const CODEICO=PXG(['oooooooooooo','oBBBBBBBBBBo','oBoBBBBBBBBo','oBBoBBBBBBBo','oBoBBoooBBBo','oBBBBBBBBBBo','oooooooooooo','....oooo....','..oooooooo..'],{o:'#1b1626',B:'#7fe8d0'}).toDataURL();
-const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const hb=document.querySelector('#s-home .hbtns');if(hb&&S.codeOn&&!hb.querySelector('.homecode'))hb.insertAdjacentHTML('beforeend',`<button class="btn homecode" data-act="codeMenu"><img class="bico" src="${CODEICO}" alt="">Special Lesson</button>`)}catch(e){}return r};
+const _rh=renderHome;renderHome=function(){const r=kkSafe(_rh,this,arguments);try{const hb=document.querySelector('#s-home .hbtns');if(hb&&S.codeOn&&!hb.querySelector('.homecode'))hb.insertAdjacentHTML('beforeend',`<button class="btn homecode" data-act="codeMenu"><img class="bico" src="${CODEICO}" alt="">Special Lesson</button>`)}catch(e){}return r};
 document.head.insertAdjacentHTML('beforeend',`<style>
 #s-home .homecode{grid-column:1/-1;background:#3e4a90!important;color:#fff6e0!important;box-shadow:0 5px 0 #262e66!important}#s-home .homecode:active{box-shadow:0 2px 0 #262e66!important}
 .codeparts{display:grid;gap:8px;max-height:60vh;overflow:auto;padding-right:4px}

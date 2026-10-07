@@ -60,7 +60,7 @@ function checkWorlds(){S.wrew=S.wrew||{};const got=[];for(let w=1;w<WSTART.lengt
  if(got.length){save();setTimeout(()=>toast(`World ${got.join(', ')} binder page complete! +${50*got.length} diamonds`),1200)}}
 
 /* results: friendship-up banner + world check */
-const _res=results;results=function(r){const i=typeof P!=='undefined'?P.fi:null;const before=(S.frl||{})[i];_res.apply(this,arguments);
+const _res=results;results=function(r){const i=typeof P!=='undefined'?P.fi:null;const before=(S.frl||{})[i];kkSafe(_res,this,arguments);
  try{if(!r||!r.pass||P.practice||i==null)return;checkWorlds();S.frl=S.frl||{};const lv=flvl(i);
   if(before!=null&&lv>before&&par('friends')){const b=$('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend',`<div class="banner frban">♥ ${esc(SPECIES[i].n[0])} friendship level ${lv}!${lv===3||lv===5?' New story unlocked!':''}</div>`)}
   S.frl[i]=lv;save()}catch(e){}};
@@ -85,7 +85,7 @@ const _gt=genText;genText=function(i,s,pr){if(!S.little||pr||(typeof P!=='undefi
 let AGE=null;
 ACT.agePick=d=>{AGE=d.v;document.querySelectorAll('.agerow button').forEach(b=>b.classList.toggle('on',b.dataset.v===AGE));sfx.click&&sfx.click()};
 const _sn=ACT.saveName;ACT.saveName=function(){const first=!S.name;const r=_sn.apply(this,arguments);if(first&&S.name&&AGE){S.age=AGE;if(AGE==='u5')setLittle(true);AGE=null;save();applyPar();try{renderHome()}catch(e){}}return r};
-const _rh=renderHome;renderHome=function(){_rh.apply(this,arguments);const nb=$('#s-home .namebox');if(nb&&!S.name&&!$('#s-home .agerow'))nb.insertAdjacentHTML('afterend',`<div class="agerow"><span>How old are you?</span><div class="seg">${[['u5','Under 5'],['5to7','5 to 7'],['8up','8 and up']].map(([v,t])=>`<button class="${AGE===v?'on':''}" data-act="agePick" data-v="${v}">${t}</button>`).join('')}</div></div>`);
+const _rh=renderHome;renderHome=function(){kkSafe(_rh,this,arguments);const nb=$('#s-home .namebox');if(nb&&!S.name&&!$('#s-home .agerow'))nb.insertAdjacentHTML('afterend',`<div class="agerow"><span>How old are you?</span><div class="seg">${[['u5','Under 5'],['5to7','5 to 7'],['8up','8 and up']].map(([v,t])=>`<button class="${AGE===v?'on':''}" data-act="agePick" data-v="${v}">${t}</button>`).join('')}</div></div>`);
  if(S.little){const pl=$('#s-home [data-act=place]');pl&&pl.closest('p')?.remove()}};
 try{if(screen==='home')renderHome()}catch(e){}
 })();

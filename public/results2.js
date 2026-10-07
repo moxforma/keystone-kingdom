@@ -25,7 +25,7 @@ const _modal=modal;modal=function(html){const r=_modal.apply(this,arguments);try
 /* Keylori speaks in a bubble beside its card instead of a big heading */
 const SAY_NEW=['Yay, you saved me! Let’s be friends!','Thank you for rescuing me!','You did it! I’m free!'];
 const SAY_AGAIN=['Yay, you’re back! I missed you!','Hi again! Let’s keep typing!','I’m so happy to see you!','You’re getting faster!'];
-const _res=results;results=function(r){const out=_res.apply(this,arguments);try{if(!r||!r.pass||P.practice)return out;const box=$('#mbox'),flip=box&&box.querySelector('#flip');if(!flip)return out;
+const _res=results;results=function(r){const out=kkSafe(_res,this,arguments);try{if(!r||!r.pass||P.practice)return out;const box=$('#mbox'),flip=box&&box.querySelector('#flip');if(!flip)return out;
  const h2=box.querySelector('h2');if(h2&&/happy to see you/.test(h2.textContent))h2.textContent=r.lvl?'Level up!':'Great job!';
  if(!flip.parentElement.classList.contains('flipwrap')){const w=document.createElement('div');w.className='flipwrap';flip.replaceWith(w);w.appendChild(flip);
   w.insertAdjacentHTML('beforeend',`<div class="kbubble">${esc(rand(r.evo!=null?['Look! I evolved!','Wow, I grew stronger!','Thanks to you, I evolved!']:r.newCard?SAY_NEW:SAY_AGAIN))}</div>`)}

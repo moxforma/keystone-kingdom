@@ -11,7 +11,7 @@ const heroIcon=l=>{const L=lookOk(l);try{return kku('hi'+L.h+(L.c||'')+JSON.stri
 const heroBig=l=>{const L=lookOk(l);try{return zookSVG(L.eq,L.h,L.c)}catch(e){return zookSVG()}};
 const BOOK=PXG(["............",".oooo..oooo.","oWWWWooWWWWo","oWLLWooWLLWo","oWWWWooWWWWo","oWLLWooWLLWo","oWWWWooWWWWo","oWWWWooWWWWo","oBBBBooBBBBo",".oooo..oooo.",".....oo....."],{o:'#1b2a2e',W:'#fff6e0',L:'#8ab8c8',B:'#c8604a'}).toDataURL();
 const GN={meteor:'Meteor Zap',race:'Race with Keylori',glitch:'Scrambler Attack',bubble:'Bubble Pop',dig:'Treasure Dig',keeper:'Keylori Keeper',bridge:'Story Bridge'};
-document.head.insertAdjacentHTML('beforeend','<style>.btn.red{background:#c83a5c!important;color:#fff6e0!important;box-shadow:0 5px 0 #8a2240!important}.cl-row{display:flex;gap:6px;align-items:stretch}.cl-row>.btn:first-child{flex:1}.cl-del{flex:none;width:44px;padding:0!important}</style>');const TEACH='kl-teach';const teach=()=>{try{return JSON.parse(localStorage.getItem(TEACH)||'{}')}catch(e){return{}}};const setTeach=t=>{try{localStorage.setItem(TEACH,JSON.stringify(t))}catch(e){}};
+document.head.insertAdjacentHTML('beforeend','<style>.btn.red{background:#c83a5c!important;color:#fff6e0!important;box-shadow:0 5px 0 #8a2240!important}.cl-row{display:flex;gap:6px;align-items:stretch}.cl-row>.btn:first-child{flex:1}.cl-del{flex:none;width:44px;padding:0!important}</style>');const TEACH='kl-teach';const teach=()=>{let t={};try{t=JSON.parse(localStorage.getItem(TEACH)||'{}')}catch(e){}try{window.kkTkFill&&window.kkTkFill(t)}catch(e){}return t};const setTeach=t=>{try{localStorage.setItem(TEACH,JSON.stringify(t))}catch(e){}try{window.kkTkSeal&&window.kkTkSeal()}catch(e){}};
 const weekStart=()=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()};
 const lessonIdx=()=>Math.floor(nextStage()/NST);
 
@@ -25,7 +25,7 @@ function stats(){const i=lessonIdx(),h=(S.hist||[]).slice(-8),avg=f=>h.length?Ma
   asg:S.asgr||{},cur:A?{i:A.i,at:A.at,n:(A.st||[]).length}:null}}
 let lastRep=0;
 function report(force){if(!S.cls||(!force&&Date.now()-lastRep<15000))return;lastRep=Date.now();post('/api/class',{a:'report',code:S.cls.code,pid:pid(),name:myName(),stats:stats()}).then(info=>{CLS_INFO=info;setLock(info);homeBanner()}).catch(()=>{})}
-const _res=results;results=function(){const r=_res.apply(this,arguments);setTimeout(report,1500);return r};
+const _res=results;results=function(){const r=kkSafe(_res,this,arguments);setTimeout(report,1500);return r};
 const _md=modal;modal=function(){const r=_md.apply(this,arguments);try{if(screen==='game'&&$('#mbox .rstats'))setTimeout(report,1500)}catch(e){}return r};
 
 /* class-wide grown-up switches from the teacher */
@@ -53,7 +53,7 @@ function asgButtons(){const A=S.asga,box=document.querySelector('#mbox');if(!A||
   if(first&&first.parentNode)first.insertAdjacentHTML('beforebegin',html);else(box.querySelector('.rbtns')||box).insertAdjacentHTML('afterbegin',html);
   first&&first.remove()}
  else{let nx=null;for(let q=0;q<NST;q++)if(!A.st.includes(q)){nx=q;break}if(nx!=null)plays.forEach(b=>b.dataset.n=A.i*NST+nx)}}
-const _res2=results;results=function(r){const out=_res2.apply(this,arguments);try{const A=S.asga;
+const _res2=results;results=function(r){const out=kkSafe(_res2,this,arguments);try{const A=S.asga;
  if(ASG_RUN&&A&&typeof P!=='undefined'&&!P.mode&&!P.practice&&P.i===A.i&&r){
   if(r.pass&&!A.st.includes(P.s)){A.st.push(P.s);save()}
   if(A.st.length>=NST){S.asgr=S.asgr||{};const prev=S.asgr[A.i];if(!prev||prev.at!==A.at){S.asgr[A.i]={at:A.at,d:Date.now(),w:r.wpm||0,a:r.acc||0};const k=Object.keys(S.asgr);if(k.length>60)delete S.asgr[k[0]];save()}}
@@ -64,7 +64,7 @@ ACT.asgDone=()=>{try{document.activeElement&&document.activeElement.blur()}catch
 ACT.asgSubmit=()=>{ASG_RUN=false;const b=document.querySelector('[data-act=asgSubmit]');if(b){b.disabled=true;b.textContent='Sending...'}
  const fin=ok=>{toast(ok?'Sent to your teacher!':'Saved! It will send next time you are online.');closeModal();show('home')};
  lastRep=0;post('/api/class',{a:'report',code:S.cls.code,pid:pid(),name:myName(),stats:stats()}).then(i=>{CLS_INFO=i;fin(true)}).catch(()=>fin(false))};
-const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const row=$('#s-home .hi-btns');row?.querySelector('[data-act=clsHub]')?.remove();
+const _rh=renderHome;renderHome=function(){const r=kkSafe(_rh,this,arguments);try{const row=$('#s-home .hi-btns');row?.querySelector('[data-act=clsHub]')?.remove();
  const tb=$('#s-home .topbar');if(tb&&S.name&&!tb.querySelector('.clsbtn')){const after=tb.querySelector('.roamtog')||tb.querySelector('.selp');const h=`<button class="btn clsbtn" data-act="clsHub"><img class="bico hico" src="${BOOK}" alt="">CLASS</button>`;after?after.insertAdjacentHTML('afterend',h):tb.insertAdjacentHTML('afterbegin',h)}homeBanner();fetchInfo()}catch(e){}return r};
 setInterval(()=>{if(typeof screen!=='undefined'&&screen==='home'&&S.cls){lastInfo=0;fetchInfo()}},20000);
 /* Race with Others card art: two heroes charging toward the camera with anime speed lines (2-frame run cycle) */

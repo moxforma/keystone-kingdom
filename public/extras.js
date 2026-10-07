@@ -125,7 +125,7 @@ const _ra90=renderArcade;renderArcade=function(){_ra90();const g=$('#s-arcade .g
  <div class="game panel"><div class="gart race keepart">${creatureSVG(3,2,'big')}<div class="food">apple</div></div><h3>Keylori Keeper</h3><p>Feed your Keylori the words it wants!</p><div class="arcade-stats"><div class="arcade-stat"><b>${S.arc.keeper||0}</b><span>Most fed</span></div><div class="arcade-stat level"><b>${arcadeHighest('keeper')}</b><span>Highest level beaten</span></div></div><button class="btn" data-act="keeper">Play</button></div>`)};
 
 /* ---------- home: Arcade is a full second mode ---------- */
-const _rh90=renderHome;renderHome=function(){_rh90();const ar=$('#s-home [data-to=arcade]'),cont=$('#s-home .btn.big');
+const _rh90=renderHome;renderHome=function(){kkSafe(_rh90,this,[]);const ar=$('#s-home [data-to=arcade]'),cont=$('#s-home .btn.big');
  if(ar&&cont&&!ar.classList.contains('arcbig')){ar.classList.add('big','arcbig');cont.after(ar)}};
 if(typeof screen!=='undefined'&&screen==='home')renderHome();
 
@@ -181,7 +181,7 @@ function roamTick(now){if(typeof screen!=='undefined'&&screen!=='home'){roamStop
   for(const p of ROAM.plats){const cx=c.x+w*.5;if(cx>p.l&&cx<p.r&&c.y+h>p.t+4&&c.y<p.b){c.y=p.t-h;c.vy=0;c.ground=p;break}}
   c.el.style.transform=`translate(${c.x}px,${c.y}px) scaleX(${c.vx<0?-1:1})`;c.el.classList.toggle('air',!c.ground)});
  ROAM.raf=requestAnimationFrame(roamTick)}
-const _rh95=renderHome;renderHome=function(){_rh95();setTimeout(roamStart,300)};
+const _rh95=renderHome;renderHome=function(){kkSafe(_rh95,this,[]);setTimeout(roamStart,300)};
 const _show95=show;show=function(id){_show95.apply(this,arguments);if(id!=='home')roamStop()};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(ROAM.raf);else if(typeof screen!=='undefined'&&screen==='home'&&ROAM.els.length){ROAM.last=performance.now();ROAM.raf=requestAnimationFrame(roamTick)}});
 if(typeof screen!=='undefined'&&screen==='home')setTimeout(roamStart,400);

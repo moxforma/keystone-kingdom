@@ -34,7 +34,7 @@ function checkUnlocks(){if(!S.name||!document.getElementById('modal').hidden)ret
  <p class="muted" style="margin:0 0 10px">You unlocked ${HEROES[h].name} for this: ${RARE[h].need.toLowerCase()}. Only the most dedicated typists ever see this hero.</p>
  <div class="rbtns"><button class="btn" data-act="rareUse" data-h="${h}">Play as ${HEROES[h].name}</button><button class="btn alt" data-act="close">Maybe later</button></div></div>`)}
 ACT.rareUse=d=>{S.hero=d.h;S.color=null;save();closeModal();try{renderHome()}catch(e){}toast(`${HEROES[d.h].name} is your hero now!`)};
-const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);setTimeout(checkUnlocks,700);return r};
+const _rh=renderHome;renderHome=function(){const r=kkSafe(_rh,this,arguments);setTimeout(checkUnlocks,700);return r};
 document.head.insertAdjacentHTML('beforeend',`<style>
 .heroes .pl{position:relative}
 #mbox .heroes{display:flex!important;flex-wrap:wrap;justify-content:center}#mbox .heroes>.pl{flex:0 0 calc(25% - 10px);box-sizing:border-box}@media (max-width:600px){#mbox .heroes>.pl{flex-basis:calc(50% - 10px)}}

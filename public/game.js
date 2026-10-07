@@ -1,3 +1,5 @@
+/* kkSafe: each add-on layer of renderHome/results calls the layer below through this, so one broken layer logs an error instead of stopping all the others */
+function kkSafe(f,t,a){try{return f.apply(t,a)}catch(e){console.error("[Keyloria layer error]",e)}}
 /* ================= DATA ================= */
 const $=s=>document.querySelector(s);
 const rand=a=>a[Math.floor(Math.random()*a.length)];
@@ -1015,7 +1017,7 @@ ACT.heroes=()=>{const cur=S.hero||'pop',col=S.color||null;
 ACT.pickHero=d=>{S.hero=d.h;S.color=null;save();sfx.click();ACT.heroes()};
 ACT.pickColor=d=>{S.color=d.c||null;save();sfx.click();ACT.heroes()};
 const _saveName=ACT.saveName;ACT.saveName=()=>{const first=!S.name;_saveName();if(first&&S.name&&!S.hero)setTimeout(ACT.heroes,300)};
-const _rh=renderHome;renderHome=function(){_rh();const nm=$('#s-home .tname');if(nm&&!nm.querySelector('[data-act=heroes]'))nm.insertAdjacentHTML('beforeend','<button class="btn sm alt" data-act="heroes">Hero</button>');
+const _rh=renderHome;renderHome=function(){kkSafe(_rh,this,[]);const nm=$('#s-home .tname');if(nm&&!nm.querySelector('[data-act=heroes]'))nm.insertAdjacentHTML('beforeend','<button class="btn sm alt" data-act="heroes">Hero</button>');
  const say=$('#s-home .say');if(say&&/Pop/.test(say.textContent))say.textContent=say.textContent.replace(/Pop/g,heroName())};
 const _rs=renderShop;renderShop=function(){_rs();const h=$('#s-shop .topbar h2');if(h)h.textContent=heroName()+"'s Closet"};
 
@@ -1098,7 +1100,7 @@ function burst(a,el,color,n=12){if(!a||!el)return;const c=fxLayer(a),ar=a.getBou
 const SHIELD=["oooooooooooo","oHHLLLLLLLBo","oHLLLLLLLLBo","oLLLLyyLLLBo","oLLLyyyyLLBo","oLLLLyyLLLBo","oLLLLLLLLLBo",".oLLLLLLLBo.",".oLLLLLLLBo.","..oLLLLLBo..","...oLLLBo...","....oooo...."];
 function shieldURL(col,got){const k='sh'+col+got;if(!PXU[k]){const pal=got?{o:'#1e1a2a',H:shadeHex(col,.45),L:col,B:shadeHex(col,-.3),y:'#fff4c8'}:{o:'#1e1a2a',H:'#5a5070',L:'#3e3552',B:'#2e2840',y:'#4a4060'};PXU[k]=PXG(SHIELD,pal).toDataURL()}return PXU[k]}
 function pixBadges(root){root.querySelectorAll('.badge').forEach(b=>{const col=getComputedStyle(b).getPropertyValue('--bc').trim()||'#888888';b.textContent='';b.style.backgroundImage=`url(${shieldURL(col,b.classList.contains('got'))})`})}
-const _rh2=renderHome;renderHome=function(){_rh2();pixBadges($('#s-home'))};
+const _rh2=renderHome;renderHome=function(){kkSafe(_rh2,this,[]);pixBadges($('#s-home'))};
 const _rm2=renderMap;renderMap=function(){_rm2();pixBadges($('#s-map'))};
 (()=>{const st=document.createElement('canvas');st.width=64;st.height=64;const g=st.getContext('2d');[[5,7,'#fff6e0',1],[40,12,'#fff6e0',1],[22,30,'#c8b8ff',1],[55,44,'#fff6e0',2],[12,52,'#f0c860',1],[33,58,'#fff6e0',1]].forEach(([x,y,c,s])=>{g.fillStyle=c;g.fillRect(x,y,s,s)});
  const sh=PXG(["....oooooooo....","..oooooooooooo..","oooooooooooooooo","..oooooooooooo..","....oooooooo...."],{o:'rgba(10,6,20,.45)'});
@@ -1125,7 +1127,7 @@ ACT.pickHero=d=>ACT.pvHero(d);ACT.pickColor=d=>ACT.pvColor(d);
 ACT.players=()=>{save();modal(`<h2>Who is playing?</h2><div class="players">${PROF.list.map(id=>{const d=id===PROF.cur?S:peek(id),h=d.hero||'pop';return `<button class="pl ${id===PROF.cur?'on':''}" data-act="pickPlayer" data-id="${id}">${zookSVG(d.equip||{},h,d.color||null)}<b>${esc(d.name||'New player')}</b><small>${d.hero?HEROES[h].name+' · ':''}Level ${levelOf(d.xp||0)}</small></button>`}).join('')}
  <button class="pl add" data-act="newPlayer"><span>+</span><b>New player</b></button></div><button class="btn alt" data-act="close">Close</button>`)};
 /* hero must be picked before playing */
-const _rh3=renderHome;renderHome=function(){_rh3();if(S.name&&!S.hero&&$('#modal').hidden)setTimeout(()=>{if(!S.hero&&$('#modal').hidden)ACT.heroes()},250)};
+const _rh3=renderHome;renderHome=function(){kkSafe(_rh3,this,[]);if(S.name&&!S.hero&&$('#modal').hidden)setTimeout(()=>{if(!S.hero&&$('#modal').hidden)ACT.heroes()},250)};
 
 /* ================= V12: family sync (Netlify) ================= */
 const SYNC={key:'kk-family',shortKey:'kk-family-short',api:'/api/keystone-sync',codeApi:'/api/keystone-family-code',t:null,busy:false,ok:null};
@@ -1269,7 +1271,7 @@ setInterval(()=>{ensureTrackers();const hk=(S.hero||'')+(S.color||'')+JSON.strin
   else if(G.type==='bridge'){f=G.pos/G.text.length;lab=`${G.wi}/${G.words.length} words`}
   if(G.done&&G.type!=='glitch')f=1;setTrk(tg,f,lab);if(typeof ghostWaveDisplay==='function')ghostWaveDisplay()}},150);
 /* --- whole-game progress on home --- */
-const _rh4=renderHome;renderHome=function(){_rh4();const xb=$('#s-home .trow');if(!xb||!S.name)return;const tot=LESSONS.length*8,done=Object.keys(S.best).length,pc=Math.round(done/tot*100);
+const _rh4=renderHome;renderHome=function(){kkSafe(_rh4,this,[]);const xb=$('#s-home .trow');if(!xb||!S.name)return;const tot=LESSONS.length*8,done=Object.keys(S.best).length,pc=Math.round(done/tot*100);
  xb.insertAdjacentHTML('afterend',`<div class="gprog"><div class="gp-top"><span>Whole game</span><b>${pc}% done</b></div><div class="gp-bar"><i style="width:${pc}%"></i></div><small>${done} of ${tot} levels · World ${worldOf(Math.min(LESSONS.length-1,(typeof EI==='function'?EI(Math.floor(nextStage()/8)):Math.floor(nextStage()/8))))} of ${WORLDS.length}</small></div>`)};
 
 /* ================= V14: delete player ================= */
@@ -1325,7 +1327,7 @@ function fitHome(){const h=document.getElementById('s-home');if(!h||h.hidden)ret
  if(h.offsetHeight>room()&&innerWidth>=900){h.classList.add('wide');document.body.classList.add('homewide');homeCols(true)}
  const H=h.offsetHeight,z=Math.max(.35,Math.min(1,room()/H));
  if(z<1){h.style.transformOrigin='top center';h.style.transform=`scale(${z.toFixed(3)})`;h.style.marginBottom=(-H*(1-z)).toFixed(0)+'px'}}
-const _rh5=renderHome;renderHome=function(){_rh5();requestAnimationFrame(fitHome);setTimeout(fitHome,150)};
+const _rh5=renderHome;renderHome=function(){kkSafe(_rh5,this,[]);requestAnimationFrame(fitHome);setTimeout(fitHome,150)};
 addEventListener('resize',()=>{fitHome();fitModal()});
 
 
@@ -1441,7 +1443,7 @@ function finish(){
  const R_={acc,wpm,stars,pass,xp,gems,newCard,holoUp,badge,lvl:newL>oldL?newL:0,egg,tierUp,tierF,brk:takeBreak(),evo,evoFrom,lucky,holoF,holoForms};
  if(pass&&!P.practice)setTimeout(()=>catchAnim(()=>results(R_)),1000);else setTimeout(()=>results(R_),pass?1300:900);
 }
-const _res8=results;results=function(r){_res8(r);if(P.practice||!r.pass)return;const box=$('#mbox .bigstars');if(!box)return;const i=P.fi,sp=SPECIES[i],pts=lessonPts(i),f=formNow(i),nxt=EVO_PTS[f+1];
+const _res8=results;results=function(r){kkSafe(_res8,this,[r]);if(P.practice||!r.pass)return;const box=$('#mbox .bigstars');if(!box)return;const i=P.fi,sp=SPECIES[i],pts=lessonPts(i),f=formNow(i),nxt=EVO_PTS[f+1];
  let h='';
  if(r.evo!=null)h+=`<div class="banner gold">${sp.n[r.evoFrom]} evolved into ${sp.n[r.evo]}!</div>`;
  if(r.lucky){const L=r.lucky;h+=L.kind==='gems'?`<div class="banner luck">Lucky find! +${L.gems} diamonds</div>`:L.kind==='prop'?'':`<div class="banner dia">SUPER RARE! ${sp.n[P.ff]} turned ${CW[L.cw].n} colors!</div>`}
@@ -1870,10 +1872,10 @@ const _em20=endMeteor;endMeteor=function(){if(G.t0)S.time+=Math.round((performan
 const _eg20=endGlitch;endGlitch=function(w){if(G.t0)S.time+=Math.round((performance.now()-G.t0)/1000);G.runStart=G.t0;G.t0=0;_eg20(w)};
 function dailyHTML(){const d=S.daily||{},mins=d.day===todayKey()?Math.floor((d.secs||0)/60):0,pc=Math.min(100,Math.round(mins/GOAL_MIN*100)),st=d.met===todayKey()||d.met===new Date(Date.now()-864e5).toDateString()?d.streak||0:0;
  return `<div class="daily"><div class="gp-top"><span>Daily goal</span><b>${Math.min(mins,GOAL_MIN)} / ${GOAL_MIN} min</b></div><div class="gp-bar"><i style="width:${pc}%;background:repeating-linear-gradient(90deg,#7fe8ff 0 10px,#3a9ab0 10px 12px)"></i></div><small>${pc>=100?'Done for today! Great job.':'A little every day works best.'} · Streak: ${st} day${st===1?'':'s'}</small></div>`}
-const _rh20=renderHome;renderHome=function(){_rh20();const g=$('#s-home .gprog');if(g&&S.name)g.insertAdjacentHTML('beforebegin',dailyHTML());
+const _rh20=renderHome;renderHome=function(){kkSafe(_rh20,this,[]);const g=$('#s-home .gprog');if(g&&S.name)g.insertAdjacentHTML('beforebegin',dailyHTML());
  const hb=$('#s-home .hbtns');if(hb&&!hb.querySelector('[data-act=practice]'))hb.insertAdjacentHTML('beforeend','<button class="btn alt" data-act="practice">Practice</button>')};
 /* --- 2. no-peek bonus --- */
-const _res20=results;results=function(r){_res20(r);if(!r.pass||P.practice||S.set.hide==='show')return;S.gems+=1;save();const b=$('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend','<div class="banner luck">No-peek +1 diamond</div>')};
+const _res20=results;results=function(r){kkSafe(_res20,this,[r]);if(!r.pass||P.practice||S.set.hide==='show')return;S.gems+=1;save();const b=$('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend','<div class="banner luck">No-peek +1 diamond</div>')};
 /* --- 3/4. practice menu: trouble keys, letter combos, free write --- */
 const COMBOS=['th','he','in','er','an','re','on','at','en','nd','ti','es','or','te','of','ed','is','it','al','ar','st','to','nt','ng','se','ha','as','ou','io','le','ve','co','me','de','hi','ri','ro','ic','ne','ea','ra','ce','the','ing','and','ion','ent','her','for','tha','ter','was','you','ith','ver','all','wit','thi','tio'];
 let PRACT=null;
@@ -1940,7 +1942,7 @@ const worldOfRegion=r=>{let w=0;WREG.forEach((x,k)=>{if(r>=x)w=k});return w+1};
 const worldDone=w=>{const a=WSTART[w-1],b=WSTART[w]||LESSONS.length;for(const i of (window.SEQWL?SEQWL(w):Array.from({length:b-a},(_,k)=>a+k)))for(let s=0;s<8;s++)if(!(S.best[i+'-'+s]>=1))return false;return true};
 const _rm22=renderMap;renderMap=function(){_rm22();const cur=worldOf(Math.floor(nextStage()/8));
  const root=$('#s-map');let w=0;[...root.children].forEach(el=>{if(el.classList.contains('worldhead')){w++;if(w>cur+1)el.remove();else if(w===cur+1&&!el.classList.contains('shut'))w=w}else if(el.classList.contains('region')){if(w>cur)el.remove()}})};
-const _rh22=renderHome;renderHome=function(){_rh22();$('#s-home .gprog')?.remove();const b=$('#s-home .badges');if(!b)return;
+const _rh22=renderHome;renderHome=function(){kkSafe(_rh22,this,[]);$('#s-home .gprog')?.remove();const b=$('#s-home .badges');if(!b)return;
  b.innerHTML=WORLDS.map((W,k)=>`<div class="badge ${worldDone(k+1)?'got':''}" style="--bc:${REGIONS[WREG[k]].color}" title="${W.name} badge">${k+1}</div>`).join('');pixBadges($('#s-home'))};
 
 /* ================= V23: random starter hero, pixel logo, new gem, Key Box catch ================= */
@@ -1991,7 +1993,7 @@ function logoCanvas(){const W=240,H=78,c=document.createElement('canvas');c.widt
  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const v=m[y][x];if(v){g.fillStyle=P[v]||'#fff';g.fillRect(x,y,1,1)}}
  return c}
 const LOGO_URL=logoCanvas().toDataURL();
-const _rh23=renderHome;renderHome=function(){_rh23();const lg=$('#s-home .logo');if(lg)lg.innerHTML=`<img class="pxlogo" src="${LOGO_URL}" alt="Keyloria Kingdom">`;
+const _rh23=renderHome;renderHome=function(){kkSafe(_rh23,this,[]);const lg=$('#s-home .logo');if(lg)lg.innerHTML=`<img class="pxlogo" src="${LOGO_URL}" alt="Keyloria Kingdom">`;
  const say=$('#s-home .say');if(say&&!S.name)say.textContent=`Hi! I'm ${HEROES[heroNow()].name}!`};
 /* --- Key Box catch --- */
 const BOXC=["..................","..................","..................","..................","..................","..................",
@@ -2077,10 +2079,10 @@ function evolveAnim(i,from,to,done){const sp=SPECIES[i],t=(S.cards[i+'-'+to]||{}
  window._evoFF=()=>{k=gaps.length;step()};setTimeout(step,700)}
 ACT.evoNext=()=>{const d=EVO_DONE;EVO_DONE=null;closeModal();d&&d()};
 const _res27=results;results=function(r){if(r.evo!=null&&!r._ev&&!P.practice){r._ev=1;return evolveAnim(P.fi,r.evoFrom,r.evo,()=>results(r))}
- _res27(r);if(r.holoUp&&r.holoF!=null&&(r.evo==null||r.holoF===r.evo)){const fl=$('#flip .fi');if(fl){const cw=fl.querySelector('.cw:not(.bk)');if(cw)cw.outerHTML=cardHTML(P.fi,r.holoF,S.cards[P.fi+'-'+r.holoF]||{})}const f=$('#flip');f&&f.classList.add('goholo');setTimeout(()=>sfx.buy(),700)}};
+ kkSafe(_res27,this,[r]);if(r.holoUp&&r.holoF!=null&&(r.evo==null||r.holoF===r.evo)){const fl=$('#flip .fi');if(fl){const cw=fl.querySelector('.cw:not(.bk)');if(cw)cw.outerHTML=cardHTML(P.fi,r.holoF,S.cards[P.fi+'-'+r.holoF]||{})}const f=$('#flip');f&&f.classList.add('goholo');setTimeout(()=>sfx.buy(),700)}};
 
 /* ================= V28: hero column on home ================= */
-const _rh28=renderHome;renderHome=function(){_rh28();const tn=$('#s-home .tname'),hb=$('#s-home .hero-big');if(!tn||!hb||!S.name)return;
+const _rh28=renderHome;renderHome=function(){kkSafe(_rh28,this,[]);const tn=$('#s-home .tname'),hb=$('#s-home .hero-big');if(!tn||!hb||!S.name)return;
  const name=tn.querySelector('h2'),lvl=tn.querySelector('.lvl'),xp=$('#s-home .xpbar'),btns=[...tn.querySelectorAll('button')];
  const info=document.createElement('div');info.className='hero-info';
  info.innerHTML=`<h2 class="hi-name">${name?name.innerHTML:''}</h2><div class="hi-lvl">${lvl?lvl.innerHTML:''}</div>`;
@@ -2089,7 +2091,7 @@ const _rh28=renderHome;renderHome=function(){_rh28();const tn=$('#s-home .tname'
  hb.appendChild(info);tn.remove();requestAnimationFrame(()=>typeof fitHome==='function'&&fitHome())};
 
 /* ================= V29: balanced home + level-up celebration ================= */
-const _rh29=renderHome;renderHome=function(){_rh29();const info=$('#s-home .hero-info');if(!info)return;
+const _rh29=renderHome;renderHome=function(){kkSafe(_rh29,this,[]);const info=$('#s-home .hero-info');if(!info)return;
  const tr=$('#s-home .trow'),bd=$('#s-home .badges');const row=info.querySelector('.hi-btns');
  if(tr)info.insertBefore(tr,row);if(bd)info.appendChild(bd);requestAnimationFrame(()=>typeof fitHome==='function'&&fitHome())};
 let LVL_DONE=null;
@@ -2101,16 +2103,16 @@ function levelUpFX(L,done){LVL_DONE=done;const un=Object.entries(ACC).filter(([k
  document.body.appendChild(d);sfx.lvl();setTimeout(()=>sfx.buy(),500)}
 ACT.lvlNext=()=>{$('#lvlfx')?.remove();const f=LVL_DONE;LVL_DONE=null;f&&f()};
 addEventListener('keydown',e=>{if($('#lvlfx')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopImmediatePropagation();ACT.lvlNext()}},true);
-const _res29=results;results=function(r){if(r.lvl&&!r._lv){r._lv=1;return levelUpFX(r.lvl,()=>results(r))}_res29(r)};
+const _res29=results;results=function(r){if(r.lvl&&!r._lv){r._lv=1;return levelUpFX(r.lvl,()=>results(r))}kkSafe(_res29,this,[r])};
 
 /* ================= V31: button colors, switch player in settings ================= */
-const _rh31=renderHome;renderHome=function(){_rh31();$('#s-home .hi-btns [data-act=players]')?.remove();
+const _rh31=renderHome;renderHome=function(){kkSafe(_rh31,this,[]);$('#s-home .hi-btns [data-act=players]')?.remove();
  const hb=$('#s-home .hi-btns [data-act=heroes]');if(hb){hb.textContent='Change hero';hb.className='btn volt'}
  const set=(sel,cls)=>{const b=$('#s-home .hbtns '+sel);if(b)b.className='btn '+cls};
  set('[data-to=binder]','lav');set('[data-to=shop]','lav');set('[data-act=practice]','coral')};
 
 
-const _rh32=renderHome;renderHome=function(){_rh32();document.querySelectorAll('#s-home .hero-info .trow > div').forEach(d=>{if(/Holo/.test(d.textContent))d.remove()})};
+const _rh32=renderHome;renderHome=function(){kkSafe(_rh32,this,[]);document.querySelectorAll('#s-home .hero-info .trow > div').forEach(d=>{if(/Holo/.test(d.textContent))d.remove()})};
 
 /* ================= V33: pixel icons on home buttons ================= */
 const BICO={
@@ -2122,7 +2124,7 @@ const BICO={
  target:{r:["...oooooo...","..oRRRRRRo..",".oRWWWWWWRo.",".oRWRRRRWRo.",".oRWRWWRWRo.",".oRWRWWRWRo.",".oRWRRRRWRo.",".oRWWWWWWRo.","..oRRRRRRo..","...oooooo..."],p:{o:'#2a1d3e',R:'#d8483a',W:'#fff6e0'}},
  swap:{r:["....o.......","....oo......","ooooYYo.....","oYYYYYYo....","ooooYYo.....","....oo..o...","....o..oo...",".....oYYoooo","....oYYYYYYo",".....oYYoooo","......oo....",".......o...."],p:{o:'#1a3a40',Y:'#fff6e0'}}};
 const BICU={};Object.entries(BICO).forEach(([k,v])=>BICU[k]=PXG(v.r,v.p).toDataURL());
-const _rh33=renderHome;renderHome=function(){_rh33();const ic=(sel,k)=>{const b=$('#s-home '+sel);if(b&&!b.querySelector('.bico'))b.insertAdjacentHTML('afterbegin',`<img class="bico" src="${BICU[k]}" alt="">`)};
+const _rh33=renderHome;renderHome=function(){kkSafe(_rh33,this,[]);const ic=(sel,k)=>{const b=$('#s-home '+sel);if(b&&!b.querySelector('.bico'))b.insertAdjacentHTML('afterbegin',`<img class="bico" src="${BICU[k]}" alt="">`)};
  ic('.hbtns [data-act=play]','sword');ic('.hbtns [data-to=map]','map');ic('.hbtns [data-to=arcade]','pad');ic('.hbtns [data-to=binder]','cards');ic('.hbtns [data-to=shop]','shirt');ic('.hbtns [data-act=practice]','target');{const b=$('#s-home .hi-btns [data-act=heroes]');if(b&&!b.querySelector('.bico'))b.insertAdjacentHTML('afterbegin',`<img class="bico hico" src="${heroCanvas({},heroNow(),S.color).toDataURL()}" alt="">`)}
  const bd=$('#s-home .hero-info .badges'),dl=$('#s-home .tcard .daily');if(bd&&dl){dl.insertAdjacentElement('afterend',bd);bd.classList.add('rbadges2')}
  requestAnimationFrame(()=>typeof fitHome==='function'&&fitHome())};
@@ -2143,10 +2145,10 @@ const _bh34=ACT.buyHero;ACT.buyHero=()=>{const first=!S.hero;_bh34();if(first&&!
 
 
 ACT.place=()=>{closeModal();onboardTest()};
-const _rh35=renderHome;renderHome=function(){_rh35();const tb=$('#s-home .topbar');if(tb&&S.name&&!tb.querySelector('.selp'))tb.insertAdjacentHTML('afterbegin',`<button class="btn selp" data-act="players"><img class="bico hico" src="${heroCanvas({},heroNow(),S.color).toDataURL()}" alt="">SELECT PLAYER</button>`)};
+const _rh35=renderHome;renderHome=function(){kkSafe(_rh35,this,[]);const tb=$('#s-home .topbar');if(tb&&S.name&&!tb.querySelector('.selp'))tb.insertAdjacentHTML('afterbegin',`<button class="btn selp" data-act="players"><img class="bico hico" src="${heroCanvas({},heroNow(),S.color).toDataURL()}" alt="">SELECT PLAYER</button>`)};
 
 /* ================= V36: new-player layout + SELECT PLAYER always ================= */
-const _rh36=renderHome;renderHome=function(){_rh36();
+const _rh36=renderHome;renderHome=function(){kkSafe(_rh36,this,[]);
  document.querySelectorAll('#s-home .trow > div').forEach(d=>{if(/Holo/.test(d.textContent))d.remove()});
  const tb=$('#s-home .topbar');if(tb&&!tb.querySelector('.selp'))tb.insertAdjacentHTML('afterbegin',`<button class="btn selp" data-act="players"><img class="bico hico" src="${heroCanvas({},heroNow(),S.color).toDataURL()}" alt="">SELECT PLAYER</button>`);
  const hb=$('#s-home .hero-big'),nb=$('#s-home .namebox');if(S.name||!hb||!nb||hb.querySelector('.hero-info'))return;
@@ -2156,7 +2158,7 @@ const _rh36=renderHome;renderHome=function(){_rh36();
  hb.appendChild(info);box.remove();requestAnimationFrame(()=>typeof fitHome==='function'&&fitHome())};
 /* ================= V37: slower levels, binder button on results ================= */
 needXP=L=>L<=1?0:Math.round(200*Math.pow(L-1,1.75)/10)*10;
-const _res37=results;results=function(r){_res37(r);setTimeout(()=>{const rb=document.querySelector('#mbox .rbtns');if(rb)rb.querySelectorAll('.btn').forEach(b=>/again/i.test(b.textContent)&&(b.classList.remove('alt'),b.classList.add('coral')));if(rb&&document.querySelector('#mbox .bigstars')&&!rb.querySelector('[data-to=binder]')){rb.insertAdjacentHTML('beforeend','<button class="btn lav" data-act="go" data-to="binder">Keylori Collection</button>');typeof fitModal==='function'&&fitModal()}},0)};
+const _res37=results;results=function(r){kkSafe(_res37,this,[r]);setTimeout(()=>{const rb=document.querySelector('#mbox .rbtns');if(rb)rb.querySelectorAll('.btn').forEach(b=>/again/i.test(b.textContent)&&(b.classList.remove('alt'),b.classList.add('coral')));if(rb&&document.querySelector('#mbox .bigstars')&&!rb.querySelector('[data-to=binder]')){rb.insertAdjacentHTML('beforeend','<button class="btn lav" data-act="go" data-to="binder">Keylori Collection</button>');typeof fitModal==='function'&&fitModal()}},0)};
 /* ================= V38: clean-name filter ================= */
 const BAD_SUB='fuck,fuk,fuq,phuck,shit,shyt,cunt,bitch,biatch,nigg,nigga,fag,slut,whore,dick,penis,vagina,pussy,porn,nazi,hitler,kkk,twat,wank,boob,bastard,asshole,arsehole,jackass,dumbass,badass,asshat,jizz,retard,dildo,horny,sex,poop,pee pee,pedo,molest,butthole,buttface,damn,goddam,piss,crap,prick,testicle,scrot,nipple,naked,nude,bollock,bugger,motherf,stfu,wtf,milf,thot,suckmy,cocks'.split(',').map(w=>w.replace(/ /g,''));
 const BAD_WORD='anal,anus,cock,kill,killer,ass,arse,cum,tit,tits,rape,rapist,butt,poo,nude,sexy,hell,die,dead,kys,gay,homo,lesbo,wtf,omfg,fu,fk,sob,stupid,idiot,dumb,loser,hate'.split(',');
@@ -2179,7 +2181,7 @@ function cleanText(txt){if(typeof txt!=='string')return txt;return txt.split(' '
 const _gt39=genText;genText=function(){return cleanText(_gt39.apply(this,arguments))};
 if(typeof comboText==='function'){const _ct39=comboText;comboText=function(){return cleanText(_ct39.apply(this,arguments))}}
 /* ================= V41: feedback + about ================= */
-const _rh41=renderHome;renderHome=function(){_rh41();const g=$('#s-home .home-grid');if(g&&!$('#s-home .footbtns'))g.insertAdjacentHTML('afterend','<div class="footbtns"><button class="btn alt sm" data-act="feedback">Feedback / Report a bug</button><button class="btn alt sm howtobtn" data-act="howto">How to play</button><button class="btn alt sm instabtn" data-act="insta">Instagram</button><button class="btn alt sm kofibtn" data-act="kofi"><img src="/site/img/ico_cup.png" alt="">Support Keyloria</button></div>')};
+const _rh41=renderHome;renderHome=function(){kkSafe(_rh41,this,[]);const g=$('#s-home .home-grid');if(g&&!$('#s-home .footbtns'))g.insertAdjacentHTML('afterend','<div class="footbtns"><button class="btn alt sm" data-act="feedback">Feedback / Report a bug</button><button class="btn alt sm howtobtn" data-act="howto">How to play</button><button class="btn alt sm instabtn" data-act="insta">Instagram</button><button class="btn alt sm kofibtn" data-act="kofi"><img src="/site/img/ico_cup.png" alt="">Support Keyloria</button></div>')};
 ACT.feedback=()=>{modal(`<h2>Feedback</h2><p class="muted" style="margin:0">Found a bug or have an idea? Tell us!</p>
  <div class="seg fbtype" style="justify-content:center"><button class="on" data-act="fbType" data-v="Bug">Bug</button><button data-act="fbType" data-v="Idea">Idea</button><button data-act="fbType" data-v="Other">Other</button></div>
  <textarea id="fbmsg" rows="5" maxlength="2000" placeholder="What happened?"></textarea>
@@ -2212,7 +2214,7 @@ function evoPanel(i,pts,f,nxt){const sp=SPECIES[i],p0=Math.min(P.pts0??pts,pts),
  <div class="ev-msg">${gain>0?`<b class="ev-gain">+${gain} star${gain>1?'s':''} of power!</b> `:''}${left} more star${left>1?'s':''} to evolve!</div>
  ${gain>0?'':`<div class="ev-tip">${miss.length?'Beat your best stars on:':'Earn more stars to evolve!'} ${tip}</div>`}</div>`}
 const _ss50=startStage;startStage=function(n,mode){const i=Math.floor(n/NST);P.pts0=undefined;const r=_ss50.apply(this,arguments);try{if(LESSONS[i])P.pts0=lessonPts(i)}catch(e){}return r};
-const _res50=results;results=function(r){_res50(r);const nw=document.querySelector('#mbox .ev-new');if(nw)setTimeout(()=>{nw.style.width=nw.dataset.w+'%';if(+nw.dataset.w>0&&sfx.ok)[0,1,2].forEach(k=>setTimeout(()=>tone&&tone(500+k*150,.08,'square',.05),k*120))},500)};
+const _res50=results;results=function(r){kkSafe(_res50,this,[r]);const nw=document.querySelector('#mbox .ev-new');if(nw)setTimeout(()=>{nw.style.width=nw.dataset.w+'%';if(+nw.dataset.w>0&&sfx.ok)[0,1,2].forEach(k=>setTimeout(()=>tone&&tone(500+k*150,.08,'square',.05),k*120))},500)};
 /* --- mastery track after full evolution --- */
 const MAST_PTS=NST*3,MAST_GEMS=10;
 function masteryPanel(i,pts,p0,gain){const sp=SPECIES[i],m=(S.mast||{})[i],w0=Math.round(Math.max(p0,16)/MAST_PTS*100),w1=Math.round(pts/MAST_PTS*100),left=MAST_PTS-pts;
@@ -2225,14 +2227,14 @@ function masteryPanel(i,pts,p0,gain){const sp=SPECIES[i],m=(S.mast||{})[i],w0=Ma
  <div class="ev-msg">${gain>0?`<b class="ev-gain">+${gain} mastery star${gain>1?'s':''}!</b> `:''}${left} more to master ${sp.n[2]} and win <b class="ms-g">${MAST_GEMS} diamonds</b> + a crown!</div>
  <div class="ms-holo">${holo}</div>${gain>0?'':`<div class="ev-tip">Get 3 stars on: ${miss.slice(0,3).join('')}</div>`}</div>`}
 const _res51=results;results=function(r){if(r&&r.pass&&!P.practice&&!r._ms){const i=P.fi;if(SPECIES[i]&&lessonPts(i)>=MAST_PTS&&!(S.mast||{})[i]){r._ms=1;S.mast=S.mast||{};S.mast[i]=1;S.gems+=MAST_GEMS;save();r._newMast=1}}
- _res51(r);if(r&&r._newMast){const b=document.querySelector('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend',`<div class="banner gold">♛ ${SPECIES[P.fi].n[2]} MASTERED! +${MAST_GEMS} diamonds</div>`);sfx.win&&sfx.win()}};
+ kkSafe(_res51,this,[r]);if(r&&r._newMast){const b=document.querySelector('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend',`<div class="banner gold">♛ ${SPECIES[P.fi].n[2]} MASTERED! +${MAST_GEMS} diamonds</div>`);sfx.win&&sfx.win()}};
 /* results: Next is gold, goes first, and is the Enter/Space default */
-const _res53=results;results=function(r){_res53(r);const rb=document.querySelector('#mbox .rbtns');if(!rb)return;
+const _res53=results;results=function(r){kkSafe(_res53,this,[r]);const rb=document.querySelector('#mbox .rbtns');if(!rb)return;
  const nx=[...rb.querySelectorAll('.btn')].find(b=>/next/i.test(b.textContent));if(nx){nx.classList.remove('alt','coral');nx.classList.add('nextbtn');rb.prepend(nx)}};
 /* --- lucky item: gift tile beside the card, tap to put it on --- */
 const _res54=results;results=function(r){const L=r&&r.lucky,i=P.fi;let stash=null;
  if(L&&L.kind==='prop'&&!r._gave&&S.kv&&S.kv[i]&&S.kv[i].prop===L.prop){stash=L.prop;delete S.kv[i].prop}
- try{_res54(r)}finally{if(stash){S.kv[i].prop=stash}}
+ try{kkSafe(_res54,this,[r])}finally{if(stash){S.kv[i].prop=stash}}
  const m=document.querySelector('#mbox');if(!m)return;
  // compact chips for small bonuses
  const chips=[...m.querySelectorAll('.banner.luck')];if(chips.length){const row=document.createElement('div');row.className='chiprow';chips.forEach(c=>{c.className='rchip';row.appendChild(c)});m.querySelector('.bigstars')?.after(row)}
@@ -2266,7 +2268,7 @@ addEventListener('keydown',e=>{if(!SPLASH)return;e.preventDefault();e.stopImmedi
 const _ss55=startStage;startStage=function(n,mode){const r=_ss55.apply(this,arguments);try{const i=Math.floor(n/NST);
  if(!mode&&LESSONS[i]&&(n%NST===0||S.lastLesson!==i))lessonSplash(i);if(!mode&&LESSONS[i]){S.lastLesson=i}}catch(e){}return r};
 /* arcade button on results */
-const _res55=results;results=function(r){_res55(r);const rb=document.querySelector('#mbox .rbtns');if(rb&&document.querySelector('#mbox .bigstars')&&!rb.querySelector('[data-to=arcade]')){const m=rb.querySelector('[data-to=map]');(m||rb.lastElementChild).insertAdjacentHTML('afterend','<button class="btn" data-act="go" data-to="arcade">Arcade</button>')}
+const _res55=results;results=function(r){kkSafe(_res55,this,[r]);const rb=document.querySelector('#mbox .rbtns');if(rb&&document.querySelector('#mbox .bigstars')&&!rb.querySelector('[data-to=arcade]')){const m=rb.querySelector('[data-to=map]');(m||rb.lastElementChild).insertAdjacentHTML('afterend','<button class="btn" data-act="go" data-to="arcade">Arcade</button>')}
  if(rb&&document.querySelector('#mbox .bigstars')&&!rb.querySelector('[data-to=home]')){rb.insertAdjacentHTML('beforeend','<button class="btn" data-act="go" data-to="home">Main Menu</button>');
   const cp=rb.querySelector('[data-act=copyRun]');if(cp)rb.appendChild(cp)}};
 /* --- world header terrain silhouette (no sky), rises from the bar bottom --- */

@@ -41,11 +41,11 @@ const _ss99=startStage;startStage=function(n,mode){const args=arguments;if(mode)
  if(STORY[w-1]&&i===worldLast(w)&&s===7&&!st.taunt[w]){st.taunt[w]=1;save();return cutscene(w,STORY[w-1].taunt,'taunt',()=>startStage(n,mode))}
  return _ss99.apply(this,args)};
 let PENDING_OUT=null;
-const _res99=results;results=function(r){_res99(r);try{const st=storyState();for(let w=1;w<=STORY.length;w++)if(shardWon(w)&&!st.shard[w]){st.shard[w]=1;save();PENDING_OUT=w;
+const _res99=results;results=function(r){kkSafe(_res99,this,[r]);try{const st=storyState();for(let w=1;w<=STORY.length;w++)if(shardWon(w)&&!st.shard[w]){st.shard[w]=1;save();PENDING_OUT=w;
   const b=document.querySelector('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend',w>10?`<div class="banner gold shardban">${esc(WORLDS[w-1]?.name||'Bonus world')} cleared!</div>`:`<div class="banner gold shardban"><img src="${shardURL(w,true)}" alt=""> You won back Keystone shard ${w}!</div>`);break}}catch(e){}};
 const _show99=show;show=function(id){_show99.apply(this,arguments);if(PENDING_OUT&&(id==='home'||id==='map')){const w=PENDING_OUT;PENDING_OUT=null;setTimeout(()=>cutscene(w,[STORY[w-1].out].concat(w>10?[]:w===10?['Thank you, hero. Every word in Keyloria is safe again.']:[`${10-shardCount()} shard${10-shardCount()===1?'':'s'} left to find. Onward!`]),'out',()=>{}),250)}};
 /* home: Keystone shard meter */
-const _rh99=renderHome;renderHome=function(){_rh99();try{storyInit()}catch(e){}const t=$('#s-home .tcard');if(!t||!S.name||t.querySelector('.shards'))return;const n=shardCount();
+const _rh99=renderHome;renderHome=function(){kkSafe(_rh99,this,[]);try{storyInit()}catch(e){}const t=$('#s-home .tcard');if(!t||!S.name||t.querySelector('.shards'))return;const n=shardCount();
  t.insertAdjacentHTML('afterbegin',`<button class="shards" data-act="storyRecap" aria-label="Keystone shards"><span class="sh-lab">Keystone ${n}/10</span><span class="sh-row">${STORY.slice(0,10).map((_,k)=>`<img src="${shardURL(k+1,shardWon(k+1))}" alt="">`).join('')}</span></button>`)};
 ACT.storyRecap=()=>{const n=shardCount(),w=Math.min(10,n+1);modal(`<h2>The Scrambled Keystone</h2><p style="margin:0">${n===10?'You restored the whole Keystone! Keyloria is saved.':`You have ${n} of 10 shards. ${esc(STORY[w-1].boss)} (${esc(STORY[w-1].bt)}) guards shard ${w} in ${esc(WORLDS[w-1]?.name||'')}.`}</p>
  <div class="sh-big">${STORY.slice(0,10).map((st,k)=>`<div class="${shardWon(k+1)?'on':''}"><img src="${shardURL(k+1,shardWon(k+1))}" alt=""><small>${shardWon(k+1)?esc(st.boss):'???'}</small></div>`).join('')}</div>

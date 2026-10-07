@@ -55,7 +55,7 @@ ACT.befriend=()=>{const d=D();if(d.vis===todayKey())return;const t=visitorFor(to
  save();sfx.win&&sfx.win();
  modal(`<h2>NEW FRIEND!</h2><div class="banner gold">${msg}</div><div class="vis-card">${cardHTML(t.i,t.f,S.cards[k])}</div><div class="rbtns"><button class="btn" data-act="close">YAY!</button></div>`);renderHome()};
 
-const _rh=renderHome;renderHome=function(){_rh();if(!S.name||(window.parOn&&!parOn('visitor')))return;const e=$('#s-home .eggrow');if(e&&!$('#s-home .visrow'))e.insertAdjacentHTML('afterend',visitorHTML())};
+const _rh=renderHome;renderHome=function(){kkSafe(_rh,this,[]);if(!S.name||(window.parOn&&!parOn('visitor')))return;const e=$('#s-home .eggrow');if(e&&!$('#s-home .visrow'))e.insertAdjacentHTML('afterend',visitorHTML())};
 
 /* closet: streak items can't be bought */
 const _rs=renderShop;renderShop=function(){_rs();Object.entries(STREAK).forEach(([id,a])=>{if(S.owned.includes(id))return;const it=document.querySelector(`#s-shop .item[data-id="${id}"]`);if(!it)return;it.classList.add('lockd');

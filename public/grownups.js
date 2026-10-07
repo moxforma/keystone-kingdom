@@ -64,28 +64,47 @@ const _pg=ACT.parGate;ACT.parGate=function(){if(window.__gu)return parPanel();re
 const TPW='kl-teach-pw';
 const tpw=()=>{try{return JSON.parse(localStorage.getItem(TPW)||'null')}catch(e){return null}};
 const hash=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('keyloria:'+t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
+
+/* With a teacher password on, the class keys are stored encrypted (AES-GCM, key from the password via PBKDF2),
+   so copying this browser's storage is useless without the password or the recovery code. */
+const TEACHK='kl-teach';window.__tkPlain=window.__tkPlain||{};
+const b64=u=>btoa(String.fromCharCode(...new Uint8Array(u))),ub64=x=>Uint8Array.from(atob(x),c=>c.charCodeAt(0));
+async function kdf(pw,salt){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['wrapKey','unwrapKey'])}
+async function wrapK(K,pw,salt){const w=await kdf(pw,salt),iv=crypto.getRandomValues(new Uint8Array(12));return b64(iv)+'.'+b64(await crypto.subtle.wrapKey('raw',K,w,{name:'AES-GCM',iv}))}
+async function unwrapK(x,pw,salt){const [iv,ct]=x.split('.');return crypto.subtle.unwrapKey('raw',ub64(ct),await kdf(pw,salt),{name:'AES-GCM',iv:ub64(iv)},{name:'AES-GCM'},true,['encrypt','decrypt'])}
+async function encTk(K,t){const iv=crypto.getRandomValues(new Uint8Array(12));return b64(iv)+'.'+b64(await crypto.subtle.encrypt({name:'AES-GCM',iv},K,new TextEncoder().encode(t)))}
+async function decTk(K,x){const [iv,ct]=x.split('.');return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:ub64(iv)},K,ub64(ct)))}
+const rawTeach=()=>{try{return JSON.parse(localStorage.getItem(TEACHK)||'{}')}catch(e){return{}}};
+const putTeach=t=>{try{localStorage.setItem(TEACHK,JSON.stringify(t))}catch(e){}};
+window.kkTkFill=t=>{for(const c in t)if(t[c]&&!t[c].tk&&window.__tkPlain[c])t[c].tk=window.__tkPlain[c]};
+async function sealAll(){const p=tpw(),K=window.__tkK;if(!p||!p.wp||!K)return;const t=rawTeach();let ch=false;
+ for(const c in t){const e=t[c];if(e&&e.tk){window.__tkPlain[c]=e.tk;e.etk=await encTk(K,e.tk);delete e.tk;ch=true}}if(ch)putTeach(t)}
+window.kkTkSeal=()=>{sealAll().catch(e=>console.warn(e))};
+async function openAll(K){const t=rawTeach();for(const c in t){const e=t[c];if(e&&e.etk)try{window.__tkPlain[c]=await decTk(K,e.etk)}catch(x){}else if(e&&e.tk)window.__tkPlain[c]=e.tk}}
+function unsealAll(){const t=rawTeach();for(const c in t){const e=t[c];if(e&&e.etk&&window.__tkPlain[c]){e.tk=window.__tkPlain[c];delete e.etk}}putTeach(t)}
 const needPw=()=>!!tpw()&&!window.__tpwOk;
 let PW_NEXT=null;
 const pwAsk=next=>{PW_NEXT=next;modal(`<h2>TEACHER PASSWORD</h2><p class="muted" style="margin:0 0 10px">The teacher dashboard on this device is locked.</p>
  <div class="pgatebox"><input id="tpwin" class="pgin" type="password" autocomplete="off" aria-label="Teacher password" style="width:260px;letter-spacing:.1em"></div>
  <div class="rbtns"><button class="btn" data-act="tpwCheck">UNLOCK</button><button class="btn alt" data-act="grownups">BACK</button></div>
  <p class="muted" style="margin:10px 0 0"><button class="linkbtn" data-act="tpwForgot">Forgot the password?</button></p>`);setTimeout(()=>document.getElementById('tpwin')?.focus(),50)};
-ACT.tpwCheck=async()=>{const p=tpw(),v=document.getElementById('tpwin')?.value||'';if(p&&await hash(v)===p.h){window.__tpwOk=1;const n=PW_NEXT;PW_NEXT=null;return n?n():window.teachList()}
+ACT.tpwCheck=async()=>{const p=tpw(),v=document.getElementById('tpwin')?.value||'';if(p&&await hash(v)===p.h){if(p.wp)try{window.__tkK=await unwrapK(p.wp,v,ub64(p.s));await openAll(window.__tkK)}catch(e){console.warn(e)}window.__tpwOk=1;const n=PW_NEXT;PW_NEXT=null;return n?n():window.teachList()}
  try{sfx.bad()}catch(e){}toast('Wrong password');const i=document.getElementById('tpwin');if(i){i.value='';i.focus()}};
 ACT.tpwForgot=()=>modal(`<h2>FORGOT PASSWORD</h2><p class="muted" style="margin:0 0 10px">Type the recovery code you saved when you set the password.</p>
  <div class="pgatebox"><input id="tpwrec" class="pgin" autocomplete="off" maxlength="9" aria-label="Recovery code" style="width:260px;text-transform:uppercase"></div>
  <div class="rbtns"><button class="btn" data-act="tpwRecover">REMOVE PASSWORD</button><button class="btn alt" data-act="grownups">BACK</button></div>`);
 ACT.tpwRecover=async()=>{const p=tpw(),v=(document.getElementById('tpwrec')?.value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
- if(p&&await hash('rec:'+v)===p.r){try{localStorage.removeItem(TPW)}catch(e){}window.__tpwOk=1;toast('Password removed');return window.teachList()}toast('That code does not match')};
-ACT.tpwSet=()=>{const has=!!tpw();modal(`<h2>${has?'CHANGE':'SET A'} TEACHER PASSWORD</h2><p class="muted" style="margin:0 0 10px">Locks the teacher dashboard and class controls on this device, so students can't change them even if they pass the maths question.</p><p class="muted" style="margin:0 0 10px;font-size:.85em">It protects this screen only. On a computer students share, use a separate browser profile for teaching, or delete the class when the term ends.</p>
+ if(p&&await hash('rec:'+v)===p.r){if(p.wr)try{await openAll(await unwrapK(p.wr,v,ub64(p.s)));unsealAll()}catch(e){console.warn(e)}window.__tkK=null;try{localStorage.removeItem(TPW)}catch(e){}window.__tpwOk=1;toast('Password removed');return window.teachList()}toast('That code does not match')};
+ACT.tpwSet=()=>{const has=!!tpw();modal(`<h2>${has?'CHANGE':'SET A'} TEACHER PASSWORD</h2><p class="muted" style="margin:0 0 10px">Locks the teacher dashboard and class controls on this device, so students can't change them even if they pass the maths question.</p><p class="muted" style="margin:0 0 10px;font-size:.85em">Your class keys are also locked with it, so copying this browser's data won't open your dashboard. Keep the recovery code safe.</p>
  <div class="pgatebox" style="display:grid;gap:10px;justify-items:center"><input id="tpw1" class="pgin" type="password" autocomplete="new-password" placeholder="Password" aria-label="New password" style="width:280px"><input id="tpw2" class="pgin" type="password" autocomplete="new-password" placeholder="Type it again" aria-label="Repeat password" style="width:280px"></div>
  <div class="rbtns"><button class="btn" data-act="tpwSave">SAVE</button>${has?'<button class="btn alt" data-act="tpwOff">TURN OFF</button>':''}<button class="btn alt" data-act="tpwBack">BACK</button></div>`);setTimeout(()=>document.getElementById('tpw1')?.focus(),50)};
 ACT.tpwBack=()=>ACT.clsDash?ACT.clsDash({}):window.teachList();
-ACT.tpwOff=()=>{try{localStorage.removeItem(TPW)}catch(e){}toast('Password turned off');ACT.tpwBack()};
+ACT.tpwOff=()=>{unsealAll();window.__tkK=null;try{localStorage.removeItem(TPW)}catch(e){}toast('Password turned off');ACT.tpwBack()};
 ACT.tpwSave=async()=>{const a=document.getElementById('tpw1')?.value||'',b=document.getElementById('tpw2')?.value||'';
  if(a.length<4)return toast('Use at least 4 characters');if(a!==b)return toast('The two passwords do not match');
  const AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',rnd=crypto.getRandomValues(new Uint8Array(8)),rec=[...rnd].map(x=>AL[x%AL.length]).join('');
- try{localStorage.setItem(TPW,JSON.stringify({h:await hash(a),r:await hash('rec:'+rec)}))}catch(e){return toast('Could not save')}window.__tpwOk=1;
+ try{const t=rawTeach();for(const c in t)if(t[c]&&t[c].tk)window.__tkPlain[c]=t[c].tk;unsealAll();const K=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']),salt=crypto.getRandomValues(new Uint8Array(16));
+ localStorage.setItem(TPW,JSON.stringify({h:await hash(a),r:await hash('rec:'+rec),s:b64(salt),wp:await wrapK(K,a,salt),wr:await wrapK(K,rec,salt)}));window.__tkK=K;await sealAll()}catch(e){console.warn(e);return toast('Could not save')}window.__tpwOk=1;
  modal(`<h2>PASSWORD SAVED</h2><p class="muted" style="margin:0 0 8px">Write down this recovery code. It is the only way to remove the password if you forget it.</p><div class="cl-big">${rec.slice(0,4)}-${rec.slice(4)}</div>
  <div class="rbtns"><button class="btn" data-act="tpwBack">I WROTE IT DOWN</button></div>`)};
 const _gt=ACT.guTeach;ACT.guTeach=function(){if(needPw())return pwAsk(()=>_gt());return _gt.apply(this,arguments)};
@@ -142,7 +161,7 @@ const _pl=ACT.players;ACT.players=function(){const r=_pl.apply(this,arguments);t
  else{const c=[...box.querySelectorAll('[data-act=close]')].pop();if(c&&!box.querySelector('.guback'))c.insertAdjacentHTML('beforebegin','<button class="btn alt guback" data-act="grownups">TEACHERS</button>')}}catch(e){}return r};
 
 /* ---- Home: Grown-ups in the header, hero things on the hero card, learning first ---- */
-const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{const home=document.getElementById('s-home');if(!home||!S.name)return r;
+const _rh=renderHome;renderHome=function(){const r=kkSafe(_rh,this,arguments);try{const home=document.getElementById('s-home');if(!home||!S.name)return r;
  const tb=home.querySelector('.topbar');
  if(tb&&!tb.querySelector('.gubtn')){const anchor=tb.querySelector('.clsbtn')||tb.querySelector('.selp');const html=`<button class="btn gubtn" data-act="grownups"><img src="${ICO}" alt="">TEACHERS</button>`;anchor?anchor.insertAdjacentHTML('afterend',html):tb.insertAdjacentHTML('beforeend',html)}
  home.querySelectorAll('.linkbtn[data-to=parents]').forEach(l=>(l.closest('p')||l).remove());
@@ -251,7 +270,7 @@ document.head.insertAdjacentHTML('beforeend','<style>#s-home .hero-info,#s-home.
 /* unlimited diamonds after the master code: topped back up whenever they're spent */
 (function(){const fill=()=>{try{if(S&&S.infGems&&S.gems<99999)S.gems=99999}catch(e){}};
 const _s=save;save=function(){fill();return _s.apply(this,arguments)};
-const _r=renderHome;renderHome=function(){fill();return _r.apply(this,arguments)};
+const _r=renderHome;renderHome=function(){fill();return kkSafe(_r,this,arguments)};
 const _m=modal;modal=function(){fill();return _m.apply(this,arguments)};fill()})();
 /* arcade header: trophy icon on the High Scores button (shown alone on phones) */
 (function(){const add=()=>{document.querySelectorAll('.hsbtn:not(.hascup)').forEach(b=>{b.classList.add('hascup');const t=b.textContent.trim();b.setAttribute('aria-label',t);b.title=t;b.innerHTML=`<img class="bico mcup" src="${window.KK_CUP}" alt=""><span class="hslbl">${t}</span>`})};

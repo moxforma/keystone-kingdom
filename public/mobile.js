@@ -148,6 +148,6 @@ body.mobile #s-map .wpick{grid-template-columns:repeat(4,minmax(0,1fr))!importan
 body.mobile #mbox .fcols{grid-template-columns:1fr!important;display:block}
 body.mobile .ls-box{max-width:90vw}
 </style>`);
-const _rhm=renderHome;renderHome=function(){const r=_rhm.apply(this,arguments);try{document.querySelectorAll('#s-home .topbar>.btn').forEach(b=>{const t=b.textContent.trim();if(t&&!b.getAttribute('aria-label')){b.setAttribute('aria-label',t);b.title=t}})}catch(e){}return r};
+const _rhm=renderHome;renderHome=function(){const r=kkSafe(_rhm,this,arguments);try{document.querySelectorAll('#s-home .topbar>.btn').forEach(b=>{const t=b.textContent.trim();if(t&&!b.getAttribute('aria-label')){b.setAttribute('aria-label',t);b.title=t}})}catch(e){}return r};
 try{if(screen==='home')renderHome()}catch(e){}
 })();

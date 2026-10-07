@@ -64,7 +64,7 @@ ACT.pr2=d=>{if(prog()<UNLOCK){toast('Finish Lesson '+UNLOCK+' to unlock this!');
  setTimeout(()=>{const b=$('#hud .ht b');if(b)b.textContent=d.m==='sent'?'Practice: sentences':'Practice: paragraph'},0)};
 
 /* ---------- home balance: keystones + daily egg move to the left box ---------- */
-const _rhb=renderHome;renderHome=function(){const r=_rhb.apply(this,arguments);try{const hi=$('#s-home .hero-info'),btns=hi&&hi.querySelector('.hi-btns');if(hi&&btns){
+const _rhb=renderHome;renderHome=function(){const r=kkSafe(_rhb,this,arguments);try{const hi=$('#s-home .hero-info'),btns=hi&&hi.querySelector('.hi-btns');if(hi&&btns){
  ['.shards','.eggrow'].forEach(q=>{const el=$('#s-home .tcard '+q);if(el){el.classList.add('moved');btns.insertAdjacentElement('beforebegin',el)}})}}catch(e){}return r};
 try{if(screen==='home')renderHome()}catch(e){}
 })();

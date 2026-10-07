@@ -44,7 +44,7 @@ function detail(a){const box=$('#mbox');if(!box)return;const back=box.innerHTML,
  ACT.graphBack=()=>{box.innerHTML=back;box.className=cls;wire()}}
 let LAST=null;
 function wire(){const c=$('#mbox .tmini');if(c&&LAST)c.onclick=()=>detail(LAST)}
-const _res=results;results=function(r){const out=_res.apply(this,arguments);try{if(P.mode==='place')return out;const a=analyse();LAST=a;if(!a||a.secs<2)return out;
+const _res=results;results=function(r){const out=kkSafe(_res,this,arguments);try{if(P.mode==='place')return out;const a=analyse();LAST=a;if(!a||a.secs<2)return out;
  const box=$('#mbox'),anchor=box&&(box.querySelector('.rstats'));if(!anchor||box.querySelector('.tmini'))return out;
  anchor.insertAdjacentHTML('afterend',`<button class="tmini" title="Open your typing graph">${chartSVG(a,false)}<span class="tmore">Tap for details</span></button>`);wire()}catch(e){console.warn(e)}return out};
 
