@@ -20,3 +20,10 @@ document.addEventListener('keydown',e=>{if(e.key!=='Tab'||M.hidden)return;const 
  if(e.shiftKey&&i===0){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&i===f.length-1){e.preventDefault();f[0].focus()}},true);
 document.head.insertAdjacentHTML('beforeend','<style>[data-act][tabindex]:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #f0c860!important;outline-offset:2px}</style>');
 })();
+/* Enter/Space on a focused pop-up button presses THAT button (not the default one) */
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!document.getElementById('modal')?.hidden){const a=document.activeElement;if(a&&document.getElementById('mbox')?.contains(a)&&/^(BUTTON|A)$/.test(a.tagName))e.stopPropagation()}},true);
+/* Escape during a lesson or game asks first: press it twice to leave */
+(function(){let armed=0;
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||typeof screen==='undefined'||(screen!=='play'&&screen!=='game')||!document.getElementById('modal')?.hidden)return;
+ if(Date.now()-armed<2500){armed=0;return}
+ armed=Date.now();e.preventDefault();e.stopPropagation();try{toast('Press Esc again to leave')}catch(x){}},true)})();

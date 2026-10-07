@@ -5,8 +5,8 @@ const OL='#0b1033';
 const LS_KEY='keyling-quest-v1';
 const DEF={name:'',xp:0,gems:0,best:{},cards:{},owned:[],equip:{},ks:{},set:{sound:true,voice:false,len:1,hide:'show'},camp:false,badges:[],hist:[],time:0,rounds:0,egg:{day:'',w:0},skip:0,placed:false,arc:{meteor:0,race:0,glitch:0,gwin:0}};
 let S;
-function load(){try{const r=localStorage.getItem(LS_KEY);S=Object.assign(structuredClone(DEF),r?JSON.parse(r):{});S.set=Object.assign({},DEF.set,S.set);S.egg=Object.assign({},DEF.egg,S.egg);Object.values(S.cards).forEach(c=>{if(c.shiny&&!c.tier)c.tier='gold';delete c.shiny});S.arc=Object.assign({},DEF.arc,S.arc)}catch(e){S=structuredClone(DEF)}}
-function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){}}
+
+
 
 const REGIONS=[
  {name:'Home Row Meadow',color:'#4de08a',desc:'Where every finger finds its home.'},
@@ -79,11 +79,7 @@ const fingerOf=id=>FN_SPECIAL[id]||FINGER[id]||'th';
 const FC={p:'#b48ae0',r:'#ff9f45',m:'#ffd84d',i:'#4de08a',t:'#6cc8e0'};
 const fcol=f=>FC[f==='th'?'t':f[1]];
 const FNAME={lp:'left pinky',lr:'left ring finger',lm:'left middle finger',li:'left pointer finger',ri:'right pointer finger',rm:'right middle finger',rr:'right ring finger',rp:'right pinky',th:'thumb'};
-function keyInfo(ch){
- const base=ch===' '?'space':ch.toLowerCase(),up=/[A-Z]/.test(ch),f=fingerOf(base),r={keys:[base],fingers:[f],f};
- if(up){const sh=f[0]==='l'?'shiftR':'shiftL';r.keys.push(sh);r.fingers.push(sh==='shiftR'?'rp':'lp');r.shift=sh==='shiftR'?'rp':'lp'}
- return r;
-}
+
 const disp=ch=>ch===' '?'SPACE':/[A-Z]/.test(ch)?'big '+ch:ch.toUpperCase();
 function fingerHTML(ch){
  const k=keyInfo(ch),c=fcol(k.f),key=`<span class="chip" style="--fc:${c}">${ch===' '?'SPACE':ch}</span>`;
@@ -111,35 +107,7 @@ function tailSVG(sp,B,C,so,ol,c1){
  if(sp.tail==='flame')return curve('M146 142 Q176 146 178 120')+`<path d="M178 124 C162 112 170 96 178 78 C186 96 198 104 190 122Z" fill="url(#flm)" ${so}/><path d="M179 118 C172 110 176 100 179 92 C183 102 188 108 184 118Z" fill="#fff6c2"/>`;
  return curve('M146 142 Q176 146 178 112')+`<polygon points="${starPts(180,100,17)}" fill="${C}" ${so}/>`;
 }
-function creatureSVG(i,form,cls=''){
- const sp=SPECIES[i],c1=sp.c1,c2=sp.c2,s=[.74,.88,1.02][form],tc=TYPES[sp.t],ol=shade(c1,-.62),iris=shade(tc,-.1),B=`url(#cb${i})`,C=`url(#cc${i})`,D=`url(#cd${i})`;
- const so=`stroke="${ol}" stroke-width="3" stroke-linejoin="round"`;
- let ear=sp.ear==='antenna'?`<path d="M84 72 Q72 46 62 26" fill="none" stroke="${ol}" stroke-width="4" stroke-linecap="round"/><circle cx="62" cy="24" r="${form?9:7}" fill="${C}" ${so}/><circle cx="59" cy="21" r="2.5" fill="#fff" opacity=".85"/>`:`<path d="${EARS[sp.ear]}" fill="${B}" ${so}/>`;
- ear=`<g transform="translate(80 72) scale(${form?1:.8}) translate(-80 -72)">${ear}</g>`;
- const ears=ear+`<g transform="translate(200 0) scale(-1 1)">${ear}</g>`;
- const tl=tailSVG(sp,B,C,so,ol,c1),tail=form===0?`<g transform="translate(146 140) scale(.6) translate(-146 -140)">${tl}</g>`:tl;
- const w=`<path d="M62 112 C22 96 12 60 26 44 C34 64 44 72 54 74 C44 58 48 46 58 40 C62 64 70 88 76 104Z" fill="${C}" ${so}/>`;
- const wings=form===2?w+`<g transform="translate(200 0) scale(-1 1)">${w}</g>`:'';
- let pat='';
- if(form>0){
-  if(sp.pat==='spots')pat=`<g fill="${c2}" opacity=".85"><circle cx="66" cy="138" r="6"/><circle cx="138" cy="146" r="5"/><circle cx="132" cy="84" r="4"/></g>`;
-  if(sp.pat==='stripes')pat=`<path d="M84 78 Q100 70 116 78 M80 88 Q100 80 120 88" stroke="${c2}" stroke-width="4" fill="none" stroke-linecap="round" opacity=".9"/>`;
-  if(sp.pat==='stars')pat=`<g fill="${c2}"><polygon points="${starPts(66,140,7)}"/><polygon points="${starPts(136,146,6)}"/></g>`;
- }
- const ey=form===0?15:13;
- const brows=form===2?`<path d="M70 88 L92 95 M130 88 L108 95" stroke="${ol}" stroke-width="4.5" stroke-linecap="round"/>`:'';
- const fang=sp.fang&&form>0?`<path d="M102 132 L105 139 L108 131Z" fill="#fff" stroke="${ol}" stroke-width="1.5"/>`:'';
- const aura=form===2?`<circle cx="100" cy="116" r="94" fill="url(#au${i})"/>`:'';
- return `<svg class="cr ${cls}" viewBox="0 0 200 200" aria-hidden="true"><defs><radialGradient id="au${i}"><stop offset="0" stop-color="${tc}" stop-opacity=".6"/><stop offset="1" stop-color="${tc}" stop-opacity="0"/></radialGradient>${grad('cb'+i,c1)}${grad('cc'+i,c2,.6)}${grad('cd'+i,shade(c1,-.2))}${grad('flm','#ffb347',.6)}${irisDef(iris)}${SOFT}</defs>${aura}
-<g transform="translate(100 124) scale(${s}) translate(-100 -124)"><ellipse cx="100" cy="180" rx="54" ry="9" fill="#000" opacity=".4" filter="url(#sft)"/>${wings}${tail}${ears}
-<ellipse cx="80" cy="168" rx="15" ry="9" fill="${D}" ${so}/><ellipse cx="120" cy="168" rx="15" ry="9" fill="${D}" ${so}/>
-<ellipse cx="100" cy="122" rx="54" ry="50" fill="${B}" stroke="${ol}" stroke-width="3.5"/>
-<ellipse cx="100" cy="146" rx="30" ry="20" fill="${C}"/>${pat}
-<ellipse cx="50" cy="132" rx="9" ry="14" transform="rotate(25 50 132)" fill="${B}" ${so}/><ellipse cx="150" cy="132" rx="9" ry="14" transform="rotate(-25 150 132)" fill="${B}" ${so}/>
-${rim()}${shine(78,90,17,9)}
-${eyeSVG(82,108,ey,iris,ol)}${eyeSVG(118,108,ey,iris,ol)}${brows}<ellipse cx="68" cy="124" rx="7" ry="4" fill="#ff8fb1" opacity=".6"/><ellipse cx="132" cy="124" rx="7" ry="4" fill="#ff8fb1" opacity=".6"/>
-<path d="M92 130 Q100 138 108 130" fill="none" stroke="${ol}" stroke-width="3" stroke-linecap="round"/>${fang}</g></svg>`;
-}
+
 /* mascot + accessories */
 const ACC={
  beanie:{slot:'head',name:'Cozy Beanie',cost:10,svg:`<path d="M60 84 Q62 36 100 34 Q138 36 140 84Z" fill="#ff7a45" ${st}/><rect x="56" y="76" width="88" height="14" rx="7" fill="#ffb347" ${st}/><circle cx="100" cy="32" r="10" fill="#fff3e0" ${st}/>`},
@@ -156,24 +124,7 @@ const ACC={
  jetpack:{slot:'back',name:'Rocket Pack',cost:45,svg:`<path d="M32 158 Q42 192 52 158Z M148 158 Q158 192 168 158Z" fill="#ffc93c"/><rect x="28" y="104" width="26" height="56" rx="11" fill="#c9d2e6" ${st}/><rect x="146" y="104" width="26" height="56" rx="11" fill="#c9d2e6" ${st}/>`},
  wings:{slot:'back',name:'Dragon Wings',cost:50,svg:`<path d="M60 112 C16 98 4 56 20 36 C30 60 40 66 50 70 C42 52 46 40 56 34 C62 62 70 88 76 104Z" fill="#3ee6ff" ${st}/><path d="M140 112 C184 98 196 56 180 36 C170 60 160 66 150 70 C158 52 154 40 144 34 C138 62 130 88 124 104Z" fill="#3ee6ff" ${st}/>`}
 };
-function zookSVG(eq){
- eq=eq||S.equip;const a=sl=>eq[sl]&&ACC[eq[sl]]?ACC[eq[sl]].svg:'';const zo='#23125e',zs=`stroke="${zo}" stroke-width="3" stroke-linejoin="round"`;
- const ear=`<path d="M64 86 L42 20 L66 48 L74 36 L90 72Z" fill="url(#zb)" ${zs}/><path d="M66 74 L52 38 L66 54 L72 46 L80 70Z" fill="url(#ze)"/>`;
- return `<svg class="zk" viewBox="0 0 200 200" aria-label="Pop the storm dragon"><defs>${grad('zb','#7c5cff')}${grad('zc','#d6ccff',.6)}${grad('zd','#5a3fd6')}${grad('ze','#3ee6ff',.6)}${grad('zg','#ffc93c',.55)}${irisDef('#1fb9d6')}${SOFT}</defs>
-<ellipse cx="100" cy="182" rx="58" ry="9" fill="#000" opacity=".42" filter="url(#sft)"/>${a('back')}
-<path d="M146 140 L176 128 L166 120 L196 96 L174 104 L184 82 L150 112 L160 118Z" fill="url(#zg)" ${zs}/>
-${ear}<g transform="translate(200 0) scale(-1 1)">${ear}</g>
-<ellipse cx="80" cy="170" rx="16" ry="9" fill="url(#zd)" ${zs}/><ellipse cx="120" cy="170" rx="16" ry="9" fill="url(#zd)" ${zs}/>
-<ellipse cx="100" cy="122" rx="58" ry="54" fill="url(#zb)" stroke="${zo}" stroke-width="3.5"/>
-<ellipse cx="100" cy="148" rx="34" ry="22" fill="url(#zc)"/>
-<ellipse cx="46" cy="134" rx="9" ry="15" transform="rotate(30 46 134)" fill="url(#zb)" ${zs}/><ellipse cx="154" cy="134" rx="9" ry="15" transform="rotate(-30 154 134)" fill="url(#zb)" ${zs}/>
-${rim('.35')}${shine(74,88,18,9)}
-<polygon points="100,70 108,81 100,93 92,81" fill="url(#ze)" ${zs}/><polygon points="99,74 103,80 99,84" fill="#fff" opacity=".8"/>
-${eyeSVG(80,110,15,'#1fb9d6',zo)}${eyeSVG(120,110,15,'#1fb9d6',zo)}
-<ellipse cx="62" cy="129" rx="7" ry="4" fill="#3ee6ff" opacity=".55"/><ellipse cx="138" cy="129" rx="7" ry="4" fill="#3ee6ff" opacity=".55"/>
-<path d="M88 132 Q100 144 112 132" fill="none" stroke="${zo}" stroke-width="3.5" stroke-linecap="round"/><path d="M104 135 L107 142 L110 133Z" fill="#fff" stroke="${zo}" stroke-width="1.5"/>
-${a('neck')}${a('face')}${a('head')}</svg>`;
-}
+
 const ICON={
  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
@@ -239,15 +190,8 @@ function buildKB(){
   input(ch,false)};
 }
 function setAvail(set,shift){keyEls.forEach((el,id)=>{const on=id==='space'||set.has(id)||(shift&&(id==='shiftL'||id==='shiftR'));el.classList.toggle('off',!on)})}
-function setTarget(ch,extraKeys){
- document.querySelectorAll('.key.tgt').forEach(k=>k.classList.remove('tgt'));
- document.querySelectorAll('.fing.on').forEach(k=>k.classList.remove('on'));
- if(extraKeys)extraKeys.forEach(k=>keyEls.get(k)?.classList.add('tgt'));
- if(ch==null)return;
- const k=keyInfo(ch);k.keys.forEach(x=>keyEls.get(x)?.classList.add('tgt'));
- k.fingers.forEach(f=>(f==='th'?['lt','rt']:[f]).forEach(x=>document.getElementById('h-'+x)?.classList.add('on')));
-}
-function lightFingers(list){document.querySelectorAll('.fing.on').forEach(k=>k.classList.remove('on'));list.forEach(x=>document.getElementById('h-'+x)?.classList.add('on'))}
+
+
 
 /* ================= CONTENT ================= */
 function learned(i){let s='';for(let j=0;j<=i;j++)if(!LESSONS[j].sp||LESSONS[j].sp==='num')s+=LESSONS[j].k;return new Set(s)}
@@ -325,21 +269,7 @@ function renderHome(){
   <p class="note" style="margin:0"><button class="linkbtn" data-act="go" data-to="parents">Grown-ups: see the progress report</button></p>
   ${touch}</div></div>`;
 }
-function renderMap(){
- const nx=nextStage();
- let h=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Lesson Quests</h2><button class="btn sm volt" data-act="practice">Practice</button>${gemsHTML()}</div>`;
- REGIONS.forEach((R,r)=>{
-  h+=(WREG.includes(r)?worldHead(r):'')+`<section class="region" style="--rc:${R.color}"><div class="rhead"><div class="badge ${S.badges.includes(r)?'got':''}" style="--bc:${R.color}">${r+1}</div><div><h3>${R.name}</h3><p class="muted">${R.desc}</p></div></div><div class="lessons">`;
-  LESSONS.forEach((L,i)=>{if(L.r!==r)return;
-   const keys=L.k?[...L.k].map(c=>`<span style="--fc:${fcol(fingerOf(c))}">${c.toUpperCase()}</span>`).join(''):'';
-   h+=`<div class="lesson panel"><div class="lt"><div class="num">Lesson ${typeof LNUM==='function'?LNUM(i):i+1}</div><h4>${lessonTitle(i)}</h4><div class="minikeys">${keys}</div></div><div class="nodes">`;
-   [0,1,2].forEach(s=>{const n=i*3+s,b=S.best[sk(i,s)]||0,u=unlocked(n);
-    const thumb=!u?ICON.lock:creatureSVG(i,s,'fit '+(S.cards[sk(i,s)]?'':'sil')),nm=stageName(i,s);
-    h+=`<button class="node ${u?'':'locked'} ${n===nx&&u?'next':''} ${isBoss(i,s)?'boss':''}" ${u?`data-act="play" data-n="${n}"`:'disabled'} aria-label="${nm}${u?'':' locked'}"><span class="nc">${thumb}</span><span class="nl">${nm}</span><span class="ns">${'★'.repeat(b)}${'☆'.repeat(u?3-b:0)}</span></button>`});
-   h+='</div></div>'});
-  h+='</div></section>'});
- $('#s-map').innerHTML=h;
-}
+
 function cardHTML(i,f,o={}){
  if(o.locked)return `<div class="cw bk ${o.cls||''}"><div class="card back"><b class="c-no">${String(i*3+f+1).padStart(3,'0')}</b><span>?</span></div></div>`;
  const sp=SPECIES[i];
@@ -347,19 +277,8 @@ function cardHTML(i,f,o={}){
  <div class="c-art">${creatureSVG(i,f,'fit big',o.tier)}</div><div class="c-type"><span class="tpill">${sp.t}</span><span class="c-rar">${'★'.repeat(f+1)}</span></div>
  <p class="c-flav">${f===0?sp.fl:EVOLUTION_FLAVOR[i]?.[f-1]||sp.fl}</p><div class="c-foot">No. ${String(i*3+f+1).padStart(3,'0')} · ${o.tier==='diamond'?'Diamond ':o.tier==='gold'?'Gold ':''}${o.holo?'Holo':'Keylori'}</div></div></div>`;
 }
-function renderBinder(){
- const c=Object.keys(S.cards).length,holo=Object.values(S.cards).filter(x=>x.holo).length,gold=Object.values(S.cards).filter(x=>x.tier==='gold').length,dia=Object.values(S.cards).filter(x=>x.tier==='diamond').length;
- let g='';SPECIES.forEach((sp,i)=>[0,1,2].forEach(f=>{const cd=S.cards[sk(i,f)];g+=cd?cardHTML(i,f,cd):cardHTML(i,f,{locked:1})}));
- $('#s-binder').innerHTML=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Keylori Collection</h2><span class="muted">${c} of 60 found · ${holo} holo · ${gold} gold · ${dia} diamond</span></div>
- <p class="muted" style="margin-top:-6px">Win a level to get a card. 3 stars = holo!</p><div class="binder">${g}</div>`;
-}
-function renderShop(){
- let it='';Object.entries(ACC).forEach(([id,a])=>{const own=S.owned.includes(id),eq=S.equip[a.slot]===id;
-  it+=`<div class="item panel ${eq?'eq':''}">${zookSVG({[a.slot]:id})}<span class="slot">${a.slot}</span><h4>${a.name}</h4>
-  ${own?`<button class="btn sm ${eq?'alt':'volt'}" data-act="equip" data-id="${id}">${eq?'Take off':'Wear'}</button>`:`<button class="btn sm" data-act="buy" data-id="${id}" ${S.gems<a.cost?'disabled':''}>${ICON.gem.replace('<svg','<svg width="16" height="16"')} ${a.cost}</button>`}</div>`});
- $('#s-shop').innerHTML=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>Hero Closet</h2>${gemsHTML()}</div>
- <div class="shop-top"><div class="shop-hero panel">${zookSVG()}<p class="muted" style="margin:0;text-align:center">Get stars to earn gems!</p></div><div class="items">${it}</div></div>`;
-}
+
+
 function settings(){
  const L=S.set.len;
  modal(`<h2>Settings</h2>
@@ -474,25 +393,7 @@ function input(ch,caps){
   say(`Oops! Find ${esc(disp(t))}.`,true);updateStrip();
  }
 }
-function finish(){
- P.phase='done';clearInterval(P.idle);setTarget(null);
- const len=P.text.length,acc=Math.round((len-P.mist.size)/len*100),mins=Math.max((performance.now()-P.start)/60000,1/60),wpm=Math.round(len/5/mins);
- const secs=(performance.now()-P.start)/1000;S.time+=Math.round(secs);sessionSecs+=secs;S.rounds++;
- if(P.mode==='place')return placeResult();
- const stars=acc>=95?3:acc>=85?2:acc>=60?1:0,pass=stars>=1;
- const oldL=levelOf(S.xp);let xp=len+(pass?20*stars:5),gems=0,newCard=false,holoUp=false,badge=null,tierUp=null;
- if(P.practice){gems=0}
- else if(pass){const k=sk(P.i,P.s),prev=S.best[k]||0;gems=Math.max(0,stars-prev)*2+(prev===0?1:0);S.best[k]=Math.max(prev,stars);
-  if(!S.cards[k]){S.cards[k]={holo:stars===3};newCard=true}else if(stars===3&&!S.cards[k].holo){S.cards[k].holo=true;holoUp=true}
-  if(P.tier&&better(P.tier,S.cards[k].tier)){S.cards[k].tier=P.tier;tierUp=P.tier}
-  const r=LESSONS[P.i].r;if(!S.badges.includes(r)&&regionDone(r)){S.badges.push(r);badge=REGIONS[r].name}}
- S.xp+=xp;S.gems+=gems;S.hist.push({t:Date.now(),w:wpm,a:acc});if(S.hist.length>80)S.hist.shift();const egg=pass?dailyEgg():null;save();
- const newL=levelOf(S.xp);
- if(pass){$('#vil')?.classList.add('pop');burst($('#arena'),$('#vil'),GV[P.i%5],22);$('#foe')?.classList.add('friend');$('#hero')?.classList.add('cheer');for(let h=0;h<5;h++)setTimeout(()=>{const e=document.createElement('div');e.className='heart';e.textContent='♥';e.style.right=(14+Math.random()*14)+'%';$('#arena')?.appendChild(e);setTimeout(()=>e.remove(),1300)},h*140);sfx.win();say(`You saved ${SPECIES[P.fi].n[P.ff]}!`)}
- else{$('#vil')?.classList.add('laugh');say('Try again! Go slow.')}
- const R_={acc,wpm,stars,pass,xp,gems,newCard,holoUp,badge,lvl:newL>oldL?newL:0,egg,tierUp,brk:takeBreak()};
- if(pass&&!P.practice)setTimeout(()=>catchAnim(()=>results(R_)),1000);else setTimeout(()=>results(R_),pass?1300:900);
-}
+
 function results(r){
  const name=SPECIES[P.fi].n[P.ff],n=P.n,hasNext=!P.practice&&n+1<LESSONS.length*8;
  const st=[1,2,3].map(k=>ICON.star.replace('<svg',`<svg class="${k<=r.stars?'on':''}"`)).join('');
@@ -561,7 +462,7 @@ function takeBreak(){if(sessionSecs>600&&!breakShown){breakShown=true;return tru
 const TIPS=['Eyes on the screen!','Sit up tall!','Back to the Home Row!','Slow is OK!'];
 function mastered(id){const k=S.ks[id];return k&&k.h>=25&&k.h/(k.h+k.m)>=.92}
 function applyLabels(){keyEls.forEach((el,id)=>el.classList.toggle('nolab',id.length===1&&(S.set.hide==='hide'||(S.set.hide==='smart'&&mastered(id)))))}
-function eggSVG(w){return `<svg viewBox="0 0 100 120" class="egg" aria-hidden="true"><ellipse cx="50" cy="66" rx="36" ry="46" fill="#fff4dc" ${st}/><circle cx="36" cy="50" r="7" fill="#ffc93c"/><circle cx="62" cy="82" r="9" fill="#3ee6ff"/><circle cx="62" cy="40" r="5" fill="#ff8fc8"/>${w>=1?`<path d="M18 72 L30 64 L38 74 L48 64" fill="none" stroke="${OL}" stroke-width="3"/>`:''}${w>=2?`<path d="M54 60 L64 50 L72 60 L82 52" fill="none" stroke="${OL}" stroke-width="3"/>`:''}</svg>`}
+
 function dailyEgg(){const d=new Date().toDateString();if(S.egg.day===d)return null;S.egg.day=d;S.egg.w++;if(S.egg.w<3)return{warm:S.egg.w};S.egg.w=0;
  const t=Math.random()<.2?'diamond':'gold',pool=Object.keys(S.cards).filter(k=>better(t,S.cards[k].tier)),k=pool.length?rand(pool):'0-0';if(!S.cards[k])S.cards[k]={holo:false};S.cards[k].tier=t;S.gems+=5;return{hatch:k,tier:t}}
 function eggBanner(e){if(!e)return'';if(e.hatch){const[a,b]=e.hatch.split('-').map(Number);return `<div class="banner ${e.tier==='diamond'?'dia':'gold'}">Your egg hatched a ${(e.tier||'gold').toUpperCase()} ${SPECIES[a].n[b]}! +5 gems</div>`}return `<div class="banner">Daily egg warmed up: ${e.warm} of 3</div>`}
@@ -702,69 +603,15 @@ function renderParents(){
 /* ================= V3: villains, scenes, lasers, Scrambler Attack ================= */
 const GV=['#9f7bd8','#9dff3d','#ff8a1f','#3ee6ff','#ffe23d'];
 const GLPTS=(()=>{let p=[];for(let k=0;k<16;k++){const a=Math.PI*2*k/16-Math.PI/2,r=k%2?50:63;p.push((100+Math.cos(a)*r*1.05).toFixed(1)+','+(114+Math.sin(a)*r*.92).toFixed(1))}return p.join(' ')})();
-function glitchSVG(v=0,king=false){
- const c=GV[v%GV.length],id='glb',gs=`stroke="${c}" stroke-width="3" stroke-linejoin="round"`;
- return `<svg class="gl" viewBox="0 0 200 200" aria-hidden="true"><defs><radialGradient id="${id}" cx="38%" cy="28%" r="85%"><stop offset="0" stop-color="#7a4bb8"/><stop offset=".5" stop-color="#2c1256"/><stop offset="1" stop-color="#0d0420"/></radialGradient><filter id="glw" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>${SOFT}</defs>
-<ellipse cx="100" cy="186" rx="52" ry="8" fill="#000" opacity=".45" filter="url(#sft)"/>
-<polygon points="${GLPTS}" fill="${c}" opacity=".6" filter="url(#glw)"/>
-<path d="M66 70 L54 34 L82 60Z M134 70 L146 34 L118 60Z" fill="${c}" stroke="#0d0420" stroke-width="3" stroke-linejoin="round"/>
-<polygon points="${GLPTS}" fill="url(#${id})" ${gs}/>
-<ellipse cx="80" cy="84" rx="16" ry="8" transform="rotate(-25 80 84)" fill="#fff" opacity=".22"/>
-<g class="px" fill="${c}"><rect x="26" y="62" width="9" height="9"/><rect x="166" y="84" width="7" height="7"/><rect x="34" y="150" width="7" height="7"/><rect x="158" y="146" width="10" height="10"/></g>
-<ellipse cx="80" cy="106" rx="15" ry="14" fill="#fff"/><ellipse cx="120" cy="106" rx="15" ry="14" fill="#fff"/>
-<circle cx="83" cy="109" r="8" fill="${c}"/><circle cx="117" cy="109" r="8" fill="${c}"/><circle cx="84" cy="110" r="4" fill="#0d0420"/><circle cx="116" cy="110" r="4" fill="#0d0420"/><circle cx="86" cy="106" r="2" fill="#fff"/><circle cx="118" cy="106" r="2" fill="#fff"/>
-<path d="M62 90 L98 101 L98 88 L62 86Z M138 90 L102 101 L102 88 L138 86Z" fill="#0d0420"/>
-<path d="M70 130 Q100 156 130 130 Q100 142 70 130Z" fill="#0d0420" stroke="${c}" stroke-width="2.5" stroke-linejoin="round"/>
-<polygon points="74,132 80,140 86,135 92,143 98,136 104,143 110,136 116,141 122,134 126,132" fill="#fff"/>
-${king?`<path d="M64 60 L60 22 L80 42 L100 14 L120 42 L140 22 L136 60Z" fill="url(#zg)" stroke="#0d0420" stroke-width="3" stroke-linejoin="round"/><circle cx="100" cy="44" r="7" fill="${c}" stroke="#0d0420" stroke-width="2"/><defs>${grad('zg','#ffc93c',.55)}</defs>`:''}</svg>`;
-}
-function sceneSVG(c){
- const k=c.slice(1),far=shade(c,-.62),mid=shade(c,-.42),near=shade(c,-.2);
- let stars='';for(let n=0;n<26;n++)stars+=`<circle cx="${(n*389)%1000}" cy="${(n*137)%170}" r="${n%3?1.2:2}" fill="#fff" opacity="${.35+(n%4)*.15}"/>`;
- return `<svg class="scene" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs>
-<linearGradient id="sk${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(c,-.85)}"/><stop offset="1" stop-color="${shade(c,-.5)}"/></linearGradient>
-<linearGradient id="gd${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${near}"/><stop offset="1" stop-color="${shade(c,-.7)}"/></linearGradient>
-<radialGradient id="mn${k}"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".22" stop-color="${shade(c,.5)}" stop-opacity=".6"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>
-<linearGradient id="fg${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity="0"/><stop offset="1" stop-color="${c}" stop-opacity=".25"/></linearGradient></defs>
-<rect width="1000" height="400" fill="url(#sk${k})"/>${stars}<circle cx="780" cy="90" r="130" fill="url(#mn${k})"/>
-<path d="M0 250 L90 165 L170 225 L280 130 L380 215 L470 150 L560 225 L660 140 L760 215 L860 160 L1000 235 V400 H0Z" fill="${far}"/>
-<path d="M280 130 L300 150 L285 148 L270 160Z M660 140 L680 162 L662 158 L648 170Z" fill="#fff" opacity=".35"/>
-<rect y="190" width="1000" height="90" fill="url(#fg${k})"/>
-<path d="M0 292 Q120 238 240 282 T480 272 T720 287 T1000 266 V400 H0Z" fill="${mid}"/>
-<path d="M0 322 Q250 296 500 318 T1000 310 V400 H0Z" fill="url(#gd${k})"/>
-<path d="M0 322 Q250 296 500 318 T1000 310" fill="none" stroke="${shade(c,.3)}" stroke-width="3" opacity=".5"/>
-<g fill="${shade(c,-.5)}"><ellipse cx="90" cy="372" rx="70" ry="16"/><ellipse cx="930" cy="366" rx="80" ry="18"/></g></svg>`;
-}
+
+
 const scn=()=>sceneSVG(REGIONS[LESSONS[P.i].r].color);
-function laser(a,from,to,color,big,fx=.5,fy=.42){
- if(!a||!from||!to)return;const ar=a.getBoundingClientRect(),f=from.getBoundingClientRect(),t=to.getBoundingClientRect();
- const x1=f.left-ar.left+f.width*fx,y1=f.top-ar.top+f.height*fy,x2=t.left-ar.left+t.width*(.38+Math.random()*.24),y2=t.top-ar.top+t.height*(.4+Math.random()*.2);
- const b=document.createElement('div');b.className='laser'+(big?' big':'');b.style.cssText=`left:${x1}px;top:${y1}px;width:${Math.hypot(x2-x1,y2-y1)}px;transform:rotate(${Math.atan2(y2-y1,x2-x1)}rad);--fc:${color}`;
- const p=document.createElement('div');p.className='impact'+(big?' big':'');p.style.cssText=`left:${x2}px;top:${y2}px;--fc:${color}`;
- a.append(b,p);setTimeout(()=>{b.remove();p.remove()},big?420:280);
-}
-function burst(a,el,color,n=12){if(!a||!el)return;const ar=a.getBoundingClientRect(),r=el.getBoundingClientRect(),x=r.left-ar.left+r.width/2,y=r.top-ar.top+r.height/2;
- for(let k=0;k<n;k++){const d=document.createElement('div');d.className='shard';const ang=Math.random()*Math.PI*2,dist=50+Math.random()*90;d.style.cssText=`left:${x}px;top:${y}px;--dx:${Math.cos(ang)*dist}px;--dy:${Math.sin(ang)*dist}px;background:${k%3?color:'#fff'}`;a.appendChild(d);setTimeout(()=>d.remove(),700)}}
+
+
 function kick(el,cls){if(!el)return;el.classList.remove(cls,'hit','laugh');void el.offsetWidth;el.classList.add(cls)}
 
 /* ---- Scrambler Attack (Typing of the Dead style, for kids) ---- */
-function pathScene(){
- let grid='',pil='';for(let d=.05;d<1;d+=.1){const y=200+300*d*d;grid+=`<line x1="0" x2="1000" y1="${y}" y2="${y}" stroke="#9f7bd8" stroke-opacity="${.1+d*.25}" stroke-width="${1+d*2}"/>`}
- [.12,.25,.42,.62,.85].forEach(d=>{const y=200+300*d,sc=.2+d*1.1;[-1,1].forEach(sd=>{const x=500+sd*(40+470*d);pil+=`<g transform="translate(${x} ${y}) scale(${sc})"><polygon points="-18,0 -24,-90 0,-150 24,-90 18,0" fill="url(#cry)" stroke="#3ee6ff" stroke-width="3" stroke-linejoin="round"/><polygon points="-6,-20 -10,-90 0,-130 4,-90" fill="#fff" opacity=".35"/></g>`})});
- let st='';for(let n=0;n<40;n++)st+=`<circle cx="${(n*263)%1000}" cy="${(n*97)%180}" r="${n%3?1.2:2.2}" fill="#fff" opacity=".7"/>`;
- return `<svg class="scene" viewBox="0 0 1000 500" preserveAspectRatio="none" aria-hidden="true"><defs>
-<linearGradient id="gsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#07041c"/><stop offset=".7" stop-color="#2d1466"/><stop offset="1" stop-color="#e0707a"/></linearGradient>
-<linearGradient id="ggd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#241060"/><stop offset="1" stop-color="#070420"/></linearGradient>
-<linearGradient id="grd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a8a"/><stop offset="1" stop-color="#1a1250"/></linearGradient>
-<linearGradient id="cry" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9ff4ff"/><stop offset="1" stop-color="#2a5bd6"/></linearGradient></defs>
-<rect width="1000" height="200" fill="url(#gsk)"/>${st}
-<g fill="#12082e"><rect x="430" y="140" width="30" height="60"/><rect x="455" y="110" width="40" height="90"/><rect x="495" y="96" width="24" height="104"/><rect x="519" y="124" width="46" height="76"/><polygon points="495,96 507,70 519,96"/></g>
-<g fill="#9f7bd8"><rect x="462" y="130" width="6" height="6"/><rect x="500" y="118" width="6" height="6"/><rect x="530" y="150" width="6" height="6"/></g>
-<rect y="200" width="1000" height="300" fill="url(#ggd)"/>${grid}
-<polygon points="470,200 530,200 930,500 70,500" fill="url(#grd)"/>
-<line x1="470" y1="200" x2="70" y2="500" stroke="#3ee6ff" stroke-width="4" opacity=".7"/><line x1="530" y1="200" x2="930" y2="500" stroke="#3ee6ff" stroke-width="4" opacity=".7"/>
-<line class="dash" x1="500" y1="200" x2="500" y2="500" stroke="#fff" stroke-width="8" stroke-dasharray="26 30" opacity=".5"/>${pil}</svg>`;
-}
+
 function startGlitch(){
  const i=arcadeLesson(),ls=learned(i),letters=[...ls].filter(c=>/[a-z]/.test(c)),ok=WORDS.filter(w=>w.length<=7&&[...w].every(c=>ls.has(c)));
  mountGame('Scrambler Attack','Type the words!','Score','Hearts');
@@ -840,28 +687,15 @@ function endGlitch(win){
 const PXC={};
 const pxu=(key,mk,sc=4)=>PXC[key]||(PXC[key]=mk().url(sc));
 const pximg=(cls,url,extra='')=>`<svg class="${cls}" viewBox="0 0 200 200" aria-hidden="true" ${extra}><image href="${url}" x="0" y="0" width="200" height="200" preserveAspectRatio="xMidYMax meet"/></svg>`;
-function creatureSVG(i,form,cls=''){return pximg('cr '+cls,pxu('s'+i+'-'+form,()=>PX.SPR.species(i,form)))}
-function zookSVG(eq){eq=eq||S.equip;const k='z'+JSON.stringify(eq);return pximg('zk',pxu(k,()=>PX.SPR.zook(eq)))}
-function glitchSVG(v=0,king=false){const c=GV[v%GV.length];return pximg('gl',pxu('g'+c+king,()=>PX.SPR.glitch(c,king)))}
-function keystoneSVG(){return pximg('ks',pxu('ks',()=>PX.SPR.keystone()))}
+
+
+
+
 const SCN={};
-function sceneSVG(c){const kind=['meadow','cave','volcano','sky','star'][REGIONS.findIndex(r=>r.color===c)]||'meadow';const u=SCN[kind]||(SCN[kind]=PX.pixelScene(kind).toDataURL());
- return `<svg class="scene" viewBox="0 0 200 72" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><image href="${u}" width="200" height="72"/></svg>`}
-function pathScene(){const u=SCN.road||(SCN.road=PX.roadScene().toDataURL());return `<svg class="scene" viewBox="0 0 160 100" preserveAspectRatio="none" aria-hidden="true"><image href="${u}" width="160" height="100" preserveAspectRatio="none"/></svg>`}
+
+
 /* Keystone catch */
-function catchAnim(done){
- const a=$('#arena'),h=$('#hero'),f=$('#foe');if(!a||!h||!f)return done();
- const ar=a.getBoundingClientRect(),hr=h.getBoundingClientRect(),fr=f.getBoundingClientRect();
- const k=document.createElement('div');k.className='kstone';k.innerHTML=keystoneSVG();
- const x1=hr.left-ar.left+hr.width*.6,y1=hr.top-ar.top+hr.height*.3,x2=fr.left-ar.left+fr.width/2,y2=fr.top-ar.top+fr.height*.75;
- k.style.cssText=`left:${x1}px;top:${y1}px`;a.appendChild(k);say('Go, Capture Stone!');tone(520,.15,'square',.06);
- requestAnimationFrame(()=>{k.style.transition='left .5s linear, top .5s cubic-bezier(.2,-0.8,.6,1)';k.style.left=x2+'px';k.style.top=y2+'px'});
- setTimeout(()=>{f.classList.add('caught');burst(a,f,'#3ee6ff',10);tone(880,.1,'square',.06)},520);
- setTimeout(()=>{k.classList.add('wob')},900);
- [1100,1500,1900].forEach((t,i)=>setTimeout(()=>tone(300+i*80,.08,'square',.06),t));
- setTimeout(()=>{k.classList.remove('wob');k.classList.add('click');burst(a,k,'#ffd23a',14);sfx.win();say('Caught!')},2300);
- setTimeout(done,3100);
-}
+
 
 const KKDATA={"order": ["sproutle", "drizzit", "zipp", "pebbo", "embit", "glintle", "duskit", "breezle", "frostby", "twinkit", "beetix", "wispy", "cogby", "dunelet", "fizzlet", "rumblet", "bubbly", "magmite", "glowbit", "qwertle"], "spr": {"sproutle": ["........................", "........................", "..qq................qq..", ".qGGq..............qGgq.", "..qgGq.oooooooooo.qGgq..", "qGGgqoLLHHLLLLBBBDoqgGGq", ".qqqoLHHLLLLLLBBBBDDoqq.", "qGgqoLHLLLLLLBBBBBDXoqGq", ".qqOLLkkkLLLLBBkkkBDXoq.", "qGqOLLwkkLLLLBBwkkBDXoGq", ".qqOLLkekLLLLBBkekBDXoq.", "..oOrrLLLLmmmmLBBrrDXo..", "..oOLLLLLLmnnmBBBBBDXo..", "...oDBBBBBBBBBBBBBDXo...", "....ooDDDDDDDDDDDDoo....", "....oLoBccccccsBoBo.....", "...oLLoBcccccccsBoBBo...", "....ooBBccccccsBBoo.oo..", ".....oBBBccccsBBBoooBDo.", ".....oDBBBBBBBBBDDBBBDo.", ".....oDDBBooBBDDooofffo.", "....oBBBo..oBBBo..fyf...", "....oooo....oooo...f....", "........................"], "drizzit": ["...........oo...........", "...........oho..........", "..b.......ohjo..........", ".bwb......ojho......b...", "..b......ohjho.....bwb..", ".........ojhjo......b...", ".......oooohjoooo.......", ".....ooLHHHLLLLBBBBoo...", "....oOLHHLLLLLLBBBBDXo..", "...oOLHLLLLLLLLBBBBBDXo.", "...oOLLkkkLLLLBBkkkBDXo.", "...oOLLwkkLLLLBBwkkBDXo.", "...oOLLkekLLLLBBkekBDXo.", "...oOrrLLLLmnnmBBBrrDXo.", "..ooOBBBcccccccBBBBDXoo.", ".oLLoBBccccccccsBBDXoLLo", "oLLHoBcccccccccsBBDXoBDo", "oooooBcccccccccsBDXooooo", "....oBBccccccccsBDXo....", "....oDBBcccccsBBDXXo.oo.", ".....oDDBBBBBBDDXXooBBo.", "......ooDDDDDDDDXooBDDo.", "........oooooooooo.ooo..", "........................"], "zipp": ["......y....y............", ".....yg...yg....y.......", "....oyYo.oyYo..yg.......", ".....oyYooyYo.oYo.......", "......oyYyYYooYo........", ".....ooOLHHLLBBBBoo.....", "....oOLHHLLLLLBBBBDXo...", "...oOLHLLLLLLLBBBBBDXo..", "...oOLLkkkLLLBBkkkBBDXo.", "...oOLLwkkLLLBBwkkBBDXyy", "...oOLLkekLLLBBkekBByyyp", "...oOLLLLLLLBBBBBBBYYYYp", "...oOLyLLLLLBBBBBBBDXoo.", "..oOLyyLLccccccBBBBDXo..", "..oOLLyLcccccsBDDBBDXo..", "..oOLLLLcccccsBDXDBDXo..", "..oDBBBBccccsBBDDBBDXo..", "...oDDBBBBBBBBBBBDXXo...", "....ooDDDDDDDDDDXXoo....", ".......oa....oa.........", ".......oa....oa.........", ".......oa....oa.........", ".....oaaAo.oaaAo........", ".....ooooo.ooooo........"], "pebbo": ["........................", "..........I.............", ".........oKo..I.........", "........oKIJooKo........", "........oKIJoKJo........", ".......oQPKJJKJQo.......", ".....ooPRRPQRPRRQoo.....", "....oPRRQoPRRQoPRQQo....", "...oOLLooLLLooLLBBBoo...", "..oOLHHLLLLLLLLBBBBoooo.", ".ooOLHLLLLLLLLBBBBoLHHLo", "oPoOLLLLLLLLLBBBBBoLkkLo", "oRRoLLLLLLLBBBBBBBoLwkBo", "oQRRoLLLLBBBBBBBBDDoBmmo", ".oooOBBccccccccBBDXoBBDo", "....oDBccccccccsBDXXoDo.", "....oDDsssssssssDDXXoo..", "....oXDDDDDDDDDDDDXXo...", "....oBBo.oBBo.oBBo.oBBo.", "....oBDo.oBDo.oBDo.oBDo.", "....owwo.owwo.owwo.owwo.", "....oooo.oooo.oooo.oooo.", "........................", "........................"], "embit": ["..y..........y.....y....", "..Yy........yY..........", ".oYo........oYo.........", ".oHco......ocLo......y..", ".oHcco....occLo.........", ".oLHcLoooooLcBDo...oo...", "OLHHHLLLLLLBBBBDo.oyyo..", "OLHccLLLLLLBccBDo.oYYo..", "OLLkkkLLLLBkkkBDooLBBDo.", "OLLwkkLLLLBwkkBDooHAADo.", "OcckYkBBBBBkYkccooLBBDo.", "OcccDcccncccDccDooBBBDo.", "OLccDccmmmccDcBDooHAAADo", "OBcccccmpmccccBDooLBBBDo", "ODBBccccccccBBDDooBBBBDo", ".oDDBBBBBBBBDDDo.oAAAADo", "..oDBBnnnnnBBDo..oBBBDo.", ".obBBnbnnnbnBBbo.oBBDo..", ".obbBnnbnbnnBbbo.oDDo...", ".obbBBnnnnnBBbbo.oo.....", "..obbbbo.obbbbo.........", "..obbbbo.obbbbo.........", "..onwnwo.onwnwo.........", "..oooooo.oooooo........."], "glintle": ["........................", "........................", "........................", "........................", "........................", "........................", "................I.......", "......oIo..........I....", ".....oKIJo....okko.okko.", "....oKIIJJo...okwo.okwo.", "...oKIKJJJJo...oBo..oBo.", "..oKIKKJJKJJo...oBo.oBo.", ".oKIKKJJKKJJJo...oBooBo.", ".oKKKJJKKJJJJo..oBBBBBo.", ".oJKKJJKKJJJJXo.oLLBBDo.", ".oJJKJJJKJJJXXooLLBBBDo.", "..oJJJJJJJJXXoLLLmmBDDo.", "...ooXXXXXXXooLLLLBBBDo.", ".oooLLLLLLLLLLLLLBBBDDo.", "oOLHHLLLLLLLLLLBBBBBDXo.", "oOLLLLLLLLLBBBBBBBBDDXo.", ".oDDDBBBBBBBBBBBBDDDXo..", "..oooooooooooooooooooo..", "........................"], "duskit": ["........................", "........................", "........................", "...y................y...", "....oy............yo....", ".....oY..........Yo.....", "......oy........yo......", ".oooo..oooooooooo..oooo.", "oUUWWooLHHLLLBBBDooWWVVo", "oUyyWWoLHLLLLBBBBDoWyyVo", "oUyyWWOLkkkLLBkkkDXWyyVo", "oUWWWWOLwkkLLBwkkDXWWWVo", "oUWWWWOLkekLLBkekDXWWWVo", "oUWWWWoLLLLmmBBBBDoWWWVo", ".oUWWWWofffffffffoWWWVo.", "..oWWWWoBBBBBBBBDoWWVo..", "..oUyWWoLBBBBBBDXoWyVo..", "..oUWWWVoLBBBBBDXoVWVo..", "...oVVVo.oDBBBDXo.oVVo..", "....ooo..oDDDDXo...oo...", "..........oDXo..........", "...........oo...........", "........................", "........................"], "breezle": ["........................", "........................", "........................", "........................", "........oooooo..........", "......ooLHHLLBoo........", ".....oLHHLLLLBBBooo.....", "...ooLHLLLLLLBBBBDBBoo..", "..oLHLLoooooooooBBDDXo..", ".oLHLLoyJJFFFFFyoBBDDXo.", ".oLLLoYJkkFFFkkGYoBDDXo.", "oLHLLoJJwkFFFwkGGoBBDXXo", "oLLLLoJJFFFmmFFGGoBBDDXo", "oLLLLLorJFFFFFGroBBBDDXo", ".oLLLBBooGGGGGooBBBDDXo.", "oLHLBBBBBooooooBBBBDDDXo", "oLLBBBBBBBBBBBBBBBDDDXXo", ".oDBBBBDDBBBBDDBBBDDXXo.", "..ooDDDooDDDDDooDDDXoo..", "....olo.olo..olo.olo....", "....olo.olo..olo.olo....", "....oGo.oGo..oGo.oGo....", "....ooo.ooo..ooo.ooo....", "........................"], "frostby": ["....oK..........Ko......", "....oIKo......oKIo......", "....oIJo......oJIo......", "....oHLo......oBDo......", "....oHLo......oBDo......", "....oHLo......oBXo......", "....oLLLoooooooBDo......", "...oOHHLLLLLLBBBBDo.....", "..oOHLLLLLLLLBBBBDXo....", "..oOLLkkkLLLBkkkBDXo....", "..oOLLwkkLLLBwkkBDXo....", "..oOLLkekLLLBkekBDXo....", "..oOrrLLLLpLLLLrrDXo....", "..oOLLLLLmnmLLLBBDXo....", "...oDBBBBBBBBBBBDXo.....", "....ooDDIKIIDDDDoo......", "...oLLoBBBBBBBBoDDo.oo..", "...oLLoBBBBBBBBoDXooHHo.", "....ooBBBBBBBBBDXoooDDo.", "....oLLBBooBBDDDXo..oo..", "...oLLLLo..oBBDDDo......", "...oooooo..ooooooo......", "........................", "........................"], "twinkit": ["........................", "........................", "..........y.............", ".........yYy............", "....y.....y....y........", "........oooooooo........", "......ooLHHLLLBBoo......", ".....oLHHLLyLLBBBBo.....", "....oOLHLLLLLLBByBDo....", "...oOLLkkkLLLBkkkBDXo...", "...oOyLwkkLLLBwkkBDXo...", "...oOLLkekLLLBkekBDXo...", "...oOLLLLLLmmBBBBBDXo...", "..oOLLLLLLLLBBBByBDDXo..", "..oDDDDDDDDDDDDDDDDDXo..", "...otuo.otuo.otuo.otuo..", "...otTo.otTo.otTo.otTo..", "....oto..oto..oto..oto..", "...otTo.otTo.otTo.otTo..", "...oto..oto..oto..oto...", "....oto..oto..oto..oto..", ".....o....o....o....o...", "........................", "........................"], "beetix": ["........................", "........................", "........................", "........................", "...........y............", "..........yYy...........", "..........oYo...........", "........ooojooo.........", ".......ohjjjjjho........", "......ohjkkjkkjho.......", "......ohjwkjwkjho.......", "...o..ohhhjjjhhho..o....", "....o.oOLHHLBBBBo.o.....", ".....oOLHLLLoBBBDXo.....", "..oooOLLyLLLoBByBDXooo..", "....oOLLLLLLoBBBBDXo....", "...ooOLLLyLLoBBByBDXoo..", "....oOLLLLLLoBBBBDXXo...", "..oooDLLLLLLoBBBBDXXooo.", ".....oDDLLLLoBBBDXXo....", "......oDDDDDoDDDXXo.....", ".......oooooooooo.......", "........................", "........................"], "wispy": ["........................", "........................", "........................", "........oooooo..........", "......ooLHHLLBoo........", ".....oLHHLLLLBBDo.......", "....oLHHLLLLLLBBDXo.....", "...oOHLLLLLLLLBBBDXo....", "...oOLLkkLLLLkkBBDXo....", "...oOLkkkLLLkkkBBDXo....", "...oOLkwkLLLkwkBBDXo....", "...oOLkkkLLLkkkBBDXo....", "...oOrLkLLmLLkBrBDXo....", "...oOLLLLLmmLLBBBDXo....", "...oOLLLLLLLLLBBBDXo.ll.", "..oOLLLLLLLLLLBBBDXoolyl", "..oOLLLLLLLLLBBBBDXoBlgl", "..oOLLLLLLLLBBBBDDXo.lyl", "..oDLLLLLLBBBBBDDXXo.lll", "..oDDBBBBBBBBBDDXXXo....", "..oDo.oDDDo.oDDDo.oXo...", "...o...ooo...ooo...o....", "........................", "........................"], "cogby": ["...........r............", "..........rwr...........", "...........o............", "...........o............", ".....oooooooooooooo.....", ".....oHLLLLLLLLLBDo.....", ".....oLssssssssssDo.....", ".....oLsttsssttsDXo.....", ".....oLsttsssttsDXo.....", ".....oLssstttsssDXo.....", ".....oBDDDDDDDDDDXo.....", ".......oooooooooo.......", "....ooHLLLLLLLLBDoo.....", "...oLooLLLyyLLBDXooDo...", "...oLooLLyYYyLBDXooDo...", "...oBooLLLyyLLBDXooXo...", "...owo.oLLLLLLBDXo.owo..", ".......oDDDDDDDDXo......", "........oBo...oBo.......", "........oBo...oBo.......", ".......oaaBo.oaaBo......", ".......ooooo.ooooo......", "........................", "........................"], "dunelet": ["........................", "........................", ".........oooooo.........", "..oo...ooLHHLBoo...oo...", "..oBo.oLHLLLLBBDo.oDo...", "...ooOLLLLLLLBBDXoo.....", "....oOLddLLLddBDXo......", "....oOdkkdLdkkdDXo......", "....oOdwkdLdwkdDXo......", "....oOLddLccLddDXo......", ".....oOLLcckccBDo.......", ".....oLLccmmccBDo.......", "......ooDccccDoo........", ".....oOLccccccBDo.......", "....oOLLccccccBDXo......", "....oBoLccccccBoDo......", "....oBoLccccccBoXo......", "....owoLLccccBBowo......", ".....oOLLLLBBBDXo...oo..", ".....oDLLBBBBBDXo..oDo..", ".....oDDBBoBBDDXo.oDo...", "....oLLBo..oBBDDoooo....", "....ooooo..oooooo.......", "........................"], "fizzlet": ["........................", "........................", "........................", "..........rr............", ".........rwRr...........", ".........oRRo...........", ".......ooLHHLBoo........", "......oLHHLyLLBDo.......", ".....ooLLbLLLLBgBDoo....", "...ooLHHLLLLgLLBBBDDoo..", "..oLHLLyLLLLLLLBBbBDDXo.", ".oLLLLLLLLbLLLBBBBByDXXo", ".oDDLLDDLLLDDBBDDBBDDXXo", ".ooDDooDDDooDDDooDDDoXXo", "..oUWWkkWWWWWWkkWWWVVo..", "..oUWWwkWWWWWWwkWWVVVo..", "..oUWWkkWWmmWWkkWWVVVo..", "...oUUWWWWWWWWWWWVVVo...", "...oUWVWWVWWVWWVWVVVo...", "...oUWVWWVWWVWWVWVVVo...", "....oUWVWWVWWVWWVVVo....", "....oUWVWWVWWVWWVVVo....", "....oooooooooooooooo....", "........................"], "rumblet": ["....y............y......", "....oy..........yo......", ".....oy........yYo......", "......oYoooooooYo.......", ".....oOLHHLLLLBBBDo.....", "....oOLHLLLLLLLBBBDXo...", "....oOLkkkLLLkkkBBDXo...", "....oOLweeLLLweeBBDXo...", "....oOLkkkLLLkkkBBDXo...", "...oOLLLLLLBBBBBBBBBDo..", "...oOLLLmmmmmmmmBBBBDXo.", "...oOLLLmwmwmwmmBBBDXoo.", "..occcoDDDDDDDDDDDXoccc.", ".occCcoBbbbbbbbbBDocCcco", ".oCCCoLBbbbbbbbBBDXoCCCo", "..ooooLBbbbbbbbBDXXoooo.", "....oLLBbbbbbbBBDXo..yo.", "....oLBBBBBBBBBDDXo.oyo.", ".....oDBBBBBBBDDXooyo...", ".....oBBoooooBBDXo......", "....oLBBo...oBBDXo......", "....owwwo...owwwo.......", "....ooooo...ooooo.......", "........................"], "bubbly": ["........................", "........................", "........................", "..b..................b..", ".bwb.....oooooo.....bwb.", "..b....ooLHHLLBoo....b..", "......oLHHLLLLBBBoo.....", ".....oLHLLsLLLLBBBDo....", "....oOLLLLLLLLLBBsBDXo..", "....oOLLLLLLLLBBBBBDXo..", "....oOLkkkLLLLkkkBBDXo..", "....oOLwkkLLLLwkkBBDXo..", "....oOLkekLLLLkekBBDXo..", "....oOsLLLLmmLLLBBsDXo..", ".....oDLLLLLLLBBBBDXo...", "....ooDDBBBBBBBBBDDXoo..", "...oLBoLBoLBoBDoBDoBDo..", "...oLBoLBoLBoBDoBDoBDo..", "...oLsoLsoLsoBsoBsoBso..", "...oBo.oBo.oBo.oDo.oDo..", "..oBo..oo..oBo..oo..oDo.", "..oo........oo.......oo.", "........................", "........................"], "magmite": ["........................", "........................", "........................", "........................", "........oooooooo........", "......ooLHHLLLBBoo......", ".....oLHLLaLLLBBBDo.....", "....oOLLLLaaLLBBBBDo....", "...oOLLLLLLaLLBBBBDXo...", "...oOLggggLLLLggggDXo...", "...oOLgaagLLLLgaagDXo...", "...oOLLLLLLLLLLBBBDXo...", "..ooOLLaAAAAAAaBBBDXoo..", ".oLoOLLLaggggaBBBBDXoBo.", "oLLoOLLLLLLLLBBBBBDXoBDo", "oLHoOLLaLLLLBBBBBaDXoBDo", "oLLoOLLaaLLLBBBBaaDXoDXo", "oBBo.oLLLLLLBBBBBDXo.oXo", ".oo..oDDLLLaBBBBDXXo..o.", ".....oDDDDDaDDDDXXXo....", ".....oLLBo.....oBDXo....", "....oLLBBo.....oBBDXo...", "....oooooo.....oooooo...", "........................"], "glowbit": ["...a.a..........a.a.....", "....aA..........Aa......", "....oAa........aAo......", ".....oAo......oAo.......", "..oo..oAoooooooAo..oo...", "..oBDooLHHLLLBBBoooBDo..", "...oBoOLHLLLLLLBBDXoDo..", "....ooOLkkkLLkkkBDXoo...", ".....oOLwkkLLwkkBDXo....", ".....oOLkekLLkekBDXo....", ".....oOLLLLLLLLLBDXo....", "......oOLLLnnLLBDXo.....", ".......ooLLmmLBDoo......", "........oDDDDDXo........", "...ooooOLLsLLLBBBDooo...", "..oLHLLLLLLsLLBBBsBDXo..", "..oLLsLLLLLLLBBBBBDXXo..", "...oDDBBBBBBBBBBDDXXo...", "....oBo.oBo....oBo.oDo..", "....oBo.oBo....oBo.oDo..", "....oBo.oBo....oBo.oDo..", "....oko.oko....oko.oko..", "....ooo.ooo....ooo.ooo..", "........................"], "qwertle": ["...o..............o.....", "...oPo..........oPo.....", "....oPo........oPo......", ".....oPooooooooPo.......", "....oOLHHLLLLLBBDo......", "...oOLHLLLLLLLBBBDXo....", "...oOLLkkkLLLkkkBDXo....", "...oOLLwekLLLwekBDXo....", "...oOLLkkkLLLkkkBDXo....", "...oOLLLLLLLLBBBBBDXo...", "...oOLLLmmmmmmBBBBDXo...", "...oOLLLmwmmwmBBBBDXo...", "qq..oDDDDDDDDDDDDDXo..qq", "qpPo.oKKoKKoKKoBBDo.oPpq", "qpPPooKQoKQoKQoBBDXooPPq", ".qPPoOJJoJJoJJoBBDXoPPq.", "..qPoOLLLLLLLLBBBDXoPq..", "...ooOLLHHLLLBBBDXoo....", "....oDBBBBBBBBBDXXo..oo.", "....oDDBBoooBBDDXo.oBo..", "....oLBBo...oBBDXooBo...", "....owwwo...owwwoo......", "....ooooo...ooooo.......", "........................"]}, "pal": {"sproutle": {"o": "#4a1e3a", "O": "#7a3a5e", "X": "#b85a84", "D": "#d27aa0", "B": "#eea0be", "L": "#f8c2d6", "H": "#ffe0ea", "g": "#5aa848", "G": "#8cd06a", "q": "#2e6e34", "c": "#fff0f4", "s": "#f0c8d8", "k": "#2a1424", "w": "#ffffff", "e": "#6a3a7a", "m": "#7a2440", "n": "#f08aa0", "r": "#f08aa8", "y": "#f6d65a", "f": "#fff6ee"}, "drizzit": {"o": "#182c52", "O": "#2e4f86", "X": "#2a4e88", "D": "#3a6aa8", "B": "#5a90cc", "L": "#82b4e4", "H": "#b8daf4", "c": "#eef6f8", "s": "#c4d8e4", "h": "#f2e4bc", "j": "#c9a86a", "k": "#0e1a30", "w": "#ffffff", "e": "#3a8ad0", "m": "#5a1a30", "n": "#e88aa0", "r": "#e8949c", "b": "#d8f0ff"}, "zipp": {"o": "#0a3a3e", "O": "#1e6a6a", "X": "#1a6e6a", "D": "#239a94", "B": "#35c2b8", "L": "#6ee0d0", "H": "#b0f4e8", "c": "#e2fff8", "s": "#a8e0d4", "y": "#f2d048", "Y": "#b88a1e", "g": "#fff2a0", "a": "#e8902a", "A": "#a85a14", "k": "#0a1a1a", "w": "#ffffff", "e": "#2a8a8a", "p": "#cfd8e4"}, "pebbo": {"o": "#2e2014", "O": "#5a4028", "X": "#7a5434", "D": "#a07448", "B": "#c89a68", "L": "#e0b888", "H": "#f2d6b0", "c": "#f8ead2", "s": "#d8c09c", "R": "#8a92a6", "Q": "#5a6278", "P": "#b8c0d0", "K": "#b88aee", "J": "#7a4ab8", "I": "#e8d4ff", "k": "#1a1008", "w": "#fff8ec", "m": "#6a2230"}, "embit": {"o": "#2e1a16", "O": "#6a3220", "D": "#84371f", "B": "#b9552e", "L": "#d97a45", "H": "#eda36b", "c": "#f4e6cf", "b": "#4b2a20", "n": "#2e1812", "k": "#1e1316", "w": "#fff9ef", "m": "#6c2232", "p": "#e48a9a", "y": "#f6d878", "Y": "#e0903a", "A": "#e8b070"}, "glintle": {"o": "#22183e", "O": "#3e2e6a", "X": "#6a58a8", "D": "#8a78c8", "B": "#a898e0", "L": "#c8bcf0", "H": "#e6e0fa", "K": "#6ee0f0", "J": "#2e8ab0", "I": "#c8faff", "k": "#1a1030", "w": "#ffffff", "m": "#6a2a5a"}, "duskit": {"o": "#1a1030", "O": "#3a2a60", "X": "#2a1e4e", "D": "#3e2e6e", "B": "#5a46a0", "L": "#7a66c4", "H": "#a898e0", "W": "#6a4ab8", "V": "#3e2a7a", "U": "#9a7ae0", "y": "#f2e08a", "Y": "#c8a848", "f": "#d8ccf4", "k": "#120a20", "w": "#ffffff", "e": "#f2e08a", "m": "#5a2a4a"}, "breezle": {"o": "#34466a", "O": "#5a6e96", "X": "#9aaed0", "D": "#c4d4ec", "B": "#e6eefa", "L": "#f6f9ff", "H": "#ffffff", "F": "#8aa0c8", "G": "#5e7296", "J": "#b0c2e0", "y": "#f0d890", "Y": "#c8a860", "k": "#1e2a44", "w": "#ffffff", "m": "#6a2a4a", "r": "#f0a8b8", "l": "#6a7ea8"}, "frostby": {"o": "#1e3654", "O": "#3e5a82", "X": "#8eb0d0", "D": "#b8d0e6", "B": "#e2eef8", "L": "#f4f9fe", "H": "#ffffff", "I": "#8edcf4", "J": "#4a9ac8", "K": "#d4f6ff", "k": "#0e1a2a", "w": "#ffffff", "e": "#3a7ac0", "m": "#6a2a40", "n": "#f08aa0", "r": "#f2a8b8", "p": "#f08aa0"}, "twinkit": {"o": "#1a1848", "O": "#3a3888", "X": "#3a3a9a", "D": "#4e4eb8", "B": "#6a6ad8", "L": "#8e8ef0", "H": "#c0c0ff", "y": "#f6dc6a", "Y": "#c8a838", "t": "#f08ac8", "T": "#b04a90", "u": "#ffc0e8", "k": "#0e0e2a", "w": "#ffffff", "e": "#2a2a7a", "m": "#5a1a4a"}, "beetix": {"o": "#0e2a1a", "O": "#2a5a3a", "X": "#1e5a3a", "D": "#2e8a52", "B": "#48b874", "L": "#78d89a", "H": "#b8f0cc", "y": "#f2d04a", "Y": "#b08a1a", "h": "#2a4a3e", "j": "#3e6a58", "k": "#0a140e", "w": "#ffffff"}, "wispy": {"o": "#2e2850", "O": "#5a5288", "X": "#a8a0d0", "D": "#c8c2e8", "B": "#e6e2f8", "L": "#f4f2fe", "H": "#ffffff", "k": "#2e2850", "w": "#ffffff", "m": "#6a3a6a", "r": "#f0a8c0", "y": "#f6dc6a", "g": "#fff6c0", "l": "#5a4a3a"}, "cogby": {"o": "#1a2030", "O": "#3a4458", "X": "#5a6478", "D": "#7a8498", "B": "#a0aabe", "L": "#c4ccdc", "H": "#e4e8f0", "s": "#1e2a44", "t": "#6ef0f0", "y": "#f2c848", "Y": "#a87a18", "r": "#f0607a", "w": "#ffffff", "a": "#e8902a"}, "dunelet": {"o": "#3a2410", "O": "#6a4a24", "X": "#8a6030", "D": "#b08048", "B": "#d4a868", "L": "#e8c88c", "H": "#f6e2b8", "c": "#f8ecd0", "k": "#1a0e04", "w": "#ffffff", "d": "#6a4420", "m": "#6a2a20"}, "fizzlet": {"o": "#4a1a3a", "O": "#7a3a5e", "X": "#c86a9a", "D": "#e08ab4", "B": "#f4a8cc", "L": "#fcc8e0", "H": "#fff0f6", "W": "#6ec8b0", "V": "#3e8a7a", "U": "#a8ecd8", "y": "#f2d04a", "b": "#5aa8f0", "g": "#6ad68a", "w": "#ffffff", "k": "#2a0e1e", "r": "#e8384f", "R": "#a01a30", "m": "#7a1a3a"}, "rumblet": {"o": "#141c48", "O": "#2e3a7a", "X": "#2e3e94", "D": "#3e52b8", "B": "#5a72d8", "L": "#7e96ec", "H": "#b0c2fa", "c": "#f2f6ff", "C": "#c4cee8", "y": "#f6d84a", "Y": "#b89418", "b": "#c8d4fa", "k": "#0a0e24", "w": "#ffffff", "e": "#f6d84a", "m": "#3a0e2a"}, "bubbly": {"o": "#0a3434", "O": "#1e5a58", "X": "#1a6a66", "D": "#23948e", "B": "#34bcb4", "L": "#68dcd2", "H": "#b0f4ec", "s": "#ffb8a6", "k": "#06201e", "w": "#ffffff", "e": "#0a4a48", "m": "#5a1a2a", "b": "#d8f4ff"}, "magmite": {"o": "#1a0e0e", "O": "#3e2a2a", "X": "#3a2626", "D": "#4e3636", "B": "#6a4a48", "L": "#8a6662", "H": "#a88480", "a": "#ff7a2a", "A": "#c8401a", "g": "#ffd84a"}, "glowbit": {"o": "#12382e", "O": "#2a5a4a", "X": "#3a9a7a", "D": "#4ec09a", "B": "#6ee8c0", "L": "#9ef4d6", "H": "#d4fff0", "a": "#e0b0ff", "A": "#a070d8", "s": "#f4fffb", "k": "#0a1e18", "w": "#ffffff", "e": "#1a5a4a", "n": "#2a1a3a", "m": "#6a2a4a"}, "qwertle": {"o": "#3a2408", "O": "#6a4a14", "X": "#a87a20", "D": "#c89a30", "B": "#e6bc4a", "L": "#f6d878", "H": "#fff2c0", "K": "#fff8ec", "J": "#d8ccb8", "Q": "#6a5a48", "p": "#7c5cff", "P": "#4e3d86", "q": "#a898f0", "k": "#1a1008", "w": "#ffffff", "e": "#7c5cff", "m": "#4a1a0a"}}, "pop": ["..o..................o..", "..oO................Oo..", "..oHo..............oBo..", "..ouLo............oBuo..", "..otuLo..........oBtuo..", "..oTtLLooooooooooBDtTo..", ".oTuLHHHHLLLLLLBBBBDuTo.", ".OLLHHHLLLLLLLLBBBBBDDo.", ".OLLHLLLLLLwuBBBBBBBBDo.", ".OLLLLLLLLLtTBBBBBBBBDo.", ".OLLLLLLLBBTTBBBBBBBDXo.", ".oLLLLkkkBBBBBBkkkBBDXo.", ".oLLLLwkkBBBBBBwkkBBDXo.", ".oLLLBkTkBBBBBBkTkBBDXo.", ".oLLBBTtTBBBBBBTtTBBDXo.", "oLLBBBkkkBBBBBBkkkBDDDXo", ".oBrrrBBBBmmmmBBBBrrrDo.", ".oBBBBBBBBmnwmBBBBBDDXo.", ".oDBBBBBBBBBBBBBBBDDDXo.", "..oXDDDDDDDDDDDDDDDDXo..", ".oLoBBBcscccsccsBBDoyYo.", ".oBoBBBccscccscBBDDoyo..", "..owoLBBBooooooooBBDoyYo", "...ooooooooooooooooooo.."], "popPal": {"o": "#2b1d3e", "O": "#4a3a74", "X": "#3a2c66", "D": "#4e3d86", "B": "#6e5bb8", "L": "#8f7fd6", "H": "#b9adeb", "t": "#6fd0c8", "T": "#3c8f9a", "u": "#b4f0e6", "w": "#fff8ec", "k": "#1e1530", "r": "#e4909c", "m": "#6e2440", "n": "#e48a98", "c": "#efe1c6", "s": "#c9b291", "y": "#e8bc58", "Y": "#a8762e"}, "gl": ["....o..............o....", "....oGo..........oGo....", "....ogGo........oGgo....", ".....ogGo......oGgo.....", "......ogoooooooogo......", "....oLLLLLLLBBBBBBBDo...", "...oLHLLLLLBBBBBBBBBDo..", "..oLLLLLLLBBBBBBBBBBBDo.", ".goLLkeeeLBBBBeeekBBBDog", ".goLLewkeLBBBBewkeBBBDog", ".goLLeeeeBBBBBeeeeBBBDog", "..oLLLLLBBBBBBBBBBBBDo..", "..oLLkkkkkkkkkkkkkBBDo..", "..oLLtktktktktktktBBDo..", "..oLLkkkkkGGGkkkkkBBDo..", "..oLLktktktktktktkBBDo..", "..oLLLkkkkkkkkkkkBBBDo..", ".goLLLLBBBBBBBBBBBBBDog.", "..oDLLBBBBBBBBBBBBBDDo..", "...oDDDDDDDDDDDDDDDDo...", "...oLLo..........oBBo...", "..oLLLo..........oBBBo..", "..oGoGo..........oGoGo..", "..ooooo..........ooooo.."], "glPal": {"o": "#1a0f26", "D": "#2a1840", "B": "#3e2560", "L": "#5a3a86", "H": "#7a58aa", "k": "#12081c", "w": "#fff4f8", "e": "#e2dc74", "t": "#f4eef0"}, "glVar": [["#c8489c", "#f08ac8"], ["#5aa83a", "#a8e07a"], ["#d0702a", "#f6b070"], ["#3a9ab0", "#8ae0e8"], ["#b8a02a", "#f0e080"]], "ks": ["......oooo......", "....oocccCoo....", "...occcCCCCCo...", "..occCCCCCCCCo..", ".occCCCCCCCCCCo.", ".ocCCCCCCCCCCCo.", "oyyyyoffffoyyyyo", "oYYYYofppfoYYYYo", "oyyyyoffffoyyyyo", ".oVVVoooooVVVvo.", ".oVVVVVVVVVVvvo.", "..oVVVVVVVVvvo..", "...oVVVVVVvvo...", "....ooVVVvoo....", "......oooo......", "................"], "ksPal": {"o": "#1a1450", "C": "#5cc8e8", "c": "#d8fbff", "V": "#8a6ce0", "v": "#5a3cb0", "y": "#f6d050", "Y": "#b8901e", "f": "#fff6d0", "p": "#ff5d8f"}, "acc": {"crown": {"x": 6, "y": 2, "back": 0, "rows": ["o..o.oo.o..o", "oyoyoyyoyoyo", "oyyyyrryyyyo", "oYYYYYYYYYYo", "oooooooooooo"], "pal": {"o": "#5a3a00", "y": "#f6d050", "Y": "#c8981e", "r": "#e84a6a"}}, "beanie": {"x": 5, "y": 1, "back": 0, "rows": ["......oo......", ".....oggo.....", "...ooHLLBoo...", "..oHLLLLLBBo..", ".oHLLLLLLLBBo.", "oaAaAaAaAaAaAo"], "pal": {"o": "#3a1a10", "g": "#fff2dc", "H": "#ff9a6a", "L": "#e86a3a", "B": "#b84a24", "a": "#f6c070", "A": "#c88a40"}}, "wizard": {"x": 5, "y": 0, "back": 0, "rows": ["......o.......", ".....oBo......", "....oBLBo.....", "....oByLBo....", "...oBLLLBBo...", "..oBLLyLLBBo..", "oooooooooooooo"], "pal": {"o": "#141a4a", "B": "#2e3a9a", "L": "#4e5ad0", "y": "#f6d050"}}, "phones": {"x": 0, "y": 4, "back": 0, "rows": ["......oooooooooooo......", "...ooDDDDDDDDDDDDDDoo...", "..oDo..............oDo..", ".oDo................oDo.", ".oDo................oDo.", ".oDo................oDo.", "opPpo..............opPpo", "oPPPo..............oPPPo", "oPPPo..............oPPPo", "opPpo..............opPpo", ".ooo................ooo."], "pal": {"o": "#0e1020", "D": "#2a2f50", "p": "#ff8ab0", "P": "#e04a7a"}}, "shades": {"x": 5, "y": 11, "back": 0, "rows": ["oooooooooooooo", "okwkkoooookwko", ".okko....okko."], "pal": {"o": "#111118", "k": "#2a2a38", "w": "#8a8aa8"}}, "bowtie": {"x": 8, "y": 18, "back": 0, "rows": ["oo....oo", "oPpoopPo", "oPPppPPo", "oPpoopPo", "oo....oo"], "pal": {"o": "#4a0a24", "P": "#e04a7a", "p": "#ff9ac0"}}, "scarf": {"x": 2, "y": 18, "back": 0, "rows": ["oooooooooooooooooooo", "orRrRrRrRrRrRrRrRrRo", "oooooooooooooRrRoooo", ".............oRro...", ".............orRo...", "..............oo...."], "pal": {"o": "#4a0a14", "r": "#e8384f", "R": "#b02038"}}, "cape": {"x": 1, "y": 19, "back": 1, "rows": ["..oooooooooooooooooo..", ".orRRRRRRRRRRRRRRRRro.", "orRRRRRRRRRRRRRRRRRRro", "oRRRRRRRRRRRRRRRRRRRRo", "oooooooooooooooooooooo"], "pal": {"o": "#4a0a14", "r": "#e8384f", "R": "#b02038"}}}};
 const KK=(()=>{
@@ -899,12 +733,11 @@ return {species,pop,scrambler,keystone,field,order:D.order};
 /* ---- swap game art to hand-drawn sprites ---- */
 const KKC={};const kku=(k,mk)=>KKC[k]||(KKC[k]=mk().toDataURL());
 const kkimg=(cls,url,scale=1)=>{const s=200*scale,o=(200-s)/2;return `<svg class="${cls}" viewBox="0 0 200 200" aria-hidden="true"><image href="${url}" x="${o}" y="${200-s}" width="${s}" height="${s}"/></svg>`};
-function creatureSVG(i,form,cls=''){return kkimg('cr '+cls,kku('k'+i+'-'+(form===2?2:0),()=>KK.species(i,form)),[.7,.85,1][form])}
-function zookSVG(eq){eq=eq||S.equip;return kkimg('zk',kku('p'+JSON.stringify(eq),()=>KK.pop(eq)))}
+
+
 function glitchSVG(v=0,king=false){return kkimg('gl',kku('g'+v+king,()=>KK.scrambler(v,king)))}
 function keystoneSVG(){return kkimg('ks',kku('ks',()=>KK.keystone()))}
-function sceneSVG(c){const kind=['meadow','cave','volcano','sky','star'][REGIONS.findIndex(r=>r.color===c)]||'meadow';const u=kku('f'+kind,()=>KK.field(kind));
- return `<svg class="scene" viewBox="0 0 256 72" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><image href="${u}" width="256" height="72"/></svg>`}
+
 ['goggles','starspecs','medal','jetpack','wings'].forEach(k=>delete ACC[k]);
 
 /* ================= V5: evolutions, rare tiers, pixel hands ================= */
@@ -922,25 +755,8 @@ const KEEP=new Set(['k','w','e','m','n','p','r']);
 function lum(h){const n=parseInt(h.slice(1),16);return .3*(n>>16)+.59*(n>>8&255)+.11*(n&255)}
 function tierPal(pal,tier){if(!tier)return pal;const ramp=TIER[tier],ks=Object.keys(pal).filter(k=>!KEEP.has(k)),ls=ks.map(k=>lum(pal[k])),mn=Math.min(...ls),mx=Math.max(...ls),out=Object.assign({},pal);
  ks.forEach((k,i)=>{const t=(ls[i]-mn)/((mx-mn)||1);out[k]=ramp[Math.min(ramp.length-1,Math.round(t*(ramp.length-1)))]});out.o=ramp[0];return out}
-function evolved(i,f,tier){
- const D=KKDATA,k=D.order[i],rows=D.spr[k],pal=tierPal(D.pal[k],tier),W=40,H=32,ox=8,oy=8;
- const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
- const put=(x,y,col)=>{if(col){g.fillStyle=col;g.fillRect(x,y,1,1)}};
- const draw=(r,x0,y0,p,flip)=>r.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.')put(flip?x0+row.length-1-x:x0+x,y0+y,p[ch])}));
- let X0=24,X1=0,Y0=24;rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch!=='.'){X0=Math.min(X0,x);X1=Math.max(X1,x);Y0=Math.min(Y0,y)}}));
- const cx=Math.round((X0+X1)/2),feats=f===0?[]:EVO[i][f-1];
- const gp=Object.assign({y:'#f6d050',Y:'#c8981e',r:'#e84a6a'},pal);
- if(feats.includes('aura')){const ring=tier==='diamond'?'#bfe2f6':tier==='gold'?'#f6dc7a':pal.L||'#ffffff';g.globalAlpha=.55;
-  rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch!=='.')[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].forEach(([a,b])=>{const q=rows[y+b];if(!q||q[x+a]===undefined||q[x+a]==='.')put(ox+x+a,oy+y+b,ring)})}));g.globalAlpha=1}
- if(feats.includes('wings')){const wy=oy+Math.round((Y0+14)/2)+2;draw(OVL.wing,ox+X0-7,wy,pal,false);draw(OVL.wing,ox+X1,wy,pal,true)}
- draw(rows,ox,oy,pal,false);
- if(feats.includes('horns')){const hw=Math.max(2,Math.min(6,Math.floor((AN.hr-AN.hl)/2)-2)),xa=cx-hw-1,xb=cx+hw-1;const hp={o:pal.o||'#1b1626',H:'#fff6e0',L:'#e8d4a8',B:'#b8946a'};draw(OVL.horn,ox+xa,oy+AN.top(xa+1)-3,hp,false);draw(OVL.horn,ox+xb,oy+AN.top(xb+1)-3,hp,true)}
- if(feats.includes('crest')){let [hh,ss]=hex2hsl(TYPES[SPECIES[i].t]||'#e8584f');if(hh>280&&hh<345)hh=8;const cp={o:pal.o||'#1b1626',H:hsl2hex(hh,Math.min(.75,ss),.72),L:hsl2hex(hh,Math.min(.75,ss),.55),B:hsl2hex(hh,Math.min(.75,ss),.38)};draw(OVL.crest,ox+cx-2,oy+AN.med2(cx-1,cx+1)-2,cp,false)}
- if(feats.includes('crown'))draw(OVL.crown,ox+cx-6,oy+AN.med2(cx-3,cx+3)-3,gp,false);
- if(f===2||tier){const sp=tier==='diamond'?['#ffffff','#bfe2f6']:['#fff4c8','#f6d050'];[[2,3],[36,6],[1,20],[38,24],[30,1]].forEach(([x,y])=>{put(x,y,sp[0]);put(x-1,y,sp[1]);put(x+1,y,sp[1]);put(x,y-1,sp[1]);put(x,y+1,sp[1])})}
- return c}
-function creatureSVG(i,form,cls='',tier){const s=[.6,.8,1][form],u=kku('e'+i+'-'+form+(tier||''),()=>evolved(i,form,tier));
- return `<svg class="cr ${cls} ${tier||''}" viewBox="0 0 200 200" aria-hidden="true"><image href="${u}" x="${(200-200*s)/2}" y="${200-160*s}" width="${200*s}" height="${160*s}"/></svg>`}
+
+
 const TRANK={gold:1,diamond:2};const better=(a,b)=>(TRANK[a]||0)>(TRANK[b]||0);
 /* ---- pixel hands ---- */
 let HMASK=null,HON=new Set();
@@ -1080,10 +896,7 @@ function evolved(i,f,tier){
  return c}
 /* store sprites already blown up with hard pixel edges, so they stay crisp even if the browser smooths a scaled image (zoom, 125% screens) */
 function upPx(c,n){const o=document.createElement('canvas');o.width=c.width*n;o.height=c.height*n;const g=o.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(c,0,0,o.width,o.height);return o}
-function creatureSVG(i,form,cls='',tier){const k=KKDATA.order[i],w=KKDATA.spr[k][0].length,Wd=w+16,H=w+8,s=[.6,.8,1][form],fit=/\bfit\b/.test(cls);
- const unit=fit?Math.min(5,200/Wd/1)*(w/24>1?24/w*1.05:1):5,iw=Wd*unit*s,ih=H*unit*s,u=kku('e'+i+'-'+form+(tier||''),()=>evolved(i,form,tier));
- const y=fit?(200-ih)/2+ih*.06:200-ih;
- return `<svg class="cr ${cls} ${tier||''}" viewBox="0 0 200 200" aria-hidden="true" style="overflow:visible"><image href="${u}" x="${(200-iw)/2}" y="${y}" width="${iw}" height="${ih}"/></svg>`}
+
 function vcanvas(key,king){const rows=WDATA.spr[key],pal=WDATA.pal[key],w=rows[0].length,c=document.createElement('canvas');c.width=w;c.height=w;const g=c.getContext('2d');
  rows.forEach((r,y)=>[...r].forEach((ch,x)=>{const col=pal[ch];if(col){g.fillStyle=col;g.fillRect(x,y,1,1)}}));
  if(king){const cr=KKDATA.acc.crown;cr.rows.forEach((r,y)=>[...r].forEach((ch,x)=>{const col=cr.pal[ch];if(col){g.fillStyle=col;g.fillRect(Math.round(w/2-6)+x,y,1,1)}}))}return c}
@@ -1107,9 +920,7 @@ function worldField(kind,w=256,h=72){const c=document.createElement('canvas');c.
   const pine=(x,y)=>{["...oo...","..oGGo..",".oGGGGo.","..oGGo..",".oGGGGo.","oGGGGGGo","oooTTooo","...TT..."].forEach((r,j)=>[...r].forEach((ch,i)=>{const col={o:'#14241a',G:'#2e5a3e',T:'#4a321c'}[ch];if(col)P(x+i,y+j,col)}))};
   [[4,6],[50,2],[110,8],[170,2],[226,6]].forEach(([x,y])=>peak(x,y));[[30,24],[86,28],[140,22],[200,30],[244,26],[16,62],[160,62]].forEach(([x,y])=>pine(x,y))}
  return c}
-function sceneSVG(c){const idx=REGIONS.findIndex(r=>r.color===c);let u;
- if(idx===5||idx===6){const k=idx===5?'forest':'mountain';u=kku('wf'+k,()=>worldField(k))}else{const kind=['meadow','cave','volcano','sky','star'][idx]||'meadow';u=kku('f'+kind,()=>KK.field(kind))}
- return `<svg class="scene" viewBox="0 0 256 72" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><image href="${u}" width="256" height="72"/></svg>`}
+
 /* ---- pixel icons ---- */
 const PXI={
  gear:{p:{o:'#1e1a2a',L:'#d8d0e8',B:'#a89cc0'},r:["....oooo....","..o.oLLo.o..",".oLooLLooLo.","..oLLLLLLo..","ooLLLooLLLoo","oLLLo..oLLBo","oLLLo..oLBBo","ooLLLooLBBoo","..oLLLBBBo..",".oLooBBooBo.","..o.oBBo.o..","....oooo...."]},
@@ -1150,8 +961,7 @@ ACT.card=d=>{const [i,f]=d.k.split('-').map(Number),cd=S.cards[d.k]||{},b=f+1;
  modal(`<div class="bigcard">${cardHTML(i,f,cd)}</div>
  <div class="rbadges"><span class="rb ${rar[1]}">${rar[0]}</span>${cd.holo?'<span class="rb holo">Holo</span>':''}<span class="rb">${'★'.repeat(b)}${'☆'.repeat(3-b)}</span></div>
  <p class="muted" style="margin:0">${rar[2]}</p><div class="forms">${forms}</div><button class="btn" data-act="close">Close</button>`)};
-function worldHead(r){const wi=r===0?0:r===5?1:2,first=r===0?0:r===5?60:75,open=unlocked(first);
- return `<div class="worldhead w${wi+1} ${open?'':'shut'}"><span>World ${wi+1}</span><h3>${WORLDS[wi].name}</h3>${open?'':`<p>${ICON.lock} Finish World ${wi} to open!</p>`}</div>`}
+
 
 /* ---- pixel meteor ---- */
 const METEOR=["....oooo....","..ooRRRroo..",".oRrRRRRRro.",".orRRdRRRRo.","oRRRRRRdRRDo","oRrRRRRRRRDo","oRRRdRRRRDDo","oRRRRRRRDDDo",".oRRRRRDDDo.",".oDRRRDDDDo.","..ooDDDDoo..","....oooo...."];
@@ -1196,12 +1006,8 @@ const HERODATA={"heroes": {"pop": {"name": "Pop", "rows": ["..o.................
 /* ================= V8: hero choice + colors ================= */
 const HEROES=HERODATA.heroes,HCOL=HERODATA.colors,HK=['o','O','X','D','B','L','H'];
 const heroName=(d=S)=>HEROES[(d&&d.hero)||'pop'].name;
-function heroCanvas(eq={},hero='pop',color=null){const h=HEROES[hero]||HEROES.pop,pal=Object.assign({},h.pal);if(color&&HCOL[color])HCOL[color].forEach((c,i)=>pal[HK[i]]=c);
- const c=document.createElement('canvas');c.width=24;c.height=24;const g=c.getContext('2d'),A=Object.values(eq||{}).filter(id=>KKDATA.acc[id]);
- const paint=(rows,p,ox=0,oy=0)=>rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(p[ch]){g.fillStyle=p[ch];g.fillRect(ox+x,oy+y,1,1)}}));
- A.filter(id=>KKDATA.acc[id].back).forEach(id=>{const a=KKDATA.acc[id];paint(a.rows,a.pal,a.x,a.y)});paint(h.rows,pal);
- A.filter(id=>!KKDATA.acc[id].back).forEach(id=>{const a=KKDATA.acc[id];paint(a.rows,a.pal,a.x,a.y)});return c}
-function zookSVG(eq,hero,color){eq=eq||S.equip;hero=hero||heroNow();color=color===undefined?S.color:color;return kkimg('zk',kku('h'+hero+(color||'')+JSON.stringify(eq),()=>heroCanvas(eq,hero,color)))}
+
+
 ACT.heroes=()=>{const cur=S.hero||'pop',col=S.color||null;
  modal(`<h2>Pick your hero</h2><div class="heroes">${Object.entries(HEROES).map(([k,h])=>`<button class="pl ${k===cur?'on':''}" data-act="pickHero" data-h="${k}">${zookSVG({},k,k===cur?col:null)}<b>${h.name}</b></button>`).join('')}</div>
  <h3 style="font-size:22px">Color</h3><div class="swatch">${[null,...Object.keys(HCOL)].map(c=>`<button class="${(c||null)===col?'on':''}" style="background:${c?HCOL[c][4]:HEROES[cur].pal.B}" data-act="pickColor" data-c="${c||''}" aria-label="${c||'original'} color"></button>`).join('')}</div>
@@ -1213,28 +1019,9 @@ const _rh=renderHome;renderHome=function(){_rh();const nm=$('#s-home .tname');if
  const say=$('#s-home .say');if(say&&/Pop/.test(say.textContent))say.textContent=say.textContent.replace(/Pop/g,heroName())};
 const _rs=renderShop;renderShop=function(){_rs();const h=$('#s-shop .topbar h2');if(h)h.textContent=heroName()+"'s Closet"};
 
-function kingdomRoad(w=160,h=100){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d'),R=(x,y,a,b,col)=>{g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),Math.round(a),Math.round(b))};
- const sky=['#2e2258','#3e2a66','#5a3478','#7e4280','#a8547e','#d0707a','#ec9478','#f6b87c'];sky.forEach((col,i)=>R(0,i*5,w,5,col));
- for(let i=0;i<24;i++)R((i*37)%w,(i*11)%16,1,1,'#fff6e0');
- R(70,30,20,10,'#ffd88a');R(66,33,28,7,'#ffd88a');R(72,28,16,2,'#ffe6a8');
- g.fillStyle='#4e3a6a';for(let x=0;x<w;x++){const y=Math.round(33+3*Math.sin(x/11)+2*Math.sin(x/5));R(x,y,1,40-y,'#4e3a6a')}
- // castle
- const S='#9a8cae',SD='#6e6288',RF='#5a2e7a',FL='#f0c860',WN='#ffe27a';
- R(62,24,36,16,S);R(62,24,36,2,SD);for(let x=62;x<98;x+=4)R(x,22,2,2,S);
- [[58,14,8],[94,14,8],[75,8,10]].forEach(([x,y,wd])=>{R(x,y,wd,40-y,S);R(x+wd-2,y,2,40-y,SD);g.fillStyle=RF;g.beginPath();g.moveTo(x-1,y);g.lineTo(x+wd/2,y-9);g.lineTo(x+wd+1,y);g.fill();R(x+wd/2,y-14,1,5,'#3a2a20');R(x+wd/2+1,y-14,3,2,FL);R(x+wd/2-1,y+5,2,3,WN)});
- R(77,32,6,8,'#3a2a3a');R(78,31,4,1,'#3a2a3a');R(66,28,2,3,WN);R(91,28,2,3,WN);
- // fields
- R(0,40,w,h-40,'#3e6a3a');for(let d=.05;d<1;d+=.1){const y=40+60*d*d;R(0,y,w,Math.max(1,6*d),'#4a7a42')}
- // road
- for(let y=40;y<h;y++){const t=(y-40)/60,half=6+t*72,x0=80-half;R(x0,y,half*2,1,'#8a7a6e');R(x0,y,1,1,'#4a3a32');R(80+half-1,y,1,1,'#4a3a32');
-  const row=Math.floor(Math.sqrt(t)*12);if(Math.floor(Math.sqrt(t)*12*4)%4===0)R(x0,y,half*2,1,'#6e6058');else{const step=Math.max(2,Math.round(4+t*14)),off=row%2?step/2:0;for(let x=x0+off;x<80+half;x+=step)R(x,y,1,1,'#6e6058')}}
- // trees & lanterns along sides
- const tree=(x,y,s)=>{const col=['#1e3a22','#2e5a32','#447a40'];R(x-3*s,y-9*s,6*s,6*s,col[1]);R(x-2*s,y-10*s,4*s,2*s,col[2]);R(x-3*s,y-4*s,6*s,1*s,col[0]);R(x-.5*s,y-3*s,1*s,3*s,'#4a321c')};
- const lamp=(x,y,s)=>{R(x,y-7*s,Math.max(1,s*.8),7*s,'#2a2030');R(x-s,y-9*s,s*2.6,2*s,'#ffd86a');R(x-1.4*s,y-10*s,s*3.4,1*s,'#2a2030')};
- [.12,.28,.5,.78].forEach((d,i)=>{const y=40+60*d,s=.6+d*2.2;[-1,1].forEach(sd=>{const x=80+sd*(10+76*d);i%2?lamp(x,y,s):tree(x,y,s);tree(x+sd*16*s,y-2*s,s*.8)})});
- return c}
 
-function pathScene(){const u=kku('kroad',()=>kingdomRoad());return `<svg class="scene" viewBox="0 0 160 100" preserveAspectRatio="none" aria-hidden="true"><image href="${u}" width="160" height="100" preserveAspectRatio="none"/></svg>`}
+
+
 const _camp=camp;camp=function(k){CAMP[0].h='Hi! I am '+heroName()+'!';_camp(k)};
 
 const SCR2={"spr": {"inkblob": ["........................", "........................", "........................", "........oooooooo........", "......ooBBBBBBBBoo......", ".....oBBLBBBBBBBBBo.....", "....oBBLBBBBBBBBBBBo....", "...oBBBBBBBBBBBBBBBBo...", "...oBBBBwwwwwwwwBBBBo...", "..oBBBBwwwwwwwwwwBBBDo..", "..oBBBBwwwkkkkwwwBBBDo..", "..oBBBBwwwkkkkwwwBBBDo..", "..oBBBBBwwwwwwwwBBBBDo..", ".oBBsBBBBBBBBBBBBBBsDDo.", ".oBsssBBBBBBBBBBBBsssDo.", ".oBBsBBkkkkkkkkkkBBsDDo.", ".oBBBBBktktkktktkBBBDDo.", ".oBBBBBBkkkkkkkkBBBBDDo.", "..oBBBBBBBBBBBBBBBBBDo..", ".oBoBBBBBBBBBBBBBBBBoDo.", ".oBooBBBoBBBBBBoBBBooDo.", "..o..oBo.oBBBBo.oBo..o..", ".....oBo..oooo..oBo.....", "......o..........o......"], "imp": ["...........oo...........", "..........oHLo..........", ".........oHLBLo.........", "........oHLLBBLo........", ".......oHLLLBBBLo.......", "......oHLLLLBBBBLo......", ".....oHLLLLLBBBBBLo.....", "....oHLLkkkkkkkkBBLo..eo", "...oHLLkkkkkkkkkkBBLoeo.", "...oHLkkyykkkkyykkBLopo.", "...oHLkkyykkkkyykkBLpo..", "..oHLLkkkkkkkkkkkkBBpo..", "..oHLLkwkwkkkkwkwkBpoo..", "..oHLLLkkkkkkkkkkBBpoo..", ".oHLLLLLLLLLBBBBBBpoDLo.", ".oHLLLLDLLLLBBBBDBqBDLo.", ".oHLLLLLLLLLBBBBBgBBDLo.", "oHLLLLLLLLLLBBBBBBBBDDLo", "oHLLLLLLLLLLBBBBBBBBDDLo", "oHLLDLLLDLLLBBBDBBBDDDLo", ".oLDoLLDoLLLBBBoDBBoXDo.", "..oo.oo..oooooo..oo.oo..", "........................", "........................"], "inkling": ["..........o..o..........", ".........oBooBo.........", "......o..oBooBo..o......", ".....oBo.oBBBBo.oBo.....", ".....oBBoBBBBBBoBBo.....", "....oBBBBBBBBBBBBBBo....", "....oBLBBBBBBBBBBBBo....", "...oBLBBBBBBBBBBBBBBo...", "...oBLwwwBBBBBBwwwBBo...", "...oBwwkwBBBBBBwkwwBo...", "...oBwkkwBBBBBBwkkwBo...", "...oBBwwBBBBBBBBwwBBo...", "...oBBBBBBBBBBBBBBBBo...", "..oBsBBBkkkkkkkkBBBsDo..", "..oBssBktktkktktkBssDo..", "..oBBBBBkkkkkkkkBBBBDo..", "..oBBBBBBBBBBBBBBBBBDo..", "..oBBBsBBBBBBBBBBsBBDo..", ".oBBBsssBBBBBBBBsssBDDo.", ".oBoBBsBBoBBBBoBBsBBoDo.", ".oo.oBBBo.oBBo.oBBBo.oo.", "....oBo...oooo...oBo....", ".....o............o.....", "........................"], "splotch": ["........................", "........................", "........................", "........................", "....oooo........oooo....", "...owwwwo......owwwwo...", "...owkkwo......owkkwo...", "...owkkwo......owkkwo...", "....oooo........oooo....", ".....oBo........oBo.....", ".....oBo........oBo.....", ".....oBo........oBo.....", "......oBo......oBo......", "......oBooooooooBo......", "....ooBBBBBBBBBBBBoo....", "..ooBBLBBBBBBBBBBBBBoo..", ".oBBLBBBBBBBBBBBBBBBDDo.", "oBBLBBkkkkkkkkkkkkBBDDDo", "oBLBBBktktkttktktkBBDDDo", "oBBBsBBkkkkkkkkkkBBsDDDo", "oBBsssBBBBBBBBBBBBsssDDo", ".oBBsBBBBBBBBBBBBBBsDDo.", "..oooBBoooBBBBoooBBooo..", ".....oo...oooo...oo....."], "quill": ["...........oo...........", "..........oHLo..........", ".........oHLBLo.........", "........oHLLBBLo........", ".......oHLLLBBBLo.......", "......oHLLLLBBBBLo......", "....oHHLLLLLBBBBBLLo....", "..ooyyyyyyyyyyyyyyyyoo..", ".oHHHHHLLLLLBBBBBLLLLLo.", "..ooooookkkkkkkkoooooof.", ".....okkyykkkkyykko..fF.", ".....okkyykkkkyykko..f..", ".....okkkkkkkkkkkko.F...", "......okwkwkkwkwko..f...", "....ooLLLLLLBBBBBBof....", "...oHLLLLLLLBBBBBBBko...", "..oHLLLLLLLLBBBBBBBkLo..", "..oHLLDLLLLLBBBBBDBBLo..", ".oHLLLLLLLLLBBBBBBBBDLo.", ".oHLLDLLLDLLBBDBBBDBDLo.", "oHLLLLLLLLLLBBBBBBBBDDLo", "oLDoLLDoLLDooDBBoDBBoXDo", ".oo.oo..oo....oo..oo.oo.", "........................"], "eraser": ["...........oo....ooooooo", "..........oHLo...oEEEEEo", ".........oHLBLo..obeeeeo", "........oHLLBBLo.obeeeeo", ".......oHhLLBBhLoobeeeeo", "......oHhLLLBBBhLoEEEEEo", ".....oHLLLLLBBBBBooooooo", "....oHLLkkkkkkkkBBLoo.Lo", "...oHLLkkkkkkkkkkBBLoLo.", "...oHLkkyykkkkyykkBLoLo.", "...oHLkkyykkkkyykkBLoo..", "..oHLLkkkkkkkkkkkkBBoo..", "..oHLLkwkwkkkkwkwkBLoo..", "..oHLLLkkkkkkkkkkBBLoo..", ".oHLLLLLLLLLBBBBBBLoDLo.", ".oHLLLLDLLLLBBBBDBLBDLo.", ".oHLLLLLLLLLBBBBBLBBDLo.", "oHLLLLLLLLLLBBBBBBBBDDLo", "oHLLLLLLLLLLBBBBBBBBDDLo", "oHLLDLLLDLLLBBBDBBBDDDLo", ".oLDoLLDoLLLBBBoDBBoXDo.", "..oo.oo..oooooo..oo.oo..", "........................", "........................"]}, "pal": {"inkblob": {"o": "#0a0a1a", "B": "#26264e", "L": "#40407e", "D": "#1a1a3a", "X": "#141430", "H": "#5a5aa0", "w": "#f4f0e6", "k": "#0a0a12", "t": "#f4f0e6", "s": "#e8e0c8"}, "imp": {"o": "#120a1a", "H": "#7a5aaa", "L": "#4e3474", "B": "#3a2660", "D": "#2e1e48", "X": "#24183a", "k": "#0a0610", "y": "#f6e05a", "w": "#f4f0e6", "p": "#f0c040", "q": "#e8c090", "g": "#2a2a2a", "e": "#f08aa0"}, "inkling": {"o": "#0a1414", "B": "#1e3a40", "L": "#2e5a62", "H": "#4a8088", "D": "#16302e", "X": "#102624", "w": "#f4f0e6", "k": "#060c0c", "t": "#f4f0e6", "s": "#e8e0c8"}, "splotch": {"o": "#140a1e", "B": "#3a2456", "L": "#5a3a80", "H": "#7a5aa8", "D": "#2a1840", "X": "#201234", "w": "#f4f0e6", "k": "#0a0610", "t": "#f4f0e6", "s": "#e8e0c8"}, "quill": {"o": "#0e1220", "H": "#4a6ab0", "L": "#2e4680", "B": "#24386a", "D": "#1a2850", "X": "#141e40", "y": "#f0c860", "k": "#06080e", "w": "#f4f0e6", "f": "#f4f0ff", "F": "#8ad0e0"}, "eraser": {"o": "#1a0a0a", "H": "#c8504a", "L": "#9a3030", "B": "#7a2424", "D": "#5a1818", "X": "#4a1414", "k": "#0a0606", "y": "#9df05a", "w": "#f4f0e6", "h": "#e8e0d0", "e": "#f08aa0", "E": "#c0607a", "b": "#5a7ab0", "p": "#f0c040", "q": "#e8c090", "g": "#2a2a2a"}}, "names": {"inkblob": "Ink Blob", "imp": "Scribble Imp", "inkling": "Inkling", "splotch": "Splotch", "quill": "Quill Witch", "eraser": "Eraser Imp"}};

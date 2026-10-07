@@ -16,7 +16,7 @@ test('only Arcade result links open ghost challenges', async () => {
   G: {challengeData:{g:'meteor',v:2,r:100}},
   ACT: {},
   URL,
-  location:{href:'https://keystone-kingdom.netlify.app/?old=1'},
+  location:{href:'https://keyloria.online/?old=1'},
   navigator:{clipboard:{writeText:async text=>copied.push(text)}},
   fetch:async (_url,options)=>{posted.push(JSON.parse(options.body));return {ok:true,json:async()=>({id:'ABC123'})}},
   $:()=>null,
@@ -28,7 +28,7 @@ test('only Arcade result links open ghost challenges', async () => {
  context.share('Adventure','3 stars');
  await context.ACT.copyRun();
  assert.equal(posted.length,0);
- assert.match(copied.at(-1), /3 stars\nCome explore Keyloria Kingdom and try it yourself!\nhttps:\/\/keystone-kingdom\.netlify\.app\/$/);
+ assert.match(copied.at(-1), /3 stars\nCome explore Keyloria Kingdom and try it yourself!\nhttps:\/\/keyloria\.online\/$/);
  assert.doesNotMatch(copied.at(-1), /ghost|challenge/i);
 
  for(const [name,kind] of [['Meteor Zap','meteor'],['Scrambler Attack','glitch'],['Race with Keylori','race']]){

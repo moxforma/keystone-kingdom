@@ -276,7 +276,7 @@ ACT.copyRun=async()=>{
  const button=$('#mbox [data-act=copyRun]');
  if(button)button.disabled=true;
  try{
-  let link='https://keystone-kingdom.netlify.app/';
+  let link='https://keyloria.online/';
   if(runShareChallenge){
    if(!G.challengeCode){
     const response=await fetch('/api/arcade-challenge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(runShareChallenge)});
@@ -291,7 +291,7 @@ ACT.copyRun=async()=>{
    if(navigator.share){try{await navigator.share({text:msg});return}catch(e2){if(e2&&e2.name==='AbortError')return}}
    shareFallback(msg);return}
   toast(runShareChallenge?(ghostRematchWon()?'Rematch link copied! Send it to your friend.':'Short challenge link copied!'):'Result copied!');
- }catch(e){shareFallback(runShareText+'\nhttps://keystone-kingdom.netlify.app/')}
+ }catch(e){shareFallback(runShareText+'\nhttps://keyloria.online/')}
  finally{if(button)button.disabled=false}
 };
 function ghostInviteModal(data){
