@@ -27,3 +27,5 @@ document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!docu
 document.addEventListener('keydown',e=>{if(e.key!=='Escape'||typeof screen==='undefined'||(screen!=='play'&&screen!=='game')||!document.getElementById('modal')?.hidden)return;
  if(Date.now()-armed<2500){armed=0;return}
  armed=Date.now();e.preventDefault();e.stopPropagation();try{toast('Press Esc again to leave')}catch(x){}},true)})();
+/* Enter inside a text box makes a new line (it used to press the pop-up's first button) */
+document.addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='TEXTAREA'&&(e.key==='Enter'||e.key===' '))e.stopPropagation()},true);

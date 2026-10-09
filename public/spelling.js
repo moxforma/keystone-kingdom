@@ -7,7 +7,7 @@
 const clean=w=>String(w||'').trim().replace(/[^A-Za-z'\-]/g,'').slice(0,20);
 const SP=()=>{S.spell=S.spell||{};S.spell.lists=S.spell.lists||{};S.spell.tricky=S.spell.tricky||{};return S.spell};
 const teacherList=()=>{const t=window.kkClassSpell;return t&&t.words&&t.words.length?t:null};
-let RUN=null;if(/[?&]sptest=1/.test(location.search))window.__spRun=()=>RUN;
+let RUN=null;if(/[?&]sptest=1/.test(location.search))window.__spRun=()=>RUN;else Object.defineProperty(window,'__spForce',{get:()=>null,set:()=>{}});
 
 /* ---------- screen ---------- */
 const host=document.getElementById('s-home')?.parentElement||document.body;
@@ -106,6 +106,7 @@ ACT.spGo=d=>{const L=getList(d.src,d.id);if(!L)return;closeModal();
  let words=shuffle(L.words);
  if(d.src!=='tricky'){const tk=shuffle(Object.keys(SP().tricky).filter(w=>!words.includes(w))).slice(0,Math.ceil(Math.min(10,words.length)*.3));words=words.slice(0,10-tk.length).concat(tk);words=shuffle(words)}
  else words=words.slice(0,10);
+ if(window.__spForce){words=window.__spForce;window.__spForce=null}
  RUN={src:d.src,id:d.id,name:L.name,mode:d.m,words,i:0,pos:0,miss:0,wordMiss:0,res:[],start:performance.now(),hp:words.length,hearts:3,phase:'show'};
  show('spell');draw();nextWord(true)};
 function nextWord(first){const R=RUN;if(!R)return;if(!first)R.i++;if(R.i>=R.words.length||(R.mode==='bee'&&R.hearts<=0))return end();
@@ -201,6 +202,7 @@ ACT.spTeachSave=async d=>{const c=SPT,tk=tkFor(c);if(!c||!tk)return toast('Open 
   window.kkClassSpellTeach=j.spell||null;toast(clear?'List cleared':'Sent to your class!');ACT.clsDash({c})}catch(e){toast(e.message)}};
 
 document.head.insertAdjacentHTML('beforeend',`<style>
+body:not(.mobile) .spstage{min-height:min(560px,calc(100vh - 150px))}body:not(.mobile) .sphero{width:210px}body:not(.mobile) .sphero svg,body:not(.mobile) .sphero img{width:210px}body:not(.mobile) .spword{font-size:46px;gap:12px}body:not(.mobile) .sps{min-width:62px;height:80px}body:not(.mobile) .spword.big{font-size:80px}body:not(.mobile) .sphint{font-size:28px}body:not(.mobile) .spbee{width:200px}body:not(.mobile) .spbee img{width:150px}body:not(.mobile) .spbar{width:180px}
 .spbox h2{display:flex;align-items:center;justify-content:center;gap:10px}.spbox h2 .spic{width:30px;height:auto}
 .sptiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:8px 0 12px}.sptiles.three{grid-template-columns:repeat(3,1fr)}.sptiles.grades{grid-template-columns:repeat(4,1fr)}
 .sptile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:118px;padding:12px 8px;background:#3a2f4e;border:4px solid #5a4a7a;color:#fff6e0;font-family:inherit;cursor:pointer;box-shadow:0 5px 0 #1b1626;width:100%}

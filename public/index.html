@@ -156,7 +156,7 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
  body{font-size:19px}
  html{scroll-padding-top:58px}
  header .wrap{padding:0 8px}
- nav{display:grid!important;grid-template-columns:repeat(4,1fr);gap:5px;padding:7px 0;overflow:visible}
+ nav{display:grid!important;grid-template-columns:repeat(5,1fr);gap:5px;padding:7px 0;overflow:visible}
  nav .lgl,nav .hp{display:none!important}
  nav .pbtn{font-size:13px!important;padding:8px 2px 10px!important;letter-spacing:.02em;white-space:normal;line-height:1.05;text-align:center;min-height:42px}
  nav .pbtn.on{outline-width:3px;outline-offset:2px}
@@ -214,11 +214,19 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
 .fbtn{display:inline-flex;align-items:center;gap:6px;font:400 18px/1 var(--px);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:#2a1d3e;padding:8px 12px 10px;box-shadow:inset 0 -4px 0 #0003,3px 3px 0 #0d0a16}
 .fbtn img{height:16px}.f-green{background:var(--green)}.f-lav{background:var(--lav)}.f-ig{background:linear-gradient(to bottom,#b4469e 0 34%,#cf3f7c 34% 68%,#e0605e 68%);color:#fff;text-shadow:1px 1px 0 #2a1d3e,-1px 1px 0 #2a1d3e,1px -1px 0 #2a1d3e,-1px -1px 0 #2a1d3e}.f-red{background:var(--red)}
 .fbtn:hover{transform:translateY(-2px)}
+
+/* nav: always one line */
+nav .pbtn{white-space:nowrap}
+@media (max-width:1180px) and (min-width:701px){nav{gap:6px}nav .pbtn{font-size:19px;padding:8px 11px 10px}nav .prism .pbtn{font-size:21px;padding:9px 13px 11px}}
+@media (max-width:700px){
+ nav{display:flex!important;grid-template-columns:none;gap:6px;overflow-x:auto!important;justify-content:flex-start!important;scroll-snap-type:x proximity;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:24px!important}
+ nav .pbtn{white-space:nowrap!important;font-size:15px!important;padding:8px 10px 10px!important;min-height:0!important;flex:0 0 auto!important;scroll-snap-align:start}
+}
 </style></head>
 <body><div class="stars"></div>
 <header id="hdr" class="showlogo showplay"><div class="mtop"><a href="/play/" class="mlogo" aria-label="Keyloria Kingdom"><img src="/site/img/logo.png" alt="Keyloria Kingdom"></a><a class="pbtn c-gold mplay" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></div><div class="wrap"><nav>
  <a class="lgl" href="/play/" aria-label="Play Keyloria Kingdom"><img class="lg" src="/site/img/logo.png" alt="Keyloria Kingdom"></a>
- <a class="pbtn c-red" href="#play" data-tab="play">How to play</a><a class="pbtn c-lav" href="#arcade" data-tab="arcade">Arcade</a><a class="pbtn c-green" href="#race" data-tab="race">Multiplayer</a><a class="pbtn c-gold" href="#classroom" data-tab="classroom">For classrooms</a>
+ <a class="pbtn c-red" href="#play" data-tab="play">How to play</a><a class="pbtn c-lav" href="#arcade" data-tab="arcade">Arcade</a><a class="pbtn c-blue" href="#spelling" data-tab="spelling">Spelling</a><a class="pbtn c-green" href="#race" data-tab="race">Multiplayer</a><a class="pbtn c-gold" href="#classroom" data-tab="classroom">For classrooms</a>
  <span class="prism hp"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span>
 </nav></div></header>
 <main>
@@ -248,6 +256,24 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
 <section id="arcade" class="tab"><div class="wrap">
  <div class="sec-h"><span class="tagbox" style="--c:var(--lav);--c2:var(--lav2)"><b><i>ARCADE</i></b></span><h2>Eight games for extra practice</h2><p>Short, replayable games with high scores for every player on the device, from easy all the way to Beast mode.</p></div>
  <div class="arc" id="arc"></div>
+</div></section>
+
+<section id="spelling" class="tab"><div class="wrap">
+ <div class="sec-h"><span class="tagbox" style="--c:var(--blue);--c2:var(--blue2)"><b><i>SPELLING</i></b></span><h2>Type it, spell it, beat the Bee</h2><p>Word sets for every grade from K to 8, your own weekly lists, and lists teachers send to the whole class.</p></div>
+ <div class="cls">
+  <div class="steps" id="steps2"></div>
+  <div><div class="screen"><div class="bar"><i></i><i></i><i></i>&nbsp;keyloria.online</div>
+   <video id="vid2" muted playsinline preload="metadata" poster="/site/clips/spelling.jpg"><source src="/site/clips/spelling.webm" type="video/webm"><source src="/site/clips/spelling.mp4" type="video/mp4"></video></div>
+   <p class="cap" id="cap2"></p></div>
+ </div>
+ <div class="feats">
+  <div class="feat"><i class="fico" data-ico="abc"></i><h4>Word sets K to 8</h4><p>From short vowels and sight words up to Greek and Latin roots and science words.</p></div>
+  <div class="feat"><i class="fico" data-ico="eye"></i><h4>Look and spell</h4><p>See the word, it hides, then type it from memory. The way schools teach spelling.</p></div>
+  <div class="feat"><i class="fico" data-ico="ear"></i><h4>Listen and spell</h4><p>The word is read aloud, with a sentence for sound-alikes like their and there.</p></div>
+  <div class="feat"><i class="fico" data-ico="bolt"></i><h4>Tricky Words</h4><p>Missed words come back until they are spelled right three times, and show in the Progress Report.</p></div>
+  <div class="feat"><i class="fico" data-ico="medal"></i><h4>Stars, medals and Buzz</h4><p>Earn stars, diamonds and grade medals. A perfect Bee Battle run unlocks a rare hero.</p></div>
+  <div class="feat"><i class="fico" data-ico="list"></i><h4>Your own lists</h4><p>Type in this week's words, or send a list to the whole class from the teacher dashboard.</p></div>
+ </div>
 </div></section>
 
 <section id="race" class="tab"><div class="wrap">
@@ -303,12 +329,33 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
 
 
 /* header logo and Play free are always shown */
+const PAL={o:'#2a1d3e',w:'#fff6e0',g:'#f0c860',G:'#c8981e',t:'#7fe8d0',T:'#3fa894',r:'#f07a6e',R:'#b8483e',b:'#7fc8f0',B:'#3a78b0',l:'#b8a0f0',n:'#6edc8c',N:'#3e9a5a',k:'#8a7aa8'};
+const ICO={
+clip:['....oooo....','..ooggggoo..','.oowwwwwwoo.','.owwwwwwwwo.','.owooooowwo.','.owwwwwwwwo.','.owoooowwwo.','.owwwwwwwwo.','.owooooowwo.','.owwwwwwwwo.','.owwwwwwwwo.','.oooooooooo.'],
+chart:['oooooooooooo','owwwwwwwwwwo','owwwwwwwwnwo','owwwwwwwnnwo','owwwwbwwnnwo','owwwwbwwnnwo','owwgwbwwnnwo','owwgwbwrnnwo','owwgwbwrnnwo','owwgwbwrnnwo','owwwwwwwwwwo','oooooooooooo'],
+grid:['............','.oooooooooo.','.onnonnoggo.','.onnonnoggo.','.oooooooooo.','.onnoggokko.','.onnoggokko.','.oooooooooo.','.oggokkokko.','.oggokkokko.','.oooooooooo.','............'],
+flag:['Gg..........','GgwwkkwwkkG.','GgkkwwkkwwG.','GgwwkkwwkkG.','GgkkwwkkwwG.','GgwwkkwwkkG.','GgGGGGGGGGG.','Gg..........','Gg..........','Gg..........','Gg..........','GGGG........'],
+toggle:['............','..oo........','kkoggokkkkkk','..oo........','............','.......oo...','kkkkkkonnokk','.......oo...','............','....oo......','kkkkorrokkkk','....oo......'],
+laptop:['............','.oooooooooo.','.obbbbbbbbo.','.obwbbbbbbo.','.obbbbbbbbo.','.obbbbbbbbo.','.obbbbbbbbo.','.oooooooooo.','oKKKKKKKKKKo','okkkkkkkkkko','oooooooooooo','............'],
+tag:['............','....oooooooo','...ogggggggo','..oggggggggo','.oogowwwwggo','oggggggggggo','oggggggggggo','.oogowwwggo.','..oggggggggo','...ogggggggo','....oooooooo','............'],
+nochat:['............','.oooooooo...','owwwwwwwwo..','owrrwwwrrwo.','owwrrwrrwwo.','owwwrrrwwwo.','owwrrwrrwwo.','owrrwwwrrwo.','owwwwwwwwo..','.ooowooooo..','...owo......','...oo.......'],
+target:['...oooooo...','..orrrrrro..','.orrwwwwrro.','orrwwrrwwrro','orwwrrrrwwro','orwrrwwrrwro','orwrrwwrrwro','orwwrrrrwwro','orrwwrrwwrro','.orrwwwwrro.','..orrrrrro..','...oooooo...'],
+shield:['..oooooooo..','.onnnnnnNNo.','.onnnnnnNNo.','.onnnnnwNNo.','.onnnnwwNNo.','.onwnwwnNNo.','.onwwwnnNNo.','.onnwnnnNNo.','..onnnnNNo..','..onnnnNNo..','...onnNNo...','....oooo....']};
+ICO.abc=['............','oooo.oooo...','oggo.obbo...','ogwo.obwo...','oggo.obbo...','oooooooooooo','..orro.onno.','..orwo.onwo.','..orro.onno.','..oooo.oooo.','............','............'];
+ICO.ear=['...oooooo...','..orrrrrro..','.orroooorro.','.oro....oro.','.oro..oorro.','.orro.orro..','..orro.oo...','...orro.....','....orro....','.....oro....','.....ooo....','............'];
+ICO.eye=['............','............','...oooooo...','.oowwwwwwoo.','owwwobbowwwo','owwobkkbowwo','owwobkkbowwo','owwwobbowwwo','.oowwwwwwoo.','...oooooo...','............','............'];
+ICO.bolt=['......ooo...','.....oggo...','....oggo....','...oggo.....','..oggggooo..','..oooggggo..','.....oggo...','....oggo....','...oggo.....','...ogo......','...oo.......','............'];
+ICO.medal=['.oo....oo...','orro..obbo..','.orro.obo...','..orroobo...','...oggggo...','..oggwgggo..','..ogwggggo..','..oggggggo..','..oggggggo..','...oggggo...','....oooo....','............'];
+ICO.list=['..oooooooo..','..owwwwwwo..','..owkkkkwo..','..owwwwwwo..','..owkkkwwo..','..owwwwwwo..','..owkkkkwo..','..owwwwwwo..','..owkkwwwo..','..owwwwwwo..','..oooooooo..','............'];
+PAL.K='#5a4a7a';
+document.querySelectorAll('.fico').forEach(el=>{const g=ICO[el.dataset.ico];if(!g)return;let r='';g.forEach((row,y)=>[...row].forEach((c,x)=>{if(PAL[c])r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${PAL[c]}"/>`}));
+ el.innerHTML=`<svg viewBox="-1 -1 14 14" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`});
 /* tabs: the hero stays, the nav swaps the section below it */
-const TABS=['play','arcade','race','classroom'];
+const TABS=['play','arcade','spelling','race','classroom'];
 function tab(id,scroll){if(id==='safety')id='classroom';if(!TABS.includes(id))id='play';
  TABS.forEach(t=>document.getElementById(t).classList.toggle('on',t===id));
  document.querySelectorAll('nav [data-tab]').forEach(a=>a.classList.toggle('on',a.dataset.tab===id));
- const v=document.getElementById('vid');if(v){if(id==='classroom')v.play().catch(()=>{});else v.pause()}
+ document.querySelectorAll('section.tab video').forEach(v=>{if(v.closest('section').id===id)v.play().catch(()=>{});else v.pause()})
  if(scroll){const top=document.getElementById(id).getBoundingClientRect().top+scrollY-(parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0);scrollTo({top,behavior:scrollY>top?'instant':'smooth'})}}
 document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const id=a.getAttribute('href').slice(1);if(!id)return;e.preventDefault();history.replaceState(null,'','#'+id);tab(id,true)});
 addEventListener('hashchange',()=>tab(location.hash.slice(1),true));
@@ -358,6 +405,25 @@ vid.addEventListener('ended',()=>{vid.currentTime=0;vid.play().catch(()=>{})});
 stepsEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i;vid.currentTime=STEPS[i][2]+.01;mark(i);vid.play().catch(()=>{})});
 mark(0);
 new IntersectionObserver(es=>{es[0].isIntersecting&&document.getElementById('classroom').classList.contains('on')?vid.play().catch(()=>{}):vid.pause()},{threshold:.35}).observe(vid);
+
+/* spelling walkthrough */
+(function(){const ST=[
+ ['Open Spelling','On the home screen',0.4,'Tap the blue <b>SPELLING</b> button on the home screen.'],
+ ['Pick your words','Grades K to 8',3.68,'Choose <b>Word Sets</b> and a grade, or a teacher list, Tricky Words or your own list.'],
+ ['Choose how to play','Look, Listen or Bee',10.28,'<b>Look</b>: see it, then type it from memory. <b>Listen</b>: hear it and type it. <b>Bee Battle</b>: beat the Bee boss.'],
+ ['Spell the words','Hints when you need them',14.8,'Press <b>Space</b> when ready and type the word. After a miss the next letter is shown, and the word goes to Tricky Words.'],
+ ['Earn rewards','Stars, diamonds, medals',28.63,'Get stars, diamonds and XP, warm the Daily Egg, and earn a medal for 3 stars on every set in a grade.'],
+ ['Bee Battle','Every perfect word hits',35.57,'Each perfect word hits the Bee. Win without losing a heart on every set in a grade to unlock <b>Buzz</b>.'],
+ ['Teachers send lists','From the class dashboard',47.7,'In the teacher dashboard, tap <b>Class spelling list</b>, paste the words and send them to every kid in the class.']];
+const el=document.getElementById('steps2'),v=document.getElementById('vid2'),cp=document.getElementById('cap2');if(!el||!v)return;let c=-1;
+el.innerHTML=ST.map((s,i)=>`<button data-i="${i}"><b>${i+1}</b><span>${s[0]}<small>${s[1]}</small></span><div class="prog"><i></i></div></button>`).join('');
+const bs=[...el.querySelectorAll('button')];
+const mk=i=>{if(i===c)return;c=i;bs.forEach((b,k)=>b.classList.toggle('on',k===i));cp.innerHTML=ST[i][3]};
+v.addEventListener('timeupdate',()=>{const t=v.currentTime;let i=0;ST.forEach((s,k)=>{if(t>=s[2]-.05)i=k});mk(i);
+ const end=i<ST.length-1?ST[i+1][2]:(v.duration||t+1);bs[i].querySelector('.prog i').style.width=Math.min(100,(t-ST[i][2])/(end-ST[i][2])*100)+'%'});
+v.addEventListener('ended',()=>{v.currentTime=0;v.play().catch(()=>{})});
+el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i;v.currentTime=ST[i][2]+.01;mk(i);v.play().catch(()=>{})});
+mk(0);new IntersectionObserver(es=>{es[0].isIntersecting&&document.getElementById('spelling').classList.contains('on')?v.play().catch(()=>{}):v.pause()},{threshold:.35}).observe(v)})();
 tab(location.hash.slice(1),!!location.hash);
 </script>
 </body></html>
