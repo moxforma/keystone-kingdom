@@ -3,30 +3,7 @@
    (Look-Cover-Type-Check, Hear & Spell, Spelling Bee boss), and Tricky Words that come back
    until they're spelled right three times. */
 (function(){
-const FAM=[
- {g:'K–1',n:'Short a: -at -an',w:['cat','hat','bat','mat','sat','can','fan','man','pan','ran']},
- {g:'K–1',n:'Short i: -ig -in',w:['big','dig','pig','wig','fig','bin','fin','pin','tin','win']},
- {g:'K–1',n:'Short o: -op -ot',w:['hop','mop','pop','top','stop','dot','hot','lot','pot','not']},
- {g:'K–1',n:'Short u: -ug -un',w:['bug','hug','mug','rug','jug','bun','fun','run','sun','gun']},
- {g:'K–1',n:'Short e: -et -en',w:['bet','jet','net','pet','wet','hen','men','pen','ten','den']},
- {g:'1–2',n:'sh ch th',w:['ship','shop','fish','dish','chip','chat','much','lunch','this','that','with','bath']},
- {g:'1–2',n:'-ck and -ll',w:['back','duck','kick','lock','neck','sock','bell','fill','doll','hill','tell','ball']},
- {g:'1–2',n:'Magic e',w:['cake','game','make','bike','kite','time','bone','home','rope','cute','tube','late']},
- {g:'1–2',n:'Sight words 1',w:['the','said','was','you','they','have','come','some','what','where','there','one']},
- {g:'2–3',n:'ee and ea',w:['bee','feet','green','sleep','tree','eat','sea','read','team','dream','beach','clean']},
- {g:'2–3',n:'ai and ay',w:['rain','train','paint','wait','snail','day','play','stay','tray','away','today','again']},
- {g:'2–3',n:'oa and ow',w:['boat','coat','road','soap','goat','snow','grow','show','slow','yellow','window','below']},
- {g:'2–3',n:'-ight',w:['light','night','right','fight','might','sight','bright','flight','tight','knight']},
- {g:'2–3',n:'-ing and -ed',w:['jumping','playing','reading','running','swimming','jumped','played','wanted','stopped','smiled']},
- {g:'2–3',n:'Sight words 2',w:['because','friend','people','could','would','should','again','every','once','many','water','laugh']},
- {g:'3–4',n:'-tion',w:['action','nation','station','motion','lotion','fraction','question','section','vacation','direction']},
- {g:'3–4',n:'Silent letters',w:['knee','knife','know','write','wrong','lamb','thumb','climb','island','listen','ghost','wrist']},
- {g:'3–4',n:'-ous and -ful',w:['famous','nervous','jealous','curious','careful','helpful','joyful','thankful','wonderful','colorful']},
- {g:'3–4',n:'Homophones',w:['their','there','they\'re','your','you\'re','to','too','two','hear','here','write','right']},
- {g:'4–5',n:'-ough',w:['though','through','thought','enough','tough','rough','cough','bought','brought','dough']},
- {g:'4–5',n:'-able and -ible',w:['comfortable','valuable','reliable','enjoyable','possible','terrible','horrible','visible','sensible','flexible']},
- {g:'4–5',n:'Tricky words',w:['necessary','separate','definitely','believe','receive','weird','calendar','library','February','Wednesday']}
-];
+/* (word sets live in GRADES below) */
 const clean=w=>String(w||'').trim().replace(/[^A-Za-z'\-]/g,'').slice(0,20);
 const SP=()=>{S.spell=S.spell||{};S.spell.lists=S.spell.lists||{};S.spell.tricky=S.spell.tricky||{};return S.spell};
 const teacherList=()=>{const t=window.kkClassSpell;return t&&t.words&&t.words.length?t:null};
@@ -38,36 +15,78 @@ if(!document.getElementById('s-spell')){const sec=document.createElement('sectio
 const BEE=PXG(['....oo..oo....','...oWWooWWo...','...oWWWWWWo...','..ooooooooooo.','.oYYYoYYYoYYo.','oYkYYoYYYoYYYo','oYYYYoYYYoYYYo','oYrrYoYYYoYYYo','.oYYYoYYYoYYo.','..oooooooooo..','...o.o..o.o...'],{o:'#1b1626',W:'#e8f4ff',Y:'#f0c860',k:'#1b1626',r:'#ff8aa8'}).toDataURL();
 const SPICO=PXG(['oooooooooooo','oWWWWWWWWWWo','oWkWkWkWWWWo','oWWWWWWWWWWo','oWkkWkkkWWWo','oWWWWWWWWWWo','oWkkkWkWWWWo','oWWWWWWWWWWo','oooooooooooo'],{o:'#2a1d3e',W:'#fff6e0',k:'#5a4a7a'}).toDataURL();
 
-/* ---------- hub ---------- */
-ACT.spell=()=>{const sp=SP(),tl=teacherList(),my=Object.entries(sp.lists),tk=Object.keys(sp.tricky);
- const lb=(src,id,name,n,extra='')=>`<button class="btn sm splist ${extra}" data-act="spPick" data-src="${src}" data-id="${id}"><b>${esc(name)}</b><small>${n} words</small></button>`;
- modal(`<h2>SPELLING</h2><p class="muted" style="margin:0 0 10px">Pick a word list, then how to practise.</p>
- <div class="spcols">
- ${tl?`<div class="spsec"><h3>From your teacher</h3>${lb('teach','t',tl.name||'Spelling list',tl.words.length,'volt')}</div>`:''}
- <div class="spsec"><h3>Tricky Words</h3>${tk.length?lb('tricky','x','My tricky words',tk.length,'red'):'<p class="muted">Words you miss will show up here until you spell them right 3 times.</p>'}</div>
- <div class="spsec"><h3>My lists</h3>${my.map(([id,l])=>`<div class="sprow">${lb('mine',id,l.name,l.words.length)}<button class="btn sm alt" data-act="spDelAsk" data-id="${id}" aria-label="Delete list" title="Delete list">✕</button></div>`).join('')}<button class="btn sm alt" data-act="spNew">+ Make a list</button></div>
- <div class="spsec"><h3>Word families</h3><div class="spfam">${FAM.map((f,i)=>`<button class="btn sm alt splist" data-act="spPick" data-src="fam" data-id="${i}"><small>Grade ${f.g}</small><b>${esc(f.n)}</b></button>`).join('')}</div></div>
- </div><div class="rbtns"><button class="btn alt" data-act="close">Back</button></div>`);
- document.getElementById('mbox')?.classList.add('guwide')};
+const GRADES=[
+ {g:'K–1',sets:[{n:'Short a and i',i:'cat',w:['cat','hat','bat','man','pan','big','pig','dig','pin','win']},{n:'Short o, u, e',i:'sun',w:['hop','top','hot','pot','bug','sun','run','hen','pen','ten']},{n:'First sight words',i:'eye',w:['the','and','you','said','was','they','have','come','some','one']}]},
+ {g:'1–2',sets:[{n:'sh, ch, th',i:'fish',w:['ship','shop','fish','chip','chat','lunch','this','that','with','bath']},{n:'-ck and -ll',i:'duck',w:['back','duck','kick','sock','neck','bell','hill','doll','tell','ball']},{n:'Magic e',i:'magic',w:['cake','game','bike','kite','time','bone','home','rope','cute','tube']}]},
+ {g:'2–3',sets:[{n:'Vowel teams',i:'boat',w:['rain','play','train','today','feet','green','sea','dream','boat','snow']},{n:'-ight and -ing',i:'star',w:['light','night','bright','knight','jumping','playing','running','swimming','smiled','stopped']},{n:'Sight words 2',i:'eye',w:['because','friend','people','could','would','should','again','every','once','laugh']}]},
+ {g:'3–4',sets:[{n:'-tion words',i:'rocket',w:['action','nation','station','motion','fraction','question','vacation','direction','lotion','section']},{n:'Silent letters',i:'ghost',w:['knee','knife','know','write','wrong','lamb','thumb','climb','island','listen']},{n:'Sound-alikes',i:'ear',w:['their','there','your','to','too','two','hear','here','write','right']}]},
+ {g:'4–5',sets:[{n:'-ough words',i:'cloud',w:['though','through','thought','enough','tough','rough','cough','bought','brought','dough']},{n:'-able and -ible',i:'tool',w:['comfortable','valuable','reliable','enjoyable','possible','terrible','horrible','visible','sensible','flexible']},{n:'Tricky words',i:'bolt',w:['necessary','separate','definitely','believe','receive','weird','calendar','library','February','Wednesday']}]},
+ {g:'5–6',sets:[{n:'Prefixes',i:'puzzle',w:['unhappy','disagree','misplace','preview','rewrite','incorrect','impossible','nonstop','overcome','understand']},{n:'Suffixes',i:'puzzle',w:['careless','kindness','movement','quietly','happiness','beautiful','dangerous','excitement','wonderful','carefully']},{n:'-ance and -ence',i:'scale',w:['balance','distance','entrance','importance','absence','difference','evidence','silence','patience','confidence']}]},
+ {g:'6–7',sets:[{n:'ie or ei',i:'scale',w:['achieve','believe','field','piece','niece','ceiling','receipt','deceive','neighbor','weight']},{n:'Double letters',i:'cherry',w:['accommodate','address','committee','embarrass','occasion','recommend','tomorrow','vacuum','millionaire','possess']},{n:'-cial and -tial',i:'gem',w:['special','official','social','crucial','artificial','partial','initial','essential','potential','confidential']}]},
+ {g:'7–8',sets:[{n:'Often misspelled',i:'bolt',w:['occurrence','conscience','rhythm','privilege','maintenance','acquire','guarantee','harass','miniature','mischievous']},{n:'Science words',i:'flask',w:['hypothesis','experiment','photosynthesis','molecule','atmosphere','ecosystem','gravity','organism','temperature','chemical']},{n:'Greek and Latin roots',i:'scroll',w:['autograph','biography','telephone','microscope','geography','spectator','transport','inspect','democracy','chronological']}]}
+];
+const famById=id=>{const m=/^g(\d+)-(\d+)$/.exec(id||'');if(!m)return null;const G=GRADES[+m[1]],s=G&&G.sets[+m[2]];return s?{...s,g:G.g,gi:+m[1]}:null};
+/* tiny pixel icons */
+const IC={};const ic=(k,rows,pal)=>{try{IC[k]=PXG(rows,Object.assign({o:'#2a1d3e'},pal)).toDataURL()}catch(e){IC[k]=''}};
+ic('teach',['..oooooooo..','.oRRRRRRRRo.','.oRWWWWWWRo.','.oRWkkkkWRo.','.oRWWWWWWRo.','.oRWkkkWWRo.','.oRWWWWWWRo.','.oRRRRRRRRo.','..oooooooo..'],{R:'#c83a5c',W:'#fff6e0',k:'#5a4a7a'});
+ic('tricky',['......ooo...','.....oYYo...','....oYYo....','...oYYYooo..','..oYYYYYYo..','..oooYYYo...','....oYYo....','...oYYo.....','...oYo......','...oo.......'],{Y:'#f0c860'});
+ic('mine',['.........oo.','........oPPo','.......oYYo.','......oYYo..','.....oYYo...','....oYYo....','...oYYo.....','..oWWo......','..oWo.......','..oo........'],{P:'#ff8aa8',Y:'#f0c860',W:'#e8d8b0'});
+ic('fam',['oooo..oooo..','oRRo..oBBo..','oRRo..oBBo..','oooooooooooo','..oGGGGGGo..','..oGWGGWGo..','..oGGGGGGo..','..oooooooo..'],{R:'#ff8a7a',B:'#7fc8f0',G:'#a8d878',W:'#2a1d3e'});
+ic('eye',['............','...oooooo...','.ooWWWWWWoo.','oWWWoBBoWWWo','oWWoBkkBoWWo','oWWWoBBoWWWo','.ooWWWWWWoo.','...oooooo...'],{W:'#fff6e0',B:'#7fc8f0',k:'#1b1626'});
+ic('ear',['...oooooo...','..oPPPPPPo..','.oPPooooPPo.','.oPo....oPo.','.oPo..ooPPo.','.oPPo.oPPo..','..oPPo.oo...','...oPPo.....','....oPPo....','.....ooo....'],{P:'#f0b090'});
+ic('plus',['....oooo....','....oGGo....','....oGGo....','oooooGGooooo','oGGGGGGGGGGo','oGGGGGGGGGGo','oooooGGooooo','....oGGo....','....oGGo....','....oooo....'],{G:'#a8d878'});
+ic('medal',['.oo....oo.','oRRo..oBBo','.oRRooBBo.','..oRRBBo..','..oYYYYo..','.oYYWYYYo.','.oYWYYYYo.','.oYYYYYYo.','..oYYYYo..','...oooo...'],{R:'#c83a5c',B:'#7fc8f0',Y:'#f0c860',W:'#fff6e0'});
+const setIcon={cat:'fam',sun:'fam',eye:'eye',fish:'fam',duck:'fam',magic:'tricky',boat:'fam',star:'tricky',rocket:'tricky',ghost:'eye',ear:'ear',cloud:'fam',tool:'fam',bolt:'tricky',puzzle:'fam',scale:'fam',cherry:'fam',gem:'tricky',flask:'fam',scroll:'mine'};
+const SICON=k=>IC[k]?`<img class="spic" src="${IC[k]}" alt="">`:'';
+const best=()=>(SP().best2=SP().best2||{});
+const starsOf=id=>best()[id]||0;
+const st=n=>`<span class="spst">${'★'.repeat(n)}${'☆'.repeat(3-n)}</span>`;
+const gradeDone=gi=>GRADES[gi].sets.every((s,k)=>starsOf('g'+gi+'-'+k)>=3);
+const tile=(act,attrs,icon,label,sub='',cls='')=>`<button class="sptile ${cls}" data-act="${act}" ${attrs}>${SICON(icon)}<b>${label}</b>${sub?`<small>${sub}</small>`:''}</button>`;
+const back=a=>`<button class="spback" data-act="${a}" aria-label="Back">◀</button>`;
+const medals=()=>GRADES.filter((G,gi)=>gradeDone(gi)).length;
+
+/* ---------- menus ---------- */
+ACT.spell=()=>{const sp=SP(),tl=teacherList(),tk=Object.keys(sp.tricky).length,my=Object.keys(sp.lists).length;
+ modal(`<h2>${SICON('fam')} SPELLING</h2>
+ <div class="sptiles">
+ ${tl?tile('spPick','data-src="teach" data-id="t"','teach','Teacher',esc(tl.name||'New list'),'hot'):''}
+ ${tile('spFam','','fam','Word Sets','Grades K–8')}
+ ${tile('spTricky','','tricky','Tricky',tk?tk+(tk>1?' words':' word'):'none yet',tk?'warn':'')}
+ ${tile('spMine','','mine','My Lists',my?my+(my>1?' lists':' list'):'make one')}
+ </div>
+ <p class="spsum">${SICON('medal')} ${medals()} grade medals · ${sp.done||0} words spelled</p>
+ <div class="rbtns"><button class="btn alt" data-act="close">Back</button></div>`);document.getElementById('mbox')?.classList.add('spbox')};
+ACT.spFam=()=>{modal(`<h2>${back('spell')} WORD SETS</h2><p class="spq">Pick your grade</p>
+ <div class="sptiles grades">${GRADES.map((G,gi)=>{const got=G.sets.reduce((a,s,k)=>a+starsOf('g'+gi+'-'+k),0);return tile('spGrade',`data-g="${gi}"`,gradeDone(gi)?'medal':'',G.g,`${got}/${G.sets.length*3} ★`,gradeDone(gi)?'done':'')}).join('')}</div>`);document.getElementById('mbox')?.classList.add('spbox')};
+ACT.spGrade=d=>{const gi=+d.g,G=GRADES[gi];if(!G)return ACT.spFam();
+ modal(`<h2>${back('spFam')} GRADE ${G.g}</h2><p class="spq">${gradeDone(gi)?'Medal earned! ':'Get 3 stars on all three for a medal'}</p>
+ <div class="sptiles three">${G.sets.map((s,k)=>{const id='g'+gi+'-'+k;return tile('spPick',`data-src="fam" data-id="${id}"`,setIcon[s.i]||'fam',esc(s.n),st(starsOf(id)))}).join('')}</div>`);document.getElementById('mbox')?.classList.add('spbox')};
+ACT.spTricky=()=>{const T=SP().tricky,ws=Object.keys(T);
+ if(!ws.length)return modal(`<h2>${back('spell')} TRICKY WORDS</h2><p class="spq">No tricky words yet.<br>Words you miss show up here until you spell them right 3 times.</p><div class="rbtns"><button class="btn" data-act="spFam">Pick a word set</button></div>`);
+ ACT.spPick({src:'tricky',id:'x'})};
+ACT.spMine=()=>{const L=Object.entries(SP().lists);
+ modal(`<h2>${back('spell')} MY LISTS</h2><div class="sptiles three">${L.map(([id,l])=>`<div class="sptwrap">${tile('spPick',`data-src="mine" data-id="${id}"`,'mine',esc(l.name),l.words.length+' words')}<button class="spx" data-act="spDelAsk" data-id="${id}" aria-label="Delete ${esc(l.name)}">✕</button></div>`).join('')}${tile('spNew','','plus','New list','type your words')}</div>`);document.getElementById('mbox')?.classList.add('spbox')};
 function getList(src,id){const sp=SP();
  if(src==='teach'){const t=teacherList();return t&&{name:t.name||'Teacher list',words:t.words}}
  if(src==='tricky')return {name:'Tricky Words',words:Object.keys(sp.tricky)};
  if(src==='mine')return sp.lists[id]||null;
- if(src==='fam'){const f=FAM[+id];return f&&{name:f.n,words:f.w}}return null}
+ if(src==='fam'){const f=famById(id);return f&&{name:f.n,words:f.w,g:f.g,gi:f.gi}}return null}
 ACT.spPick=d=>{const L=getList(d.src,d.id);if(!L||!L.words.length)return toast('That list is empty');
- const m=(k,t,s,ico)=>`<button class="btn spmode" data-act="spGo" data-src="${d.src}" data-id="${d.id}" data-m="${k}"><span class="spm-i">${ico}</span><span><b>${t}</b><small>${s}</small></span></button>`;
- modal(`<h2>${esc(L.name)}</h2><p class="muted" style="margin:0 0 10px">${L.words.slice(0,12).map(esc).join(', ')}${L.words.length>12?'…':''}</p>
- <div class="spmodes">${m('look','Look, Cover, Type','See the word, it hides, type it from memory.','👀')}${m('hear','Hear and Spell','Listen to the word and type it. No peeking!','👂')}${m('bee','Spelling Bee','Beat the Bee boss with every word you spell.'+(d.src==='fam'&&FAM[+d.id]&&FAM[+d.id].g==='4–5'&&!SP().beeFlawless?' Win without losing a heart for a secret reward!':''),'🐝')}</div>
- <div class="rbtns"><button class="btn alt" data-act="spell">Back</button></div>`)};
-ACT.spNew=()=>{modal(`<h2>MAKE A LIST</h2><p class="muted" style="margin:0 0 8px">Type or paste this week's spelling words, one per line or with commas.</p>
- <input id="spname" class="cl-in wide" maxlength="40" placeholder="Week 3 words" autocomplete="off" style="width:100%;margin-bottom:8px">
- <textarea id="spwords" rows="7" maxlength="1200" placeholder="because&#10;friend&#10;people" style="width:100%"></textarea>
- <div class="rbtns"><button class="btn" data-act="spSave">Save list</button><button class="btn alt" data-act="spell">Back</button></div>`);setTimeout(()=>document.getElementById('spname')?.focus(),50)};
+ const backTo=d.src==='fam'?`spGrade" data-g="${L.gi}`:d.src==='mine'?'spMine':'spell';
+ const secret=d.src==='fam'&&L.gi>=4&&!SP().beeFlawless;
+ const m=(k,icon,t,s)=>tile('spGo',`data-src="${d.src}" data-id="${d.id}" data-m="${k}"`,icon,t,s);
+ modal(`<h2><button class="spback" data-act="${backTo}" aria-label="Back">◀</button> ${esc(L.name)}</h2><p class="spq">How do you want to play?</p>
+ <div class="sptiles three">${m('look','eye','Look','see it, then type')}${m('hear','ear','Listen','hear it, type it')}<button class="sptile bee" data-act="spGo" data-src="${d.src}" data-id="${d.id}" data-m="bee"><img class="spic" src="${BEE}" alt=""><b>Bee Battle</b><small>${secret?'secret reward!':'beat the bee'}</small></button></div>`);document.getElementById('mbox')?.classList.add('spbox')};
+ACT.spNew=()=>{modal(`<h2>${back('spMine')} NEW LIST</h2>
+ <input id="spname" class="cl-in wide" maxlength="40" placeholder="List name" autocomplete="off" style="width:100%;margin-bottom:8px">
+ <textarea id="spwords" rows="7" maxlength="1200" placeholder="Type words here, one per line" style="width:100%"></textarea>
+ <div class="rbtns"><button class="btn" data-act="spSave">Save</button></div>`);setTimeout(()=>document.getElementById('spname')?.focus(),50)};
 const parseWords=t=>[...new Set(String(t||'').split(/[\s,;]+/).map(clean).filter(w=>w.length>0))].slice(0,40);
 ACT.spSave=()=>{const words=parseWords(document.getElementById('spwords')?.value);if(!words.length)return toast('Add some words first');
- const id='l'+Date.now().toString(36);SP().lists[id]={name:(document.getElementById('spname')?.value||'').trim().slice(0,40)||'My list',words};save();toast('List saved');ACT.spell()};
-ACT.spDelAsk=d=>{const l=SP().lists[d.id];if(!l)return ACT.spell();modal(`<h2>Delete ${esc(l.name)}?</h2><div class="rbtns"><button class="btn red" data-act="spDel" data-id="${d.id}">Delete</button><button class="btn alt" data-act="spell">Cancel</button></div>`)};
-ACT.spDel=d=>{delete SP().lists[d.id];save();ACT.spell()};
+ const id='l'+Date.now().toString(36);SP().lists[id]={name:(document.getElementById('spname')?.value||'').trim().slice(0,40)||'My list',words};save();toast('List saved!');ACT.spMine()};
+ACT.spDelAsk=d=>{const l=SP().lists[d.id];if(!l)return ACT.spMine();modal(`<h2>Delete ${esc(l.name)}?</h2><div class="rbtns"><button class="btn red" data-act="spDel" data-id="${d.id}">Delete</button><button class="btn alt" data-act="spMine">Keep it</button></div>`)};
+ACT.spDel=d=>{delete SP().lists[d.id];save();ACT.spMine()};
 
 /* ---------- a round ---------- */
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -86,7 +105,7 @@ function nextWord(first){const R=RUN;if(!R)return;if(!first)R.i++;if(R.i>=R.word
 function focusMob(){if(window.KK_MOBILE){const i=document.getElementById('mobin');try{i&&i.focus({preventScroll:true})}catch(e){}}}
 function slots(w,pos,showAll,reveal){return [...w].map((c,k)=>{const done=k<pos,cur=k===pos;const ch=done||showAll?c:(reveal&&reveal[k]?c:'');return `<span class="sps ${done?'ok':''} ${cur&&!showAll?'cur':''} ${reveal&&reveal[k]&&!done?'hint':''}">${ch?esc(c):'&nbsp;'}</span>`}).join('')}
 function draw(){const R=RUN,el=document.getElementById('s-spell');if(!R||!el)return;const w=R.words[R.i]||'';
- const title={look:'Look, Cover, Type',hear:'Hear and Spell',bee:'Spelling Bee'}[R.mode];
+ const title={look:'Look and Spell',hear:'Listen and Spell',bee:'Bee Battle'}[R.mode];
  const top=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>${title}</h2><span class="spcount">${Math.min(R.i+1,R.words.length)} / ${R.words.length}</span></div>`;
  const bee=R.mode==='bee'?`<div class="spbee"><img src="${BEE}" alt="Spelling Bee" class="${R.hit?'hit':''}"><div class="spbar"><i style="width:${Math.round(R.hp/R.words.length*100)}%"></i></div><div class="sphearts">${'♥'.repeat(Math.max(0,R.hearts))}${'♡'.repeat(Math.max(0,3-R.hearts))}</div></div>`:'';
  let mid='';
@@ -109,17 +128,24 @@ function wordDone(){const R=RUN,w=R.words[R.i],perfect=R.wordMiss===0;R.reveal=n
  save();R.phase='done';draw();const mid=document.querySelector('#s-spell .spmid');if(mid)mid.insertAdjacentHTML('beforeend',`<div class="spok ${perfect?'':'meh'}">${perfect?'✔ Perfect!':'✔ Got it. This one goes on your Tricky list.'}</div>`);
  try{perfect?sfx.ok&&sfx.ok():null}catch(e){}setTimeout(()=>{if(RUN===R)nextWord()},perfect?700:1400)}
 function end(){const R=RUN;RUN=null;if(!R)return;const n=R.res.length,perfect=R.res.filter(r=>!r.miss).length,acc=n?Math.round(perfect/n*100):0;
- const stars=acc>=90?3:acc>=70?2:acc>=40?1:0,win=R.mode!=='bee'||R.hp<=0;
- if(R.mode==='bee'&&win&&R.hearts>=3&&R.src==='fam'&&FAM[+R.id]&&FAM[+R.id].g==='4–5'&&n>=8&&!SP().beeFlawless){SP().beeFlawless=1}
- const key='spell:'+R.src+':'+R.id+':'+R.mode,b=(SP().best=SP().best||{}),prev=b[key]||0;
- let gems=n?Math.floor(perfect/3)+Math.max(0,stars-prev)*2+(prev===0&&stars>0?1:0):0;if(R.mode==='bee'&&win&&n)gems+=3;if(stars>prev)b[key]=stars;
- const xp=R.res.reduce((a,r)=>a+r.w.length,0)+perfect*5;S.gems+=gems;S.xp+=xp;S.time=(S.time||0)+Math.round((performance.now()-R.start)/1000);SP().done=(SP().done||0)+n;save();try{sfx.win()}catch(e){}
- const rows=R.res.map(r=>`<span class="spr ${r.miss?'bad':'good'}">${esc(r.w)}${r.miss?` <small>×${r.miss}</small>`:''}</span>`).join('');
+ const stars=acc>=90?3:acc>=70?2:acc>=40?1:0,win=R.mode!=='bee'||R.hp<=0,fam=R.src==='fam'?famById(R.id):null;
+ if(R.mode==='bee'&&win&&R.hearts>=3&&fam&&fam.gi>=4&&n>=8&&!SP().beeFlawless){SP().beeFlawless=1}
+ const bid=R.src==='fam'?R.id:R.src+':'+R.id,B=best(),prev=B[bid]||0,medalBefore=fam?gradeDone(fam.gi):true;
+ if(stars>prev)B[bid]=stars;const medal=fam&&!medalBefore&&gradeDone(fam.gi);
+ const rw=[];if(n){rw.push(['Perfect words',Math.ceil(perfect/2)]);if(stars>prev)rw.push([prev?'New best stars':'First stars',(stars-prev)*2+(prev?0:1)]);if(R.mode==='bee'&&win)rw.push(['Beat the Bee',3]);if(medal)rw.push(['Grade '+fam.g+' medal!',10])}
+ const gems=rw.reduce((a,r)=>a+r[1],0),xp=R.res.reduce((a,r)=>a+r.w.length,0)+perfect*5;
+ S.gems+=gems;S.xp+=xp;S.time=(S.time||0)+Math.round((performance.now()-R.start)/1000);SP().done=(SP().done||0)+n;
+ let egg=null;try{if(perfect>=3&&typeof dailyEgg==='function')egg=dailyEgg()}catch(e){}save();try{sfx.win()}catch(e){}
+ const g=(typeof ICON!=='undefined'&&ICON.gem)?ICON.gem.replace('<svg','<svg width="26" height="26"'):'';
+ const reward=gems?`<div class="reward"><div class="rtot">${g}<b>+${gems}</b><span>diamonds</span></div>${rw.filter(r=>r[1]>0).map(([t,v])=>`<div><span>${t}</span><b>+${v}</b></div>`).join('')}</div>`:'';
+ const rows=R.res.map(r=>`<span class="spr ${r.miss?'bad':'good'}">${esc(r.w)}</span>`).join('');
  show('home');
- modal(`<h2>${R.mode==='bee'?(win?'You beat the Bee!':'The Bee got away!'):'Spelling done!'}</h2><div class="hero-mini">${zookSVG()}</div>
- <div class="rstats"><div><b>${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</b><span>Stars</span></div><div><b>${perfect}/${n}</b><span>Perfect words</span></div><div><b>+${xp}</b><span>XP</span></div><div><b>+${gems}</b><span>Diamonds</span></div></div>
- <h3>Your words</h3><div class="spres">${rows}</div>${R.res.some(r=>r.miss)?'<p class="muted" style="margin:6px 0 0">Red words go on your Tricky Words list. Spell each one right 3 times to clear it.</p>':''}
- <div class="rbtns"><button class="btn" data-act="spGo" data-src="${R.src}" data-id="${R.id}" data-m="${R.mode}">Play again</button><button class="btn alt" data-act="spell">Spelling</button><button class="btn alt" data-act="spHome">Home</button></div>`)}
+ modal(`<h2>${R.mode==='bee'?(win?'You beat the Bee!':'The Bee got away!'):stars===3?'Super speller!':'Nice spelling!'}</h2><div class="hero-mini">${zookSVG()}</div>
+ ${medal?`<div class="banner gold">${SICON('medal')} Grade ${fam.g} medal earned!</div>`:''}${typeof eggBanner==='function'?eggBanner(egg):''}
+ <div class="spbig">${st(stars)}</div>
+ <div class="rstats"><div><b>${perfect}/${n}</b><span>Perfect</span></div><div><b>+${xp}</b><span>XP</span></div></div>${reward}
+ <div class="spres">${rows}</div>${R.res.some(r=>r.miss)?'<p class="muted" style="margin:6px 0 0">Red words go to Tricky Words.</p>':''}
+ <div class="rbtns"><button class="btn" data-act="spGo" data-src="${R.src}" data-id="${R.id}" data-m="${R.mode}">Play again</button><button class="btn alt" data-act="${fam?'spGrade" data-g="'+fam.gi:'spell'}">More spelling</button><button class="btn alt" data-act="spHome">Home</button></div>`)}
 ACT.spHome=()=>{closeModal();show("home")};
 document.addEventListener('keydown',e=>{if(typeof screen==='undefined'||screen!=='spell'||!document.getElementById('modal').hidden)return;if(e.ctrlKey||e.metaKey||e.altKey)return;
  if(e.target&&/^(INPUT|TEXTAREA)$/.test(e.target.tagName)&&e.target.id!=='mobin')return;
@@ -132,7 +158,7 @@ document.addEventListener('keydown',e=>{if(typeof screen==='undefined'||screen!=
 try{if(typeof HEROES!=='undefined'&&!HEROES.buzz){HEROES.buzz={"name": "Buzz", "pal": {"a": "#140c04", "b": "#1b1208", "o": "#1e1206", "c": "#2a1a08", "e": "#3a2410", "f": "#4a2010", "g": "#5a3a18", "i": "#88c8e4", "X": "#a8740c", "j": "#a8dcf0", "D": "#d09a18", "k": "#e8f8ff", "B": "#f0b828", "m": "#ff8a9a", "L": "#ffd040", "H": "#fff0a0", "n": "#ffffff"}, "rows": [".....oLLo......oLLo.....", "....oLLco......ocLLo....", "oooo.oooco....ocooo.oooo", "nnnno...oco..oco...ojiii", "kknkno.oocoooocoo.ojjnii", "knnkknoHHHHHHBDDXojjjnni", "knnnkkHLLLLLBBBDXXjjnnni", "kknkkHLLLLLLBBBDDXXjjnii", "kkkkHLLLLLLLBBBBDDXXjiii", "ookHLLLLLLLLBBBBDDDXXioo", ".oHLLLbbbLLLBBBbbbDDXXo.", ".oLLLLnbbLLLBBBbbnDDXXo.", ".oLLLLbbbLLLBBBbbbDDXXo.", ".oLLLmmLLLLLBBBBBmmDXXo.", ".oLLLLLLLffffffBBDDDXXo.", ".oLLLLLLLLffffBBBDDDXXo.", ".oggggggggggggcccoooaao.", ".oeeeeeeeeeecccccoooaao.", "..oLLLLLLLLLBBBBDDDXXo..", "..oeeeeeeeeeccccoooaao..", "...oeeeeeeeeccccooaao...", "....oLLLLLLLBBBDDXXo....", ".....ooeeeeeccooaoo.....", ".......ooooccoooo......."]};
  if(typeof HERO_COLORS!=='undefined')HERO_COLORS.buzz=[null,'pink','green','purple'];
  try{if(typeof KKC!=='undefined')Object.keys(KKC).forEach(k=>{if(/buzz/.test(k))delete KKC[k]})}catch(e){}
- if(window.RARE_HEROES)window.RARE_HEROES.buzz={need:'Beat the Spelling Bee on a Grade 4–5 list without losing a heart',prog:()=>SP().beeFlawless?'done!':'not yet',ok:()=>!!SP().beeFlawless}}}catch(e){console.warn(e)}
+ if(window.RARE_HEROES)window.RARE_HEROES.buzz={need:'Win a Bee Battle in Grade 4–5 or higher without losing a heart',prog:()=>SP().beeFlawless?'done!':'not yet',ok:()=>!!SP().beeFlawless}}}catch(e){console.warn(e)}
 
 /* ---------- home button (shares a row with Special Lesson when that's unlocked) ---------- */
 const _rh=renderHome;renderHome=function(){const r=kkSafe(_rh,this,arguments);try{const hb=document.querySelector('#s-home .hbtns');if(hb&&S.name&&!hb.querySelector('.homespell')){const code=hb.querySelector('.homecode');
@@ -162,6 +188,15 @@ ACT.spTeachSave=async d=>{const c=SPT,tk=tkFor(c);if(!c||!tk)return toast('Open 
   window.kkClassSpellTeach=j.spell||null;toast(clear?'List cleared':'Sent to your class!');ACT.clsDash({c})}catch(e){toast(e.message)}};
 
 document.head.insertAdjacentHTML('beforeend',`<style>
+.spbox h2{display:flex;align-items:center;justify-content:center;gap:10px}.spbox h2 .spic{width:30px;height:auto}
+.sptiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:8px 0 12px}.sptiles.three{grid-template-columns:repeat(3,1fr)}.sptiles.grades{grid-template-columns:repeat(4,1fr)}
+.sptile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:118px;padding:12px 8px;background:#3a2f4e;border:4px solid #5a4a7a;color:#fff6e0;font-family:inherit;cursor:pointer;box-shadow:0 5px 0 #1b1626;width:100%}
+.sptile:hover{border-color:#f0c860}.sptile:active{transform:translateY(3px);box-shadow:0 2px 0 #1b1626}.sptile b{font-size:22px;line-height:1.05;text-align:center}.sptile small{font-size:15px;color:#c8bce0;text-transform:none}
+.sptile .spic{width:46px;height:auto;image-rendering:pixelated}.sptile.hot{background:#c83a5c;border-color:#ff8aa8}.sptile.warn small{color:#f0c860}.sptile.done{border-color:#f0c860;background:#4a3a20}.sptile.bee{background:#4a3a10;border-color:#f0c860}
+.grades .sptile{min-height:84px}.grades .sptile b{font-size:26px}.sptwrap{position:relative}.spx{position:absolute;top:4px;right:4px;width:28px;height:28px;background:#1b1626;color:#fff6e0;border:2px solid #5a4a7a;cursor:pointer}
+.spback{background:#3a2f4e;border:3px solid #5a4a7a;color:#fff6e0;width:38px;height:38px;cursor:pointer;font-size:16px;flex:none}.spq{text-align:center;margin:0 0 6px;color:#c8bce0;font-size:20px}.spsum{text-align:center;color:#c8bce0;display:flex;gap:8px;justify-content:center;align-items:center;margin:0}.spsum .spic{width:22px}
+.spst{color:#f0c860;letter-spacing:2px;font-size:18px}.spbig{text-align:center}.spbig .spst{font-size:40px}.banner .spic{width:22px;vertical-align:middle}
+body.mobile .sptiles.three,body.mobile .sptiles.grades{grid-template-columns:repeat(2,1fr)}body.mobile .sptile{min-height:96px}
 #s-home .homespell{background:#7fc8f0!important;color:#2a1d3e!important;box-shadow:0 5px 0 #4a8ab8!important;grid-column:1/-1}#s-home .homespell.half{grid-column:auto}#s-home .homespell:active{box-shadow:0 2px 0 #4a8ab8!important}
 #s-home .homecode.half{grid-column:auto}.spteachbtn{margin-top:8px;width:100%}.spdot{background:#c83a5c;color:#fff6e0;font-size:.7em;padding:2px 6px;margin-left:6px}
 .spcols{display:grid;gap:12px;max-height:62vh;overflow:auto;padding-right:4px;text-align:left}.spsec h3{margin:0 0 6px;font-size:18px;color:#f0c860}
