@@ -12,6 +12,7 @@ function score(v){const n=v.name;let s=0;
  if(v.default)s+=3;return s}
 const ranked=()=>V.slice().sort((a,b)=>score(b)-score(a));
 function pick(){if(!V.length)load();const want=S.set&&S.set.voiceName;if(want){const v=V.find(x=>x.name===want);if(v)return v}return ranked()[0]||null}
+window.kkPickVoice=()=>pick();
 window.speak=speak=function(t){if(!S.set.voice)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(t).replace(/<[^>]+>/g,''));
  const v=pick();if(v){u.voice=v;u.lang=v.lang}
  const human=v&&score(v)>=40;u.rate=human?1:.95;u.pitch=human?1.05:1.15;speechSynthesis.speak(u)}catch(e){}};

@@ -90,7 +90,14 @@ ACT.spDel=d=>{delete SP().lists[d.id];save();ACT.spMine()};
 
 /* ---------- a round ---------- */
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-function sayWord(w,slow){try{if(!('speechSynthesis' in window))return;const was=S.set.voice;S.set.voice=true;speak(w);S.set.voice=was;if(slow){}}catch(e){}}
+/* words that sound like other words get a sentence, like a real spelling bee */
+const SENT={their:'Their dog is big.',there:'Put it over there.',your:'Is this your hat?',to:'We walk to school.',too:'I want to come too.',two:'I have two cats.',hear:'I can hear the bird.',here:'Come over here.',write:'Write your name.',right:'Turn right at the corner.',
+ sea:'Fish swim in the sea.',knight:'The knight wore armor.',night:'The stars come out at night.',one:'I have one dog.',piece:'Can I have a piece of cake?',weight:'What is your weight?',know:'I know the answer.',son:'He is their son.',sun:'The sun is hot.',
+ through:'We walked through the park.',though:'It was cold, though sunny.',thought:'I thought about it.',bought:'Mom bought milk.',brought:'She brought a snack.',accept:'I accept your gift.',address:'Write your address.',dough:'Bread is made from dough.',
+ knee:'I hurt my knee.',lamb:'The lamb is fluffy.',bee:'The bee buzzed by.',read:'I like to read books.',rain:'The rain is wet.',wrong:'That answer is wrong.',field:'Cows eat grass in the field.',ceiling:'The fan is on the ceiling.'};
+function sayWord(w,slow){try{if(!('speechSynthesis' in window))return;const v=window.kkPickVoice&&window.kkPickVoice(),sent=SENT[String(w).toLowerCase()];speechSynthesis.cancel();
+ const say=(t,rate)=>{const u=new SpeechSynthesisUtterance(t);if(v){u.voice=v;u.lang=v.lang}u.rate=rate;u.pitch=1;speechSynthesis.speak(u)};
+ const r=slow?.55:.8;say(w+'.',r);if(sent)say(sent,slow?.7:.9);say(w+'.',r)}catch(e){}}
 ACT.spGo=d=>{const L=getList(d.src,d.id);if(!L)return;closeModal();
  let words=shuffle(L.words);
  if(d.src!=='tricky'){const tk=shuffle(Object.keys(SP().tricky).filter(w=>!words.includes(w))).slice(0,Math.ceil(Math.min(10,words.length)*.3));words=words.slice(0,10-tk.length).concat(tk);words=shuffle(words)}
@@ -109,11 +116,12 @@ function draw(){const R=RUN,el=document.getElementById('s-spell');if(!R||!el)ret
  const top=`<div class="topbar"><button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button><h2>${title}</h2><span class="spcount">${Math.min(R.i+1,R.words.length)} / ${R.words.length}</span></div>`;
  const bee=R.mode==='bee'?`<div class="spbee"><img src="${BEE}" alt="Spelling Bee" class="${R.hit?'hit':''}"><div class="spbar"><i style="width:${Math.round(R.hp/R.words.length*100)}%"></i></div><div class="sphearts">${'♥'.repeat(Math.max(0,R.hearts))}${'♡'.repeat(Math.max(0,3-R.hearts))}</div></div>`:'';
  let mid='';
- if(R.mode==='look'&&R.phase==='show')mid=`<p class="sphint">Look carefully…</p><div class="spword big">${esc(w)}</div><button class="btn sm alt" data-act="spReady">I'm ready (Enter)</button>`;
- else mid=`<p class="sphint">${R.mode==='look'?'Now type it from memory!':'Listen, then type the word.'}</p><div class="spword">${slots(w,R.pos,false,R.reveal)}</div>${R.mode!=='look'?`<button class="btn sm alt" data-act="spHear">🔊 Hear it again (Enter)</button>`:''}`;
+ if(R.mode==='look'&&R.phase==='show')mid=`<p class="sphint">Look carefully…</p><div class="spword big">${esc(w)}</div><button class="btn sm alt" data-act="spReady">I'm ready (Space)</button>`;
+ else mid=`<p class="sphint">${R.mode==='look'?'Now type it from memory!':'Listen, then type the word.'}</p><div class="spword">${slots(w,R.pos,false,R.reveal)}</div>${R.mode!=='look'?`<div class="sphear"><button class="btn sm" data-act="spHear">🔊 Again <small>(Space)</small></button><button class="btn sm alt" data-act="spSlow">🐢 Slow <small>(Enter)</small></button></div>`:''}`;
  el.innerHTML=`${top}<div class="spstage">${bee}<div class="sphero">${zookSVG()}</div><div class="spmid">${mid}</div></div><p class="muted spfoot">${esc(R.name)}</p>`}
 ACT.spReady=()=>{if(RUN&&RUN.phase==='show'){RUN.phase='type';draw();focusMob()}};
 ACT.spHear=()=>{if(RUN)sayWord(RUN.words[RUN.i]);focusMob()};
+ACT.spSlow=()=>{if(RUN)sayWord(RUN.words[RUN.i],true);focusMob()};
 ACT.spQuit=()=>{RUN=null;show('home')};
 document.getElementById('s-spell')?.addEventListener('click',e=>{if(!e.target.closest('[data-act]'))focusMob()});
 function key(ch){const R=RUN;if(!R||R.phase!=='type')return;const w=R.words[R.i];if(!w)return;const want=w[R.pos];
@@ -149,7 +157,8 @@ function end(){const R=RUN;RUN=null;if(!R)return;const n=R.res.length,perfect=R.
 ACT.spHome=()=>{closeModal();show("home")};
 document.addEventListener('keydown',e=>{if(typeof screen==='undefined'||screen!=='spell'||!document.getElementById('modal').hidden)return;if(e.ctrlKey||e.metaKey||e.altKey)return;
  if(e.target&&/^(INPUT|TEXTAREA)$/.test(e.target.tagName)&&e.target.id!=='mobin')return;
- if(e.key==='Enter'){e.preventDefault();if(RUN&&RUN.phase==='show')ACT.spReady();else ACT.spHear();return}
+ if(e.key===' '){e.preventDefault();if(RUN&&RUN.phase==='show')ACT.spReady();else if(RUN&&RUN.mode!=='look')ACT.spHear();return}
+ if(e.key==='Enter'){e.preventDefault();if(RUN&&RUN.mode!=='look')ACT.spSlow();return}
  if(e.key==='Escape'){e.preventDefault();ACT.spQuit();return}
  if(e.key.length===1&&/[A-Za-z'\-]/.test(e.key)){e.preventDefault();key(e.key)}},true);
 
@@ -210,7 +219,7 @@ body.mobile .sptiles.three,body.mobile .sptiles.grades{grid-template-columns:rep
 .spword.big{font-size:56px;letter-spacing:.08em;color:#fff6e0}.sps{min-width:44px;height:58px;border-bottom:5px solid #5a4a7a;display:inline-flex;align-items:center;justify-content:center;color:#fff6e0}
 .sps.ok{color:#7fe8a0;border-color:#7fe8a0}.sps.cur{border-color:#f0c860;animation:spblink 1s steps(1) infinite}.sps.hint{color:#f0a860}
 @keyframes spblink{50%{border-color:transparent}}.spword.shake{animation:spshake .3s steps(3)}@keyframes spshake{33%{transform:translateX(-8px)}66%{transform:translateX(8px)}}
-.spok{font-size:24px;color:#7fe8a0}.spok.meh{color:#f0c860}.spfoot{text-align:center;margin:10px 0 0}
+.sphear{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.sphear small{opacity:.7;font-size:.8em}.spok{font-size:24px;color:#7fe8a0}.spok.meh{color:#f0c860}.spfoot{text-align:center;margin:10px 0 0}
 .spbee{position:absolute;right:18px;top:12px;display:grid;justify-items:center;gap:4px;width:150px}.spbee img{width:110px;image-rendering:pixelated;animation:spfly 1.2s steps(2) infinite}.spbee img.hit{filter:brightness(2) saturate(0)}
 @keyframes spfly{50%{transform:translateY(-6px)}}.spbar{width:140px;height:12px;background:#3a2f4e;border:3px solid #1b1626}.spbar i{display:block;height:100%;background:#c83a5c}.sphearts{color:#ff8aa8;font-size:22px;letter-spacing:2px}
 .spres{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.spr{padding:4px 10px;font-size:18px;border:3px solid #3a2f4e}.spr.good{background:#2f5a3e;color:#c8ffd8}.spr.bad{background:#5a2a3a;color:#ffd0d8}
