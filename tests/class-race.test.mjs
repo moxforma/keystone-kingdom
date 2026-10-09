@@ -97,3 +97,13 @@ test('class: guessing codes gets blocked',async()=>{
  let last;for(let i=0;i<45;i++)last=(await call({a:'info',code:'ant'+String(i).padStart(3,'0')})).status;
  assert.equal(last,429);
 });
+
+test('class: teacher sends a spelling list, kids see it in class info',async()=>{
+ const {call}=load('keyloria-class.mjs');
+ const {code,tk}=(await call({a:'create',name:'Room 5'})).body;
+ assert.equal((await call({a:'spell',code,tk:'0'.repeat(32),words:['cat']})).status,403);
+ await call({a:'spell',code,tk,name:'Week 1',words:['because','friend','because','<b>bad</b>','x'.repeat(40)]});
+ const sp=(await call({a:'info',code})).body.spell;
+ assert.equal(sp.name,'Week 1');assert.deepEqual(JSON.parse(JSON.stringify(sp.words)),['because','friend','bbadb','x'.repeat(20)]);
+ await call({a:'spell',code,tk,words:[]});assert.equal((await call({a:'info',code})).body.spell,null);
+});
