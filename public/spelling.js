@@ -91,11 +91,15 @@ ACT.spDel=d=>{delete SP().lists[d.id];save();ACT.spMine()};
 /* ---------- a round ---------- */
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 /* words that sound like other words get a sentence, like a real spelling bee */
-const SENT={their:'Their dog is big.',there:'Put it over there.',your:'Is this your hat?',to:'We walk to school.',too:'I want to come too.',two:'I have two cats.',hear:'I can hear the bird.',here:'Come over here.',write:'Write your name.',right:'Turn right at the corner.',
+/* how to SAY a word when the voice gets it wrong on its own (spelling stays the same) */
+const PRON={the:'thuh',a:'uh',was:'wuz',of:'uv',said:'sed',does:'duz',one:'won',two:'too',once:'wunce',live:'liv'};
+const SENT={the:'The cat sat on the mat.',and:'I like cats and dogs.',you:'I see you.',said:'She said hello.',was:'It was fun.',they:'They are my friends.',have:'I have a hat.',come:'Come and play.',some:'I want some juice.',
+ because:'I smiled because I was happy.',friend:'You are my friend.',people:'Many people came.',could:'I could see the moon.',would:'Would you like a snack?',should:'You should rest.',again:'Read it again.',every:'I play every day.',once:'Once upon a time.',laugh:'That made me laugh.',
+their:'Their dog is big.',there:'Put it over there.',your:'Is this your hat?',to:'We walk to school.',too:'I want to come too.',two:'I have two cats.',hear:'I can hear the bird.',here:'Come over here.',write:'Write your name.',right:'Turn right at the corner.',
  sea:'Fish swim in the sea.',knight:'The knight wore armor.',night:'The stars come out at night.',one:'I have one dog.',piece:'Can I have a piece of cake?',weight:'What is your weight?',know:'I know the answer.',son:'He is their son.',sun:'The sun is hot.',
  through:'We walked through the park.',though:'It was cold, though sunny.',thought:'I thought about it.',bought:'Mom bought milk.',brought:'She brought a snack.',accept:'I accept your gift.',address:'Write your address.',dough:'Bread is made from dough.',
  knee:'I hurt my knee.',lamb:'The lamb is fluffy.',bee:'The bee buzzed by.',read:'I like to read books.',rain:'The rain is wet.',wrong:'That answer is wrong.',field:'Cows eat grass in the field.',ceiling:'The fan is on the ceiling.'};
-function sayWord(w,slow){try{if(!('speechSynthesis' in window))return;const v=window.kkPickVoice&&window.kkPickVoice(),sent=SENT[String(w).toLowerCase()];speechSynthesis.cancel();
+function sayWord(w,slow){try{if(!('speechSynthesis' in window))return;const v=window.kkPickVoice&&window.kkPickVoice(),lw=String(w).toLowerCase(),sent=SENT[lw];w=PRON[lw]||w;speechSynthesis.cancel();
  const say=(t,rate)=>{const u=new SpeechSynthesisUtterance(t);if(v){u.voice=v;u.lang=v.lang}u.rate=rate;u.pitch=1;speechSynthesis.speak(u)};
  const r=slow?.55:.8;say(w+'.',r);if(sent)say(sent,slow?.7:.9);say(w+'.',r)}catch(e){}}
 ACT.spGo=d=>{const L=getList(d.src,d.id);if(!L)return;closeModal();
