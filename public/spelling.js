@@ -74,10 +74,10 @@ function getList(src,id){const sp=SP();
  if(src==='fam'){const f=famById(id);return f&&{name:f.n,words:f.w,g:f.g,gi:f.gi}}return null}
 ACT.spPick=d=>{const L=getList(d.src,d.id);if(!L||!L.words.length)return toast('That list is empty');
  const backTo=d.src==='fam'?`spGrade" data-g="${L.gi}`:d.src==='mine'?'spMine':'spell';
- const secret=d.src==='fam'&&L.gi>=4&&!SP().beeFlawless;
+ const secret=d.src==='fam'&&!SP().beeFlawless,beeDone=d.src==='fam'&&(SP().beeFl||{})[d.id];
  const m=(k,icon,t,s)=>tile('spGo',`data-src="${d.src}" data-id="${d.id}" data-m="${k}"`,icon,t,s);
  modal(`<h2><button class="spback" data-act="${backTo}" aria-label="Back">◀</button> ${esc(L.name)}</h2><p class="spq">How do you want to play?</p>
- <div class="sptiles three">${m('look','eye','Look','see it, then type')}${m('hear','ear','Listen','hear it, type it')}<button class="sptile bee" data-act="spGo" data-src="${d.src}" data-id="${d.id}" data-m="bee"><img class="spic" src="${BEE}" alt=""><b>Bee Battle</b><small>${secret?'secret reward!':'beat the bee'}</small></button></div>`);document.getElementById('mbox')?.classList.add('spbox')};
+ <div class="sptiles three">${m('look','eye','Look','see it, then type')}${m('hear','ear','Listen','hear it, type it')}<button class="sptile bee" data-act="spGo" data-src="${d.src}" data-id="${d.id}" data-m="bee"><img class="spic" src="${BEE}" alt=""><b>Bee Battle</b><small>${beeDone?'perfect! ✔':secret?'no hearts lost = ?':'beat the bee'}</small></button></div>`);document.getElementById('mbox')?.classList.add('spbox')};
 ACT.spNew=()=>{modal(`<h2>${back('spMine')} NEW LIST</h2>
  <input id="spname" class="cl-in wide" maxlength="40" placeholder="List name" autocomplete="off" style="width:100%;margin-bottom:8px">
  <textarea id="spwords" rows="7" maxlength="1200" placeholder="Type words here, one per line" style="width:100%"></textarea>
@@ -129,7 +129,7 @@ function wordDone(){const R=RUN,w=R.words[R.i],perfect=R.wordMiss===0;R.reveal=n
  try{perfect?sfx.ok&&sfx.ok():null}catch(e){}setTimeout(()=>{if(RUN===R)nextWord()},perfect?700:1400)}
 function end(){const R=RUN;RUN=null;if(!R)return;const n=R.res.length,perfect=R.res.filter(r=>!r.miss).length,acc=n?Math.round(perfect/n*100):0;
  const stars=acc>=90?3:acc>=70?2:acc>=40?1:0,win=R.mode!=='bee'||R.hp<=0,fam=R.src==='fam'?famById(R.id):null;
- if(R.mode==='bee'&&win&&R.hearts>=3&&fam&&fam.gi>=4&&n>=8&&!SP().beeFlawless){SP().beeFlawless=1}
+ if(R.mode==='bee'&&win&&R.hearts>=3&&fam&&n>=8){const F=(SP().beeFl=SP().beeFl||{});F[R.id]=1;if(GRADES[fam.gi].sets.every((x,k)=>F['g'+fam.gi+'-'+k]))SP().beeFlawless=1}
  const bid=R.src==='fam'?R.id:R.src+':'+R.id,B=best(),prev=B[bid]||0,medalBefore=fam?gradeDone(fam.gi):true;
  if(stars>prev)B[bid]=stars;const medal=fam&&!medalBefore&&gradeDone(fam.gi);
  const rw=[];if(n){rw.push(['Perfect words',Math.ceil(perfect/2)]);if(stars>prev)rw.push([prev?'New best stars':'First stars',(stars-prev)*2+(prev?0:1)]);if(R.mode==='bee'&&win)rw.push(['Beat the Bee',3]);if(medal)rw.push(['Grade '+fam.g+' medal!',10])}
@@ -158,7 +158,7 @@ document.addEventListener('keydown',e=>{if(typeof screen==='undefined'||screen!=
 try{if(typeof HEROES!=='undefined'&&!HEROES.buzz){HEROES.buzz={"name": "Buzz", "pal": {"a": "#140c04", "b": "#1b1208", "o": "#1e1206", "c": "#2a1a08", "e": "#3a2410", "f": "#4a2010", "g": "#5a3a18", "i": "#88c8e4", "X": "#a8740c", "j": "#a8dcf0", "D": "#d09a18", "k": "#e8f8ff", "B": "#f0b828", "m": "#ff8a9a", "L": "#ffd040", "H": "#fff0a0", "n": "#ffffff"}, "rows": [".....oLLo......oLLo.....", "....oLLco......ocLLo....", "oooo.oooco....ocooo.oooo", "nnnno...oco..oco...ojiii", "kknkno.oocoooocoo.ojjnii", "knnkknoHHHHHHBDDXojjjnni", "knnnkkHLLLLLBBBDXXjjnnni", "kknkkHLLLLLLBBBDDXXjjnii", "kkkkHLLLLLLLBBBBDDXXjiii", "ookHLLLLLLLLBBBBDDDXXioo", ".oHLLLbbbLLLBBBbbbDDXXo.", ".oLLLLnbbLLLBBBbbnDDXXo.", ".oLLLLbbbLLLBBBbbbDDXXo.", ".oLLLmmLLLLLBBBBBmmDXXo.", ".oLLLLLLLffffffBBDDDXXo.", ".oLLLLLLLLffffBBBDDDXXo.", ".oggggggggggggcccoooaao.", ".oeeeeeeeeeecccccoooaao.", "..oLLLLLLLLLBBBBDDDXXo..", "..oeeeeeeeeeccccoooaao..", "...oeeeeeeeeccccooaao...", "....oLLLLLLLBBBDDXXo....", ".....ooeeeeeccooaoo.....", ".......ooooccoooo......."]};
  if(typeof HERO_COLORS!=='undefined')HERO_COLORS.buzz=[null,'pink','green','purple'];
  try{if(typeof KKC!=='undefined')Object.keys(KKC).forEach(k=>{if(/buzz/.test(k))delete KKC[k]})}catch(e){}
- if(window.RARE_HEROES)window.RARE_HEROES.buzz={need:'Win a Bee Battle in Grade 4–5 or higher without losing a heart',prog:()=>SP().beeFlawless?'done!':'not yet',ok:()=>!!SP().beeFlawless}}}catch(e){console.warn(e)}
+ if(window.RARE_HEROES)window.RARE_HEROES.buzz={need:'Win a perfect Bee Battle (no hearts lost) on all 3 word sets of any grade',prog:()=>{const F=SP().beeFl||{};return Math.max(0,...GRADES.map((G,gi)=>G.sets.filter((x,k)=>F['g'+gi+'-'+k]).length))+'/3 perfect Bee Battles in one grade'},ok:()=>!!SP().beeFlawless}}}catch(e){console.warn(e)}
 
 /* ---------- home button (shares a row with Special Lesson when that's unlocked) ---------- */
 const _rh=renderHome;renderHome=function(){const r=kkSafe(_rh,this,arguments);try{const hb=document.querySelector('#s-home .hbtns');if(hb&&S.name&&!hb.querySelector('.homespell')){const code=hb.querySelector('.homecode');
