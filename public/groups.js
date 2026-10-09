@@ -31,7 +31,7 @@ const _md=modal;modal=function(){const r=_md.apply(this,arguments);try{if(screen
 /* class-wide grown-up switches from the teacher */
 try{window.CLS_LOCK=S.cls&&S.cls.lock||null;applyPar&&applyPar()}catch(e){}
 const _ldL=load;load=function(){const r=_ldL.apply(this,arguments);try{window.CLS_LOCK=S.cls&&S.cls.lock||null;applyPar&&applyPar()}catch(e){}return r};
-function setLock(i){const L=i&&i.lock||null,was=JSON.stringify(window.CLS_LOCK||null);window.CLS_LOCK=S.cls?L:null;if(S.cls&&JSON.stringify(S.cls.lock||null)!==JSON.stringify(L)){S.cls.lock=L;save()}if(JSON.stringify(window.CLS_LOCK||null)!==was){try{applyPar&&applyPar();if(screen==='home')renderHome()}catch(e){}}}
+function setLock(i){try{window.kkClassSpell=S.cls&&i&&i.spell||null}catch(e){}const L=i&&i.lock||null,was=JSON.stringify(window.CLS_LOCK||null);window.CLS_LOCK=S.cls?L:null;if(S.cls&&JSON.stringify(S.cls.lock||null)!==JSON.stringify(L)){S.cls.lock=L;save()}if(JSON.stringify(window.CLS_LOCK||null)!==was){try{applyPar&&applyPar();if(screen==='home')renderHome()}catch(e){}}}
 /* ---------- home: class banner (teacher's pick + open class race) ---------- */
 let CLS_INFO=null,lastInfo=0;
 function fetchInfo(){if(!S.cls||Date.now()-lastInfo<15000)return;lastInfo=Date.now();post('/api/class',{a:'info',code:S.cls.code}).then(i=>{CLS_INFO=i;setLock(i);S.cls.name=i.name;homeBanner()}).catch(e=>{if(/not found/i.test(e.message)){S.cls=null;save()}})}

@@ -25,7 +25,7 @@ function masterUnlock(){try{const NS=typeof NST!=='undefined'?NST:8;
  S.daily=S.daily||{day:'',secs:0,streak:0,met:'',lastT:S.time||0};S.daily.best=Math.max(S.daily.best||0,60);
  S.owned=S.owned||[];Object.keys(ACC).forEach(id=>{if(!S.owned.includes(id))S.owned.push(id)});
  const top=Math.max(1,...Object.values(ACC).map(a=>a.lvl||0));if(S.xp<needXP(top))S.xp=needXP(top);
- S.infGems=1;S.gems=99999;S.codeOn=true;S.cards=S.cards||{};for(let i=0;i<LESSONS.length;i++)for(let f=0;f<3;f++){const k=i+'-'+f;S.cards[k]=Object.assign(S.cards[k]||{},{holo:true})}S.rareOwn={drakko:1,kitsu:1,nyx:1};S.rareSeen={drakko:1,kitsu:1,nyx:1};S.placed=true;S.camp=true;
+ S.infGems=1;S.gems=99999;S.codeOn=true;S.cards=S.cards||{};for(let i=0;i<LESSONS.length;i++)for(let f=0;f<3;f++){const k=i+'-'+f;S.cards[k]=Object.assign(S.cards[k]||{},{holo:true})}S.rareOwn={drakko:1,kitsu:1,nyx:1,buzz:1};S.rareSeen={drakko:1,kitsu:1,nyx:1,buzz:1};S.spell=S.spell||{};S.spell.beeFlawless=1;S.placed=true;S.camp=true;
  S.story=S.story||{};S.story.shard=S.story.shard||{};for(let w=1;w<=12;w++)S.story.shard[w]=1;
  save();toast('Master code accepted: everything is unlocked!')}catch(e){console.warn(e);toast('Could not unlock everything')}}
 window.masterUnlock=masterUnlock;

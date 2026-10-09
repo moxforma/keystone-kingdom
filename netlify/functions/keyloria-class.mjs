@@ -66,7 +66,7 @@ export default async (req, context) => {
     const out = await Promise.all(blobs.slice(0, 60).map(x => store.get(x.key, { type: "json" })));
     return out.filter(Boolean);
   };
-  const pub = () => ({ name: meta.name, assign: meta.assign, lock: meta.lock || null, race: meta.race && Date.now() - meta.race.at < 30 * 60000 ? meta.race : null });
+  const pub = () => ({ name: meta.name, assign: meta.assign, lock: meta.lock || null, spell: meta.spell || null, race: meta.race && Date.now() - meta.race.at < 30 * 60000 ? meta.race : null });
   const pid = String(b.pid || "");
   if (a === "info") return json(pub());
   if (a === "join" || a === "report") {
@@ -84,6 +84,8 @@ export default async (req, context) => {
   if (a === "dash") return json({ ...pub(), hist: meta.hist || (meta.assign ? [meta.assign] : []), members: (await members()).map(m => ({ pid: m.pid, name: m.name, joined: m.joined, stats: m.stats })) });
   if (a === "assign") { meta.assign = b.i == null ? null : { i: num(b.i, 9999), title: cleanTitle(b.title), at: Date.now() }; if (meta.assign) meta.hist = [...(meta.hist || []), meta.assign].slice(-40); await store.setJSON("c:" + code, meta); return json(pub()) }
   if (a === "lock") { const L = {}; if (b.lock && typeof b.lock === "object") for (const [k, v] of Object.entries(b.lock).slice(0, 20)) if (/^[a-z]{2,12}$/.test(k)) L[k] = v === 0 ? 0 : 1; meta.lock = L; await store.setJSON("c:" + code, meta); return json(pub()) }
+  if (a === "spell") { const words = [...new Set((Array.isArray(b.words) ? b.words : []).map(w => String(w || "").replace(/[^A-Za-z'\-]/g, "").slice(0, 20)).filter(Boolean))].slice(0, 40);
+    meta.spell = words.length ? { name: cleanTitle(b.name) || "Spelling list", words, at: Date.now() } : null; await store.setJSON("c:" + code, meta); return json(pub()) }
   if (a === "race") { meta.race = b.room ? { room: String(b.room).toUpperCase().slice(0, 6), at: Date.now() } : null; await store.setJSON("c:" + code, meta); return json(pub()) }
   if (a === "delete") { const { blobs } = await store.list({ prefix: "m:" + code + ":" }); await Promise.all(blobs.map(x => store.delete(x.key))); await store.delete("c:" + code); return json({ ok: true }) }
   if (a === "remove") { if (validPid(pid)) await store.delete("m:" + code + ":" + pid); return json({ ok: true }) }
