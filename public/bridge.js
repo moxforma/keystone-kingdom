@@ -9,7 +9,7 @@ function prepText(t){const p=progLesson(),I=!!window.INSANE;
  if(p<22&&!I)t=t.replace(/[!?]/g,'.').replace(/["']/g,'');
  if(typeof arcadeNumberOn==='function'){if(!arcadeNumberOn())t=t.replace(/\d/g,'');if(!arcadeSymbolOn())t=t.replace(/[!?;:]/g,'.').replace(/[^A-Za-z0-9\s.,]/g,'')}
  return t.replace(/\s+/g,' ').replace(/\.\.+/g,'.').trim()}
-function wpmTarget(){const d=S.set.arcd||'auto';if(window.INSANE)return 72;return d==='beast'?50:d==='hard'?34:d==='medium'?20:d==='easy'?12:Math.max(10,Math.min(40,Math.round((typeof avgWpm==='function'?avgWpm():12)*.85)))}
+function wpmTarget(){const d=S.set.arcd||'auto';if(window.INSANE)return 72;return d==='beast'?50:d==='hard'?34:d==='medium'?20:d==='easy'?6:Math.max(10,Math.min(40,Math.round((typeof avgWpm==='function'?avgWpm():12)*.85)))}
 let LASTP=null;
 let BGHOST=null;
 function learnedStory(){const p=progLesson(),ls=learned(Math.min(LESSONS.length-1,p));const ok=w=>[...w.toLowerCase()].every(c=>ls.has(c));
