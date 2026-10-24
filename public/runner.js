@@ -5,7 +5,7 @@
 if(typeof S==='undefined')return;
 const W=320,H=120,GROUND=100,RX=72;                 // RX = runner's front edge on screen
 const BW=12,PLANK=10;                                // runner body width, bridge plank width
-const GRAV=800,JV=-260,HOP=110;                        // jump strength, minimum forward speed of a jump
+const GRAV=520,JV=-205,HOP=55;                         // jump strength, minimum forward speed of a jump
 const SPEEDS=[.6,.8,1,1.25,1.5],SPD_NAME=['Slowest','Slow','Normal','Fast','Fastest'];
 const LV=[
  {name:'F and J',     keys:'fj',        n:9,  words:0,  v:62},
