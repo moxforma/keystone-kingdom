@@ -5,7 +5,7 @@
 if(typeof S==='undefined')return;
 const W=320,H=120,GROUND=100,RX=72;                 // RX = runner's front edge on screen
 const BW=12,PLANK=10;                                // runner body width, bridge plank width
-const GRAV=900,JV=-235,HOP=92;                        // jump strength, minimum forward speed of a jump
+const GRAV=800,JV=-260,HOP=110;                        // jump strength, minimum forward speed of a jump
 const SPEEDS=[.6,.8,1,1.25,1.5],SPD_NAME=['Slowest','Slow','Normal','Fast','Fastest'];
 const LV=[
  {name:'F and J',     keys:'fj',        n:9,  words:0,  v:62},
@@ -45,6 +45,10 @@ function trim(src){const c=document.createElement('canvas');c.width=src.width;c.
  const o=document.createElement('canvas');o.width=x1-x0+1;o.height=y1-y0+1;o.getContext('2d').drawImage(c,-x0,-y0);return o}
 function flash(src,col){const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const g=c.getContext('2d');g.drawImage(src,0,0);g.globalCompositeOperation='source-in';g.fillStyle=col;g.fillRect(0,0,c.width,c.height);return c}
 
+/* ---------- plug-in hooks (add-on files: runner-boss.js, runner-paths.js, runner-goals.js) ---------- */
+const HK={build:[],key:[],update:[],drawWorld:[],drawTop:[],results:[],startModal:[]},SEG={};
+const runHooks=(n,...a)=>{let r=false;for(const f of HK[n]){try{if(f(...a))r=true}catch(e){console.error('[runner hook '+n+']',e)}}return r};
+const collect=(n,...a)=>HK[n].map(f=>{try{return f(...a)||''}catch(e){console.error(e);return ''}}).join('');
 /* ---------- state ---------- */
 let R=null,HERO=null,HERO_W=null,cvs=null,g=null,raf=0,last=0,scale=3;
 const opt={lv:Math.min(store.get('lv',0),LV.length-1),hard:false,spd:store.get('spd',2)};
@@ -58,15 +62,16 @@ function build(){
   if(words.length&&i>1&&Math.random()<L.words&&obs.length&&obs[obs.length-1].t!=='gap'){const w=pick(words);obs.push({t:'gap',x,word:w,typed:0,w:w.length*PLANK+4});x+=w.length*PLANK+4}
   else{let k=pick([...L.keys]);if(L.caps&&/[a-z]/.test(k)&&Math.random()<L.caps)k=k.toUpperCase();const sp=OBS[Math.floor(Math.random()*OBS.length)];obs.push({t:'rock',x,key:k,sp,w:sp.width-2,h:sp.height-1})}
   const gap=Math.max(jump+(L.hard?26:44),v*(L.hard?rnd(.85,1.3):rnd(1.6,2.3)));
-  if(Math.random()<.55)for(let j=0;j<3;j++)gems.push({x:x+gap*.45+j*9,y:GROUND-26-[0,5,0][j],got:0});
+  const lo=obs[obs.length-1];if(lo.t==='rock')[-11,0,11].forEach((dx,j)=>gems.push({x:lo.x+lo.w/2+dx,y:GROUND-[32,40,32][j],got:0}));   // gems ride the jump arc: a well-timed jump grabs them
   x+=gap}
  const bossX=x+80;
  const seq=L.hard?[pick(words),pick(words),pick(words)].join(' '):Array.from({length:8+opt.lv*2},()=>pick([...L.keys])).join('');
  const sp=Math.floor(Math.random()*Math.min(40,SPECIES.length)),vk=pick(typeof BADKEYS!=='undefined'?BADKEYS:['inkblob']);
  let VIL=null,KEY=null;try{VIL=vilCanvas(vk,L.hard)}catch(e){}try{KEY=trim(evolvedV(sp,0,null,(S.kv&&S.kv[sp])||{}))}catch(e){}
- return {L,v,obs,gems,bossX,seq,pos:0,sp,vname:(typeof SCR2!=='undefined'&&SCR2.names[vk])||'Scrambler',VIL,VILF:VIL&&flash(VIL,'#ffffff'),KEY,
+ const RR={L,v,obs,gems,bossX,seq,pos:0,sp,vname:(typeof SCR2!=='undefined'&&SCR2.names[vk])||'Scrambler',VIL,VILF:VIL&&flash(VIL,'#ffffff'),KEY,
   front:RX,cam:0,speed:0,y:0,vy:0,air:false,jt:null,stun:0,kb:0,t:0,phase:'ready',hits:0,miss:0,nice:0,bonks:0,gemN:0,streak:0,best:0,
-  parts:[],pops:[],beams:[],shake:0,red:0,hitT:0,laugh:0,free:0,start:0,typed:0}}
+  parts:[],pops:[],beams:[],shake:0,red:0,hitT:0,laugh:0,free:0,start:0,typed:0,jumpScale:1};
+ R=RR;runHooks('build',RR);return RR}
 
 /* ---------- screen ---------- */
 function mount(){
@@ -100,15 +105,17 @@ function hudHTML(){const L=level();
  <div class="rspd" title="Speed"><span>Speed</span>${SPEEDS.map((_,i)=>`<button data-act="runSpd" data-v="${i}" class="${i===opt.spd?'on':i<opt.spd?'lit':''}" aria-label="${SPD_NAME[i]}"></button>`).join('')}</div>
  <div class="stat"><b id="r-acc">100%</b><span>Accuracy</span></div><div class="stat"><b id="r-cmb">0</b><span>Combo</span></div>${typeof soundBtn==='function'?soundBtn():''}`}
 function stripHTML(){
+ if((R.phase==='boss'||R.phase==='free')&&RUNNER.boss&&RUNNER.boss.stripHTML)return RUNNER.boss.stripHTML();
  if(R.phase==='boss'||R.phase==='free')return [...R.seq].map((c,i)=>`<span class="${c===' '?'sp':''} ${i<R.pos?'ok':''}">${c===' '?'·':esc(c)}</span>`).join('');
- const out=[];R.obs.forEach((o,i)=>{if(i)out.push('<span class="sp">·</span>');if(o.t==='gap')[...o.word].forEach(c=>out.push(`<span>${esc(c)}</span>`));else out.push(`<span>${esc(o.key)}</span>`)});return out.join('')}
+ const out=[];R.obs.forEach((o,i)=>{if(i)out.push('<span class="sp">·</span>');stripOf(o).forEach(c=>out.push(`<span>${esc(c)}</span>`))});return out.join('')}
 let stripMap=[];
-function buildStrip(){document.getElementById('rstripIn').innerHTML=stripHTML();stripMap=[];if(R.phase==='boss')return;let k=0;R.obs.forEach((o,i)=>{if(i)k++;if(o.t==='gap'){o.si=k;k+=o.word.length}else{o.si=k;k++}})}
+function buildStrip(){document.getElementById('rstripIn').innerHTML=stripHTML();stripMap=[];if(R.phase==='boss')return;let k=0;R.obs.forEach((o,i)=>{if(i)k++;o.si=k;k+=stripOf(o).length})}
 function updStrip(){
  const sp=document.getElementById('rstripIn').children;if(!sp.length)return;let cur=-1,ch=null;
- if(R.phase==='boss'){cur=R.pos;ch=R.seq[R.pos];for(let i=0;i<sp.length;i++){sp[i].classList.toggle('ok',i<R.pos);sp[i].classList.remove('cur')}}
- else{R.obs.forEach(o=>{if(o.t==='gap'){for(let j=0;j<o.word.length;j++)sp[o.si+j].classList.toggle('ok',j<o.typed)}else sp[o.si].classList.toggle('ok',!!(o.done||o.jt))});
-  const t=target();if(t){cur=t.t==='gap'?t.si+t.typed:t.si;ch=t.t==='gap'?t.word[t.typed]:t.key}
+ if(R.phase==='boss'&&RUNNER.boss&&RUNNER.boss.strip){const b=RUNNER.boss.strip();cur=b.cur;ch=b.ch}
+ else if(R.phase==='boss'){cur=R.pos;ch=R.seq[R.pos];for(let i=0;i<sp.length;i++){sp[i].classList.toggle('ok',i<R.pos);sp[i].classList.remove('cur')}}
+ else{R.obs.forEach(o=>{const n=stripOf(o).length,ty=typedOf(o);for(let j=0;j<n;j++)sp[o.si+j]&&sp[o.si+j].classList.toggle('ok',j<ty)});
+  const t=target();if(t){cur=t.si+Math.min(typedOf(t),stripOf(t).length-1);ch=(wantOf(t)||'')[0]}
   for(let i=0;i<sp.length;i++)sp[i].classList.remove('cur')}
  if(cur>=0&&sp[cur]){const el=sp[cur];el.classList.add('cur');el.style.setProperty('--fc',fc(ch));const w=document.getElementById('rstrip').clientWidth;document.getElementById('rstripIn').style.transform=`translateX(${w/2-(el.offsetLeft+el.offsetWidth/2)}px)`}
  if(ch!=null&&ch!==' '){try{setTarget(ch);document.getElementById('rhint').innerHTML=fingerHTML(ch)}catch(e){}}else if(ch===' '){try{setTarget(' ');document.getElementById('rhint').innerHTML=fingerHTML(' ')}catch(e){}}
@@ -126,7 +133,8 @@ function startModal(){const L=level();
  const keys=[...new Set(L.keys)].slice(0,12).map(k=>`<span class="chip" style="--fc:${fc(k)}">${esc(k)}</span>`).join('');
  modal(`<div data-runner="start"><h2>Keyloria Run</h2><p style="margin:0 0 6px">Type the letter to jump!</p>
  <div class="rkeys">${keys}${L.keys.length>12?'<span class="chip">…</span>':''}</div>
- <div class="rpick">${LV.map((l,i)=>`<button class="btn sm alt ${!opt.hard&&i===opt.lv?'on':''}" data-act="runLv" data-v="${i}" title="${l.name}">${i+1}</button>`).join('')}<button class="btn sm hard ${opt.hard?'on':''}" data-act="runHard">Super hard</button></div>
+ <div class="rpick">${LV.map((l,i)=>`<button class="btn sm alt ${!opt.hard&&i===opt.lv?'on':''}" data-act="runLv" data-v="${i}" title="${l.name}" ${RUNNER.locked(i)?'disabled style="opacity:.45"':''}>${RUNNER.label(i)}</button>`).join('')}<button class="btn sm hard ${opt.hard?'on':''}" data-act="runHard" ${RUNNER.locked('hard')?'disabled style="opacity:.45"':''}>${RUNNER.label('hard')}</button></div>
+ ${collect('startModal')}
  <div class="rbtns"><button class="btn big" data-act="runGo">Go! (SPACE)</button></div></div>`)}
 function go(){closeModal();if(R.paused){R.phase=R.paused;R.paused=null}else if(R.phase==='ready'){R.phase='run';R.start=performance.now()}snd(523,.08,'square',.05)}
 function results(){
@@ -138,33 +146,47 @@ function results(){
  <div class="rfree">${creatureSVG(R.sp,0,'px')}<div class="bubble" style="position:static;opacity:1;transform:none">Yay, you saved me!</div></div>
  <p class="note" style="margin:0">${tip}</p>
  <div class="rstats"><div><b>${stars} ★</b><span>Stars</span></div><div><b>${acc}%</b><span>Accuracy</span></div><div><b>${wpm}</b><span>WPM</span></div><div><b>${R.nice}</b><span>Nice jumps</span></div><div><b>${R.gemN}</b><span>Diamonds</span></div></div>
- <div class="rbtns">${!opt.hard&&opt.lv+1<LV.length?`<button class="btn" data-act="runNext">Next ▸</button>`:''}<button class="btn ${opt.hard||opt.lv+1>=LV.length?'':'alt'}" data-act="runAgain">Play again</button><button class="btn alt" data-act="runMenu">Levels</button></div></div>`);
+ ${collect('results',{stars,acc,wpm,nice:R.nice,gems:R.gemN,bonks:R.bonks,best:R.best,lv:opt.lv,hard:opt.hard,R})}
+ <div class="rbtns">${!opt.hard&&opt.lv+1<LV.length&&!RUNNER.locked(opt.lv+1)?`<button class="btn" data-act="runNext">Next ▸</button>`:''}<button class="btn ${opt.hard||opt.lv+1>=LV.length?'':'alt'}" data-act="runAgain">Play again</button><button class="btn alt" data-act="runMenu">Levels</button></div></div>`);
  try{sfx.win()}catch(e){}
 }
 Object.assign(ACT,{
  runGo:()=>go(),
- runLv:d=>{opt.lv=+d.v;opt.hard=false;store.set('lv',opt.lv);newRun();startModal()},
- runHard:()=>{opt.hard=!opt.hard;newRun();startModal()},
+ runLv:d=>{if(RUNNER.locked(+d.v))return;opt.lv=+d.v;opt.hard=false;store.set('lv',opt.lv);newRun();startModal()},
+ runHard:()=>{if(RUNNER.locked('hard'))return;opt.hard=!opt.hard;newRun();startModal()},
  runSpd:d=>{opt.spd=+d.v;store.set('spd',opt.spd);const was=R.phase;const k=SPEEDS[opt.spd];R.v=R.L.v*k;document.getElementById('rhud').innerHTML=hudHTML();updStrip();if(document.activeElement)document.activeElement.blur();R.phase=was},
  runNext:()=>{opt.lv=Math.min(LV.length-1,opt.lv+1);store.set('lv',opt.lv);newRun();startModal()},
  runAgain:()=>{newRun();go()},
  runMenu:()=>{newRun();startModal()},
 });
-window.RUNNER={open,get R(){return R},opt};
+window.RUNNER={open,get R(){return R},opt,HK,SEG,boss:null,
+ locked:i=>false,label:i=>i==='hard'?'Super hard':String(i+1),
+ C:{W,H,GROUND,RX,BW,PLANK,GRAV,JV,HOP,SPEEDS},LV,HARD,level,
+ get g(){return g},get HERO(){return HERO},
+ txt:(...a)=>txt(...a),PX,cap:(...a)=>cap(...a),fc,snd,rnd,pick,pool,store,flash,trim,
+ burst:(...a)=>burst(...a),popTxt:(...a)=>popTxt(...a),miss:()=>miss(),jump:o=>jump(o),
+ target:()=>target(),updStrip:()=>updStrip(),buildStrip:()=>buildStrip(),
+ win:()=>{R.phase='free';R.free=0},heroY:()=>height()};
 
 /* ---------- rules ---------- */
-const target=()=>R.obs.find(o=>o.t==='gap'?o.typed<o.word.length:!o.done&&!o.jt);
+const isDone=o=>o.t==='gap'?o.typed>=o.word.length:o.t==='rock'?(o.done||o.jt):(SEG[o.t]?SEG[o.t].done(o):true);
+const wantOf=o=>o.t==='gap'?o.word[o.typed]:o.t==='rock'?o.key:(SEG[o.t]?SEG[o.t].want(o):'');
+const stripOf=o=>o.t==='gap'?[...o.word]:o.t==='rock'?[o.key]:(SEG[o.t]?SEG[o.t].strip(o):[]);
+const typedOf=o=>o.t==='gap'?o.typed:o.t==='rock'?((o.done||o.jt)?1:0):(SEG[o.t]?SEG[o.t].typed(o):0);
+const target=()=>R.obs.find(o=>!isDone(o));
 const height=()=>-R.y;
 function burst(x,y,col,n,sp=50){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=rnd(sp*.3,sp);R.parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:rnd(.25,.5),c:col})}}
 function popTxt(s,x,y,col){R.pops.push({s,x,y,col,l:.8})}
 function miss(){R.miss++;R.streak=0;R.red=.15;try{sfx.bad()}catch(e){snd(170,.18,'sine',.14)}}
 function jump(o){
- R.air=true;R.vy=JV;R.jt=o;o.jt=true;R.jumpV=Math.max(R.speed,HOP);
+ R.air=true;R.vy=JV*(R.jumpScale||1);R.jt=o;o.jt=true;R.jumpV=Math.max(R.speed,HOP);
  // was it timed well? (would this jump clear it without slowing down)
  const d=o.x-R.front,v=Math.max(R.speed,HOP),tA=d/v,tB=(d+BW+o.w)/v,yA=-JV*tA-GRAV/2*tA*tA,yB=-JV*tB-GRAV/2*tB*tB;
- o.nice=d>0&&yA>=o.h&&yB>=o.h&&R.speed>R.v*.7;
+ o.nice=d>0&&yA>=o.h&&yB>=o.h;
  snd(330,.12,'square',.05);snd(620,.1,'square',.04,.05);burst(R.front-BW/2-R.cam,GROUND,'#e8dcc0',4,25)}
 function key(e){
+ if(runHooks('key',e))return;
+ if(R.phase==='boss'&&RUNNER.boss){RUNNER.boss.key(e);updStrip();return}
  if(R.phase==='boss'){const want=R.seq[R.pos];
   if(e.key===want||(want&&want===want.toLowerCase()&&e.key===want.toUpperCase()&&!e.shiftKey)){R.pos++;R.hits++;R.typed++;R.streak++;R.best=Math.max(R.best,R.streak);
    if(want!==' '){const big=R.streak>0&&R.streak%5===0;R.beams.push({c:fc(want),l:big?.22:.12,big});R.hitT=.12;burst(R.bossX-R.cam+4,GROUND-14,fc(want),big?14:6,big?80:50);R.shake=big?3:1;try{sfx.ok(R.streak)}catch(e){}}
@@ -174,9 +196,10 @@ function key(e){
  if(R.phase!=='run')return;
  const t=target();if(!t)return;
  if(t.x-R.cam>W+4){return}                                   // not on screen yet
- const want=t.t==='gap'?t.word[t.typed]:t.key,ok=e.key===want||(want===want.toLowerCase()&&e.key===want.toUpperCase()&&!e.shiftKey&&e.getModifierState&&e.getModifierState('CapsLock'));
+ const want=wantOf(t)||'',caps=e.getModifierState&&e.getModifierState('CapsLock')&&!e.shiftKey,kk=caps?e.key.toLowerCase():e.key,ok=[...want].includes(kk);
  if(!ok){if(R.air&&R.jt&&e.key===R.jt.key)return;miss();updStrip();return}
  R.hits++;R.typed++;R.streak++;R.best=Math.max(R.best,R.streak);
+ if(SEG[t.t]){SEG[t.t].key(t,kk);updStrip();return}
  if(t.t==='gap'){t.typed++;snd(440+t.typed*50,.06,'square',.05);burst(t.x+t.typed*PLANK-R.cam,GROUND+2,'#d0ac78',4,30);if(t.typed===t.word.length){popTxt('BRIDGE!',t.x+t.w/2,GROUND-34,'#f0c860');try{sfx.super()}catch(e){}}}
  else{if(R.air){R.hits--;R.typed--;R.streak--;return}jump(t)}
  updStrip()}
@@ -190,8 +213,11 @@ function update(dt){
  R.t+=dt;R.shake=Math.max(0,R.shake-dt*20);R.red=Math.max(0,R.red-dt);R.hitT=Math.max(0,R.hitT-dt);R.laugh=Math.max(0,R.laugh-dt);
  R.parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.9;p.vy*=.9;p.l-=dt});R.parts=R.parts.filter(p=>p.l>0);
  R.pops.forEach(p=>{p.y-=18*dt;p.l-=dt});R.pops=R.pops.filter(p=>p.l>0);R.beams.forEach(b=>b.l-=dt);R.beams=R.beams.filter(b=>b.l>0);
+ if(R.phase==='boss'&&RUNNER.boss){RUNNER.boss.update(dt);return}
  if(R.phase==='free'){R.free+=dt;if(R.free>1.8&&!R.shown){R.shown=1;results()}return}
  if(R.phase!=='run')return;
+ R.obs.forEach(o=>{if(SEG[o.t]&&SEG[o.t].update)SEG[o.t].update(o,dt)});
+ if(runHooks('update',dt))return;
  // speed
  let want=R.v*(1+Math.min(R.streak,10)*.025);
  if(R.stun>0){R.stun-=dt;want=0}
@@ -199,8 +225,9 @@ function update(dt){
   // never fall into a gap: stop at the end of the bridge
   const gp=R.obs.find(o=>o.t==='gap'&&o.typed<o.word.length&&o.x+o.w>R.front-BW);
   if(gp){const edge=gp.x+2+gp.typed*PLANK,d=edge-R.front;if(d<40)want=Math.min(want,Math.sqrt(2*900*Math.max(0,d)))}
+  R.obs.forEach(o=>{if(SEG[o.t]&&SEG[o.t].block){const bx=SEG[o.t].block(o);if(bx!=null){const d=bx-R.front;if(d<40)want=Math.min(want,Math.sqrt(2*1200*Math.max(0,d)))}}});
   // easy modes: skid to a stop in front of a rock instead of bumping it
-  if(!R.L.hard){const rk=R.obs.find(o=>o.t==='rock'&&!o.done&&o.x+o.w>R.front-BW);if(rk&&!rk.jt){const d=rk.x-10-R.front;if(d<26)want=Math.min(want,Math.sqrt(2*700*Math.max(0,d)))}}
+  if(!R.L.hard){const rk=R.obs.find(o=>o.t==='rock'&&!o.done&&o.x+o.w>R.front-BW);if(rk&&!rk.jt){const d=rk.x-10-R.front;if(d<16)want=Math.min(want,Math.sqrt(2*1400*Math.max(0,d)))}}
   R.speed+=(want-R.speed)*Math.min(1,dt*(want<R.speed?30:3));if(want<R.speed)R.speed=want;
  }
  const vx=R.air?R.jumpV:R.speed+R.kb;R.kb*=.85;if(Math.abs(R.kb)<2)R.kb=0;
@@ -213,9 +240,9 @@ function update(dt){
   if(R.front>o.x+1&&back<o.x+o.w-1&&height()<o.h-2){bonk(o);break}
   break}
  // gems
- R.gems.forEach(gm=>{if(!gm.got&&gm.x>R.front-BW-4&&gm.x<R.front+2&&Math.abs((GROUND-12-height())-gm.y)<14){gm.got=1;R.gemN++;snd(1175,.06,'square',.04);burst(gm.x-R.cam,gm.y,'#8ff0ff',5,40)}});
+ R.gems.forEach(gm=>{if(!gm.got&&gm.x>R.front-BW-4&&gm.x<R.front+2&&(GROUND-gm.y)>=height()-6&&(GROUND-gm.y)<=height()+24){gm.got=1;R.gemN++;snd(1175,.06,'square',.04);burst(gm.x-R.cam,gm.y,'#8ff0ff',5,40)}});
  // reach the Scrambler
- if(R.front>=R.bossX-46){R.front=R.bossX-46;R.cam=R.front-RX;R.speed=0;R.phase='boss';R.pos=0;R.streak=0;buildStrip();updStrip();try{speak('Free '+SPECIES[R.sp].n[0]+'!')}catch(e){}}
+ if(R.front>=R.bossX-46){R.front=R.bossX-46;R.cam=R.front-RX;R.speed=0;R.phase='boss';R.pos=0;R.streak=0;buildStrip();updStrip();try{speak('Free '+SPECIES[R.sp].n[0]+'!')}catch(e){}if(RUNNER.boss){RUNNER.boss.start(R);buildStrip();updStrip()}}
 }
 
 /* ---------- draw ---------- */
@@ -241,12 +268,15 @@ function draw(){
   if(o.t==='gap'){g.fillStyle='#0b1033';g.fillRect(x,GROUND,o.w,H-GROUND);g.fillStyle='#1a2156';g.fillRect(x,GROUND,o.w,1);g.fillStyle='#4f7f48';g.fillRect(x-1,GROUND,1,H-GROUND);g.fillRect(x+o.w,GROUND,1,H-GROUND);
    for(let i=0;i<o.typed;i++){const px=x+2+i*PLANK;g.fillStyle='#2a1a12';g.fillRect(px,GROUND,PLANK,5);g.fillStyle='#b48c5c';g.fillRect(px,GROUND,PLANK-1,4);g.fillStyle='#e8c088';g.fillRect(px,GROUND,PLANK-1,1);g.fillStyle='#8a5a34';g.fillRect(px+2,GROUND+2,1,1);g.fillRect(px+6,GROUND+2,1,1)}
    const cx=x+o.w/2,act=o===t;[...o.word].forEach((c,i)=>{const kx=Math.round(cx+(i-(o.word.length-1)/2)*12-6);cap(c,kx,GROUND-30-(act&&i===o.typed?(Math.floor(R.t*6)%2):0),i<o.typed?2:act&&i===o.typed?1:0)});
-  }else if(!o.done||x>RX-60){g.drawImage(o.sp,x-1,GROUND-o.sp.height+1);if(!o.done&&!o.jt)cap(o.key,Math.round(x+o.w/2-6),GROUND-o.sp.height-16-(o===t?(Math.floor(R.t*6)%2):0),o===t?1:0)}}
+  }else if(SEG[o.t]){SEG[o.t].draw(o,g,cam,o===t)}
+  else if(!o.done||x>RX-60){g.drawImage(o.sp,x-1,GROUND-o.sp.height+1);if(!o.done&&!o.jt)cap(o.key,Math.round(x+o.w/2-6),GROUND-o.sp.height-16-(o===t?(Math.floor(R.t*6)%2):0),o===t?1:0)}}
  // gems
  R.gems.forEach(gm=>{if(gm.got)return;const x=gm.x-cam;if(x<-8||x>W+8)return;g.drawImage(GEM,x-3,gm.y-2+(Math.floor(R.t*3+gm.x)%2))});
+ runHooks('drawWorld',g,cam);
  // Scrambler + cage
  const bx=R.bossX-cam;
- if(bx<W+50){
+ if(RUNNER.boss&&RUNNER.boss.draw&&R.phase!=='free'){RUNNER.boss.draw(g,cam)}
+ else if(bx<W+50){
   if(R.phase!=='free'){
    // cage with Keylori
    const cx=bx+20,kw=R.KEY?R.KEY.width:24,kh=R.KEY?R.KEY.height:24,cw=kw+6,ch=kh+5;
@@ -268,14 +298,16 @@ function draw(){
  // particles
  R.parts.forEach(p=>{g.fillStyle=p.c;const s=p.l>.2?2:1;g.fillRect(Math.round(p.x),Math.round(p.y),s,s)});
  R.pops.forEach(p=>txt(g,p.s,p.x-cam,p.y,p.col,1,'c'));
+ runHooks('drawTop',g,cam);
  g.setTransform(1,0,0,1,0,0);
  if(R.red){g.globalAlpha=Math.min(.35,R.red*2);g.fillStyle='#ff6b7a';g.fillRect(0,0,W,H);g.globalAlpha=1}
  // top bar: progress or Scrambler meter
- if(R.phase==='boss'||R.phase==='free'){const left=1-R.pos/R.seq.length;txt(g,R.vname,W-6,4,'#ffffff',1,'r');g.fillStyle='#0b1033';g.fillRect(W-88,15,82,6);g.fillStyle='#3a2050';g.fillRect(W-87,16,80,4);g.fillStyle='#ff6b7a';g.fillRect(W-87,16,Math.round(80*left),4);
+ if(RUNNER.boss&&RUNNER.boss.drawHud&&(R.phase==='boss'||R.phase==='free')){RUNNER.boss.drawHud(g)}
+ else if(R.phase==='boss'||R.phase==='free'){const left=1-R.pos/R.seq.length;txt(g,R.vname,W-6,4,'#ffffff',1,'r');g.fillStyle='#0b1033';g.fillRect(W-88,15,82,6);g.fillStyle='#3a2050';g.fillRect(W-87,16,80,4);g.fillStyle='#ff6b7a';g.fillRect(W-87,16,Math.round(80*left),4);
   txt(g,'FREE '+SPECIES[R.sp].n[0].toUpperCase()+'!',6,4,'#f0c860')}
  else{const p=Math.max(0,Math.min(1,(R.front-RX)/(R.bossX-46-RX)));g.fillStyle='#0b1033';g.fillRect(6,5,W-12,5);g.fillStyle='#1a2156';g.fillRect(7,6,W-14,3);g.fillStyle='#f0c860';g.fillRect(7,6,Math.round((W-14)*p),3);
   g.drawImage(GEM,W-40,13);txt(g,'x'+R.gemN,W-32,12,'#8ff0ff');}
- if(R.phase==='run'&&R.stun<=0&&R.speed<3&&!R.air&&t){const ch=t.t==='gap'?t.word[t.typed]:t.key;if(Math.floor(R.t*2)%2===0)txt(g,ch,RX-BW/2,GROUND-50,fc(ch),2,'c')}
+ if(R.phase==='run'&&R.stun<=0&&R.speed<3&&!R.air&&t&&wantOf(t)){const ch=wantOf(t)[0];if(Math.floor(R.t*2)%2===0)txt(g,ch,RX-BW/2,GROUND-50,fc(ch),2,'c')}
 }
 function cap(ch,x,y,st){ // st 0 waiting · 1 next · 2 done
  const col=st===1?fc(ch):st===2?'#2a3270':'#e8ecff';g.fillStyle='#0b1033';g.fillRect(x-1,y-1,14,15);g.fillStyle=col;g.fillRect(x,y,12,13);g.fillStyle=st===1?'#ffffff':st===2?'#1a2156':'#ffffff';g.fillRect(x,y,12,1);
