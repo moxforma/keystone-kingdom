@@ -94,7 +94,7 @@ function record(i,s,info,x){
  }else{S.runf=S.runf||{};S.runf[fkey(i,s)]=fails(i,s)+1}
  gems+=info.gems|0;out.gems=gems;
  S.xp+=out.xp;S.gems+=gems;
- try{S.hist.push({t:Date.now(),w:info.wpm,a:info.acc});if(S.hist.length>80)S.hist.shift()}catch(e){}
+ /* runner parts don't count toward WPM history (owner's rule: runs shouldn't affect WPM) */
  const newL=levelOf(S.xp);out.lvl=newL>oldL?newL:0;
  try{save()}catch(e){console.error(e)}
  return out}
@@ -273,6 +273,7 @@ function artURL(hero){if(ART&&!hero)return ART;
 function starTotal(){try{const o=RU.store.get('stars',{});return Object.values(o||{}).reduce((a,v)=>a+Math.max(0,Math.min(3,+v||0)),0)}catch(e){return 0}}
 const _ra=renderArcade;
 renderArcade=function(){const r=_ra.apply(this,arguments);try{
+ return r;   /* Keyloria Run lives in the main adventure now, not the Arcade */
  const g=document.querySelector('#s-arcade .games');if(!g||g.querySelector('[data-act=runFree]')||mobile())return r;
  const card=document.createElement('div');card.className='game panel rungame';
  card.innerHTML=`<div class="gart zart"><div class="zimg" style="background-image:url(${artURL()})"></div></div><h3>Keyloria Run</h3><p>Run, jump and free the caged Keylori!</p><div class="arcade-stats"><div class="arcade-stat"><b>${starTotal()}</b><span>Stars (of 21)</span></div><div class="arcade-stat"><b>${[0,1,2,3,4,5].filter(i=>!RU.locked(i)).length}</b><span>Levels open</span></div></div><button class="btn" data-act="runFree">Play</button>`;

@@ -75,7 +75,7 @@ function build(){
  const sp=Math.floor(Math.random()*Math.min(40,SPECIES.length)),vk=pick(typeof BADKEYS!=='undefined'?BADKEYS:['inkblob']);
  let VIL=null,KEY=null;try{VIL=vilCanvas(vk,L.hard)}catch(e){}try{KEY=trim(evolvedV(sp,0,null,(S.kv&&S.kv[sp])||{}))}catch(e){}
  const RR={L,v,obs,gems,bossX,seq,pos:0,sp,vname:(typeof SCR2!=='undefined'&&SCR2.names[vk])||'Scrambler',VIL,VILF:VIL&&flash(VIL,'#ffffff'),KEY,
-  front:RX,cam:0,speed:0,y:0,vy:0,air:false,jt:null,stun:0,kb:0,t:0,phase:'ready',hits:0,miss:0,nice:0,bonks:0,gemN:0,streak:0,best:0,
+  front:RX,cam:0,speed:0,y:0,vy:0,air:false,jt:null,stun:0,kb:0,t:0,phase:'ready',hits:0,miss:0,nice:0,bonks:0,falls:0,fall:null,blink:0,gemN:0,streak:0,best:0,
   parts:[],pops:[],beams:[],shake:0,red:0,hitT:0,laugh:0,free:0,start:0,typed:0,jumpScale:1};
  R=RR;runHooks('build',RR);return RR}
 
@@ -155,8 +155,8 @@ function results(){
  if(custom&&custom.adjust){try{const a=custom.adjust({stars,acc,wpm,R})||{};if(a.stars!=null)stars=a.stars;if(a.acc!=null)acc=a.acc;if(a.wpm!=null)wpm=a.wpm}catch(e){console.error('[runner custom adjust]',e)}}   // adjust(info) may override stars/acc/wpm (hybrid Boss Test: combined with the classic part)
  const name=SPECIES[R.sp].n[0];const st=[1,2,3].map(k=>ICON.star.replace('<svg',`<svg class="${k<=stars?'on':''}"`)).join('');
  if(!custom&&!opt.hard&&stars>0&&opt.lv+1<LV.length)store.set('unl',Math.max(store.get('unl',1),opt.lv+2));
- const tip=R.bonks?'Press the letter just before you reach it!':pick(['Keep your eyes on the screen, not your hands!','Sit up tall and relax your shoulders!','Slow is OK! Getting it right comes first.']);
- const info={stars,acc,wpm,nice:R.nice,gems:R.gemN,bonks:R.bonks,best:R.best,lv:opt.lv,hard:opt.hard,R};
+ const tip=(R.bonks||R.falls)?'Press the letter just before you reach it!':pick(['Keep your eyes on the screen, not your hands!','Sit up tall and relax your shoulders!','Slow is OK! Getting it right comes first.']);
+ const info={stars,acc,wpm,nice:R.nice,gems:R.gemN,bonks:R.bonks,falls:R.falls,best:R.best,lv:opt.lv,hard:opt.hard,R};
  let cx=null;if(custom&&custom.results){try{cx=custom.results(info)}catch(e){console.error('[runner custom results]',e)}}cx=cx||{};
  const ok=!custom||stars>0;
  modal(`<div data-runner="done"><h2>${cx.head||(ok?'You saved '+esc(name)+'!':'So close!')}</h2><div class="bigstars">${st}</div>
@@ -212,6 +212,7 @@ function key(e){
   }else{miss();R.laugh=.4}
   updStrip();return}
  if(R.phase!=='run')return;
+ if(R.fall)return;                                          // falling / respawning: keys are ignored (not misses)
  const t=target();if(!t)return;
  if(t.x-R.cam>W+4){return}                                   // not on screen yet
  const want=wantOf(t)||'',caps=e.getModifierState&&e.getModifierState('CapsLock')&&!e.shiftKey,kk=caps?e.key.toLowerCase():e.key,ok=[...want].includes(kk);
@@ -227,6 +228,14 @@ function bonk(o){
  if(R.jt){R.jt.jt=false;R.jt=null}
  popTxt('BONK!',o.x+o.w/2,GROUND-30,'#ff6b7a');snd(120,.15,'square',.07);burst(o.x-R.cam,GROUND-8,'#ffffff',6,40);updStrip()}
 
+function fall(gp){
+ R.fall={t:0,gp};R.falls++;R.streak=0;R.speed=0;R.kb=0;R.stun=0;R.shake=2;
+ popTxt('WHOOPS!',R.front-BW/2,GROUND-34,'#ff6b7a');
+ for(let i=0;i<8;i++)snd(1000-i*100,.07,'sine',.06,i*.05);
+ burst(R.front-BW/2-R.cam,GROUND,'#e8dcc0',5,30);updStrip()}
+function respawn(){
+ const gp=R.fall.gp;R.fall=null;R.front=gp.x-14;R.cam=R.front-RX;R.speed=0;R.blink=.5;
+ burst(R.front-BW/2-R.cam,GROUND-8,'#ffffff',8,40);snd(660,.06,'square',.04);snd(880,.08,'square',.04,.06);updStrip()}
 function update(dt){
  R.t+=dt;R.shake=Math.max(0,R.shake-dt*20);R.red=Math.max(0,R.red-dt);R.hitT=Math.max(0,R.hitT-dt);R.laugh=Math.max(0,R.laugh-dt);
  R.parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.9;p.vy*=.9;p.l-=dt});R.parts=R.parts.filter(p=>p.l>0);
@@ -235,14 +244,17 @@ function update(dt){
  if(R.phase==='free'){R.free+=dt;if(R.free>1.8&&!R.shown){R.shown=1;results()}return}
  if(R.phase!=='run')return;
  R.obs.forEach(o=>{if(SEG[o.t]&&SEG[o.t].update)SEG[o.t].update(o,dt)});
+ R.blink=Math.max(0,R.blink-dt);
+ if(R.fall){const f=R.fall;f.t+=dt;R.speed=0;R.stun=0;if(f.t>=.8)respawn();return}
  if(runHooks('update',dt))return;
  // speed
  let want=R.v*(1+Math.min(R.streak,10)*.025);
  if(R.stun>0){R.stun-=dt;want=0}
  if(!R.air){
-  // never fall into a gap: stop at the end of the bridge
+  // unfinished bridge: gentle levels slow down near the end of the planks (never fully stop); later levels barely or not at all
   const gp=R.obs.find(o=>o.t==='gap'&&o.typed<o.word.length&&o.x+o.w>R.front-BW);
-  if(gp){const edge=gp.x+2+gp.typed*PLANK,d=edge-R.front;if(d<40)want=Math.min(want,Math.sqrt(2*900*Math.max(0,d)))}
+  if(gp&&!R.L.hard){const edge=gp.x+2+gp.typed*PLANK,d=edge-R.front,easy=R.L.tier!=null?R.L.tier<=1:opt.lv<=2,zone=easy?60:40,lo=easy?.4:.85;
+   if(d<zone)want*=lo+(1-lo)*Math.max(0,d)/zone}
   R.obs.forEach(o=>{if(SEG[o.t]&&SEG[o.t].block){const bx=SEG[o.t].block(o);if(bx!=null){const d=bx-R.front;if(d<40)want=Math.min(want,Math.sqrt(2*1200*Math.max(0,d)))}}});
   // easy modes: skid to a stop in front of a rock instead of bumping it
   if(!R.L.hard){const rk=R.obs.find(o=>o.t==='rock'&&!o.done&&o.x+o.w>R.front-BW);if(rk&&!rk.jt){const d=rk.x-10-R.front;if(d<16)want=Math.min(want,Math.sqrt(2*1400*Math.max(0,d)))}}
@@ -252,6 +264,8 @@ function update(dt){
  R.front+=vx*dt;R.cam=R.front-RX;
  if(R.air){R.vy+=GRAV*dt;R.y+=R.vy*dt;if(R.y>=0){R.y=0;R.vy=0;R.air=false;snd(110,.05,'triangle',.08);
    const o=R.jt;R.jt=null;if(o&&!o.done){o.jt=false;popTxt('TOO SOON',o.x+o.w/2,GROUND-30,'#b8c0e8');updStrip()}}}
+ // run off the end of the built planks: fall into the hole
+ if(!R.air){const gp=R.obs.find(o=>o.t==='gap'&&o.typed<o.word.length&&o.x+o.w>R.front-BW);if(gp&&R.front-BW/2>gp.x+2+gp.typed*PLANK){fall(gp);return}}
  // obstacles: clear or bonk
  for(const o of R.obs){if(o.t!=='rock'||o.done)continue;const back=R.front-BW;
   if(back>o.x+o.w){o.done=true;if(o.nice){R.nice++;R.gemN++;popTxt('NICE!',o.x+o.w/2,GROUND-34,'#4de08a');snd(988,.05,'square',.04);snd(1319,.08,'square',.04,.05)}updStrip();continue}
@@ -495,8 +509,8 @@ function draw(){
   }}
  // hero
  if(HERO){const hw=HERO.width,hh=HERO.height,step=R.phase==='run'&&!R.air&&R.speed>8?(Math.floor(R.t*10)%2):0,stun=R.stun>0?(Math.floor(R.t*30)%2):0;
-  const hx=Math.round(RX-BW/2-hw/2)+stun,hy=Math.round(GROUND-hh-height())-step;g.drawImage(R.stun>0&&stun?HERO_W:HERO,hx,hy)}
- else{g.fillStyle='#f0c860';g.fillRect(RX-BW,GROUND-20-Math.round(height()),BW,20)}
+  const hx=Math.round(RX-BW/2-hw/2)+stun,hy=Math.round(GROUND-hh-height())-step+(R.fall?Math.round(260*R.fall.t*R.fall.t):0);if(!(R.blink>0&&Math.floor(R.t*20)%2)&&hy<H)g.drawImage(R.stun>0&&stun?HERO_W:HERO,hx,hy)}
+ else if(!R.fall||R.fall.t<.4){g.fillStyle='#f0c860';g.fillRect(RX-BW,GROUND-20-Math.round(height())+(R.fall?Math.round(260*R.fall.t*R.fall.t):0),BW,20)}
  // lasers (straight, hard-edged)
  R.beams.forEach(b=>{const y=GROUND-16,x0=RX+2,x1=bx;const th=b.big?4:2;g.fillStyle=b.c;g.fillRect(x0,y-th/2,x1-x0,th);g.fillStyle='#ffffff';g.fillRect(x0,y-(b.big?1:0),x1-x0,b.big?2:1)});
  // particles
@@ -511,7 +525,7 @@ function draw(){
   txt(g,'FREE '+SPECIES[R.sp].n[0].toUpperCase()+'!',6,4,'#f0c860')}
  else{const p=Math.max(0,Math.min(1,(R.front-RX)/(R.bossX-46-RX)));g.fillStyle='#0b1033';g.fillRect(6,5,W-12,5);g.fillStyle='#1a2156';g.fillRect(7,6,W-14,3);g.fillStyle='#f0c860';g.fillRect(7,6,Math.round((W-14)*p),3);
   g.drawImage(GEM,W-40,13);txt(g,'x'+R.gemN,W-32,12,'#8ff0ff');}
- if(R.phase==='run'&&R.stun<=0&&R.speed<3&&!R.air&&t&&wantOf(t)){const ch=wantOf(t)[0];if(Math.floor(R.t*2)%2===0)txt(g,ch,RX-BW/2,GROUND-50,fc(ch),2,'c')}
+ if(R.phase==='run'&&R.stun<=0&&!R.fall&&R.speed<3&&!R.air&&t&&wantOf(t)){const ch=wantOf(t)[0];if(Math.floor(R.t*2)%2===0)txt(g,ch,RX-BW/2,GROUND-50,fc(ch),2,'c')}
 }
 function cap(ch,x,y,st){ // st 0 waiting · 1 next · 2 done
  const col=st===1?fc(ch):st===2?'#2a3270':'#e8ecff';g.fillStyle='#0b1033';g.fillRect(x-1,y-1,14,15);g.fillStyle=col;g.fillRect(x,y,12,13);g.fillStyle=st===1?'#ffffff':st===2?'#1a2156':'#ffffff';g.fillRect(x,y,12,1);
