@@ -55,14 +55,14 @@ function forkHook(R,dt){
   const o=R.obs.find(f=>f.t==='fork'&&(f.st==='hi'||f.st==='ledge'));if(!o)return false;
   const px0=o.x+o.p0,px1=px0+o.LW;
   if(o.st==='hi'){
-    const prev=height();R.front+=R.jumpV*dt;R.cam=R.front-RX;R.vy+=GRAV*dt;R.y+=R.vy*dt;const h=height();grabGems(R);
+    const prev=height();R.stun=Math.max(0,R.stun-dt);R.front+=R.jumpV*dt;R.cam=R.front-RX;R.vy+=GRAV*dt;R.y+=R.vy*dt;const h=height();grabGems(R);
     if(R.vy>0&&prev>=LH&&h<=LH&&R.front>px0+3&&R.front-BW<px1-2){          // landed on the ledge
       R.y=-LH;R.vy=0;o.st='ledge';R.jt=null;o.jt=false;R.nice++;
       RUNNER.popTxt('HIGH!',R.front-BW/2,GROUND-LH-34,'#f0c860');RUNNER.snd(784,.06,'square',.05);RUNNER.snd(1047,.1,'square',.05,.06);RUNNER.burst(RX-BW/2,GROUND-LH,'#f0c860',8,40)}
     else if(R.y>=0){                                                       // came down on the ground
       R.y=0;R.vy=0;R.air=false;R.jt=null;o.jt=false;RUNNER.snd(110,.05,'triangle',.08);
-      if(R.front-BW>px1){o.st='done';o.done=true}                          // flew right over it: fine
-      else{o.st='wait';RUNNER.popTxt('TOO SOON',o.x+o.w/2,GROUND-34,'#b8c0e8');if(R.front>o.x-22){R.front=o.x-22;R.cam=R.front-RX}R.speed=0;R.stun=.2}
+      if(R.front-BW>px1||R.front-BW>o.x+o.w+1){o.st='done';o.done=true}   // sailed over the rock (even without reaching the ledge): cleared, no rewind
+      else{o.st='wait';RUNNER.popTxt('TOO SOON',o.x+o.w/2,GROUND-34,'#b8c0e8');if(R.front>o.x-8){R.front=o.x-8;R.cam=R.front-RX}R.speed=0;R.kb=0;R.stun=.2}   // back to a spot where a jump from rest always clears the rock
       RUNNER.updStrip()}
     return true}
   // on the ledge: run along it, collect gems, step off the end

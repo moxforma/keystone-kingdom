@@ -61,12 +61,13 @@ function setCustom(c){if(c){if(!custom)saved={lv:opt.lv,hard:opt.hard};custom=Ob
 
 function build(){
  const L=level(),spd=SPEEDS[opt.spd],v=L.v*spd,air=-2*JV/GRAV,jump=Math.max(v,HOP)*air;
- const words=pool(L.hard?'abcdefghijklmnopqrstuvwxyz':L.keys,3,L.hard?7:5);
+ const words=pool(L.hard?'abcdefghijklmnopqrstuvwxyz':L.keys,L.wmin||3,L.hard?7:(L.wmax||5));   // L.wmin/L.wmax: optional word length range (the lesson bridge raises it in later worlds)
+ const pickWord=()=>{if(L.wfav&&L.favor){const f=words.filter(w=>[...w].some(c=>L.favor.includes(c)));if(f.length&&Math.random()<L.wfav)return pick(f)}return pick(words)};   // L.wfav: optional share of words that use the favoured (new) letters
  const obs=[],gems=[];let x=RX+150;
  for(let i=0;i<L.n;i++){
-  if(words.length&&i>1&&Math.random()<L.words&&obs.length&&obs[obs.length-1].t!=='gap'){const w=pick(words);obs.push({t:'gap',x,word:w,typed:0,w:w.length*PLANK+4});x+=w.length*PLANK+4}
+  if(words.length&&i>1&&Math.random()<L.words&&obs.length&&obs[obs.length-1].t!=='gap'){const w=pickWord();obs.push({t:'gap',x,word:w,typed:0,w:w.length*PLANK+4});x+=w.length*PLANK+4}
   else{let k=pick([...L.keys,...(L.favor||'')]);if(L.caps&&/[a-z]/.test(k)&&Math.random()<L.caps)k=k.toUpperCase();const sp=OBS[Math.floor(Math.random()*OBS.length)];obs.push({t:'rock',x,key:k,sp,w:sp.width-2,h:sp.height-1})}
-  const gap=Math.max(jump+(L.hard?26:44),v*(L.hard?rnd(.85,1.3):rnd(1.6,2.3)));
+  const gap=Math.max(jump+(L.hard?26:44),v*(L.hard?rnd(.85,1.3):rnd(1.6,2.3))*(L.gapMul||1));   // L.gapMul (optional, default 1): tighter spacing in later worlds
   const lo=obs[obs.length-1];if(lo.t==='rock')[-11,0,11].forEach((dx,j)=>gems.push({x:lo.x+lo.w/2+dx,y:GROUND-[32,40,32][j],got:0}));   // gems ride the jump arc: a well-timed jump grabs them
   x+=gap}
  const bossX=x+80;

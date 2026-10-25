@@ -252,4 +252,37 @@ renderArcade=function(){const r=_ra.apply(this,arguments);try{
  const before=[...g.children].find(el=>(el.querySelector('h3')?.textContent||'').trim()==='Race with Keylori');
  before?g.insertBefore(card,before):g.appendChild(card)}catch(e){console.warn(e)}return r};
 try{if(screen==='arcade')renderArcade()}catch(e){}
+
+/* ---------- Lesson Quests: mark the runner lessons ----------
+   A runner lesson gets an orange RUN pill and one "Run" button (with its best stars) in place of the 8 parts; a hybrid Boss Test gets a BOSS RUN pill.
+   Grown-up switch "Runner levels" off, or phone mode: no badges, nothing changes. */
+const RQ_ARROW=(()=>{const rows=[];for(let y=0;y<9;y++){let r='';for(let x=0;x<11;x++){const body=y>=3&&y<=5&&x<5,head=x>=5&&x<=9-Math.abs(y-4);r+=(body||head)?'k':'.'}rows.push(r)}return rows})();
+let RQ_IMG=null;const rqArrow=()=>RQ_IMG||(RQ_IMG=PXG(RQ_ARROW,{k:'#1e1a2a'}).toDataURL());
+(function(){try{const st=document.createElement('style');st.textContent='.rq-pill{display:inline-flex;align-items:center;gap:6px;margin-top:6px;background:#ff9f45;color:#1e1a2a;border:2px solid #1e1a2a;border-radius:4px;padding:3px 7px 3px 4px;font:9px/1 "Press Start 2P",monospace;letter-spacing:.05em;box-shadow:2px 2px 0 #1e1a2a}.rq-pill img{width:22px;height:18px;image-rendering:pixelated;display:block}.rq-stages{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:4px}.rq-stars{color:#f0c860;letter-spacing:2px;font-size:16px}';document.head.appendChild(st)}catch(e){}})();
+/* lessons in the order renderMap draws their cards (region by region, play order) */
+function rqLessons(){const o=window.ORDER&&ORDER.length?ORDER:LESSONS.map((_,k)=>k),out=[];
+ REGIONS.forEach((R,r)=>o.forEach(i=>{if(LESSONS[i]&&LESSONS[i].r===r)out.push(i)}));return out}
+function markQuests(){
+ const root=document.getElementById('s-map');if(!root||!enabled())return;
+ const order=rqLessons();
+ root.querySelectorAll('section.region').forEach(sec=>{
+  const name=((sec.querySelector('.rhead h3')||{}).textContent||'').trim(),r=REGIONS.findIndex(R=>R.name===name);if(r<0)return;
+  const pool=order.filter(i=>LESSONS[i].r===r);   // this region's lessons in play order = its cards in order
+  sec.querySelectorAll('.lesson').forEach(card=>{
+   const t=((card.querySelector('.lt h4')||{}).textContent||'').trim(),k=pool.findIndex(i=>lessonTitle(i)===t);
+   if(k<0)return;   // not recognised: change nothing
+   const i=pool.splice(k,1)[0],run=isRunnerLesson(i),hy=isHybridBossTest(i);
+   if(!run&&!hy)return;
+   const h4=card.querySelector('.lt h4');
+   if(h4){const p=document.createElement('span');p.className='rq-pill';p.innerHTML=`<img src="${rqArrow()}" alt="">${hy?'BOSS RUN':'RUN'}`;h4.insertAdjacentElement('afterend',p)}
+   if(!run)return;
+   const st=card.querySelector('.stages');if(!st)return;
+   const best=Math.min(3,Math.max(0,...Array.from({length:ST},(_,s)=>S.best[i+'-'+s]||0)));
+   st.className='stages rq-stages';
+   st.innerHTML=`<button class="btn" data-act="play" data-n="${i*ST}"${unlocked(i*ST)?'':' disabled'}>Run ▸</button><span class="rq-stars" title="Best stars">${'★'.repeat(best)+'☆'.repeat(3-best)}</span>`;
+  });
+ });
+}
+const _rmQ=renderMap;
+renderMap=function(){const r=kkSafe(_rmQ,this,arguments);try{markQuests()}catch(e){console.warn('[runner-lesson]',e)}return r};
 })();

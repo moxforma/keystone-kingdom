@@ -50,10 +50,12 @@ const apex1=o=>Math.max(30,Math.min(40,o.SH+16));
 const vt=R=>clamp(R.v*.9,50,120);                  // walking speed on top
 function grabGems(R){R.gems.forEach(gm=>{if(!gm.got&&gm.x>R.front-BW-4&&gm.x<R.front+2&&(GROUND-gm.y)>=height()-6&&(GROUND-gm.y)<=height()+24){gm.got=1;R.gemN++;RN.snd(1175,.06,'square',.04);RN.burst(gm.x-R.cam,gm.y,'#8ff0ff',5,40)}})}
 function puff(h){PUFF.push({y:GROUND-ri(h),t:0})}
-function bonkAt(R,o,x){
- R.bonks++;R.streak=0;R.shake=3;R.stun=R.L.hard?.45:.25;R.kb=R.L.hard?-70:0;R.speed=0;R.front=x;R.cam=R.front-RX;
- if(R.air){R.air=false;R.y=0;R.vy=0}if(R.jt){R.jt.jt=false;R.jt=null}
- RN.popTxt('BONK!',o.x+o.w/2,GROUND-o.h-8,'#ff6b7a');RN.snd(120,.15,'square',.07);RN.burst(o.x-R.cam,GROUND-8,'#ffffff',6,40)}
+function wallHit(R,o){   // the tower face is a solid wall: effects only, never moves the hero
+ R.bonks++;R.streak=0;R.shake=3;R.stun=R.L.hard?.45:.25;if(!R.air)R.kb=R.L.hard?-70:0;R.speed=0;
+ if(R.jt){R.jt.jt=false;R.jt=null}
+ RN.popTxt('BONK!',o.x+o.w/2,GROUND-Math.min(o.h,40)-8,'#ff6b7a');RN.snd(120,.15,'square',.07);RN.burst(o.x-R.cam,GROUND-8,'#ffffff',6,40)}
+const ZONE=36;                                  // climb zone: how close to the face the hero must be
+const inZone=(R,o)=>o.x-R.front<=ZONE&&R.front<=o.x+2;
 
 /* ---------- boost / start ---------- */
 function boost(R,o,first){
@@ -87,13 +89,17 @@ SEG.tall={
  strip:o=>o.letters,
  typed:o=>o.k,
  key(o,ch){const R=rr();
-  if(o.st==='wait'||o.st==='slide'){
+  const bad=()=>{R.hits--;R.typed--;R.streak--};   // typed at a bad moment: ignore silently (not a mistake, no movement)
+  if(o.st==='wait'){
+   if(R.air)return bad();
+   if(!inZone(R,o)){RN.jump(o);RN.updStrip();return}      // too early: a plain jump that lands short (TOO SOON)
    o.k=1;o.st='climb';o.vx=Math.max(R.speed,40);o.t0=R.t;boost(R,o,true);RN.updStrip();return}
   if(o.st==='climb'){
+   if(!R.air||!inZone(R,o))return bad();
    o.k++;
    if(o.k>=o.n){o.st='mount'}
    boost(R,o,false);RN.updStrip();return}
-  R.hits--;R.typed--;R.streak--},                 // typed at a bad moment: ignore (not a mistake)
+  bad()},
  update(o,dt){const R=rr();if(R.phase!=='run')return;
   if(o.st==='drop'&&!R.air){o.st='done';o.done=true;RN.updStrip()}},
  block:o=>(o.st==='wait'&&!rr().L.hard)?o.x-6:null,
@@ -117,9 +123,12 @@ function tallHook(dt){
  const R=rr();if(R.phase!=='run')return false;
  const o=R.obs.find(q=>q.t==='tall'&&ACTIVE[q.st]);
  if(!o){
-  // standing in front of a tower: bump (only really happens in super hard / when the hero lands against it)
-  const w=R.obs.find(q=>q.t==='tall'&&q.st==='wait'&&q.x-R.front<30&&q.x+TW>R.front-BW);
-  if(w&&R.front>w.x-1&&height()<w.h-2)bonkAt(R,w,w.x-(R.L.hard?3:10));
+  // solid wall: the face of a tower that has not been climbed stops the hero without any snapping
+  const w=R.obs.find(q=>q.t==='tall'&&q.st==='wait'&&q.x-R.front<40&&q.x+TW>R.front-BW);
+  if(w){const lim=w.x-1,vx=R.air?(R.jumpV||0):(R.speed+R.kb);
+   if(R.front<=lim&&R.front+Math.max(vx,0)*dt>=lim){
+    if(vx>25&&R.stun<=0)wallHit(R,w);
+    R.front=lim;R.cam=R.front-RX;R.speed=0;R.kb=Math.min(R.kb,0);if(R.air)R.jumpV=0}}
   return false}
  const G=gc(R),H=o.h,tx=o.x-4;
  R.kb=0;R.stun=0;R.air=true;R.jt=null;
@@ -131,7 +140,7 @@ function tallHook(dt){
    RN.snd(300,.06,'square',.04);return false}
   return true}
  if(o.st==='slide'){
-  R.speed=0;R.front=Math.min(tx,R.front+Math.max(o.vx||40,40)*dt);if(R.front<tx&&R.front>tx-1)R.front=tx;R.cam=R.front-RX;
+  R.speed=0;if(R.front<tx)R.front=Math.min(tx,R.front+Math.max(o.vx||40,40)*dt);R.cam=R.front-RX;
   R.y+=70*dt;R.vy=0;
   if(R.y>=0){R.y=0;R.air=false;o.st='wait';RN.snd(110,.05,'triangle',.07);RN.burst(RX-BW/2,GROUND,'#e8dcc0',4,25)}
   return true}
@@ -140,19 +149,23 @@ function tallHook(dt){
  // horizontal: glide to the face; once the feet are over the top edge, step onto the top
  const entering=o.st==='mount'&&h>=H-2;
  if(entering)R.front+=vt(R)*dt;
- else R.front=R.front<tx?Math.min(tx,R.front+Math.max(o.vx||40,40)*dt):tx;
+ else if(R.front<tx)R.front=Math.min(tx,R.front+Math.max(o.vx||40,40)*dt);
  R.speed=0;R.cam=R.front-RX;grabGems(R);
  if(o.st==='climb'){
   if(R.y>=0){R.y=0;R.vy=0;fail(R,o);return true}
   if(R.vy>0&&h<ymin(R,o)){fail(R,o);return true}
  }else{ // mount
   if(R.vy>0&&h<=H){
-   if(R.front-BW/2<o.x+1)R.front=o.x+BW/2+1;
    R.cam=R.front-RX;land(R,o)}
   else if(R.y>=0){R.y=0;R.vy=0;fail(R,o)}
  }
  return true}
 HK.update.push(dt=>tallHook(dt));
+HK.key.push(e=>{   // tower letters typed when they are not the wanted one: ignore silently (no mistake)
+ const R=rr();if(!R||R.phase!=='run')return false;
+ const t=RN.target();if(!t||t.t!=='tall')return false;
+ const ch=String(e.key).toLowerCase();if(!t.letters.includes(ch))return false;
+ return ch!==SEG.tall.want(t)});
 
 /* ---------- puffs (hard pixel clouds under the feet) ---------- */
 HK.drawTop.push(g=>{
