@@ -3,7 +3,9 @@
    Uses the game's own hero, Keylori, Scramblers, keyboard, finger hints, sounds and pop-up boxes. */
 (function(){
 if(typeof S==='undefined')return;
-const W=320,H=120,GROUND=100,RX=72;                 // RX = runner's front edge on screen
+const APPW=(()=>{try{const m=document.querySelector('main.app'),p=document.createElement('div');m.appendChild(p);const w=p.getBoundingClientRect().width;p.remove();return Math.max(320,Math.floor(w))}catch(e){return 966}})();   // the game's content width (same as the letter strip)
+const SC=Math.max(2,Math.min(Math.round(APPW/330),Math.floor((innerHeight-440)/120)||2));   // whole-number pixel scale
+const W=Math.max(300,Math.floor((APPW-6)/SC)),H=120,GROUND=100,RX=72;   // width follows the game's own width                 // RX = runner's front edge on screen
 const BW=12,PLANK=10;                                // runner body width, bridge plank width
 const GRAV=520,JV=-205,HOP=55;                         // jump strength, minimum forward speed of a jump
 const SPEEDS=[.6,.8,1,1.25,1.5],SPD_NAME=['Slowest','Slow','Normal','Fast','Fastest'];
@@ -52,7 +54,10 @@ const collect=(n,...a)=>HK[n].map(f=>{try{return f(...a)||''}catch(e){console.er
 /* ---------- state ---------- */
 let R=null,HERO=null,HERO_W=null,cvs=null,g=null,raf=0,last=0,scale=3;
 const opt={lv:Math.min(store.get('lv',0),LV.length-1),hard:false,spd:store.get('spd',2)};
-const level=()=>opt.hard?HARD:LV[opt.lv];
+let custom=null,saved=null;   // custom = a level config handed in by another screen (the lesson bridge): {name,keys,favor,words,n,v,lv,back,results(info),startExtra()}
+const level=()=>custom||(opt.hard?HARD:LV[opt.lv]);
+function setCustom(c){if(c){if(!custom)saved={lv:opt.lv,hard:opt.hard};custom=Object.assign({words:.3,n:12,v:72,custom:1},c);custom.keys=[...new Set(String(custom.keys))].join('');opt.hard=false;opt.lv=Math.max(0,Math.min(LV.length-1,custom.lv==null?2:custom.lv))}
+ else if(custom){custom=null;if(saved){opt.lv=saved.lv;opt.hard=saved.hard;saved=null}}}
 
 function build(){
  const L=level(),spd=SPEEDS[opt.spd],v=L.v*spd,air=-2*JV/GRAV,jump=Math.max(v,HOP)*air;
@@ -60,12 +65,12 @@ function build(){
  const obs=[],gems=[];let x=RX+150;
  for(let i=0;i<L.n;i++){
   if(words.length&&i>1&&Math.random()<L.words&&obs.length&&obs[obs.length-1].t!=='gap'){const w=pick(words);obs.push({t:'gap',x,word:w,typed:0,w:w.length*PLANK+4});x+=w.length*PLANK+4}
-  else{let k=pick([...L.keys]);if(L.caps&&/[a-z]/.test(k)&&Math.random()<L.caps)k=k.toUpperCase();const sp=OBS[Math.floor(Math.random()*OBS.length)];obs.push({t:'rock',x,key:k,sp,w:sp.width-2,h:sp.height-1})}
+  else{let k=pick([...L.keys,...(L.favor||'')]);if(L.caps&&/[a-z]/.test(k)&&Math.random()<L.caps)k=k.toUpperCase();const sp=OBS[Math.floor(Math.random()*OBS.length)];obs.push({t:'rock',x,key:k,sp,w:sp.width-2,h:sp.height-1})}
   const gap=Math.max(jump+(L.hard?26:44),v*(L.hard?rnd(.85,1.3):rnd(1.6,2.3)));
   const lo=obs[obs.length-1];if(lo.t==='rock')[-11,0,11].forEach((dx,j)=>gems.push({x:lo.x+lo.w/2+dx,y:GROUND-[32,40,32][j],got:0}));   // gems ride the jump arc: a well-timed jump grabs them
   x+=gap}
  const bossX=x+80;
- const seq=L.hard?[pick(words),pick(words),pick(words)].join(' '):Array.from({length:8+opt.lv*2},()=>pick([...L.keys])).join('');
+ const seq=L.hard?[pick(words),pick(words),pick(words)].join(' '):Array.from({length:8+opt.lv*2},()=>pick([...L.keys,...(L.favor||'')])).join('');
  const sp=Math.floor(Math.random()*Math.min(40,SPECIES.length)),vk=pick(typeof BADKEYS!=='undefined'?BADKEYS:['inkblob']);
  let VIL=null,KEY=null;try{VIL=vilCanvas(vk,L.hard)}catch(e){}try{KEY=trim(evolvedV(sp,0,null,(S.kv&&S.kv[sp])||{}))}catch(e){}
  const RR={L,v,obs,gems,bossX,seq,pos:0,sp,vname:(typeof SCR2!=='undefined'&&SCR2.names[vk])||'Scrambler',VIL,VILF:VIL&&flash(VIL,'#ffffff'),KEY,
@@ -97,11 +102,13 @@ function mount(){
  cvs=document.getElementById('rcv');g=cvs.getContext('2d');g.imageSmoothingEnabled=false;
  addEventListener('resize',fit);
 }
-function fit(){if(!cvs)return;const box=document.getElementById('rbox'),avW=(box.clientWidth||innerWidth)-6,avH=Math.max(120,innerHeight-430);
- scale=Math.max(1,Math.min(Math.floor(avW/W),Math.floor(avH/H)));cvs.style.width=W*scale+'px';cvs.style.height=H*scale+'px'}
+function fit(){if(!cvs)return;const box=document.getElementById('rbox');
+ // the game's screens can be zoomed (text-size setting): size the canvas so each game pixel is a whole number of SCREEN pixels
+ const f=(box.getBoundingClientRect().width/(box.offsetWidth||1))||1,sw=box.getBoundingClientRect().width||APPW;
+ scale=Math.max(1,Math.min(SC,Math.floor((sw-6)/W)));cvs.style.width=(W*scale/f)+'px';cvs.style.height=(H*scale/f)+'px';cvs.style.borderWidth=(3/f)+'px'}
 function hudHTML(){const L=level();
- return `<button class="icon-btn" data-act="go" data-to="home" aria-label="Back">${ICON.back}</button>
- <div class="ht"><b>Run · ${L.name}</b><span>${opt.hard?'Super hard':'Level '+(opt.lv+1)+' of '+LV.length}</span></div>
+ return `<button class="icon-btn" data-act="go" data-to="${custom?(custom.back||'map'):(RUNNER.backTo||'home')}" aria-label="Back">${ICON.back}</button>
+ <div class="ht"><b>${custom?esc(L.name):'Run · '+L.name}</b><span>${custom?esc(custom.sub||'Review run'):opt.hard?'Super hard':'Level '+(opt.lv+1)+' of '+LV.length}</span></div>
  <div class="rspd" title="Speed"><span>Speed</span>${SPEEDS.map((_,i)=>`<button data-act="runSpd" data-v="${i}" class="${i===opt.spd?'on':i<opt.spd?'lit':''}" aria-label="${SPD_NAME[i]}"></button>`).join('')}</div>
  <div class="stat"><b id="r-acc">100%</b><span>Accuracy</span></div><div class="stat"><b id="r-cmb">0</b><span>Combo</span></div>${typeof soundBtn==='function'?soundBtn():''}`}
 function stripHTML(){
@@ -122,14 +129,19 @@ function updStrip(){
  const a=document.getElementById('r-acc'),c=document.getElementById('r-cmb');if(a)a.textContent=Math.round(R.hits/Math.max(1,R.hits+R.miss)*100)+'%';if(c)c.textContent=R.streak}
 
 /* ---------- flow ---------- */
-function open(){
+function open(cfg){
+ setCustom(cfg&&cfg.keys?cfg:null);
  mount();show('runner');document.getElementById('s-runner').appendChild(document.getElementById('kbwrap'));
  heroImg(h=>{HERO=h;HERO_W=h&&flash(h,'#ffffff')});
- newRun();startModal();
+ newRun();if(custom&&custom.autoStart){try{go()}catch(e){startModal()}}else startModal();   // autoStart: the bridge's boss chase starts running at once
  cancelAnimationFrame(raf);last=performance.now();raf=requestAnimationFrame(loop);
 }
 function newRun(){R=build();document.getElementById('rhud').innerHTML=hudHTML();buildStrip();fit();updStrip()}
 function startModal(){const L=level();
+ if(custom){const ks=[...new Set(L.keys)].slice(0,14).map(k=>`<span class="chip" style="--fc:${fc(k)}">${esc(k)}</span>`).join('');let ex='';try{ex=custom.startExtra?custom.startExtra()||'':''}catch(e){}
+  return modal(`<div data-runner="start"><h2>${esc(L.name)}</h2><p style="margin:0 0 6px">Type the letter to jump!</p>
+  <div class="rkeys">${ks}${L.keys.length>14?'<span class="chip">…</span>':''}</div>${ex}
+  <div class="rbtns"><button class="btn big" data-act="runGo">Go! (SPACE)</button><button class="btn alt" data-act="go" data-to="${custom.back||'map'}">Map</button></div></div>`)}
  const keys=[...new Set(L.keys)].slice(0,12).map(k=>`<span class="chip" style="--fc:${fc(k)}">${esc(k)}</span>`).join('');
  modal(`<div data-runner="start"><h2>Keyloria Run</h2><p style="margin:0 0 6px">Type the letter to jump!</p>
  <div class="rkeys">${keys}${L.keys.length>12?'<span class="chip">…</span>':''}</div>
@@ -138,17 +150,21 @@ function startModal(){const L=level();
  <div class="rbtns"><button class="btn big" data-act="runGo">Go! (SPACE)</button></div></div>`)}
 function go(){closeModal();if(R.paused){R.phase=R.paused;R.paused=null}else if(R.phase==='ready'){R.phase='run';R.start=performance.now()}snd(523,.08,'square',.05)}
 function results(){
- const acc=Math.round(R.hits/Math.max(1,R.hits+R.miss)*100),stars=acc>=95?3:acc>=85?2:acc>=60?1:0,mins=Math.max((performance.now()-R.start)/60000,1/60),wpm=Math.round(R.typed/5/mins);
+ let acc=Math.round(R.hits/Math.max(1,R.hits+R.miss)*100),stars=acc>=95?3:acc>=85?2:acc>=60?1:0,mins=Math.max((performance.now()-R.start)/60000,1/60),wpm=Math.round(R.typed/5/mins);
+ if(custom&&custom.adjust){try{const a=custom.adjust({stars,acc,wpm,R})||{};if(a.stars!=null)stars=a.stars;if(a.acc!=null)acc=a.acc;if(a.wpm!=null)wpm=a.wpm}catch(e){console.error('[runner custom adjust]',e)}}   // adjust(info) may override stars/acc/wpm (hybrid Boss Test: combined with the classic part)
  const name=SPECIES[R.sp].n[0];const st=[1,2,3].map(k=>ICON.star.replace('<svg',`<svg class="${k<=stars?'on':''}"`)).join('');
- if(!opt.hard&&stars>0&&opt.lv+1<LV.length)store.set('unl',Math.max(store.get('unl',1),opt.lv+2));
+ if(!custom&&!opt.hard&&stars>0&&opt.lv+1<LV.length)store.set('unl',Math.max(store.get('unl',1),opt.lv+2));
  const tip=R.bonks?'Press the letter just before you reach it!':pick(['Keep your eyes on the screen, not your hands!','Sit up tall and relax your shoulders!','Slow is OK! Getting it right comes first.']);
- modal(`<div data-runner="done"><h2>You saved ${esc(name)}!</h2><div class="bigstars">${st}</div>
- <div class="rfree">${creatureSVG(R.sp,0,'px')}<div class="bubble" style="position:static;opacity:1;transform:none">Yay, you saved me!</div></div>
- <p class="note" style="margin:0">${tip}</p>
- <div class="rstats"><div><b>${stars} ★</b><span>Stars</span></div><div><b>${acc}%</b><span>Accuracy</span></div><div><b>${wpm}</b><span>WPM</span></div><div><b>${R.nice}</b><span>Nice jumps</span></div><div><b>${R.gemN}</b><span>Diamonds</span></div></div>
- ${collect('results',{stars,acc,wpm,nice:R.nice,gems:R.gemN,bonks:R.bonks,best:R.best,lv:opt.lv,hard:opt.hard,R})}
- <div class="rbtns">${!opt.hard&&opt.lv+1<LV.length&&!RUNNER.locked(opt.lv+1)?`<button class="btn" data-act="runNext">Next ▸</button>`:''}<button class="btn ${opt.hard||opt.lv+1>=LV.length?'':'alt'}" data-act="runAgain">Play again</button><button class="btn alt" data-act="runMenu">Levels</button></div></div>`);
- try{sfx.win()}catch(e){}
+ const info={stars,acc,wpm,nice:R.nice,gems:R.gemN,bonks:R.bonks,best:R.best,lv:opt.lv,hard:opt.hard,R};
+ let cx=null;if(custom&&custom.results){try{cx=custom.results(info)}catch(e){console.error('[runner custom results]',e)}}cx=cx||{};
+ const ok=!custom||stars>0;
+ modal(`<div data-runner="done"><h2>${cx.head||(ok?'You saved '+esc(name)+'!':'So close!')}</h2><div class="bigstars">${st}</div>
+ ${ok?`<div class="rfree">${creatureSVG(R.sp,0,'px')}<div class="bubble" style="position:static;opacity:1;transform:none">Yay, you saved me!</div></div>`:''}
+ ${cx.html||''}<p class="note" style="margin:0">${ok?tip:'Try again! Go slow.'}</p>
+ ${cx.stats||`<div class="rstats"><div><b>${stars} ★</b><span>Stars</span></div><div><b>${acc}%</b><span>Accuracy</span></div><div><b>${wpm}</b><span>WPM</span></div><div><b>${R.nice}</b><span>Nice jumps</span></div><div><b>${R.gemN}</b><span>Diamonds</span></div></div>`}
+ ${custom?'':collect('results',info)}
+ <div class="rbtns">${cx.btns||(!opt.hard&&opt.lv+1<LV.length&&!RUNNER.locked(opt.lv+1)?`<button class="btn" data-act="runNext">Next ▸</button>`:'')+`<button class="btn ${opt.hard||opt.lv+1>=LV.length?'':'alt'}" data-act="runAgain">Play again</button><button class="btn alt" data-act="runMenu">Levels</button>`}</div></div>`);
+ try{if(ok)sfx.win()}catch(e){}
 }
 Object.assign(ACT,{
  runGo:()=>go(),
@@ -159,7 +175,7 @@ Object.assign(ACT,{
  runAgain:()=>{newRun();go()},
  runMenu:()=>{newRun();startModal()},
 });
-window.RUNNER={open,get R(){return R},opt,HK,SEG,boss:null,
+window.RUNNER={open,get R(){return R},get custom(){return custom},close:()=>setCustom(null),opt,HK,SEG,boss:null,backTo:null,
  locked:i=>false,label:i=>i==='hard'?'Super hard':String(i+1),
  C:{W,H,GROUND,RX,BW,PLANK,GRAV,JV,HOP,SPEEDS},LV,HARD,level,
  get g(){return g},get HERO(){return HERO},
