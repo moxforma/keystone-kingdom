@@ -17,10 +17,10 @@ const ACTIVE={climb:1,mount:1,walk:1,slide:1};
 const height=()=>-rr().y;
 
 /* ---------- sprites ---------- */
-const PAL={o:'#1e1a2a',H:'#c8c8d8',L:'#9a9ab0',M:'#74748e',D:'#55556e',G:'#4f7f48',g:'#365f3c',Y:'#f0c860'};
+const PAL0={o:'#1e1a2a',H:'#c8c8d8',L:'#9a9ab0',M:'#74748e',D:'#55556e',G:'#4f7f48',g:'#365f3c',Y:'#f0c860'};
 const SPR={};
 function tower(h,kind){
- const k=h+'/'+kind;if(SPR[k])return SPR[k];
+ const TT=RN.theme||{},k=h+'/'+kind+'/'+(TT.id||0);if(SPR[k])return SPR[k];const PAL=Object.assign({},PAL0,TT.stone||{});
  const c=document.createElement('canvas');c.width=TW;c.height=h;const x=c.getContext('2d');
  const r=(col,a,b,w,hh)=>{x.fillStyle=col;x.fillRect(a,b,w,hh)};
  r(PAL.o,0,0,TW,h);

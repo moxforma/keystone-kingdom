@@ -165,29 +165,31 @@ HK.update.push(function(dt){const R=rr();return forkHook(R,dt)||flapHook(R,dt)})
 /* ---------- drawing ---------- */
 function drawPipe(g,kind,x,y0,y1,gapAtBottom){
   const hgt=y1-y0;if(hgt<=0)return;
+  const T=RUNNER.theme||{},S=T.stone||{},V=T.vine||{},K=T.cl||{};
   if(kind===0){                                                    // stone pillar (Keyloria ruins)
-    g.fillStyle='#1e1a2a';g.fillRect(x-1,y0,PW+2,hgt);g.fillStyle='#74748e';g.fillRect(x,y0,PW,hgt);g.fillStyle='#9a9ab0';g.fillRect(x+2,y0,3,hgt);g.fillStyle='#55556e';g.fillRect(x+10,y0,4,hgt);
-    g.fillStyle='#1e1a2a';for(let yy=y0+7;yy<y1-1;yy+=8)g.fillRect(x,yy,PW,1);g.fillStyle='#4f7f48';for(let yy=y0+3;yy<y1-1;yy+=16)g.fillRect(x+6+((yy>>4)&1)*3,yy,2,3);
-    const ry=gapAtBottom?y1-5:y0;g.fillStyle='#1e1a2a';g.fillRect(x-3,ry,PW+6,5);g.fillStyle='#c8c8d8';g.fillRect(x-2,ry+1,PW+4,3);g.fillStyle='#9a9ab0';g.fillRect(x-2,ry+3,PW+4,1);g.fillStyle='#f0c860';g.fillRect(x+PW/2-1,ry+1,2,2)
+    g.fillStyle=(S.o||'#1e1a2a');g.fillRect(x-1,y0,PW+2,hgt);g.fillStyle=(S.M||'#74748e');g.fillRect(x,y0,PW,hgt);g.fillStyle=(S.L||'#9a9ab0');g.fillRect(x+2,y0,3,hgt);g.fillStyle=(S.D||'#55556e');g.fillRect(x+10,y0,4,hgt);
+    g.fillStyle=(S.o||'#1e1a2a');for(let yy=y0+7;yy<y1-1;yy+=8)g.fillRect(x,yy,PW,1);g.fillStyle=(S.G||'#4f7f48');for(let yy=y0+3;yy<y1-1;yy+=16)g.fillRect(x+6+((yy>>4)&1)*3,yy,2,3);
+    const ry=gapAtBottom?y1-5:y0;g.fillStyle=(S.o||'#1e1a2a');g.fillRect(x-3,ry,PW+6,5);g.fillStyle=(S.H||'#c8c8d8');g.fillRect(x-2,ry+1,PW+4,3);g.fillStyle=(S.L||'#9a9ab0');g.fillRect(x-2,ry+3,PW+4,1);g.fillStyle=(S.Y||'#f0c860');g.fillRect(x+PW/2-1,ry+1,2,2)
   }else if(kind===1){                                               // cloud column
     const bands=Math.ceil(hgt/6);
-    for(let b=0;b<bands;b++){const yy=y0+b*6,hh=Math.min(6,y1-yy),o=(b&1)?-1:1;g.fillStyle='#7a8ec0';g.fillRect(x+o-1,yy,PW+4,hh)}
-    for(let b=0;b<bands;b++){const yy=y0+b*6,hh=Math.min(6,y1-yy),o=(b&1)?-1:1;g.fillStyle='#f4f8ff';g.fillRect(x+o,yy,PW+2,hh);g.fillStyle='#dfe8f4';g.fillRect(x+o+PW-3,yy,5,hh);g.fillStyle='#ffffff';g.fillRect(x+o+1,yy+1,3,2)}
+    for(let b=0;b<bands;b++){const yy=y0+b*6,hh=Math.min(6,y1-yy),o=(b&1)?-1:1;g.fillStyle=(K.o||'#7a8ec0');g.fillRect(x+o-1,yy,PW+4,hh)}
+    for(let b=0;b<bands;b++){const yy=y0+b*6,hh=Math.min(6,y1-yy),o=(b&1)?-1:1;g.fillStyle=(K.b||K.H||'#f4f8ff');g.fillRect(x+o,yy,PW+2,hh);g.fillStyle=(K.L||'#dfe8f4');g.fillRect(x+o+PW-3,yy,5,hh);g.fillStyle=(K.w||'#ffffff');g.fillRect(x+o+1,yy+1,3,2)}
   }else{                                                            // thorny vine
-    g.fillStyle='#1e2a1a';g.fillRect(x+4,y0,6,hgt);g.fillStyle='#365f3c';g.fillRect(x+5,y0,4,hgt);g.fillStyle='#4f7f48';g.fillRect(x+6,y0,1,hgt);
-    for(let yy=y0+2;yy<y1-2;yy+=8){const L=((yy-y0)>>3)&1;g.fillStyle='#e8e0f0';if(L){g.fillRect(x,yy,5,1);g.fillRect(x+1,yy+1,3,1);g.fillRect(x+2,yy-1,1,1)}else{g.fillRect(x+9,yy,5,1);g.fillRect(x+10,yy+1,3,1);g.fillRect(x+11,yy-1,1,1)}}
-    const ty=gapAtBottom?y1-5:y0;g.fillStyle='#1e2a1a';g.fillRect(x+1,ty,12,5);g.fillStyle='#4f7f48';g.fillRect(x+2,ty+1,10,3);g.fillStyle='#e8e0f0';g.fillRect(x+3,ty+1,1,1);g.fillRect(x+6,ty+2,1,1);g.fillRect(x+9,ty+1,1,1)
+    g.fillStyle=(V.o||'#1e2a1a');g.fillRect(x+4,y0,6,hgt);g.fillStyle=(V.d||'#365f3c');g.fillRect(x+5,y0,4,hgt);g.fillStyle=(V.l||'#4f7f48');g.fillRect(x+6,y0,1,hgt);
+    for(let yy=y0+2;yy<y1-2;yy+=8){const L=((yy-y0)>>3)&1;g.fillStyle=(V.t||'#e8e0f0');if(L){g.fillRect(x,yy,5,1);g.fillRect(x+1,yy+1,3,1);g.fillRect(x+2,yy-1,1,1)}else{g.fillRect(x+9,yy,5,1);g.fillRect(x+10,yy+1,3,1);g.fillRect(x+11,yy-1,1,1)}}
+    const ty=gapAtBottom?y1-5:y0;g.fillStyle=(V.o||'#1e2a1a');g.fillRect(x+1,ty,12,5);g.fillStyle=(V.l||'#4f7f48');g.fillRect(x+2,ty+1,10,3);g.fillStyle=(V.t||'#e8e0f0');g.fillRect(x+3,ty+1,1,1);g.fillRect(x+6,ty+2,1,1);g.fillRect(x+9,ty+1,1,1)
   }
 }
 function drawFork(g,o,cam,R,isT){
   const x=o.x-cam,x0=o.x+o.p0-cam,top=GROUND-LH,bob=isT?(Math.floor(R.t*6)%2):0;
+  const GN=(RUNNER.theme&&RUNNER.theme.gnd)||{},GV=(RUNNER.theme&&RUNNER.theme.vine)||{};
   // the ledge (a floating one-way platform) with its gems drawn by the engine
-  g.fillStyle='#2a1a12';g.fillRect(x0-1,top-1,o.LW+2,10);g.fillStyle='#b48c5c';g.fillRect(x0,top+2,o.LW,6);
-  g.fillStyle='#8a6a44';for(let i=4;i<o.LW-4;i+=9){g.fillRect(x0+i,top+4+(i%4),2,1);g.fillRect(x0+i+4,top+6,1,1)}
-  g.fillStyle='#62955a';g.fillRect(x0,top,o.LW,3);g.fillStyle='#a4c886';g.fillRect(x0,top,o.LW,1);g.fillStyle='#365f3c';for(let i=2;i<o.LW-2;i+=7)g.fillRect(x0+i,top+2,2,1);
+  g.fillStyle='#2a1a12';g.fillRect(x0-1,top-1,o.LW+2,10);g.fillStyle=(GN.f||'#b48c5c');g.fillRect(x0,top+2,o.LW,6);
+  g.fillStyle=(GN.sp||'#8a6a44');for(let i=4;i<o.LW-4;i+=9){g.fillRect(x0+i,top+4+(i%4),2,1);g.fillRect(x0+i+4,top+6,1,1)}
+  g.fillStyle=(GN.t||'#62955a');g.fillRect(x0,top,o.LW,3);g.fillStyle=(GN.th||'#a4c886');g.fillRect(x0,top,o.LW,1);g.fillStyle=(GV.d||'#365f3c');for(let i=2;i<o.LW-2;i+=7)g.fillRect(x0+i,top+2,2,1);
   g.fillStyle='#2a1a12';for(let i=2;i<o.LW-4;i+=10){g.fillRect(x0+i,top+9,5,1);g.fillRect(x0+i+1,top+10,3,1)}
   // the rock for the low road
-  g.drawImage(ROCK,Math.round(x-1),GROUND-ROCK.height+1);
+  {const RK=(RUNNER.thSprite&&RUNNER.thSprite(0))||ROCK;g.drawImage(RK,Math.round(x-1),GROUND-RK.height+1)}
   if(o.st==='wait'){
     const cx=Math.round(x+o.w/2),st=isT?1:0;
     RUNNER.cap(o.lo,cx-2,GROUND-o.h-18-bob,st);

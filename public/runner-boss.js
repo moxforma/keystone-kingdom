@@ -50,9 +50,10 @@ function vgeom(b){
 function start(R){
  const L=R.L,hard=!!L.hard,lv=RN.opt.lv||0;
  let ANG=null;try{if(R.VIL)ANG=RN.flash(R.VIL,'#ff4a4a')}catch(e){}
- const max=hard?24:12+Math.floor(lv/2);
- B={R,hard,hp:max,max,p2:false,mode:'intro',mt:0,t:0,bx0:R.bossX,blobs:[],spots:[],lasers:[],splats:[],bars:Array(NBARS).fill(true),
-  charge:0,cmax:hard?12:10,hitT:0,laugh:0,angryT:0,shield:0,crack:0,keyHop:0,throwsLeft:0,windDur:.8,prevCh:'',dirty:true,ANG,dieT:0,done:false};
+ const tier=Math.max(0,Math.min(14,(+L.tier)||0));   // world tier (optional R.L.tier, set by the lesson bridge): 0 = unchanged; later worlds: more HP, faster and tighter fights
+ const max=(hard?24:12+Math.floor(lv/2))+Math.round(tier*.6);
+ B={R,hard,tier,tm:Math.max(.55,1-.04*tier),p2at:.5+.015*tier,hp:max,max,p2:false,mode:'intro',mt:0,t:0,bx0:R.bossX,blobs:[],spots:[],lasers:[],splats:[],bars:Array(NBARS).fill(true),
+  charge:0,cmax:(hard?12:10)+Math.floor(tier/4),hitT:0,laugh:0,angryT:0,shield:0,crack:0,keyHop:0,throwsLeft:0,windDur:.8,prevCh:'',dirty:true,ANG,dieT:0,done:false};
  R.streak=0;
 }
 const volleyCount=b=>b.p2?2:(b.hard?4:3);
@@ -66,7 +67,7 @@ function dmg(n){
  const b=act();if(!b||b.hp<=0)return;const R=RN.R;
  b.hp=Math.max(0,b.hp-n);b.hitT=.16;syncBars(b);
  if(b.hp<=0)die(b);
- else if(!b.p2&&b.hp<=b.max/2){b.p2=true;b.angryT=1;const v=vgeom(b);RN.popTxt('GRR!',wx(v.sx),GROUND-v.vh-10,'#ff6b7a');RN.snd(150,.4,'sawtooth',.07);shake(3);RN.burst(v.sx,v.cy,'#ff4a4a',14,70)}
+ else if(!b.p2&&b.hp<=b.max*b.p2at){b.p2=true;b.angryT=Math.max(.4,1-.05*b.tier);const v=vgeom(b);RN.popTxt('GRR!',wx(v.sx),GROUND-v.vh-10,'#ff6b7a');RN.snd(150,.4,'sawtooth',.07);shake(3);RN.burst(v.sx,v.cy,'#ff4a4a',14,70)}
 }
 function die(b){
  if(b.mode==='dying'||b.mode==='done')return;
@@ -74,8 +75,8 @@ function die(b){
  sfxTry('super');
 }
 function doThrow(b){
- const v=vgeom(b),R=RN.R,n=b.p2?2:1,avoid=onScreenChars(b);
- const f=Math.pow(Math.max(20,R.v)/72,.8);let T=Math.max(2.2,Math.min(6.5,4/f));if(b.p2)T=Math.max(1.8,T*.85);
+ const v=vgeom(b),R=RN.R,n=b.p2||b.tier>=8?2:1,avoid=onScreenChars(b);
+ const f=Math.pow(Math.max(20,R.v)/72,.8);const tt=1-.03*b.tier,tf=.04*b.tier;let T=Math.max(2.2-tf,Math.min(6.5,4/f)*tt);if(b.p2)T=Math.max(1.8-tf,T*.85);   // tier 0: exactly the old numbers
  const sx0=v.sx-v.vw/2+2,vel=(sx0-HITX)/T;
  for(let i=0;i<n;i++){
   const ch=chooseCh(avoid,b.prevCh);avoid.push(ch);b.prevCh=ch;
@@ -83,12 +84,12 @@ function doThrow(b){
   b.blobs.push(z)}
  RN.snd(220,.12,'square',.06);RN.snd(330,.1,'square',.05,.06);setMode(b,'fly');b.dirty=true}
 function spawnSpots(b){
- const v=vgeom(b),n=b.hard?3:(Math.random()<.5?2:3),slots=[[-30,-34],[0,-54],[30,-34]]
- const sl=(n<3?[slots[0],slots[2]]:slots).slice(0,Math.min(n,uniq().length)),avoid=[],dur=b.hard?4.5:(b.p2?5.2:6);
+ const v=vgeom(b),n=b.hard?3:(b.tier>=6||Math.random()<.5?3:2),slots=[[-30,-34],[0,-54],[30,-34]]
+ const sl=(n<3?[slots[0],slots[2]]:slots).slice(0,Math.min(n,uniq().length)),avoid=[],dur=(b.hard?4.5:(b.p2?5.2:6))*Math.max(.5,1-.045*b.tier);
  b.spots=sl.map(s=>{const ch=chooseCh(avoid,b.prevCh);avoid.push(ch);return{ch,ox:s[0],oy:s[1],l:dur,dur}});
  RN.snd(660,.08,'triangle',.05);RN.snd(880,.1,'triangle',.05,.08);setMode(b,'weak');b.dirty=true}
 function spotPos(b,s){const v=vgeom(b);return{x:ri(v.sx+s.ox),y:Math.max(32,Math.min(GROUND-10,ri(GROUND+s.oy)))}}
-function nextVolley(b){b.throwsLeft=volleyCount(b);b.windDur=b.p2?.6:.9;setMode(b,'wind')}
+function nextVolley(b){b.throwsLeft=volleyCount(b);b.windDur=(b.p2?.6:.9)*b.tm;setMode(b,'wind')}
 function countHit(ch){
  const R=RN.R,b=act();R.hits++;R.typed++;R.streak++;R.best=Math.max(R.best,R.streak);sfxTry('ok',R.streak);
  if(b.charge<b.cmax){b.charge++;if(b.charge>=b.cmax){RN.snd(880,.1,'square',.05);RN.snd(1175,.15,'square',.05,.1)}}}
@@ -129,7 +130,7 @@ function update(dt){
   if(b.angryT>0)b.mt=Math.min(b.mt,0);
   else if(b.mt>=b.windDur)doThrow(b);
  }else if(b.mode==='fly'){
-  if(!b.blobs.length){b.throwsLeft--;if(b.throwsLeft>0){b.windDur=b.p2?.4:.5;setMode(b,'wind')}else spawnSpots(b)}
+  if(!b.blobs.length){b.throwsLeft--;if(b.throwsLeft>0){b.windDur=(b.p2?.4:.5)*b.tm;setMode(b,'wind')}else spawnSpots(b)}
  }else if(b.mode==='weak'){
   const before=b.spots.length;
   b.spots.forEach(s=>s.l-=dt);
@@ -137,7 +138,7 @@ function update(dt){
   if(b.spots.length!==before)b.dirty=true;
   if(!b.spots.length)setMode(b,'rest');
  }else if(b.mode==='rest'){
-  if(b.mt>=.8){nextVolley(b);b.dirty=true}
+  if(b.mt>=.8*b.tm){nextVolley(b);b.dirty=true}
  }else if(b.mode==='dying'){
   b.dieT+=dt;
   if(b.dieT>.12){b.dieT=0;const v=vgeom(b);RN.burst(v.sx+RN.rnd(-v.vw/2,v.vw/2),v.cy+RN.rnd(-v.vh/2,v.vh/2),RN.pick(['#ffffff','#f0c860','#b48ae0']),12,80);RN.snd(RN.rnd(200,500),.06,'square',.04);shake(3)}
