@@ -5,7 +5,7 @@
 (function(){
 if(!window.RUNNER)return;
 try{
-const RN=window.RUNNER,C=RN.C,W=C.W,GROUND=C.GROUND,RX=C.RX,BW=C.BW,GRAV=C.GRAV,HOP=C.HOP;
+const RN=window.RUNNER,C=RN.C,GROUND=C.GROUND,RX=C.RX,BW=C.BW,GRAV=C.GRAV,HOP=C.HOP;
 const HK=RN.HK,SEG=RN.SEG,ri=Math.round;
 const rr=()=>RN.R;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -104,7 +104,7 @@ SEG.tall={
   if(o.st==='drop'&&!R.air){o.st='done';o.done=true;RN.updStrip()}},
  block:o=>(o.st==='wait'&&!rr().L.hard)?o.x-6:null,
  draw(o,g,cam,isT){
-  const R=rr(),x=o.x-cam;if(x<-TW-4||x>W+4)return;
+  const R=rr(),x=o.x-cam;if(x<-TW-4||x>C.W+4)return;
   const X=ri(x),top=GROUND-o.h;
   g.drawImage(tower(o.h,o.kind),X,top);
   if(o.word){                                        // little flag on a word tower

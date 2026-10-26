@@ -8,7 +8,7 @@ try{
 const C=RUNNER.C,GROUND=C.GROUND,RX=C.RX,BW=C.BW,GRAV=C.GRAV,HOP=C.HOP,JV=C.JV;
 const HK=RUNNER.HK,SEG=RUNNER.SEG;
 const HI_SCALE=1.25,LH=40;                       // big-jump strength, ledge height above ground
-const FG=85,GS=58,PW=14;                         // flap gravity, pipe gap size, pipe width
+const FG=85,GS0=58,PW=14;                        // flap gravity, base pipe gap size, pipe width
 const rr=()=>RUNNER.R;
 const height=()=>-rr().y;
 const heroH=()=>{try{return RUNNER.HERO?RUNNER.HERO.height:28}catch(e){return 28}};
@@ -73,34 +73,62 @@ function forkHook(R,dt){
 
 /* ================= FLAP =================
    Entry: only when the hero stands on the ground with nothing else going on (typing early is ignored, never a miss).
-   While flying the hero keeps a fixed screen x, cruises at a slow constant speed (never faster at high speed settings),
-   stops at a line in front of each gap until that gap's letter was pressed once (the hit), and the same letter can then be
-   pressed as often as you like: every press is one flap. Exit: balloon pops, hero drifts down while speeding back up. */
+   While flying the hero keeps a fixed screen x and runs at EXACTLY the normal run pace (R.v with the usual combo bonus): no slowdown.
+   The gaps are laid out when the flight starts (anchored to the hero, never behind him), their spacing scales with the run speed so every
+   gap gives about the same TIME to react as a normal level, and they get a little taller at high speed. The hero only waits (brakes right
+   in front of a pillar) when a letter is really late. The same letter can be pressed as often as you like: every press is one flap.
+   Exit: balloon pops, hero drifts down at the same pace. */
 const FLY_TOP=14;                                     // hero's head never goes above this screen y (below the HUD bars)
-const CRUISE=(R)=>clamp(R.v,40,56);                   // flap cruise speed (px/s): same or slower than the run
-const leadFor=(v)=>clamp(Math.round((v*1.25-60)/2.6)+44,70,160);   // run-up before the first gap so a fast entry can slow down smoothly
 const hMax=()=>Math.max(30,GROUND-heroH()-FLY_TOP);
-function flapReady(o,R){return !R.air&&R.stun<=0&&!R.jt&&Math.abs(R.vy)<1&&height()<1&&RUNNER.target()===o}
+const ambush=()=>{try{return RUNNER.action&&RUNNER.action.state()}catch(e){return null}};
+const baseV=R=>{const a=ambush();return R.v/((a&&a.mult)||1)};          // run speed without a blast boost
+function reactT(R){                                   // seconds between two gaps: about 1.2 on easy tiers down to 0.7 on late ones
+  const L=R.L||{};let T;
+  if(L.tier!=null)T=1.25-.05*(+L.tier||0);else if(L.hard)T=.72;else T=[1.3,1.3,1.2,1.1,.95,.85][clamp(RUNNER.opt.lv|0,0,5)];
+  return clamp(T,.65,1.3)}
+// (re)place the gaps of section o so that gap 0 sits `lead` px after anchor; returns the x where the section ends
+function layout(R,o,anchor,leadMin){
+  const v=baseV(R),T=reactT(R);
+  const pitch=clamp(Math.round(v*1.15*T),64,340),gs=clamp(GS0+Math.round((v-90)/10),GS0,70);
+  const lead=Math.max(leadMin||0,clamp(Math.round(v*1.15*(T+.45))+20,90,Math.max(90,C.W-RX-24)));
+  const lo=Math.round(gs/2)+8,hi=84-Math.round(gs/2);
+  o.gs=gs;o.pitch=pitch;o.lead=lead;
+  o.gaps.forEach((p,i)=>{if(p.c0==null)p.c0=p.c;p.c=clamp(p.c0,lo,hi);p.x=Math.round(anchor)+lead+i*pitch});
+  const tail=Math.round(PW+14+v*1.7+60);
+  return o.gaps[o.n-1].x+PW+tail}
+function relocate(R,o,newEnd){                         // move everything after the section so the spacing after it stays right
+  const i=R.obs.indexOf(o),nx=R.obs[i+1],oldEnd=o.x+o.w;
+  let ex=nx?newEnd+80-nx.x:newEnd+140-R.bossX;
+  if(ex<0&&nx&&nx.x+ex-R.cam<C.W+40)ex=0;               // never pull something visible closer
+  if(ex<0&&!nx)ex=0;
+  if(ex)shiftAny(R,nx?nx.x-14:o.x+1,ex);
+  o.w=newEnd-o.x}
+function shiftAny(R,cut,ex){R.obs.forEach(q=>{if(q.x>=cut&&q.t!=='flap')q.x+=ex});R.gems.forEach(g=>{if(g.x>=cut)g.x+=ex});R.bossX+=ex}
+function ambushBusy(){const a=ambush();return !!(a&&(a.mode||(a.blobs&&a.blobs.length)))}
+function flapReady(o,R){return !R.air&&R.stun<=0&&!R.jt&&Math.abs(R.vy)<1&&height()<1&&RUNNER.target()===o&&!ambushBusy()}
 function flapStart(o,R){
-  const cr=CRUISE(R);o.cr=cr;
-  // make sure the first gap is far enough away for the current speed to ease down to the cruise speed
-  const req=Math.max(0,R.speed-cr)/2.6+46,dist=o.gaps[0].x-R.front;
-  if(dist<req){const sh=Math.ceil(req-dist);o.gaps.forEach(p=>p.x+=sh);shiftFrom(R,o.x+1,sh);o.w+=sh}
-  o.st='fly';R.air=true;R.jt=null;R.vy=Math.min(R.vy,-35);R.kb=0;o.hit=[];o.pl='';o.pt=-9;o.pulse=0;o.gcool=0;o.bv=0;o.slow=0;o.assist=0;o.cool=0;o.bumps=0;
+  // lay the gaps out in front of the hero now (if the start was delayed so much that the first gap was about to pass him,
+  // the pillars were hidden and now come in from the right edge)
+  const end=layout(R,o,R.front,o.hold?C.W-RX+16:0);
+  relocate(R,o,end);o.hold=false;
+  if(R.air)R.speed=Math.max(R.speed,R.jumpV||0);
+  o.st='fly';R.air=true;R.jt=null;R.vy=Math.min(R.vy,-35);R.kb=0;o.hit=[];o.pl='';o.pt=-9;o.pulse=0;o.gcool=0;o.bv=0;o.slow=0;o.assist=0;o.cool=0;o.bumps=0;o.sndT=-9;
   RUNNER.popTxt('FLY!',R.front-BW/2,GROUND-60,'#ff6b7a');RUNNER.snd(660,.08,'square',.05);RUNNER.snd(880,.1,'square',.05,.07);RUNNER.burst(RX-BW/2,GROUND-height()-heroH()-6,'#ff6b7a',10,45)}
 function flapUp(o,R,first){
-  const hh=heroH(),h=height(),gp=o.gaps[o.k];let vy=62;
-  if(gp){const t=.42,tf=gp.c-hh/2,gt=gp.c+GS/2;
+  const hh=heroH(),h=height(),gp=o.gaps[o.k],gs=o.gs||GS0;let vy=62;
+  if(gp){const t=.42,tf=gp.c-hh/2,gt=gp.c+gs/2,Z=Math.max(100,R.speed*.7);
     vy=clamp((tf-h+.5*FG*t*t)/t,26,118);                           // each flap aims at the current gap
     if(h>tf+8)vy=Math.min(vy,10);                                  // already high enough: just a tiny hop, so tapping keeps him floating
-    if(gp.x-R.front<100&&h+hh>gt-8)vy=Math.min(vy,4)}              // never push him up into the top pillar
+    if(gp.x-R.front<Z&&h+hh>gt-8)vy=Math.min(vy,4)}                // never push him up into the top pillar
   R.vy=Math.min(R.vy,-vy);o.pulse=.14;
-  if(first){RUNNER.snd(520+o.k*45,.07,'square',.05);RUNNER.snd(780+o.k*45,.06,'triangle',.04,.04)}
-  else{RUNNER.snd(300+Math.floor(Math.random()*5)*14,.05,'triangle',.04);RUNNER.snd(430,.04,'square',.02,.03)}
-  RUNNER.burst(RX-BW/2,GROUND-height()+1,'#ffffff',first?5:3,28)}
-function flapPress(o,R){
-  const first=!o.hit[o.k];
-  if(first){o.hit[o.k]=1;R.hits++;R.typed++;R.streak++;R.best=Math.max(R.best,R.streak)}
+  const quiet=R.t-o.sndT<.09;                                      // held keys / mashing: no wall of sound
+  if(!quiet){o.sndT=R.t;
+   if(first){RUNNER.snd(520+o.k*45,.07,'square',.05);RUNNER.snd(780+o.k*45,.06,'triangle',.04,.04)}
+   else{RUNNER.snd(300+Math.floor(Math.random()*5)*14,.05,'triangle',.04);RUNNER.snd(430,.04,'square',.02,.03)}
+   RUNNER.burst(RX-BW/2,GROUND-height()+1,'#ffffff',first?5:3,28)}}
+function flapPress(o,R,k){
+  const first=!o.hit[k==null?o.k:k];k=k==null?o.k:k;
+  if(first){o.hit[k]=1;R.hits++;R.typed++;R.streak++;R.best=Math.max(R.best,R.streak)}
   flapUp(o,R,first);RUNNER.updStrip()}
 SEG.flap={
   want:o=>(o.k<o.n&&(o.st==='pre'||o.st==='fly'))?o.letters[o.k]:'',
@@ -110,30 +138,40 @@ SEG.flap={
   key(o,ch){const R=rr();                                            // fallback only (the key hook below normally handles flap keys)
     if(o.st!=='fly'||o.k>=o.n)return;o.hit[o.k]=1;flapUp(o,R,true)},
   update(o,dt){const R=rr();if(R.phase!=='run')return;
-    if(o.st==='pre'&&R.front>=o.x){
-      if(flapReady(o,R)||(R.front>=o.x+60&&RUNNER.target()===o&&R.stun<=0))flapStart(o,R)}
+    if(o.st==='pre'){
+      layout(R,o,o.x);                                                // keep the pillars tied to the section (other builders may have moved it)
+      if(!o.hold&&o.gaps[0].x-R.front<70)o.hold=true;                // the start was delayed (tower, ambush...): hide the pillars, they come in from the right when it starts
+      if(R.front>=o.x&&(flapReady(o,R)||(R.front>=o.x+60&&RUNNER.target()===o&&R.stun<=0&&!ambushBusy())))flapStart(o,R)}
   },
   draw(){}
 };
-// keys: before the flap starts everything is ignored (no mistake); while flying the current letter can be pressed again and again
+// keys: before the flap starts everything is ignored (no mistake, but ambush letters still reach their blob); while flying the current
+// letter can be pressed again and again. Held keys (auto-repeat) never count as a first press and never as a mistake.
 HK.key.push(function(e){
   const R=rr();if(!R||R.phase!=='run')return false;
-  const o=R.obs.find(f=>f.t==='flap'&&(f.st==='pre'||f.st==='fly'));if(!o||o.k>=o.n)return false;
+  const o=R.obs.find(f=>f.t==='flap'&&(f.st==='pre'||f.st==='fly'||f.st==='pop'||f.st==='fall'));if(!o)return false;
+  if(o.k>=o.n){                                                           // all letters done: the last letter pressed again / held is harmless
+    if(o.st!=='pre'&&o.pl&&e.key===o.pl&&R.t-o.pt<1.2){if(o.st==='fly')flapUp(o,R,false);return true}
+    return false}
+  if(o.st==='pop'||o.st==='fall')return false;
   if(RUNNER.target()!==o)return false;
-  if(o.st==='pre')return true;
+  if(o.st==='pre'){const a=ambush();if(a&&a.blobs&&a.blobs.some(z=>z.st==='in'&&z.ch===e.key))return false;return true}
   const caps=e.getModifierState&&e.getModifierState('CapsLock')&&!e.shiftKey,kk=caps?String(e.key).toLowerCase():e.key;
-  if(kk===o.letters[o.k]){flapPress(o,R);return true}
-  if(o.pl&&kk===o.pl&&R.t-o.pt<.5){flapUp(o,R,false);return true}      // still mashing the letter of the gap he just passed: a free flap
+  if(kk===o.letters[o.k]){if(e.repeat&&!o.hit[o.k])return true;flapPress(o,R);return true}
+  if(o.pl&&kk===o.pl&&R.t-o.pt<.6){flapUp(o,R,false);return true}      // still pressing the letter of the gap he just passed: a free flap
+  const nx=o.letters[o.k+1];
+  if(nx!==undefined&&kk===nx&&!e.repeat){flapPress(o,R,o.k+1);return true}   // next letter typed a little early: counts for that gap (never a mistake)
+  if(e.repeat)return true;
   RUNNER.miss();RUNNER.updStrip();return true});
 
 function flapHook(R,dt){
   const o=R.obs.find(f=>f.t==='flap'&&(f.st==='fly'||f.st==='pop'||f.st==='fall'));if(!o)return false;
-  const hh=heroH(),hmax=hMax(),fly=o.st==='fly';
+  const hh=heroH(),hmax=hMax(),fly=o.st==='fly',gs=o.gs||GS0;
   o.slow=Math.max(0,o.slow-dt);o.cool=Math.max(0,o.cool-dt);o.pulse=Math.max(0,o.pulse-dt);o.gcool=Math.max(0,o.gcool-dt);
   // vertical: gentle gravity, soft pull towards the current gap, floor and ceiling
   R.vy+=(o.st==='fall'?GRAV:FG)*dt;
-  const gp=o.k<o.n?o.gaps[o.k]:null;
-  if(fly&&gp&&gp.x-R.front<90){const tf=gp.c-hh/2;R.vy-=clamp((tf-height())*(2.5+o.assist),-45-o.assist*20,45+o.assist*20)*dt}
+  const gp=o.k<o.n?o.gaps[o.k]:null,Z=Math.max(90,R.speed*.7);
+  if(fly&&gp&&gp.x-R.front<Z){const tf=gp.c-hh/2;R.vy-=clamp((tf-height())*(2.5+o.assist),-45-o.assist*20,45+o.assist*20)*dt}
   R.vy=clamp(R.vy,-140,o.st==='fall'?400:60);R.y+=R.vy*dt;
   if(R.y>0){
     if(o.st==='fall'){                                                       // landed: back to running
@@ -141,10 +179,12 @@ function flapHook(R,dt){
     const hard=R.vy>28;R.y=0;R.vy=hard?-R.vy*.3:0;                          // bumps along the bottom, never punished
     if(hard&&!o.gcool){o.gcool=.3;RUNNER.snd(130,.04,'triangle',.05);RUNNER.burst(RX-BW/2,GROUND,'#e8dcc0',3,22)}}
   if(-R.y>hmax){R.y=-hmax;R.vy=Math.max(R.vy,0)}
-  // horizontal: slow constant cruise; stop at the line in front of the current gap until its letter was pressed once
-  let want=fly?o.cr*(o.slow>0?.5:1):R.v*(1+Math.min(R.streak,10)*.025),cap=Infinity;
-  if(fly&&gp&&!o.hit[o.k])cap=Math.sqrt(2*380*Math.max(0,gp.x-30-R.front));
-  if(R.speed<want)R.speed=Math.min(want,R.speed+260*dt);else R.speed+=(want-R.speed)*Math.min(1,dt*2.6);
+  // horizontal: exactly the normal run pace (same easing as the engine). Only a really late letter makes him wait in front of the pillar.
+  let want=R.v*(1+Math.min(R.streak,10)*.025)*(fly&&o.slow>0?.7:1),cap=Infinity;
+  if(fly&&gp&&!o.hit[o.k]){                                                   // letter not pressed yet: wait in front of the pillar only if he would not fit through
+    const tt=Math.max(0,gp.x-R.front)/Math.max(R.speed,60),hp=height()-(R.vy*tt+.5*FG*tt*tt),gb=gp.c-gs/2,gt=gp.c+gs/2;
+    if(hp<gb+6||hp+hh>gt-6)cap=Math.sqrt(2*1200*Math.max(0,gp.x-5-R.front))}
+  R.speed+=(want-R.speed)*Math.min(1,dt*(want<R.speed?30:3));if(want<R.speed)R.speed=want;
   if(R.speed>cap)R.speed=cap;
   R.front+=(R.speed+o.bv)*dt;o.bv*=Math.pow(.88,dt*60);if(Math.abs(o.bv)<1)o.bv=0;R.cam=R.front-RX;R.kb=0;R.air=true;
   // the letter moves on once he is through the gap
@@ -153,10 +193,10 @@ function flapHook(R,dt){
   // soft bump on pipes / vines
   if(fly&&!o.cool){const h=height();
     for(const p of o.gaps){if(R.front-2>p.x&&R.front-BW+2<p.x+PW){
-      const gb=p.c-GS/2,gt=p.c+GS/2;
-      if(h+3<gb||h+hh-3>gt){o.bumps++;o.assist=Math.min(4,o.assist+1.5);o.cool=.45;o.slow=.9;o.bv=-90;R.front=Math.min(R.front,p.x-1);R.cam=R.front-RX;R.vy=h+3<gb?-50:40;R.shake=1;
+      const gb=p.c-gs/2,gt=p.c+gs/2;
+      if(h+3<gb||h+hh-3>gt){o.bumps++;o.assist=Math.min(4,o.assist+1.5);o.cool=.45;o.slow=.5;o.bv=-90;R.front=Math.min(R.front,p.x-1);R.cam=R.front-RX;R.vy=h+3<gb?-50:40;R.shake=1;
         RUNNER.popTxt('OOF!',p.x+PW/2,GROUND-clamp(h+hh+10,30,76),'#b8c0e8');RUNNER.snd(150,.12,'square',.06);RUNNER.burst(p.x-R.cam,GROUND-h-hh/2,'#ffffff',6,35);break}}}}
-  // all letters done and past the last gap: pop the balloon, drift down while speeding back up
+  // all letters done and past the last gap: pop the balloon, drift down at the same pace
   if(fly&&o.k>=o.n){const lp=o.gaps[o.gaps.length-1];if(R.front-BW>lp.x+PW+14){o.st='pop';o.pt=.3;
     RUNNER.popTxt('POP!',R.front-BW/2,GROUND-height()-hh-26,'#ffd0d8');RUNNER.snd(220,.12,'sawtooth',.06);RUNNER.snd(1319,.05,'square',.04,.03);
     RUNNER.burst(RX-BW/2,GROUND-height()-hh-14,'#ff6b7a',14,70);RUNNER.burst(RX-BW/2,GROUND-height()-hh-14,'#ffffff',6,50)}}
@@ -170,12 +210,13 @@ function build(R){
   // flap section: once per run, level index >= 2 and super hard
   if((hard||opt.lv>=2)&&R.obs.length>=4){
     const m=clamp(Math.round(R.obs.length*.5),2,R.obs.length-1),prev=R.obs[m-1],nx=R.obs[m];
-    const n=irnd(6,10),pitch=64,lead=leadFor(R.v);
+    const n=irnd(6,10);
     const room=clamp(Math.round(R.v*1.25*.79*1.15+50),100,290);       // room after the last obstacle for its jump to land
-    const fx=Math.round(prev.x+(prev.w||10)+room),len=lead+(n-1)*pitch+PW+110;
+    const fx=Math.round(prev.x+(prev.w||10)+room);
     const letters=[];for(let i=0;i<n;i++)letters.push(pickKey(keys,caps,letters.length?[letters[i-1]]:null));
-    const gaps=[];let c=irnd(36,48);for(let i=0;i<n;i++){c=clamp(c+irnd(-12,12),34,52);gaps.push({x:fx+lead+i*pitch,c,kind:i%3})}
-    const o={t:'flap',x:fx,w:len,n,k:0,letters,gaps,st:'pre',bumps:0,hit:[]};
+    const gaps=[];let c=irnd(36,48);for(let i=0;i<n;i++){c=clamp(c+irnd(-12,12),34,52);gaps.push({x:0,c,kind:i%3})}
+    const o={t:'flap',x:fx,w:0,n,k:0,letters,gaps,st:'pre',bumps:0,hit:[],hold:false};
+    const len=layout(R,o,fx,0)-fx;o.w=len;                              // gaps spaced for this run speed
     const ex=Math.max(0,fx+len+80-nx.x);shiftFrom(R,nx.x-14,ex);
     R.obs.splice(m,0,o);
   }
@@ -239,10 +280,12 @@ function drawFork(g,o,cam,R,isT){
 const capPos=(p,cam)=>{const x=Math.round(p.x-cam)+2;return [clamp(x,1,C.W-14),clamp(GROUND-Math.round(p.c)-6,13,GROUND-15)]};   // always inside the canvas
 function drawFlap(g,o,cam,R,isT){
   if(o.x+o.w<cam-10||o.x>cam+C.W+10)return;
+  if(o.st==='pre'&&o.hold)return;                                   // start delayed: nothing is shown until it starts
+  const gs=o.gs||GS0,live=o.st==='pre'||o.st==='fly';
   o.gaps.forEach((p,i)=>{const x=Math.round(p.x-cam);if(x<-24||x>C.W+10)return;
-    const gb=p.c-GS/2,gt=p.c+GS/2,yTop=GROUND-Math.round(gt),yBot=GROUND-Math.round(gb);
+    const gb=p.c-gs/2,gt=p.c+gs/2,yTop=GROUND-Math.round(gt),yBot=GROUND-Math.round(gb);
     drawPipe(g,p.kind,x,0,yTop,true);drawPipe(g,p.kind,x,yBot,GROUND,false);
-    if(i>o.k&&(o.st==='pre'||o.st==='fly')){const q=capPos(p,cam);RUNNER.cap(o.letters[i],q[0],q[1],0)}})}   // upcoming letters; the current one is drawn on top of the hero
+    if(i>o.k&&live){const q=capPos(p,cam);RUNNER.cap(o.letters[i],q[0],q[1],0)}})}   // upcoming letters; the current one is drawn on top of the hero
 HK.drawWorld.push(function(g,cam){const R=rr(),t=RUNNER.target();
   R.obs.forEach(o=>{
     if(o.t==='fork'){if(o.x+o.p0+o.LW<cam-6||o.x>cam+C.W+10)return;drawFork(g,o,cam,R,o===t)}
@@ -252,8 +295,12 @@ HK.drawWorld.push(function(g,cam){const R=rr(),t=RUNNER.target();
 HK.drawTop.push(function(g,cam){const R=rr();
   if(R._pathAir){R.air=true;R._pathAir=false}
   const o=R.obs.find(f=>f.t==='flap'&&(f.st==='pre'||f.st==='fly'));if(!o)return;
-  if(o.k<o.n){const p=o.gaps[o.k],x=Math.round(p.x-cam);                  // current letter: on top of everything, clamped into the canvas
-    if(x>-30&&x<C.W+30){const q=capPos(p,cam);RUNNER.cap(o.letters[o.k],q[0],q[1]-(o.pulse>0?2:Math.floor(R.t*6)%2),o.st==='fly'?1:0)}}
+  if(o.st==='pre'&&o.hold){                                                 // start delayed: the first letter waits at the right edge, where its pillar will come in
+    if(RUNNER.target()===o&&o.k<o.n)RUNNER.cap(o.letters[o.k],C.W-14,GROUND-Math.round(o.gaps[o.k].c)-6-Math.floor(R.t*6)%2,0);return}
+  if(o.k<o.n){const p=o.gaps[o.k],q=capPos(p,cam);                          // current letter: on top of everything, always inside the canvas
+    RUNNER.cap(o.letters[o.k],q[0],q[1]-(o.pulse>0?2:Math.floor(R.t*6)%2),o.st==='fly'?1:0);
+    const p2=o.gaps[o.k+1];                                                 // the next letter shows at the right edge before its pillar comes into view
+    if(o.st==='fly'&&p2&&Math.round(p2.x-cam)>C.W+10&&Math.round(p.x-cam)<C.W-30){const q2=capPos(p2,cam);RUNNER.cap(o.letters[o.k+1],q2[0],q2[1],0)}}
   if(o.st!=='fly')return;
   const hh=heroH(),hx=RX-Math.round(BW/2),top=GROUND-hh-Math.round(height()),sw=Math.round(Math.sin(R.t*3));
   const by=Math.max(11,top-26+(Math.floor(R.t*4)%2)+(o.pulse>0?-2:0)),sl=top-(by+10);

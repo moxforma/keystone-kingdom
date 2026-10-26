@@ -6,7 +6,7 @@
 (function(){
 if(!window.RUNNER)return;
 try{
-const RN=window.RUNNER,C=RN.C,W=C.W,GROUND=C.GROUND,RX=C.RX,BW=C.BW,HX=RX-BW/2,HITX=RX+6;
+const RN=window.RUNNER,C=RN.C,GROUND=C.GROUND,RX=C.RX,BW=C.BW,HX=RX-BW/2,HITX=RX+6;
 const ri=Math.round,HK=RN.HK,SEG=RN.SEG;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const sfxTry=(n,a)=>{try{sfx[n](a)}catch(e){}};
@@ -69,7 +69,7 @@ function pickCh(a,others){
  const keys=[...new Set([...a.R.L.keys])],R=a.R;
  const oth=others.map(lc);
  let strict=[];
- R.obs.filter(o=>!isDoneObs(o)&&o.x<R.cam+W+200).slice(0,4).forEach(o=>{strict.push(...[...wantsOf(o)].map(lc))});
+ R.obs.filter(o=>!isDoneObs(o)&&o.x<R.cam+C.W+200).slice(0,4).forEach(o=>{strict.push(...[...wantsOf(o)].map(lc))});
  const loose=[...curWants()].map(lc);
  let pool=keys.filter(k=>!oth.includes(lc(k))&&!strict.includes(lc(k)));
  if(!pool.length)pool=keys.filter(k=>!oth.includes(lc(k))&&!loose.includes(lc(k)));
@@ -87,7 +87,7 @@ function forkActive(R){return R.obs.some(o=>o.t==='fork'&&(o.st==='hi'||o.st==='
 function nearSpecial(R){return R.obs.some(o=>(o.t==='gap'||o.t==='fork')&&!isDoneObs(o)&&o.x-R.front<120&&o.x+(o.w||0)>R.front-120)}
 function startAmbush(a){
  a.air=Math.random()<.45;a.sx=ri(228+Math.random()*30);a.sy=a.air?GROUND-48:GROUND-MH;
- a.x=W+16;a.mode='in';a.mt=0;a.retHits=0;a.blobs=[];a.flash=0;
+ a.x=C.W+16;a.mode='in';a.mt=0;a.retHits=0;a.blobs=[];a.flash=0;
  RN.snd(300,.08,'square',.05);RN.snd(450,.08,'square',.05,.07)}
 function throwBlobs(a){
  const n=a.hard?2:1,T=blobTime(a),sx0=a.sx-6,vel=(sx0-HITX)/T,others=[];
@@ -121,7 +121,7 @@ function fire(a){
  a.beams.push({l:.38,max:.38,y});
  let nSm=0;
  R.obs.forEach(o=>{
-  if(o.t!=='rock'||o.done||o.jt)return;const sx=o.x-cam;if(sx<RX-4||sx>W+10)return;
+  if(o.t!=='rock'||o.done||o.jt)return;const sx=o.x-cam;if(sx<RX-4||sx>C.W+10)return;
   o.done=true;nSm++;const cx=sx+(o.w||10)/2,delay=Math.max(.02,(cx-RX)/520);
   a.deb.push({o,ox:o.x,delay,hide:1});});
  // hold smashed rocks until the beam reaches them, then burst
@@ -153,7 +153,7 @@ HK.key.push(e=>{
  const z=a.blobs.filter(q=>q.st==='in').sort((p,q)=>p.x-q.x).find(q=>q.ch===e.key||q.ch===kk);
  if(!z)return false;
  // never ambiguous: if the engine would accept this key for an obstacle on screen, let the engine have it
- const t=RN.target();if(t&&t.x-R.cam<=W+4&&[...curWants()].includes(kk))return false;
+ const t=RN.target();if(t&&t.x-R.cam<=C.W+4&&[...curWants()].includes(kk))return false;
  hitBlob(a,z);return true});
 
 /* ---------- update ---------- */
@@ -189,7 +189,7 @@ HK.update.push(dt=>{
    if(R.front>X+160)a.idx++;                                   // missed the window: skip it
    else if(!flapActive(R)&&!forkActive(R)&&!nearSpecial(R)&&R.front<R.bossX-200-120){a.idx++;startAmbush(a)}}}
  // Scrambler states
- if(a.mode==='in'){const k=Math.min(1,a.mt/.45),e=k*(2-k);a.x=ri(W+16+(a.sx-W-16)*e);if(a.mt>=.45){a.x=a.sx;a.mode='wind';a.mt=0}}
+ if(a.mode==='in'){const k=Math.min(1,a.mt/.45),e=k*(2-k);a.x=ri(C.W+16+(a.sx-C.W-16)*e);if(a.mt>=.45){a.x=a.sx;a.mode='wind';a.mt=0}}
  else if(a.mode==='wind'){if(a.mt>=.5)throwBlobs(a)}
  else if(a.mode==='ko'){if(a.mt>.25){a.mode=null}}
  else if(a.mode==='flee'){a.x=ri(a.sx+a.mt*220);if(a.mt>.7)a.mode=null}
@@ -211,11 +211,11 @@ HK.update.push(dt=>{
   a.blobs.forEach(z=>{if(z.st==='in'&&cw.includes(lc(z.ch))){const nc=pickCh(a,a.blobs.filter(q=>q!==z).map(q=>q.ch));if(!cw.includes(lc(nc))){z.ch=nc;a.hint=''}}});
   // finger hint: show the blob's letter while it is the most urgent thing
   const z=a.blobs.filter(q=>q.st==='in').sort((p,q)=>p.x-q.x)[0],t=RN.target();
-  if(z){const oeta=(t&&t.x-R.cam<=W+4)?Math.max(0,(t.x-R.front))/Math.max(R.speed,40):99,beta=(z.x-HITX)/z.v;setHint(a,beta<=oeta+.4?z:null)}else setHint(a,null)}
+  if(z){const oeta=(t&&t.x-R.cam<=C.W+4)?Math.max(0,(t.x-R.front))/Math.max(R.speed,40):99,beta=(z.x-HITX)/z.v;setHint(a,beta<=oeta+.4?z:null)}else setHint(a,null)}
  else if(a.hint)setHint(a,null);
  return false});
 function updGems(a,dt){
- const tx=W-37,ty=16;
+ const tx=C.W-37,ty=16;
  for(let i=a.gems.length-1;i>=0;i--){const g=a.gems[i];
   if(g.d>0){g.d-=dt;continue}
   g.t+=dt;const k=Math.min(1,g.t/.7),e=k*k;
@@ -272,7 +272,7 @@ HK.drawTop.push((g,cam)=>{
  const y0=hy();
  a.lasers.forEach(l=>{line(g,RX+2,y0,l.tx,l.ty,2,l.c);line(g,RX+2,y0,l.tx,l.ty,1,'#ffffff')});
  a.beams.forEach(b=>{const k=b.l/b.max,th=k>.35?8:4,fl=Math.floor(t*30)%2,by=b.y;
-  g.fillStyle=fl?'#f0c860':'#ffe9a0';g.fillRect(RX+2,by-(th>>1),W-RX-2,th);g.fillStyle='#ffffff';g.fillRect(RX+2,by-(th>>2),W-RX-2,th>>1);
+  g.fillStyle=fl?'#f0c860':'#ffe9a0';g.fillRect(RX+2,by-(th>>1),C.W-RX-2,th);g.fillStyle='#ffffff';g.fillRect(RX+2,by-(th>>2),C.W-RX-2,th>>1);
   g.fillStyle='#ffffff';g.fillRect(RX-2,by-6,10,12);g.fillStyle='#f0c860';g.fillRect(RX,by-4,6,8)});
  // splats and shield
  a.splats.forEach(s=>{if(s.l>.2||Math.floor(t*20)%2)g.drawImage(SPLAT,s.x-3,s.y-3)});

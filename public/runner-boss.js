@@ -1,7 +1,7 @@
 /* Keyloria Run: interactive boss fight. Deflect ink blobs, hit weak spots, charge the mega laser (Space). */
 (function(){
 if(!window.RUNNER)return;
-const RN=window.RUNNER,C=RN.C,W=C.W,H=C.H,GROUND=C.GROUND,RX=C.RX,HX=RX-C.BW/2;
+const RN=window.RUNNER,C=RN.C,H=C.H,GROUND=C.GROUND,RX=C.RX,HX=RX-C.BW/2;
 const HITX=RX+6;              // a blob that gets this far splats on the shield
 const NBARS=8;
 let B=null;
@@ -287,10 +287,10 @@ function strip(){
 
 /* ---------- drawing ---------- */
 function draw(g,cam){
- const R=RN.R,b=act(),bx=R.bossX-cam;if(bx>W+50)return;
+ const R=RN.R,b=act(),bx=R.bossX-cam;if(bx>C.W+50)return;
  const cg=cageGeom(),K=cg.K,cx=ri(bx+20),t=b?b.t:R.t;
- if(b&&b.p3&&b.mode!=='dying'&&b.mode!=='done'){const ph=Math.floor(t*5)%2;g.globalAlpha=ph?.28:.12;g.fillStyle=ph?'#ff2a2a':'#5a0a30';g.fillRect(0,0,W,H);g.globalAlpha=1;
-  g.fillStyle=ph?'#ff4a4a':'#7a1030';g.fillRect(0,0,W,2);g.fillRect(0,H-2,W,2);g.fillRect(0,0,2,H);g.fillRect(W-2,0,2,H)}
+ if(b&&b.p3&&b.mode!=='dying'&&b.mode!=='done'){const ph=Math.floor(t*5)%2;g.globalAlpha=ph?.28:.12;g.fillStyle=ph?'#ff2a2a':'#5a0a30';g.fillRect(0,0,C.W,H);g.globalAlpha=1;
+  g.fillStyle=ph?'#ff4a4a':'#7a1030';g.fillRect(0,0,C.W,2);g.fillRect(0,H-2,C.W,2);g.fillRect(0,0,2,H);g.fillRect(C.W-2,0,2,H)}
  const hop=b&&b.keyHop>0?-(Math.floor(b.keyHop*14)%2)*2:0;
  if(K)g.drawImage(K,cx+3,GROUND-cg.kh-2+hop);
  const fr=b&&b.crack>0?'#ffffff':'#3a3048';
@@ -322,7 +322,7 @@ function shield(g,cx,cy,rx,ry,col){
 
 function disc(g,cx,cy,r,col){g.fillStyle=col;for(let dy=-r;dy<=r;dy++){const w=ri(Math.sqrt(Math.max(0,r*r-dy*dy)));g.fillRect(cx-w,cy+dy,2*w+1,1)}}
 function banner(g,b){
- const s=b.sp;if(!s)return;const t=b.t,n=s.txt.length,sc=n*16<=W-24?2:1,cw=8*sc,x0=6,bw=W-12,y0=22,bh=sc===2?30:26;
+ const s=b.sp;if(!s)return;const t=b.t,n=s.txt.length,sc=n*16<=C.W-24?2:1,cw=8*sc,x0=6,bw=C.W-12,y0=22,bh=sc===2?30:26;
  const pop=Math.min(1,b.mt/.25),yy=y0-ri((1-pop)*30);
  // scroll: parchment with hard edges
  g.fillStyle='#0b1033';g.fillRect(x0-3,yy-1,bw+6,bh+2);
@@ -386,10 +386,10 @@ const o0=()=>14;
 
 function drawHud(g){
  const R=RN.R,b=act(),f=b?b.hp/b.max:1;
- RN.txt(g,R.vname,W-6,4,'#ffffff',1,'r');
- g.fillStyle='#0b1033';g.fillRect(W-88,15,82,6);g.fillStyle='#3a2050';g.fillRect(W-87,16,80,4);
- g.fillStyle=b&&b.p2?'#ff9a3a':'#ff6b7a';g.fillRect(W-87,16,ri(80*f),4);
- g.fillStyle='#ffffff';g.fillRect(W-87+40,15,1,6);
+ RN.txt(g,R.vname,C.W-6,4,'#ffffff',1,'r');
+ g.fillStyle='#0b1033';g.fillRect(C.W-88,15,82,6);g.fillStyle='#3a2050';g.fillRect(C.W-87,16,80,4);
+ g.fillStyle=b&&b.p2?'#ff9a3a':'#ff6b7a';g.fillRect(C.W-87,16,ri(80*f),4);
+ g.fillStyle='#ffffff';g.fillRect(C.W-87+40,15,1,6);
  let nm='KEYLORI';try{nm=SPECIES[R.sp].n[0].toUpperCase()}catch(e){}
  RN.txt(g,'FREE '+nm+'!',6,4,'#f0c860');
  if(!b)return;

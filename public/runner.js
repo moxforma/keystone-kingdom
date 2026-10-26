@@ -3,9 +3,8 @@
    Uses the game's own hero, Keylori, Scramblers, keyboard, finger hints, sounds and pop-up boxes. */
 (function(){
 if(typeof S==='undefined')return;
-const APPW=(()=>{try{const m=document.querySelector('main.app'),p=document.createElement('div');m.appendChild(p);const w=p.getBoundingClientRect().width;p.remove();return Math.max(320,Math.floor(w))}catch(e){return 966}})();   // the game's content width (same as the letter strip)
-const SC=Math.max(2,Math.min(Math.round(APPW/330),Math.floor((innerHeight-440)/120)||2));   // whole-number pixel scale
-const W=Math.max(300,Math.floor((APPW-6)/SC)),H=120,GROUND=100,RX=72;   // width follows the game's own width                 // RX = runner's front edge on screen
+const H=120,GROUND=100,RX=72;   // RX = runner's front edge on screen
+let W=320,SC=2;                  // game width in game pixels / whole-number screen pixels per game pixel: both are re-measured from the CURRENT layout (see fit)
 const BW=12,PLANK=10;                                // runner body width, bridge plank width
 const GRAV=520,JV=-205,HOP=55;                         // jump strength, minimum forward speed of a jump
 const SPEEDS=[.6,.8,1,1.25,1.5],SPD_NAME=['Slowest','Slow','Normal','Fast','Fastest'];
@@ -101,12 +100,36 @@ function mount(){
  .rfree{display:flex;align-items:center;justify-content:center;gap:12px}.rfree svg{width:120px;height:120px}`;
  document.head.appendChild(st);
  cvs=document.getElementById('rcv');g=cvs.getContext('2d');g.imageSmoothingEnabled=false;
- addEventListener('resize',fit);
+ addEventListener('resize',()=>refit());addEventListener('orientationchange',()=>refit());
+ ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>refit()));
+ try{if(window.visualViewport)visualViewport.addEventListener('resize',()=>refit())}catch(e){}
+ try{new MutationObserver(()=>refit()).observe(document.body,{attributes:true,attributeFilter:['class']})}catch(e){}   // text-size zoom (fs-s / fs-l) changes the body class
+ try{if(window.ResizeObserver)new ResizeObserver(()=>refit()).observe(document.getElementById('rbox'))}catch(e){}
 }
-function fit(){if(!cvs)return;const box=document.getElementById('rbox');
- // the game's screens can be zoomed (text-size setting): size the canvas so each game pixel is a whole number of SCREEN pixels
- const f=(box.getBoundingClientRect().width/(box.offsetWidth||1))||1,sw=box.getBoundingClientRect().width||APPW;
- scale=Math.max(1,Math.min(SC,Math.floor((sw-6)/W)));cvs.style.width=(W*scale/f)+'px';cvs.style.height=(H*scale/f)+'px';cvs.style.borderWidth=(3/f)+'px'}
+/* Size the canvas from the CURRENT layout: whole-number screen pixels per game pixel (zoom-aware), width = the strip/rbox width, height-limited by what is left under the canvas.
+   Returns false when the runner screen is not laid out yet (hidden / zero width): the caller retries on the next frame. */
+let fitSig='';
+function measure(){const sec=document.getElementById('s-runner'),box=document.getElementById('rbox');if(!sec||!box||sec.hidden)return null;
+ const r=box.getBoundingClientRect(),ow=box.offsetWidth;if(!(r.width>40)||!(ow>0))return null;
+ const f=r.width/ow||1,sw=Math.floor(r.width);
+ const below=Math.max(0,sec.getBoundingClientRect().bottom-r.bottom),vh=window.innerHeight||document.documentElement.clientHeight||800;
+ const availH=vh-r.top-below-14;   // screen px left for the canvas if everything under it should stay in view
+ return {f,sw,availH}}
+function fit(){if(!cvs)return false;const m=measure();if(!m)return false;
+ const{f,sw,availH}=m,inner=sw-6;
+ let sc=Math.max(1,Math.round(inner/330));                                  // wide screens get bigger pixels
+ const hcap=Math.floor((availH-6)/H);if(hcap>=2)sc=Math.min(sc,hcap);else sc=Math.min(sc,2);   // never below 2 when the width allows it
+ sc=Math.min(sc,Math.max(1,Math.floor(inner/300)));                          // never wider than the box (keeps W >= 300)
+ sc=Math.max(sc,1);if(inner>=2*300)sc=Math.max(sc,2);
+ const nw=Math.max(300,Math.floor(inner/sc));
+ const sig=[nw,sc,f.toFixed(4)].join();
+ SC=sc;scale=sc;
+ if(nw!==W||cvs.width!==nw){W=nw;RUNNER.C.W=nw;cvs.width=nw;cvs.height=H;g=cvs.getContext('2d');g.imageSmoothingEnabled=false}
+ cvs.style.width=(W*sc/f)+'px';cvs.style.height=(H*sc/f)+'px';cvs.style.borderWidth=(3/f)+'px';
+ fitSig=sig;return true}
+/* refit now and again after the next frames (layout may not have settled: show(), modal transitions, fonts, fullscreen) */
+let refitQ=0;
+function refit(n=2){fit();cancelAnimationFrame(refitQ);let k=0;const step=()=>{fit();if(++k<=n)refitQ=requestAnimationFrame(step)};refitQ=requestAnimationFrame(step)}
 function hudHTML(){const L=level();
  return `<button class="icon-btn" data-act="go" data-to="${custom?(custom.back||'map'):(RUNNER.backTo||'home')}" aria-label="Back">${ICON.back}</button>
  <div class="ht"><b>${custom?esc(L.name):'Run · '+L.name}</b><span>${custom?esc(custom.sub||'Review run'):opt.hard?'Super hard':'Level '+(opt.lv+1)+' of '+LV.length}</span></div>
@@ -137,7 +160,7 @@ function open(cfg){
  newRun();if(custom&&custom.autoStart){try{go()}catch(e){startModal()}}else startModal();   // autoStart: the bridge's boss chase starts running at once
  cancelAnimationFrame(raf);last=performance.now();raf=requestAnimationFrame(loop);
 }
-function newRun(){R=build();document.getElementById('rhud').innerHTML=hudHTML();buildStrip();fit();updStrip()}
+function newRun(){fit();R=build();document.getElementById('rhud').innerHTML=hudHTML();buildStrip();fit();updStrip();refit(3)}   // measure first so W is current when the run is generated
 function startModal(){const L=level();
  if(custom){const ks=[...new Set(L.keys)].slice(0,14).map(k=>`<span class="chip" style="--fc:${fc(k)}">${esc(k)}</span>`).join('');let ex='';try{ex=custom.startExtra?custom.startExtra()||'':''}catch(e){}
   return modal(`<div data-runner="start"><h2>${esc(L.name)}</h2><p style="margin:0 0 6px">Type the letter to jump!</p>
@@ -178,7 +201,7 @@ Object.assign(ACT,{
 });
 window.RUNNER={open,get R(){return R},get custom(){return custom},close:()=>setCustom(null),opt,HK,SEG,boss:null,backTo:null,
  locked:i=>false,label:i=>i==='hard'?'Super hard':String(i+1),
- C:{W,H,GROUND,RX,BW,PLANK,GRAV,JV,HOP,SPEEDS},LV,HARD,level,
+ C:{W,H,GROUND,RX,BW,PLANK,GRAV,JV,HOP,SPEEDS},refit:()=>refit(),LV,HARD,level,
  get g(){return g},get HERO(){return HERO},get theme(){return thSync()},get THEMES(){return THEMES},themeFor:L=>themeFor(L),thSprite:i=>mkSpr(thSync(),i),
 
  txt:(...a)=>txt(...a),PX,cap:(...a)=>cap(...a),fc,snd,rnd,pick,pool,store,flash,trim,

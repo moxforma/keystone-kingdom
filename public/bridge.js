@@ -24,7 +24,7 @@ ACT.bridge=()=>{let raw=learnedStory();
  if(S.set.arcd==='beast'&&!window.INSANE&&progLesson()>=UNLOCK){const two=rand(TXT.para.filter(x=>x!==raw));if(two)raw+=' '+two}
  const text=BGHOST?BGHOST.t:prepText(raw),words=text.split(' '),wpm=wpmTarget(),limit=Math.round(text.length/5/wpm*60+(window.INSANE?0:S.set.arcd==='beast'?3:6));
  mountGame('Story Bridge','Type the story to build the bridge!','Words','Rope');
- G={type:'bridge',frames:[[0,0]],ghostInvite:BGHOST,text,pos:0,mist:new Set(),words,wi:0,limit,left:limit,done:false,start:0,score:0,combo:0,arcLevel:typeof arcadeLevelNow==='function'?arcadeLevelNow():'auto'};
+ G={type:'bridge',frames:[[0,0]],ghostInvite:BGHOST,text,pos:0,mist:new Set(),words,wi:0,limit,left:limit,pen:0,el:0,last:0,done:false,start:0,score:0,combo:0,arcLevel:typeof arcadeLevelNow==='function'?arcadeLevelNow():'auto'};
  $('#gsw').hidden=true;const ar=$('#garena');ar.className='garena bridge-arena';
  let starts=[],k=0;words.forEach(w=>{starts.push(k);k+=w.length+1});G.starts=starts;
  ar.innerHTML=`${backdrop(3,['#2a2a6a','#3a3a8a','#5a4a9a','#7a5aa8'])}${cloudsHTML()}
@@ -48,16 +48,45 @@ function finish(won){if(G.done)return;const secs=(performance.now()-(G.start||pe
  G.bridgeMs=elapsed*100;let extra='';if(G.ghostInvite){const fs=G.ghostInvite.f.at(-1)[1]/10,me=won?(elapsed/10):null;const beat=won&&elapsed<G.ghostInvite.f.at(-1)[1];G.ghostBeat=beat;
   extra=`<div class="ghost-summary"><b>${beat?'You beat your friend’s ghost!':'Your friend’s ghost crossed first!'}</b><span>You: ${me?me.toFixed(1)+'s':'did not finish'} · Friend: ${fs.toFixed(1)}s (${G.ghostInvite.a}% accuracy)</span></div>`}
  const share=G.challengeData&&won?shareRunHTML('Story Bridge',`${wpm} WPM · ${acc}% accuracy`):'';
- xEnd(won?'You crossed the bridge!':'The rope snapped!',[[wpm,'WPM'],[Math.max(0,acc)+'%','Accuracy'],[G.wi+'/'+G.words.length,'Words']],gems,'bridge',extra+(won?'<div class="banner gold">The Scrambler runs away!</div>':'<div class="banner">So close! Try a slower speed setting.</div>'),share)}
-function tick(now){if(G.done||G.type!=='bridge')return;if(G.ghostInvite&&G.start){const t=(now-G.start)/100,f=G.ghostInvite.f;let pos=f[f.length-1][0];for(let k=1;k<f.length;k++){if(f[k][1]>=t){const a=f[k-1],b=f[k],u=b[1]>a[1]?(t-a[1])/(b[1]-a[1]):1;pos=a[0]+(b[0]-a[0])*u;break}}const gEl=$('#brghost');if(gEl)gEl.style.left=`calc(4% + ${pos/G.text.length*82}%)`}if(G.start){G.left=G.limit-(now-G.start)/1000;$('#g-b').textContent=Math.max(0,Math.ceil(G.left));const r=$('#brropei');if(r)r.style.width=Math.max(0,G.left/G.limit*100)+'%';
-  if(G.left<8)$('#brrope')?.classList.add('fray');if(G.left<=0)return finish(false)}else $('#g-b').textContent=G.limit;
+ const end=()=>xEnd(won?'You crossed the bridge!':'The rope snapped!',[[wpm,'WPM'],[Math.max(0,acc)+'%','Accuracy'],[G.wi+'/'+G.words.length,'Words']],gems,'bridge',extra+(won?'<div class="banner gold">The Scrambler runs away!</div>':'<div class="banner">So close! Try a slower speed setting.</div>'),share);
+ if(won)return end();
+ const g=G;G.done=true;ropeSync();fallScene();setTimeout(()=>{if(G===g&&G.type==='bridge')end()},1500)}
+/* single source of truth for the rope: G.limit (fixed total) - G.pen (mistake penalties) - G.el (running time). The drawing, the number and the lose test all read G.left from here */
+function ropeSync(){G.left=G.limit-G.pen-G.el;const L=Math.max(0,G.left);$('#g-b').textContent=Math.ceil(L);const r=$('#brropei');if(r)r.style.width=(L/G.limit*100)+'%';if(G.left<8)$('#brrope')?.classList.add('fray')}
+/* lose animation: rope snaps, planks drop, the hero steps off the edge and tumbles into the chasm (hard pixel steps) */
+function fallScene(){const ch=$('.br-chasm'),rope=$('#brrope'),h=$('#brhero'),ar=$('#garena');if(!ch||!h)return;
+ const f=G.wi/G.words.length,x=Math.min(86,4+f*82+7);
+ if(rope){rope.classList.remove('fray');rope.classList.add('snap');ch.insertAdjacentHTML('beforeend','<i class="br-stub a"></i><i class="br-stub b"></i><div class="br-whoops">WHOOPS!</div>')}
+ [...document.querySelectorAll('#brplanks i')].forEach((p,k)=>p.style.setProperty('--k',k));
+ try{tone(900,.05,'square',.08);setTimeout(()=>tone(300,.12,'sawtooth',.08),60);[0,1,2,3,4,5].forEach(k=>setTimeout(()=>tone(520-k*70,.09,'square',.05),380+k*90))}catch(e){}
+ setTimeout(()=>{h.style.left=x+'%'},200);setTimeout(()=>h.classList.add('br-fall'),520);if(ar)ar.classList.add('br-snapping')}
+function tick(now){if(G.done||G.type!=='bridge')return;if(G.ghostInvite&&G.start){const t=(now-G.start)/100,f=G.ghostInvite.f;let pos=f[f.length-1][0];for(let k=1;k<f.length;k++){if(f[k][1]>=t){const a=f[k-1],b=f[k],u=b[1]>a[1]?(t-a[1])/(b[1]-a[1]):1;pos=a[0]+(b[0]-a[0])*u;break}}const gEl=$('#brghost');if(gEl)gEl.style.left=`calc(4% + ${pos/G.text.length*82}%)`}if(G.start){const t=performance.now();G.el+=Math.min(250,Math.max(0,t-G.last))/1000;G.last=t;ropeSync();if(G.left<=0)return finish(false)}else $('#g-b').textContent=G.limit;
  G.raf=requestAnimationFrame(tick)}
 const _gi=gameInput;gameInput=function(ch,caps){if(!(typeof G!=='undefined'&&G&&G.type==='bridge'))return _gi.apply(this,arguments);if(G.done)return;
- try{pressFx(ch===' '?'space':ch.toLowerCase())}catch(e){}if(!G.start)G.start=performance.now();
+ try{pressFx(ch===' '?'space':ch.toLowerCase())}catch(e){}if(!G.start){G.start=performance.now();G.last=G.start}
  const t=G.text[G.pos];if(t===undefined)return;
  if(matchKey(ch,t,caps)){const el=$('#bc'+G.pos);el&&el.classList.add(G.mist.has(G.pos)?'bad':'ok');G.pos++;G.combo++;try{sfx.ok(G.combo)}catch(e){}
   if(t===' '||G.pos>=G.text.length)wordDone();if(G.pos>=G.text.length){paint();return finish(true)}paint()}
- else{G.mist.add(G.pos);G.combo=0;{const pen=window.INSANE?2:{beast:1,hard:.5}[S.set.arcd]||0;if(pen){G.limit-=pen;const rp=$('#brrope');if(rp){rp.classList.remove('wob');void rp.offsetWidth;rp.classList.add('wob')}}}try{sfx.bad()}catch(e){}const pl=$('#bp'+G.wi);if(pl){pl.classList.remove('wob');void pl.offsetWidth;pl.classList.add('wob')}const el=$('#bc'+G.pos);if(el){el.classList.remove('err');void el.offsetWidth;el.classList.add('err')}}};
+ else{G.mist.add(G.pos);G.combo=0;{const pen=window.INSANE?2:{beast:1,hard:.5}[S.set.arcd]||0;if(pen){G.pen+=pen;const rp=$('#brrope');if(rp){rp.classList.remove('wob');void rp.offsetWidth;rp.classList.add('wob')}ropeSync();if(G.left<=0){try{sfx.bad()}catch(e){}return finish(false)}}}try{sfx.bad()}catch(e){}const pl=$('#bp'+G.wi);if(pl){pl.classList.remove('wob');void pl.offsetWidth;pl.classList.add('wob')}const el=$('#bc'+G.pos);if(el){el.classList.remove('err');void el.offsetWidth;el.classList.add('err')}}};
+
+
+/* Story Bridge lose animation (hard pixel steps) */
+(function(){const st=document.createElement('style');st.textContent=`
+.br-rope.snap i{animation:none;width:0!important}
+.br-stub{position:absolute;bottom:72%;width:9%;height:6px;background:repeating-linear-gradient(90deg,#e8c070 0 6px,#a8803a 6px 10px);z-index:5;transform-origin:left center}
+.br-stub.a{left:10%;animation:brstuba .8s steps(6) forwards}
+.br-stub.b{right:10%;transform-origin:right center;animation:brstubb .8s steps(6) forwards}
+@keyframes brstuba{0%{transform:rotate(0)}to{transform:translateY(120px) rotate(70deg)}}
+@keyframes brstubb{0%{transform:rotate(0)}to{transform:translateY(120px) rotate(-70deg)}}
+.garena.br-lost .br-planks{animation:none}
+.garena.br-lost .br-planks i.on,.garena.br-lost .br-planks i:not(.on){animation:brdrop 1s steps(7) forwards;animation-delay:calc(var(--k,0)*40ms)}
+@keyframes brdrop{0%{transform:none}25%{transform:translateY(10px) rotate(6deg)}to{transform:translateY(260px) rotate(35deg)}}
+.br-hero{transition:left .25s steps(4)}
+.br-hero.br-fall{animation:brhfall 1.1s steps(9) forwards}
+@keyframes brhfall{0%{transform:translateY(0)}15%{transform:translateY(-18px) rotate(-15deg)}to{transform:translateY(420px) rotate(720deg)}}
+.br-whoops{position:absolute;left:50%;bottom:62%;z-index:6;transform:translateX(-50%);font-family:'Jersey 10',monospace;font-size:clamp(28px,5vw,56px);color:#ffd23c;text-shadow:3px 3px 0 #3a1a10,-3px 3px 0 #3a1a10,3px -3px 0 #3a1a10,-3px -3px 0 #3a1a10;animation:brwhoops .9s steps(4) both}
+@keyframes brwhoops{0%{opacity:0;transform:translateX(-50%) scale(.4)}40%{opacity:1;transform:translateX(-50%) scale(1.2)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+`;document.head.appendChild(st)})();
 
 /* arcade card */
 const _ra=renderArcade;renderArcade=function(){_ra.apply(this,arguments);const g=$('#s-arcade .games');if(!g||g.querySelector('[data-act=bridge]'))return;const lock=false;
