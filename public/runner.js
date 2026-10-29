@@ -29,7 +29,7 @@ const GLY={};
 function glyph(ch,col){const k=ch+col;if(GLY[k])return GLY[k];const c=document.createElement('canvas');c.width=8;c.height=9;const x=c.getContext('2d');
  x.font='8px "Press Start 2P"';x.fillStyle=col;x.fillText(ch,0,8);const d=x.getImageData(0,0,8,9);for(let i=3;i<d.data.length;i+=4)d.data[i]=d.data[i]>100?255:0;x.putImageData(d,0,0);return GLY[k]=c}
 function txt(g,s,x,y,col,sc=1,align='l',sh='#0b1033'){s=String(s);const w=s.length*8*sc;x=Math.round(align==='c'?x-w/2:align==='r'?x-w:x);y=Math.round(y);
- [...s].forEach((ch,i)=>{if(ch===' ')return;if(sh)g.drawImage(glyph(ch,sh),x+i*8*sc+sc,y+sc,8*sc,9*sc);g.drawImage(glyph(ch,col),x+i*8*sc,y,8*sc,9*sc)})}
+ [...s].forEach((ch,i)=>{if(ch===' ')return;if(sh)g.drawImage(glyph(ch,sh),x+i*8*sc,y+sc,8*sc,9*sc);g.drawImage(glyph(ch,col),x+i*8*sc,y,8*sc,9*sc)})}
 
 /* ---------- sprites ---------- */
 const PX=(rows,pal)=>{const c=document.createElement('canvas');c.width=rows[0].length;c.height=rows.length;const g=c.getContext('2d');rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(pal[ch]){g.fillStyle=pal[ch];g.fillRect(x,y,1,1)}}));return c};
