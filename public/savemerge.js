@@ -18,6 +18,9 @@ function mergeSave(x,y){
  if(base.arc||other.arc){m.arc={...maxMap(base.arc,other.arc)};if(base.arc&&base.arc.high||other.arc&&other.arc.high)m.arc.high={...((other.arc||{}).high||{}),...((base.arc||{}).high||{})}}
  if(base.daily||other.daily){m.daily={...(base.daily||{})};m.daily.best=maxNum((base.daily||{}).best,(other.daily||{}).best)}
  if(base.codeOn||other.codeOn)m.codeOn=true;
+if(base.streams||other.streams){const A=base.streams||{},B=other.streams||{};m.streams={};for(const id of new Set([...Object.keys(A),...Object.keys(B)])){const a=A[id]||{},b=B[id]||{},o={...a};
+ o.best=maxMap(a.best,b.best);o.btp=maxMap(a.btp,b.btp);o.mast=maxMap(a.mast,b.mast);for(const k of['skip','rn','done'])o[k]=maxNum(a[k],b[k]);o.runf={...(b.runf||{}),...(a.runf||{})};m.streams[id]=o}}
+if(base.spell||other.spell){const a=base.spell||{},b=other.spell||{};m.spell={...b,...a,best2:maxMap(a.best2,b.best2),beeFl:{...(b.beeFl||{}),...(a.beeFl||{})},tricky:{...(b.tricky||{}),...(a.tricky||{})},lists:{...(b.lists||{}),...(a.lists||{})},done:maxNum(a.done,b.done)};if(a.beeFlawless||b.beeFlawless)m.spell.beeFlawless=1}
  m.upd=maxNum(base.upd,other.upd);return m}
 root.mergeSave=mergeSave;
 if(typeof mergeBundle==='function'&&typeof localBundle==='function'){const _mb=mergeBundle;mergeBundle=function(r){

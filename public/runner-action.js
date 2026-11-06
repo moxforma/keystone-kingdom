@@ -40,7 +40,7 @@ function okAt(a,X,span){
  const R=a.R;
  if(X<RX+240||X+span>R.bossX-200)return false;
  for(const o of R.obs){
-  if(o.t==='gap'||o.t==='fork'){const e=o.x+(o.w||0);if(X>o.x-120&&X<e+120)return false}
+  if(o.t==='gap'||o.t==='fork'||o.t==='mbridge'){const e=o.x+(o.w||0);if(X>o.x-120&&X<e+120)return false}
   else if(o.t==='flap'){if(X+span>o.x-120&&X<o.x+o.w+60)return false}}
  return true}
 function planRun(R){
@@ -60,11 +60,18 @@ function planRun(R){
 HK.build.push(R=>{try{planRun(R)}catch(e){console.error('[runner-action build]',e);A=fresh(R)}});
 
 /* ---------- letters ---------- */
-const wantsOf=o=>{try{
- if(o.t==='gap')return o.word;if(o.t==='rock')return o.key;
- let s=SEG[o.t]?SEG[o.t].want(o):'';if(o.t==='fork')s+=o.hi+o.lo;if(o.t==='flap'&&o.letters)s+=o.letters.join('');return s}catch(e){return ''}};
+/* accepted keys of an obstacle. whole=true: every key it will accept (all letters of a word). A segment may define acc(o,whole) when its want() is
+   empty on purpose (Math / Spelling hide the answer from the finger hint) and a gap may define accK(whole). */
+const accOf=(o,whole)=>{try{
+ if(o.t==='gap')return o.accK?o.accK(whole):(whole?o.word:(o.word[o.typed]||''));
+ if(o.t==='rock')return o.key;
+ const S=SEG[o.t];if(!S)return '';
+ let s=S.acc?S.acc(o,whole):S.want(o);
+ if(whole){if(o.t==='fork')s+=o.hi+o.lo;if(o.t==='flap'&&o.letters)s+=o.letters.join('')}
+ return s}catch(e){return ''}};
+const wantsOf=o=>accOf(o,true);
 const isDoneObs=o=>{try{return o.t==='gap'?o.typed>=o.word.length:o.t==='rock'?(o.done||o.jt):(SEG[o.t]?SEG[o.t].done(o):true)}catch(e){return true}};
-function curWants(){const t=RN.target();if(!t)return '';try{if(t.t==='gap')return t.word[t.typed]||'';if(t.t==='rock')return t.key;return SEG[t.t]?SEG[t.t].want(t):''}catch(e){return ''}}
+function curWants(){const t=RN.target();if(!t)return '';return accOf(t,false)}
 function pickCh(a,others){
  const keys=[...new Set([...a.R.L.keys])],R=a.R;
  const oth=others.map(lc);
@@ -79,12 +86,24 @@ function pickCh(a,others){
  let k=RN.pick(pool);if(a.R.L.caps&&/[a-z]/.test(k)&&Math.random()<a.R.L.caps)k=k.toUpperCase();
  a.prev=k;return k}
 
+/* Math / Spelling: RN.ambushProvider = {pick(sel)->item|null (item.ch = the key that answers it), draw(g,item,x,y,cur,t)} makes blobs carry a problem
+   instead of a keycap. sel(cands,keyOf) returns the candidate whose key collides with no obstacle (strict, then only the current one). */
+function pickFrom(a,others,cands,keyOf){
+ const R=a.R,oth=others.map(lc),strict=[];
+ R.obs.filter(o=>!isDoneObs(o)&&o.x<R.cam+C.W+200).slice(0,4).forEach(o=>{strict.push(...[...wantsOf(o)].map(lc))});
+ const loose=[...curWants()].map(lc),k=c=>lc(keyOf(c));
+ let p=cands.filter(c=>!oth.includes(k(c))&&!strict.includes(k(c)));
+ if(!p.length)p=cands.filter(c=>!oth.includes(k(c))&&!loose.includes(k(c)));
+ if(!p.length)return null;
+ const p2=p.filter(c=>k(c)!==lc(a.prev));if(p2.length)p=p2;
+ const c=RN.pick(p);a.prev=keyOf(c);return c}
+const prov=()=>RN.ambushProvider||null;
 /* ---------- ambush flow ---------- */
 const wx=sx=>ri(rr().cam)+sx;
 const hy=()=>GROUND-16-ri(-rr().y);              // hero centre height (screen y)
 function flapActive(R){return R.obs.some(o=>o.t==='flap'&&(o.st==='fly'||o.st==='pop'||o.st==='fall'))}
 function forkActive(R){return R.obs.some(o=>o.t==='fork'&&(o.st==='hi'||o.st==='ledge'||o.st==='drop'))}
-function nearSpecial(R){return R.obs.some(o=>(o.t==='gap'||o.t==='fork')&&!isDoneObs(o)&&o.x-R.front<120&&o.x+(o.w||0)>R.front-120)}
+function nearSpecial(R){return R.obs.some(o=>(o.t==='gap'||o.t==='fork'||o.t==='mbridge')&&!isDoneObs(o)&&o.x-R.front<120&&o.x+(o.w||0)>R.front-120)}
 function startAmbush(a){
  a.air=Math.random()<.45;a.sx=ri(228+Math.random()*30);a.sy=a.air?GROUND-48:GROUND-MH;
  a.x=C.W+16;a.mode='in';a.mt=0;a.retHits=0;a.blobs=[];a.flash=0;
@@ -92,8 +111,10 @@ function startAmbush(a){
 function throwBlobs(a){
  const n=a.hard?2:1,T=blobTime(a),sx0=a.sx-6,vel=(sx0-HITX)/T,others=[];
  for(let i=0;i<n;i++){
-  const ch=pickCh(a,a.blobs.map(z=>z.ch).concat(others));others.push(ch);
-  a.blobs.push({x:sx0+i*20,sx0:sx0+i*20,v:vel,ch,st:'in',arc:!a.air&&i===1,y:a.air?a.sy+3:GROUND-8,w:Math.random()*3,y0:a.air?a.sy+3:GROUND-8})}
+  const av=a.blobs.map(z=>z.ch).concat(others);let item=null;
+  try{const P=prov();if(P)item=P.pick((c,kf)=>pickFrom(a,av,c,kf))}catch(e){item=null}
+  const ch=item?item.ch:pickCh(a,av);others.push(ch);
+  a.blobs.push({x:sx0+i*20,sx0:sx0+i*20,v:vel,ch,item,st:'in',arc:!a.air&&i===1,y:a.air?a.sy+3:GROUND-8,w:Math.random()*3,y0:a.air?a.sy+3:GROUND-8})}
  RN.snd(220,.12,'square',.06);RN.snd(330,.1,'square',.05,.06);a.mode='fly';a.mt=0}
 function koScrambler(a,col){
  if(a.mode==='ko'||!a.mode||a.mode==='flee')return;
@@ -121,8 +142,8 @@ function fire(a){
  a.beams.push({l:.38,max:.38,y});
  let nSm=0;
  R.obs.forEach(o=>{
-  if(o.t!=='rock'||o.done||o.jt)return;const sx=o.x-cam;if(sx<RX-4||sx>C.W+10)return;
-  o.done=true;nSm++;const cx=sx+(o.w||10)/2,delay=Math.max(.02,(cx-RX)/520);
+  const S=SEG[o.t];if(o.t==='rock'?(o.done||o.jt):!(S&&S.smashable&&S.smashable(o)))return;const sx=o.x-cam;if(sx<RX-4||sx>C.W+10)return;
+  if(S&&S.smash)S.smash(o);o.done=true;nSm++;const cx=sx+(o.w||10)/2,delay=Math.max(.02,(cx-RX)/520);
   a.deb.push({o,ox:o.x,delay,hide:1});});
  // hold smashed rocks until the beam reaches them, then burst
  if(a.mode&&a.mode!=='ko'&&a.mode!=='flee')koScrambler(a,'#f0c860');
@@ -208,10 +229,11 @@ HK.update.push(dt=>{
  // keep every live blob's letter unambiguous
  if(a.blobs.length){
   const cw=[...curWants()].map(lc);
-  a.blobs.forEach(z=>{if(z.st==='in'&&cw.includes(lc(z.ch))){const nc=pickCh(a,a.blobs.filter(q=>q!==z).map(q=>q.ch));if(!cw.includes(lc(nc))){z.ch=nc;a.hint=''}}});
+  a.blobs.forEach(z=>{if(z.st==='in'&&z.item&&cw.includes(lc(z.ch))){try{const P=prov(),it=P&&P.pick((c,kf)=>pickFrom(a,a.blobs.filter(q=>q!==z).map(q=>q.ch),c,kf));if(it&&!cw.includes(lc(it.ch))){z.item=it;z.ch=it.ch}}catch(e){}}
+  else if(z.st==='in'&&cw.includes(lc(z.ch))){const nc=pickCh(a,a.blobs.filter(q=>q!==z).map(q=>q.ch));if(!cw.includes(lc(nc))){z.ch=nc;a.hint=''}}});
   // finger hint: show the blob's letter while it is the most urgent thing
   const z=a.blobs.filter(q=>q.st==='in').sort((p,q)=>p.x-q.x)[0],t=RN.target();
-  if(z){const oeta=(t&&t.x-R.cam<=C.W+4)?Math.max(0,(t.x-R.front))/Math.max(R.speed,40):99,beta=(z.x-HITX)/z.v;setHint(a,beta<=oeta+.4?z:null)}else setHint(a,null)}
+  if(z){const oeta=(t&&t.x-R.cam<=C.W+4)?Math.max(0,(t.x-R.front))/Math.max(R.speed,40):99,beta=(z.x-HITX)/z.v;setHint(a,beta<=oeta+.4&&!z.item?z:null)}else setHint(a,null)}
  else if(a.hint)setHint(a,null);
  return false});
 function updGems(a,dt){
@@ -267,7 +289,7 @@ HK.drawTop.push((g,cam)=>{
  const inb=a.blobs.filter(z=>z.st==='in').sort((p,q)=>p.x-q.x);
  a.blobs.forEach(z=>{
   const sp=Math.floor(t*6+z.w)%2?BLOB_B:BLOB_A,x=ri(z.x),y=ri(z.y);g.drawImage(sp,x,y);
-  if(z.st==='in'){const cur=z===inb[0];RN.cap(z.ch,x+3-6,y-17-(cur?Math.floor(t*6)%2:0),cur?1:0)}});
+  if(z.st==='in'){const cur=z===inb[0],by=y-17-(cur?Math.floor(t*6)%2:0),P=prov();if(z.item&&P&&P.draw)P.draw(g,z.item,x+3,by,cur,t,inb.indexOf(z));else RN.cap(z.ch,x+3-6,by,cur?1:0)}});
  // lasers (blob hits) and mega beam
  const y0=hy();
  a.lasers.forEach(l=>{line(g,RX+2,y0,l.tx,l.ty,2,l.c);line(g,RX+2,y0,l.tx,l.ty,1,'#ffffff')});
@@ -289,6 +311,6 @@ HK.drawTop.push((g,cam)=>{
   RN.txt(g,'SPACE',x+1,y+1,'#0b1033',1,'l',null)}
 });
 
-RN.action={state:()=>act(),cmax:()=>act()&&act().cmax};
+RN.action={state:()=>act(),cmax:()=>act()&&act().cmax,canFire:()=>{const a=act();return !!a&&canFire(a)}};
 }catch(e){console.error('[runner-action]',e)}
 })();

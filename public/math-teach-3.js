@@ -1,0 +1,32 @@
+/* math-teach-3.js : "watch me" mini-lessons for worlds 9-12 (28 topics). Shown before each math lesson.
+   Self-registering: each entry goes into window.MATH_TEACH[topicId]. */
+(function(){var T=(window.MATH_TEACH=window.MATH_TEACH||{});
+T['m9.1']={ex:'−6 + 10', a:'4', steps:[{t:'−6 + 10'},{t:'Start at −6 on the line'},{t:'Move right 10 steps'},{t:'−6 + 10 = 4'}], tip:'Number line!'};
+T['m9.2']={ex:'2 + 5²', a:'27', steps:[{t:'2 + 5²'},{t:'Power first: 5² = 25'},{t:'2 + 25 = 27'},{t:'2 + 5² = 27'}], tip:'Powers first!'};
+T['m9.3']={ex:'2/3 × 3/4', a:'1/2', steps:[{t:'2/3 × 3/4'},{t:'Tops: 2 × 3 = 6'},{t:'Bottoms: 3 × 4 = 12'},{t:'2/3 × 3/4 = 6/12 = 1/2'}], tip:'Simplify last!'};
+T['m9.4']={ex:'$40 + 13% HST. Total $?', a:'45.20', steps:[{t:'$40 + 13% HST. Total $?'},{t:'10% of $40 is $4.00'},{t:'3% of $40 is $1.20'},{t:'$40 + $5.20 = $45.20'}], tip:'Find 10% first'};
+T['m9.5']={ex:'2/5 = _/20', a:'8', steps:[{t:'2/5 = _/20'},{t:'5 × 4 = 20'},{t:'2 × 4 = 8'},{t:'2/5 = 8/20'}], tip:'Do the same!'};
+T['m9.6']={ex:'x + 6 = 2', a:'−4', steps:[{t:'x + 6 = 2'},{t:'Take 6 from both sides'},{t:'2 − 6 = −4'},{t:'x + 6 = 2 gives x = −4'}], tip:'Balance it!'};
+T['m9.7']={ex:'Angles 50° and 60°. Third?', a:'70', steps:[{t:'Angles 50° and 60°. Third?'},{t:'A triangle adds to 180°'},{t:'50 + 60 = 110'},{t:'180 − 110 = 70'}], tip:'Total is 180°'};
+T['m10.1']={ex:'−2.4 + 3.9', a:'1.5', steps:[{t:'−2.4 + 3.9'},{t:'Signs differ: subtract'},{t:'3.9 − 2.4 = 1.5'},{t:'−2.4 + 3.9 = 1.5'}], tip:'Bigger one wins'};
+T['m10.2']={ex:'3^4', a:'81', steps:[{t:'3^4'},{t:'3 × 3 × 3 × 3'},{t:'9 × 3 = 27, × 3 = 81'},{t:'3^4 = 81'}], tip:'Multiply it out'};
+T['m10.3']={ex:'Bike $200, up 10%. New $?', a:'220', steps:[{t:'Bike $200, up 10%. New $?'},{t:'10% of $200 = $20'},{t:'$200 + $20 = $220'}], tip:'Find 10% first'};
+T['m10.4']={ex:'2x + 5 = x + 9', a:'4', steps:[{t:'2x + 5 = x + 9'},{t:'Take x from both sides'},{t:'x + 5 = 9'},{t:'Take 5 from both: x = 4'}], tip:'Balance it!'};
+T['m10.5']={ex:'y = 2x + 3, x = 4. y?', a:'11', steps:[{t:'y = 2x + 3, x = 4. y?'},{t:'2 × 4 = 8'},{t:'8 + 3 = 11'},{t:'y = 2 × 4 + 3 = 11'}], tip:'Times, then plus'};
+T['m10.6']={ex:'Legs 6 and 8. Hypotenuse?', a:'10', steps:[{t:'Legs 6 and 8. Hypotenuse?'},{t:'6² + 8² = 36 + 64'},{t:'36 + 64 = 100'},{t:'Hypotenuse = √100 = 10'}], tip:'Square, add, root'};
+T['m10.7']={ex:'Mean: 4, 6, 8, 10', a:'7', steps:[{t:'Mean: 4, 6, 8, 10'},{t:'Add: 4 + 6 + 8 + 10 = 28'},{t:'Share 28 among 4 numbers'},{t:'28 ÷ 4 = 7'}], tip:'Add, then share'};
+T['m11.1']={ex:'48 + 26', a:'74', steps:[{t:'48 + 26'},{t:'48 + 2 = 50'},{t:'Take 2 from 26: 24'},{t:'50 + 24 = 74'}], tip:'Make tens!'};
+T['m11.2']={ex:'6 × 7', a:'42', steps:[{t:'6 × 7'},{t:'Split 6 into 5 + 1'},{t:'5 × 7 = 35, 1 × 7 = 7'},{t:'6 × 7 = 35 + 7 = 42'}], tip:'Break it apart'};
+T['m11.3']={ex:'20, 25, _, 35', a:'30', steps:[{t:'20, 25, _, 35'},{t:'Jump: 25 − 20 = 5'},{t:'Add 5: 25 + 5 = 30'},{t:'20, 25, 30, 35'}], tip:'Find the jump'};
+T['m11.4']={ex:'_ × 4 = 20', a:'5', steps:[{t:'_ × 4 = 20'},{t:'Think: 4 groups of what?'},{t:'4 × 5 = 20'},{t:'So _ = 5'}], tip:'Undo it!'};
+T['m11.5']={ex:'25¢ + 10¢ + 5¢', a:'40', steps:[{t:'25¢ + 10¢ + 5¢',aid:{coins:[25,10,5]}},{t:'Start with the 25¢'},{t:'25¢ + 10¢ = 35¢'},{t:'25¢ + 10¢ + 5¢ = 40¢'}], tip:'Count up!'};
+T['m11.6']={ex:'Square, sides 4 cm. Perimeter?', a:'16', steps:[{t:'Perimeter of a 4 cm square'},{t:'4 sides, all the same'},{t:'4 + 4 + 4 + 4 = 16'},{t:'Perimeter = 16 cm'}], tip:'Add all sides'};
+T['m11.7']={ex:'Mia: 4 pucks, gets 3, 2', a:'9', steps:[{t:'Mia: 4 pucks, gets 3, 2'},{t:'4 + 3 = 7'},{t:'7 + 2 = 9'},{t:'4 + 3 + 2 = 9 pucks'}], tip:'Do one step'};
+T['m12.1']={ex:'5 + 3 × 4', a:'17', steps:[{t:'5 + 3 × 4'},{t:'Multiply first: 3 × 4 = 12'},{t:'5 + 12 = 17'},{t:'5 + 3 × 4 = 17'}], tip:'Times before plus'};
+T['m12.2']={ex:'−3 × (−4)', a:'12', steps:[{t:'−3 × (−4)'},{t:'Neg × neg = positive'},{t:'3 × 4 = 12'},{t:'−3 × (−4) = 12'}], tip:'Same signs: positive'};
+T['m12.3']={ex:'15% of 60', a:'9', steps:[{t:'15% of 60'},{t:'10% of 60 = 6'},{t:'5% is half of 10%: 3'},{t:'15% of 60 = 9'}], tip:'Find 10% first'};
+T['m12.4']={ex:'3x + 4 = 19', a:'5', steps:[{t:'3x + 4 = 19'},{t:'Take 4 from both: 3x = 15'},{t:'Divide both by 3: x = 5'},{t:'3x + 4 = 19 gives x = 5'}], tip:'Undo the steps'};
+T['m12.5']={ex:'LCM of 4 and 6', a:'12', steps:[{t:'LCM of 4 and 6'},{t:'Multiples of 4: 4, 8, 12'},{t:'Multiples of 6: 6, 12'},{t:'First match: 12'},{t:'LCM of 4 and 6 = 12'}], tip:'List the multiples'};
+T['m12.6']={ex:'Triangle b=6, h=4. Area?', a:'12', steps:[{t:'Triangle: base 6, height 4'},{t:'Area = base × height ÷ 2'},{t:'6 × 4 = 24, 24 ÷ 2 = 12'},{t:'Triangle area = 12 cm²'}], tip:'Half a rectangle'};
+T['m12.7']={ex:'Skates $40, 50% off. Sale price?', a:'20', steps:[{t:'Skates $40, 50% off'},{t:'50% off means half price'},{t:'$40 ÷ 2 = $20'},{t:'Sale price = $20'}], tip:'Break it down'};
+})();

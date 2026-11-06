@@ -97,12 +97,13 @@ function doThrow(b){
  for(let i=0;i<n;i++){
   const ch=chooseCh(avoid,b.prevCh);avoid.push(ch);b.prevCh=ch;
   const z={x:sx0+i*16,sx0:sx0+i*16,v:vel,ch,st:'in',arc:n===2?i===1:Math.random()<.4,y:GROUND-8,w:RN.rnd(0,3)};
+  try{const bc=RN.bossContent;if(bc&&bc.blob){const c=bc.blob(avoid.slice(0,-1));if(c&&c.ch!=null){z.ch=c.ch;z.q=c.q;avoid[avoid.length-1]=c.ch}}}catch(e){}   // optional content provider (Math stream): blob carries a problem
   b.blobs.push(z)}
  RN.snd(220,.12,'square',.06);RN.snd(330,.1,'square',.05,.06);setMode(b,'fly');b.dirty=true}
 function spawnSpots(b){
  const v=vgeom(b),n=b.hard?3:(b.tier>=6||Math.random()<.5?3:2),slots=[[-30,-34],[0,-54],[30,-34]]
  const sl=(n<3?[slots[0],slots[2]]:slots).slice(0,Math.min(n,uniq().length)),avoid=[],dur=Math.max(b.tier>=6?1.9:0,(b.hard?4.5:(b.p2?5.2:6))*Math.max(.5,1-.045*b.tier)*(b.tier>=6?1-.04*(b.tier-5):1));
- b.spots=sl.map(s=>{const ch=chooseCh(avoid,b.prevCh);avoid.push(ch);return{ch,ox:s[0],oy:s[1],l:dur,dur}});
+ b.spots=sl.map(s=>{const ch=chooseCh(avoid,b.prevCh);avoid.push(ch);let q=null,c2=ch;try{const bc=RN.bossContent,c=bc&&bc.spot&&bc.spot(avoid.slice(0,-1));if(c&&c.ch!=null){c2=c.ch;q=c.q;avoid[avoid.length-1]=c2}}catch(e){}return{ch:c2,q,ox:s[0],oy:s[1],l:dur,dur}});
  RN.snd(660,.08,'triangle',.05);RN.snd(880,.1,'triangle',.05,.08);setMode(b,'weak');b.dirty=true}
 function spotPos(b,s){const v=vgeom(b);return{x:ri(v.sx+s.ox),y:Math.max(32,Math.min(GROUND-10,ri(GROUND+s.oy)))}}
 function nextVolley(b){b.throwsLeft=volleyCount(b);b.windDur=(b.p3?.4:b.p2?.6:.9)*b.tm;setMode(b,'wind')}
@@ -164,8 +165,9 @@ function makeSentence(b,final){
 const spellDue=(b,s)=>s.final?(b.p3&&(b.cyc3>=1||b.hp<=b.max*.1)):b.hp<=b.max*s.at+1e-6;
 function dueSpell(b){return b.sched.find(s=>!s.done&&spellDue(b,s))}
 function startSpell(b,s){
- s.done=true;const final=!!s.final,txt=makeSentence(b,final),per=Math.max(.45,1.5-1.05*Math.min(11,b.tier)/11);
- b.cur=s;b.sp={txt,i:0,t:0,final,lim:1.4+txt.length*per/SPD()};
+ s.done=true;let mc=null;try{const bc=RN.bossContent;mc=bc&&bc.spell?bc.spell(b,!!s.final):null}catch(e){mc=null}
+ const final=!!s.final,txt=mc?mc.txt:makeSentence(b,final),per=Math.max(.45,1.5-1.05*Math.min(11,b.tier)/11);
+ b.cur=s;b.sp={txt,i:0,t:0,final,lim:mc&&mc.lim?mc.lim:1.4+txt.length*per/SPD(),math:mc};
  b.blobs=[];b.spots=[];setMode(b,'spell');b.dirty=true;
  const v=vgeom(b);RN.popTxt(final?'FINAL SPELL!':'SPELL!',wx(v.sx),GROUND-v.vh-18,'#c9a8f0');
  RN.snd(120,.5,'sawtooth',.07);RN.snd(240,.4,'triangle',.05,.15);RN.burst(v.sx,v.cy,'#c9a8f0',14,60)}
@@ -272,18 +274,18 @@ function key(e){
 /* ---------- strip ---------- */
 function items(){
  const b=act();if(!b||b.mode==='dying'||b.mode==='done')return[];const o=[];
- b.blobs.filter(z=>z.st==='in').sort((p,q)=>p.x-q.x).forEach(z=>o.push({ch:z.ch}));
- b.spots.slice().sort((p,q)=>p.l-q.l).forEach(s=>o.push({ch:s.ch}));
+ b.blobs.filter(z=>z.st==='in').sort((p,q)=>p.x-q.x).forEach(z=>o.push({ch:z.ch,q:z.q}));
+ b.spots.slice().sort((p,q)=>p.l-q.l).forEach(s=>o.push({ch:s.ch,q:s.q}));
  if(b.charge>=b.cmax)o.push({ch:' '});
  return o}
 function stripHTML(){
  const b=act();
- if(b&&b.mode==='spell'&&b.sp){const s=b.sp;return [...s.txt].map((c,i)=>`<span class="${c===' '?'sp':''} ${i<s.i?'ok':''}">${c===' '?'·':esc(c)}</span>`).join('')}
+ if(b&&b.mode==='spell'&&b.sp){const s=b.sp;return [...s.txt].map((c,i)=>`<span class="${c===' '?'sp':''} ${i<s.i?'ok':''}">${c===' '?'·':esc(s.math&&i>=s.i?'?':c)}</span>`).join('')}
  const it=items();if(!it.length)return '<span class="sp">·</span>';
- return it.map(i=>i.ch===' '?'<span>SPACE</span>':`<span>${esc(i.ch)}</span>`).join('')}
+ return it.map(i=>i.ch===' '?'<span>SPACE</span>':`<span>${esc(i.q?'?':i.ch)}</span>`).join('')}
 function strip(){
- const b=act();if(b&&b.mode==='spell'&&b.sp)return{cur:b.sp.i,ch:b.sp.txt[b.sp.i]};
- const it=items();return it.length?{cur:0,ch:it[0].ch}:{cur:-1,ch:null}}
+ const b=act();if(b&&b.mode==='spell'&&b.sp)return{cur:b.sp.i,ch:b.sp.math?null:b.sp.txt[b.sp.i]};
+ const it=items();return it.length?{cur:0,ch:it[0].q?null:it[0].ch}:{cur:-1,ch:null}}
 
 /* ---------- drawing ---------- */
 function draw(g,cam){
@@ -345,6 +347,7 @@ function banner(g,b){
  const k=Math.max(0,1-s.t/s.lim),low=k<.25;
  g.fillStyle='#0b1033';g.fillRect(x0,yy+bh-5,bw,3);g.fillStyle=low&&Math.floor(t*8)%2?'#ffffff':low?'#ff4a4a':'#8ff0ff';g.fillRect(x0+1,yy+bh-4,ri((bw-2)*k),1)}
 
+function capQ(g,ch,q,x,y,st,side){const bc=RN.bossContent;if(q&&bc&&bc.cap){bc.cap(g,ch,q,x,y,st,side);return}RN.cap(ch,x,y,st)}
 function top(g,cam){
  const b=act();if(!b||RN.R.phase!=='boss')return;
  const t=b.t;
@@ -355,7 +358,7 @@ function top(g,cam){
    g.fillStyle=col;g.fillRect(p.x-o,p.y-o,2*o,2);g.fillRect(p.x-o,p.y+o-2,2*o,2);g.fillRect(p.x-o,p.y-o,2,2*o);g.fillRect(p.x+o-2,p.y-o,2,2*o);
    g.fillStyle='#0b1033';g.fillRect(p.x-o+2,p.y-o+2,2*o-4,2*o-4);
    g.fillStyle='#f0c860';[[-o-2,0],[o+1,0],[0,-o-2],[0,o+1]].forEach(([a,c])=>g.fillRect(p.x+a,p.y+c,1,1))}
-  RN.cap(s.ch,p.x-6,p.y-7,1);
+  capQ(g,s.ch,s.q,p.x-6,p.y-7,1,s.ox<0?-1:s.ox>0?1:0);
   const bw=ri(16*Math.max(0,s.l)/s.dur);g.fillStyle='#0b1033';g.fillRect(p.x-9,p.y+o0(),18,3);g.fillStyle='#f0c860';g.fillRect(p.x-8,p.y+o0()+1,bw,1);
  });
  // blobs
@@ -363,12 +366,12 @@ function top(g,cam){
  b.blobs.forEach(z=>{
   const sp=Math.floor(t*6+z.w)%2?BLOB_B:BLOB_A,x=ri(z.x),y=ri(z.y);
   g.drawImage(sp,x,y);
-  if(z.st==='in'){const cur=z===inb[0];RN.cap(z.ch,x+3-6,y-17-(cur?Math.floor(t*6)%2:0),cur?1:0)}});
+  if(z.st==='in'){const cur=z===inb[0];capQ(g,z.ch,z.q,x+3-6,y-17-(cur?Math.floor(t*6)%2:0)-(z.q?inb.indexOf(z)*16:0),cur?1:0,0)}});
  // spell: charging orb above the Scrambler, thrown at the shield when the timer runs out
  if(b.mode==='spell'&&b.sp){const v=vgeom(b),p=Math.min(1,b.mt/.9),r=3+ri(p*8),f=Math.floor(t*10)%2,ox=v.sx,oy=GROUND-v.vh-14-ri(p*4);
   disc(g,ox,oy,r+1,'#0b1033');disc(g,ox,oy,r,f?'#c9a8f0':'#8a5fd8');disc(g,ox,oy,Math.max(1,r-3),f?'#ffffff':'#e6dcff');
   for(let i=0;i<4;i++){const a=t*3+i*Math.PI/2;g.fillStyle='#f0c860';g.fillRect(ox+ri(Math.cos(a)*(r+4)),oy+ri(Math.sin(a)*(r+4)),1,1)}
-  banner(g,b)}
+  if(b.sp&&b.sp.math&&RN.bossContent&&RN.bossContent.banner)RN.bossContent.banner(g,b,b.sp);else banner(g,b)}
  if(b.mode==='spfail'&&b.fail){const f=b.fail,k=Math.min(1,f.t/.5),ox=ri(f.x+(HITX-f.x)*k),oy=ri(f.y-16+(GROUND-16-(f.y-16))*k);disc(g,ox,oy,12,'#0b1033');disc(g,ox,oy,11,'#8a5fd8');disc(g,ox,oy,8,Math.floor(t*14)%2?'#c9a8f0':'#ffffff')}
  if(b.mode==='dying'&&b.ko&&!b.brk){const v=vgeom(b),f=Math.floor(b.t*8)%4,hy=GROUND-v.vh+v.dy-4;[[-10,0],[0,-3],[10,0],[0,3]].forEach(([a,c],i)=>{const q=(i+f)%4,xx=v.sx+[-10,0,10,0][q],yy=hy+[0,-3,0,3][q];g.fillStyle='#0b1033';g.fillRect(xx-2,yy-2,5,5);g.fillStyle=i%2?'#ffffff':'#f0c860';g.fillRect(xx-1,yy,3,1);g.fillRect(xx,yy-1,1,3)})}
  // lasers

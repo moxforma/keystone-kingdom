@@ -162,6 +162,9 @@ function open(cfg){
 }
 function newRun(){fit();R=build();document.getElementById('rhud').innerHTML=hudHTML();buildStrip();fit();updStrip();refit(3)}   // measure first so W is current when the run is generated
 function startModal(){const L=level();
+ if(custom&&(custom.stream==='math'||custom.stream==='spell')){   // Math / Spelling: one short line, then Space (no key chips, no extra notes)
+  return modal(`<div data-runner="start"><h2>${esc(L.name)}</h2><p style="margin:0 0 10px">${custom.stream==='math'?'Solve it to jump!':'Spell it to jump!'}</p>
+  <div class="rbtns"><button class="btn big" data-act="runGo">Go! (SPACE)</button><button class="btn alt" data-act="go" data-to="${custom.back||'map'}">Map</button></div></div>`)}
  if(custom){const ks=[...new Set(L.keys)].slice(0,14).map(k=>`<span class="chip" style="--fc:${fc(k)}">${esc(k)}</span>`).join('');let ex='';try{ex=custom.startExtra?custom.startExtra()||'':''}catch(e){}
   return modal(`<div data-runner="start"><h2>${esc(L.name)}</h2><p style="margin:0 0 6px">Type the letter to jump!</p>
   <div class="rkeys">${ks}${L.keys.length>14?'<span class="chip">…</span>':''}</div>${ex}

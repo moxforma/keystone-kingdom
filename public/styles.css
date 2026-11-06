@@ -1308,3 +1308,5 @@ body:not(.kkready) #s-home{visibility:hidden}
 /* Focus mode: no decorative motion */
 body.no-fx .zk,body.no-fx .hero .zk,body.no-fx .hero-big *,body.no-fx .card.holo::after,body.no-fx .sprtile.holo::after,body.no-fx .fthumb.holo::after,body.no-fx .sky,body.no-fx .sky *{animation:none!important}
 body.no-fx .speech,body.no-fx .bubble-say{display:none!important}
+/* the star sky is a fixed overlay: keep it behind the lesson title so a star can never sit on a hyphen ("-tion") */
+.hud{position:relative;z-index:5}
