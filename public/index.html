@@ -219,8 +219,9 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
 nav .pbtn{white-space:nowrap}
 @media (max-width:1180px) and (min-width:701px){nav{gap:6px}nav .pbtn{font-size:19px;padding:8px 11px 10px}nav .prism .pbtn{font-size:21px;padding:9px 13px 11px}}
 @media (max-width:700px){
- nav{display:flex!important;grid-template-columns:none;gap:6px;overflow-x:auto!important;justify-content:flex-start!important;scroll-snap-type:x proximity;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:24px!important}
- nav .pbtn{white-space:nowrap!important;font-size:15px!important;padding:8px 10px 10px!important;min-height:0!important;flex:0 0 auto!important;scroll-snap-align:start}
+ nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible!important;height:auto!important;padding:6px 0 8px!important;-webkit-mask-image:none;mask-image:none}   /* wraps to two rows: every item stays visible */
+ nav .pbtn{white-space:nowrap!important;font-size:14px!important;padding:8px 4px 10px!important;min-height:0!important;text-align:center;letter-spacing:.02em}
+ html{scroll-padding-top:150px!important}
 }
 </style></head>
 <body><div class="stars"></div>
@@ -232,17 +233,47 @@ nav .pbtn{white-space:nowrap}
 <main>
 <div class="wrap hero">
  <div><a href="/play/"><img class="biglogo" id="biglogo" src="/site/img/logo.png" alt="Keyloria Kingdom"></a>
- <h1>Typing, math and spelling on a <em>pixel adventure</em></h1>
- <p class="lead">Kids zap Scramblers, befriend Keylori and master typing, math and spelling, one short lesson at a time.</p>
+ <h1>Typing, math and spelling in one <em>pixel adventure</em></h1>
+ <p class="lead">Kids zap Scramblers, befriend Keylori and grow at typing, math and spelling, one short lesson at a time. One hero, one profile, three subjects.</p>
  <div class="cta"><span class="prism"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span><a class="pbtn c-teal" href="#classroom"><img src="/site/img/ico_book.png" alt="">For classrooms</a></div>
  <p class="tiny">Free · Runs in the browser · No downloads · No ads</p>
- <p class="tiny">Three subjects in one game · Math and Spelling mapped to the Ontario curriculum, JK to Grade 8</p>
+ <p class="tiny">Mapped to the Ontario curriculum, JK to Grade 8 · not officially endorsed</p>
  <p class="kbnote">Made to be played with a keyboard, ideally on a computer or an iPad with a keyboard.</p></div>
  <div><div class="scene"><div class="cloud" style="top:14%"></div><div class="cloud" style="top:30%;animation-delay:-9s"></div><div class="path"></div>
   <div class="strip" id="strip"></div><div class="say" id="say">Zap!</div>
   <img class="hs" src="/site/img/hero_pop.png" alt=""><div class="bar"><i id="hp" style="width:100%"></i></div><img class="vs" id="vs" src="/site/img/v_imp.png" alt=""><div class="beam" id="beam"></div></div>
   <div class="kb" id="kb"></div></div>
 </div>
+
+<section class="wrap pillars" aria-label="Three subjects">
+<style>
+.pillars{padding-top:6px;padding-bottom:30px}
+.pillars h2{font:400 18px/1.5 var(--title);text-align:center;margin:0 0 18px;color:var(--ink);text-shadow:3px 3px 0 #2a1d3e}
+.pl3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+.pil{--c:var(--teal);--c2:var(--teal2);display:block;text-decoration:none;color:var(--ink);background:var(--panel);border:4px solid var(--line);border-top:10px solid var(--c);box-shadow:0 6px 0 #0a0716;padding:18px 20px 22px;text-align:center}
+.pil.m{--c:var(--gold);--c2:var(--gold2)}.pil.s{--c:#e89ac0;--c2:#a04c78}
+.pil:hover{transform:translateY(-3px)}
+.pil img{display:block;margin:0 auto 10px;width:114px;height:84px;image-rendering:pixelated;max-width:none}
+.pil b{display:block;font:400 34px/1 var(--px);letter-spacing:.08em;color:var(--c);margin-bottom:6px}
+.pil span{font-size:24px;color:var(--mute);line-height:1.25;display:block}
+@media (max-width:700px){.pl3{grid-template-columns:1fr;gap:10px}.pil{display:grid;grid-template-columns:auto 1fr;gap:0 14px;text-align:left;align-items:center;padding:10px 14px}.pil img{grid-row:1/3;width:76px;height:56px;margin:0}.pil b{font-size:26px;margin:0}.pil span{font-size:20px}.pillars h2{font-size:14px}}
+</style>
+<h2>Type &middot; Math &middot; Spell</h2>
+<div class="pl3">
+<a class="pil" href="#play" data-tab="play"><img data-pil="typing" alt=""><b>TYPE</b><span>Learn every key, finger by finger.</span></a>
+<a class="pil m" href="#math" data-tab="math"><img data-pil="math" alt=""><b>MATH</b><span>Number sense, JK to Grade 8.</span></a>
+<a class="pil s" href="#spelling" data-tab="spelling"><img data-pil="spell" alt=""><b>SPELL</b><span>Ontario word lists, look and type.</span></a>
+</div>
+<script>
+(function(){var P={typing:['#7fe8d0','#3fa894'],math:['#f0c860','#c8981e'],spell:['#e89ac0','#a04c78']},F={'1':['.#.','##.','.#.','.#.','###'],'2':['###','..#','###','#..','###'],'3':['###','..#','.##','..#','###'],A:['.#.','#.#','###','#.#','#.#'],B:['##.','#.#','##.','#.#','##.'],C:['.##','#..','#..','#..','.##']};
+document.querySelectorAll('img[data-pil]').forEach(function(im){var id=im.dataset.pil,c=document.createElement('canvas');c.width=19;c.height=14;var g=c.getContext('2d'),cap=P[id][0],dk=P[id][1],K='#fff6e0',I='#1a1030';
+function r(x,y,w,h,f){g.fillStyle=f;g.fillRect(x,y,w,h)}
+r(0,0,19,14,I);r(1,1,17,10,cap);r(1,11,17,2,dk);r(1,1,17,1,K);[[0,0],[18,0],[0,13],[18,13]].forEach(function(p){g.clearRect(p[0],p[1],1,1)});
+if(id==='typing'){[3,6,9,12,15].forEach(function(x){r(x,3,2,2,K);r(x,5,2,1,dk)});[4,7,10,13].forEach(function(x){r(x,6,2,2,K);r(x,8,2,1,dk)});r(5,9,9,2,K);r(5,11,9,1,dk)}
+else{(id==='math'?'123':'ABC').split('').forEach(function(ch,k){F[ch].forEach(function(row,y){for(var x=0;x<3;x++)if(row[x]==='#')r(3+k*5+x,3+y,1,1,I)})})}
+im.src=c.toDataURL()})})();
+</script>
+</section>
 
 <section id="play" class="tab on"><div class="wrap">
  <div class="sec-h"><span class="tagbox" style="--c:var(--red);--c2:var(--red2)"><b><i>HOW TO PLAY</i></b></span><h2>Four steps to fast fingers</h2><p>Every lesson is a quick battle. Typing the right keys powers your hero, and true fun facts make every sentence worth reading.</p></div>
@@ -418,7 +449,7 @@ new IntersectionObserver(es=>{es[0].isIntersecting&&document.getElementById('cla
 
 /* spelling walkthrough */
 (function(){const ST=[
- ['Open Spelling','On the home screen',0.4,'Tap the blue <b>SPELLING</b> button on the home screen.'],
+ ['Open Spelling','On the home screen',0.4,'Tap the pink <b>SPELL</b> tile on the home screen.'],
  ['Pick your words','Grades K to 8',3.68,'Choose <b>Word Sets</b> and a grade, or a teacher list, Tricky Words or your own list.'],
  ['Choose how to play','Look, Listen or Bee',10.28,'<b>Look</b>: see it, then type it from memory. <b>Listen</b>: hear it and type it. <b>Bee Battle</b>: beat the Bee boss.'],
  ['Spell the words','Hints when you need them',14.8,'Press <b>Space</b> when ready and type the word. After a miss the next letter is shown, and the word goes to Tricky Words.'],

@@ -19,10 +19,14 @@ function voicesReady(cb){
  try{if(speechSynthesis.getVoices().length)return go();speechSynthesis.addEventListener('voiceschanged',go,{once:true});setTimeout(go,1500)}catch(e){go()}}
 primeVoices();
 const PRON={the:'thuh',a:'uh',was:'wuz',of:'uv',said:'sed',does:'duz',one:'won',two:'too',once:'wunce',live:'liv'};
+const voiceOn=()=>!!(S.set&&S.set.voice);   // same switch as game.js speak() / voice.js: "Read hints out loud"
 function sayParts(parts,cb){
+ if(!voiceOn()||!hasSpeech()){if(cb)setTimeout(cb,0);return}   // sound off: say nothing, never wait for speech to end
  voicesReady(()=>{try{if(!hasSpeech())return;const v=window.kkPickVoice&&window.kkPickVoice();speechSynthesis.cancel();
   setTimeout(()=>{try{const ps=parts.filter(x=>x[0]);ps.forEach(([t,r],ix)=>{const u=new SpeechSynthesisUtterance(t);if(v){u.voice=v;u.lang=v.lang}u.rate=r;u.pitch=1;if(cb&&ix===ps.length-1){u.onend=()=>cb();u.onerror=()=>{}}speechSynthesis.speak(u)});if(cb&&!ps.length)cb()}catch(e){if(cb)cb()}},60)}catch(e){if(cb)cb()}})}
-function sayWord(it,slow,cb){const w=it.w,p=PRON[w]||w,sent=it.s||(window.SPELLD&&SPELLD.sentence?SPELLD.sentence(w):'');
+function sentOf(it){return it.s||(window.SPELLD&&SPELLD.sentence?SPELLD.sentence(it.w):'')||''}
+function sayWord(it,slow,cb){const w=it.w,p=PRON[w]||w,sent=sentOf(it);
+ try{cuePulse()}catch(e){}
  const r=slow?.55:.8;sayParts([[p+'.',r],[sent,slow?.7:.9],[p+'.',r]],cb)}
 const SND={a:'aah',e:'eh',i:'ih',o:'ah',u:'uh',b:'buh',c:'kuh',d:'duh',f:'fff',g:'guh',h:'huh',j:'juh',k:'kuh',l:'lll',m:'mmm',n:'nnn',p:'puh',q:'kwuh',r:'rrr',s:'sss',t:'tuh',v:'vvv',w:'wuh',x:'ks',y:'yuh',z:'zzz'};
 
@@ -36,6 +40,12 @@ try{document.head.insertAdjacentHTML('beforeend',`<style>
 .spsplat{position:absolute;z-index:5;width:4px;height:4px;pointer-events:none;image-rendering:pixelated;background:#c0407a;
  box-shadow:-8px -4px 0 #c0407a,8px -8px 0 #e070a0,12px 4px 0 #c0407a,-4px 8px 0 #8a2a5a,4px 12px 0 #e070a0,-12px 8px 0 #8a2a5a,0 0 0 4px #c0407a,4px 0 0 4px #c0407a,-4px 4px 0 4px #8a2a5a,16px -4px 0 #8a2a5a;animation:spsplat .6s steps(5) forwards}
 @keyframes spsplat{0%{transform:scale(.5);opacity:1}30%{transform:scale(1.5)}100%{transform:scale(1.5);opacity:0}}
+#spcue{position:absolute;left:3%;right:3%;bottom:6%;z-index:4;display:flex;align-items:center;justify-content:center;gap:12px;min-height:40px;padding:2px 6px;font-family:'Jersey 10',monospace;font-size:clamp(22px,2.8vw,30px);letter-spacing:.06em;color:#e8e2f4;text-transform:uppercase;text-align:center;line-height:1.05;text-shadow:0 2px 0 #0a0f2e;pointer-events:none}
+#spcue .sphearb{position:static;flex:none;pointer-events:auto;padding:4px 8px 6px}
+#spcue.pulse img{animation:spcuep .3s steps(2) infinite}
+@keyframes spcuep{0%{transform:scale(1)}100%{transform:scale(1.34)}}
+#spcue .tk{flex:none;display:inline-block;background:#e8ecff;color:#0b1033;border-bottom:3px solid #8f98d0;padding:4px 8px 1px;font-size:.78em;line-height:1;letter-spacing:.1em;text-shadow:none}
+#spcue .tx{background:rgba(10,15,46,.72);padding:2px 8px}#spcue .tx b{color:#f0c860;font-weight:400;letter-spacing:.12em}
 #stripIn span.sph{color:#6f79b8}#stripIn span.spdot{color:var(--good)}
 .fhint .splook{font-family:var(--display);font-size:20px;letter-spacing:.06em}
 </style>`)}catch(e){}
@@ -68,10 +78,9 @@ function classic(n){
  P.sp=R;P.mist=new Set();P.combo=0;P.start=performance.now();P.last=performance.now();P.tier=null;P.maxCombo=0;
  const foeI=P.i+'-'+formNow(P.i),[fi,ff]=foeI.split('-').map(Number);P.fi=fi;P.ff=ff;
  const name=SPECIES[fi].n[ff],vname=villainName(P.i,boss);
- const hear=md!=='look'&&!R.noSpeech;
- $q('#arena').innerHTML=`${scn()}<div class="bubble" id="bubble"></div><div class="hero" id="hero">${zookSVG()}</div><div class="foe" id="foe"><div class="cage">${creatureSVG(fi,ff,'px',null)}</div></div><div class="villain ${boss?'boss':''}" id="vil">${villainSVG(P.i,boss)}</div>
+  $q('#arena').innerHTML=`${scn()}<div class="bubble" id="bubble"></div><div class="hero" id="hero">${zookSVG()}</div><div class="foe" id="foe"><div class="cage">${creatureSVG(fi,ff,'px',null)}</div></div><div class="villain ${boss?'boss':''}" id="vil">${villainSVG(P.i,boss)}</div>
  <div class="fmeter"><span class="fname">${vname}</span><div class="bar"><i id="fbar" style="width:100%"></i></div><span class="flab">Free ${name}!</span></div>
- ${hear?`<button class="sphearb" id="sphear" data-act="spHear2" aria-label="Hear the word again" title="Hear it again"><img src="${speakerURL()}" alt=""></button>`:''}`;
+ ${md!=='look'?`<div id="spcue"><button class="sphearb" id="sphear" data-act="spHear2" aria-label="Hear the word again" title="Hear it again"><img src="${speakerURL()}" alt=""></button><span class="tk">TAB</span><span class="tx"></span></div>`:''}`;
  try{$q('#strip').classList.remove('shake')}catch(e){}
  P.phase='play';P.onKey=(ch,caps)=>onKey(R,ch,caps);
  say(boss?'Spelling Bee!':md==='look'?'Look, cover, type!':md==='hear'?'Listen and spell!':`Save ${name}!`);
@@ -90,15 +99,26 @@ function startFlash(R){if(R.phase!=='listen')return;clearT(R);const it=cur(R);R.
  later(R,flashMs(R,it),()=>cover(R))}
 function listenThenFlash(R,it,delay){   // say the word, then flash it briefly once the speaking has ended
  R.phase='listen';R.flash=true;R.vis=false;draw(R);try{setTarget(null);$q('#fhint').innerHTML=''}catch(e){}
- if(R.noSpeech){later(R,delay,()=>startFlash(R));return}
+ if(R.noSpeech||!voiceOn()){later(R,delay,()=>startFlash(R));return}   // no sound: flash the word right away
  const tok=R.tok=(R.tok||0)+1;
  later(R,delay,()=>sayWord(it,false,()=>{if(alive(R)&&R.tok===tok&&R.phase==='listen')startFlash(R)}));
  later(R,delay+9000,()=>{if(R.tok===tok&&R.phase==='listen')startFlash(R)})}
 
+/* ---------- visual for everything spoken: the example sentence with the word blanked (or blanks + letter count when there is no sentence) ---------- */
+function blankSentence(it){
+ const w=it.w,sent=sentOf(it),blanks='_'.repeat(w.length);
+ if(sent){const esc1=x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  let re=new RegExp('\\b'+esc1(w)+'\\b','i');
+  if(!re.test(sent)){const st=w.length>4?w.slice(0,w.length-1):w;re=new RegExp('\\b'+esc1(st)+'[a-z]*','i')}   // inflected form in the sentence
+  if(re.test(sent))return{html:esc(sent).replace(new RegExp(re.source,'i'),()=>'<b>'+blanks+'</b>')}}
+ return{html:'<b>'+[...blanks].join(' ')+'</b>'}}
+function cueSet(R){const el=$q('#spcue');if(!el)return;const it=cur(R);if(!it)return;const t=el.querySelector('.tx');if(t)t.innerHTML=blankSentence(it).html}
+function cuePulse(){const el=$q('#spcue');if(!el)return;el.classList.add('pulse');clearTimeout(cuePulse.t);cuePulse.t=setTimeout(()=>el.classList.remove('pulse'),voiceOn()?2500:600)}
+
 /* ---------- one word ---------- */
 function load(R){
  if(R.k>=R.q.length)return end(R);
- const it=cur(R);it.miss=0;R.pos=0;R.rev=false;R.helpPos=-1;clearT(R);
+ const it=cur(R);it.miss=0;R.pos=0;R.rev=false;R.helpPos=-1;clearT(R);cueSet(R);
  if(R.md==='look'&&!R.w1){                                  // show it, then cover it
   R.phase='show';R.vis=true;R.flash=true;draw(R);say(it.retry?'Once more!':'Look!');
   $q('#fhint').innerHTML='<span class="splook">SPACE: cover it</span>';try{setTarget(null)}catch(e){}
@@ -183,7 +203,7 @@ function end(R){
  R.phase='fin';clearT(R);
  const len=R.len,ok=R.res.filter(Boolean).length;
  try{say('Great spelling!')}catch(e){}
- try{if(hasSpeech())speechSynthesis.cancel()}catch(e){}
+ try{if(hasSpeech()&&voiceOn())speechSynthesis.cancel()}catch(e){}
  setTimeout(()=>{if(P&&P.sp===R){P.phase='play';P.onKey=null;K.finishClassic({len,ok,secs:Math.max(1,(performance.now()-P.start)/1000)})}},500)}
 
 /* ---------- hear again: Tab key or the speaker button ---------- */

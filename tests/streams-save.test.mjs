@@ -64,3 +64,45 @@ test('merging a save with itself changes nothing', () => {
   assert.deepEqual(m.streams, A.streams);
   assert.deepEqual(m.spell.tricky, A.spell.tricky);
 });
+
+test('streams merge keeps per-game arcade high scores (S.streams[id].hi): union, de-dupe, top 10, same on client and server', () => {
+  const mk = (n, base) => Array.from({ length: n }, (_, k) => ({ score: base + k, acc: 90, at: base * 1000 + k }));
+  const a = { name: 'Kit', upd: 10, streams: { math: { best: {}, hi: { dash: [{ score: 50, acc: 80, at: 1 }, { score: 20, acc: 70, at: 2 }], pop: [{ score: 7, acc: 100, at: 3 }] } } } };
+  const b = { name: 'Kit', upd: 5, streams: { math: { best: {}, hi: { dash: [{ score: 50, acc: 80, at: 1 }, { score: 90, acc: 95, at: 4 }], zap: [{ score: 3, acc: 60, at: 5 }] } },
+                                  spell: { best: {}, hi: { bee: [{ score: 11, acc: 88, at: 6 }] } } } };
+  const ab = both(a, b), ba = both(b, a);
+  assert.deepEqual(ab.streams.math.hi.dash.map(e => e.score), [90, 50, 20]);   // the duplicate entry is kept once
+  assert.deepEqual(Object.keys(ab.streams.math.hi).sort(), ['dash', 'pop', 'zap']);
+  assert.deepEqual(ab.streams.spell.hi, { bee: [{ score: 11, acc: 88, at: 6 }] });
+  assert.deepEqual(ab.streams.math.hi, ba.streams.math.hi);                       // order-independent
+  const big = both({ name: 'Kit', upd: 1, streams: { math: { hi: { g: mk(10, 100) } } } }, { name: 'Kit', upd: 2, streams: { math: { hi: { g: mk(10, 200) } } } });
+  assert.equal(big.streams.math.hi.g.length, 10); assert.equal(big.streams.math.hi.g[0].score, 209);
+  // a side without hi never invents one
+  assert.equal('hi' in both(A, B).streams.math, false);
+});
+
+/* Keylori across subjects: ONE collection, a creature offset per subject (streams.js SLOTMAP block) */
+const smSrc = readFileSync(new URL('../public/streams.js', import.meta.url), 'utf8');
+const sm = smSrc.slice(smSrc.indexOf('/*SLOTMAP*/'), smSrc.indexOf('/*ENDSLOTMAP*/'));
+const slotCtx = {};
+runInNewContext(`${sm}\nglobalThis.out = { slotFor, slotBack };`, slotCtx);
+const { slotFor, slotBack } = slotCtx.out;
+
+test('creature slots: Typing unchanged, Math starts a third in, Spelling two thirds in, wrapping', () => {
+  const n = 117;
+  assert.equal(slotFor('typing', 0, n), 0); assert.equal(slotFor('typing', 116, n), 116);
+  assert.equal(slotFor('math', 0, n), 39); assert.equal(slotFor('spell', 0, n), 78);
+  assert.equal(slotFor('math', 78, n), 0); assert.equal(slotFor('spell', 39, n), 0);   // wraps around
+  assert.equal(slotFor('math', 116, n), 38);
+});
+
+test('creature slots: each subject is a one-to-one mapping and slotBack undoes it', () => {
+  for (const n of [117, 100, 7]) for (const id of ['typing', 'math', 'spell']) {
+    const seen = new Set();
+    for (let i = 0; i < n; i++) { const j = slotFor(id, i, n); seen.add(j); assert.equal(slotBack(id, j, n), i); }
+    assert.equal(seen.size, n);
+  }
+  // the three subjects give three different creatures for the same lesson
+  assert.equal(new Set(['typing', 'math', 'spell'].map(id => slotFor(id, 5, 117))).size, 3);
+  assert.equal(slotFor('math', 500, 117), 500);   // out of range is left alone
+});

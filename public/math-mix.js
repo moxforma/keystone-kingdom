@@ -17,6 +17,32 @@
   function lvl12(r, s, G) { var l = Math.min(7, r.int(Math.max(0, s - 2), s) + (s < 3 ? 2 : s < 5 ? 1 : 0)); return r.pick(G[l])(r, s); }
   var NAMES = ['Maya', 'Sam', 'Noor', 'Liam', 'Ava', 'Kai', 'Priya', 'Leo', 'Zoe', 'Omar'];
 
+  /* a hint must match the problem in front of the kid: pick it from the question text (first matching rule), never at random */
+  function hintBy(q, rules, dflt) { var i; q = String(q); for (i = 0; i < rules.length; i++) if (rules[i][0].test(q)) return rules[i][1]; return dflt || ''; }
+  var H_SPRINT = [[/[+].*[−]|[−].*[+]/, 'Add first, then take away'], [/\+.*\+/, 'Add two, then the next'], [/\+/, 'Make a ten, then add the rest'], [/−/, 'Count back, or count up']];
+  var H_TIMES = [[/×/, 'Think of the times table'], [/÷/, 'Use the times table backward']];
+  var H_MONEY = [[/Change\?/, 'Count up from the cost to what you pay'], [/each|at \$|at \d/, 'Multiply, then add'], [/loonie|toonie/, 'A loonie is $1, a toonie is $2'], [/Total/, 'Add the amounts']];
+  var H_MEAS = [
+    [/Perimeter \d+, length/, 'Half the perimeter, then take away the length'], [/Area \d+, width/, 'Area ÷ width'],
+    [/Perimeter|Fence/, 'Add up all the sides'], [/Area\?|Tiles/, 'Length × width'],
+    [/sides\?/, 'Count the sides'], [/faces|corners|edges/, 'Picture the shape'], [/symmetry/, 'Fold it so the halves match'], [/Row of/, 'Count from the other end'],
+    [/Minutes\?/, 'Count up from the start time'], [/Days in/, '7 days in 1 week'],
+    [/p\.m\.|24 h/, 'For the 24 h clock add 12 (or take away 12)'],
+    [/^\d+ cm = _ mm$/, '10 mm make 1 cm'], [/^\d+ m = _ cm$|^\d+ cm = _ m$/, '100 cm make 1 m'], [/^\d+ kg = _ g$|^\d+ g = _ kg$/, '1000 g make 1 kg'], [/^\d+ L = _ mL$/, '1000 mL make 1 L']];
+  var H_OPS = [[/\(/, 'Brackets first'], [/[²³]/, 'Powers first, then × ÷'], [/./, '× ÷ before + −']];
+  var H_INTS = [[/−\s\(−/, 'Taking away a negative adds'], [/[×÷]/, 'Same signs: positive. Different signs: negative'], [/[²³]/, 'Multiply it out, watch the signs'], [/./, 'Use a number line']];
+  var H_PCT = [[/is _% of/, 'Part ÷ whole × 100'], [/% change/, 'Change ÷ start × 100'], [/plus 13% HST/, 'Add 13% of the price'], [/HST/, '13% = 10% + 3%'], [/off/, 'Find the % of the price, then take it off'],
+    [/\/\d+ = _%/, 'Make the bottom 100'], [/= _%/, 'Move the point 2 places'], [/^50%/, 'Half of it'], [/^25%/, 'Halve it, halve again'], [/^75%/, 'Find 25%, then times 3'], [/./, 'Find 10% first']];
+  var H_POW = [[/GCF/, 'The biggest number that divides both'], [/LCM/, 'The smallest number both go into'], [/Factors/, 'List the factor pairs'], [/Next prime/, 'A prime has only 1 and itself as factors'],
+    [/× 10/, 'Move the point 2 or 3 places'], [/√/, 'Which number times itself?'], [/./, 'Multiply it out']];
+  var H_GEO = [[/Triangular prism/, 'Triangle area × length'], [/Prism/, 'Base area × height'], [/Triangle b=/, 'Base × height ÷ 2'], [/Triangle angles/, 'Angles in a triangle add to 180°'],
+    [/Parallelogram/, 'Base × height'], [/moved/, 'Count the moves on the grid'], [/Surface/, 'Add the area of every face'], [/Volume/, 'Length × width × height'], [/Angles on a line/, 'A straight line is 180°'],
+    [/Right angle/, 'A right angle is 90°'], [/Circle r|Circle d=\d+\. Radius/, 'The diameter is 2 radii'], [/C = 3\.14/, 'Multiply by 3.14'], [/dilated/, 'Multiply by the scale'], [/symmetry/, 'Fold it so the halves match'],
+    [/Legs|Hyp/, 'a² + b² = c²'], [/Scale/, 'Multiply by the scale'], [/Perimeter/, 'Add up all the sides'], [/Area/, 'Length × width']];
+  var H_RATE = [[/% off, plus 13% HST/, 'Take off the discount first, then add HST'], [/HST/, 'Add 13% of the price'], [/off/, 'Find the % of the price, then take it off'], [/How far/, 'Distance = speed × time'], [/Speed \(km\/h\)/, 'Speed = distance ÷ time'],
+    [/muffins/, 'Find the cost of one first'], [/Mean/, 'Add them up, then ÷ how many'], [/Range/, 'Biggest minus smallest'], [/Weeks/, 'Money still needed ÷ saved each week'], [/Ratio/, 'Total ÷ all the parts, then times the larger part'],
+    [/Warms|°C/, 'Use a number line'], [/interest/, 'Amount × rate × years'], [/tip/, 'Find the % of the bill'], [/Pay \$100/, 'Add up what you bought, then take it from $100']];
+
   /* ============================================================ WORLD 11 ============================================================ */
 
   /* ---- m11.1 mental maths sprint ---- */
@@ -42,7 +68,7 @@
   MATH.add({
     id: 'm11.1', world: 11, n: 1, strand: 'B', exp: 'Gr1-4 mental math: add and subtract within 20, 100, 1000, 10 000 (review sprint)', title: 'Math sprint',
     neg: false, exact: true, ans: 'num',
-    gen: function (r, s) { var x = lvl(r, s, SPRINT); x.hint = r.pick(['Go fast', 'Make tens', 'Count on', 'Round, then fix']); return x; }
+    gen: function (r, s) { var x = lvl(r, s, SPRINT); x.hint = hintBy(x.q, H_SPRINT); return x; }
   });
 
   /* ---- m11.2 times and shares ---- */
@@ -64,7 +90,7 @@
   MATH.add({
     id: 'm11.2', world: 11, n: 2, strand: 'B', exp: 'Gr2-4 multiplication and division facts to 10x10 and beyond, 2-3 digit by 1 digit (review)', title: 'Times and shares',
     neg: false, exact: true, ans: 'num',
-    gen: function (r, s) { var x = lvl(r, s, TIMES); x.hint = r.pick(['Think of the table', 'Skip count', 'Use a fact you know']); return x; }
+    gen: function (r, s) { var x = lvl(r, s, TIMES); x.hint = hintBy(x.q, H_TIMES); return x; }
   });
 
   /* ---- m11.3 skip-count challenge ---- */
@@ -141,7 +167,7 @@
   MATH.add({
     id: 'm11.5', world: 11, n: 5, strand: 'F', exp: 'Gr2-4 Canadian money: totals, change, multiples; amounts to 5 cents (no pennies). Under $1 type 35 or 0.35; $1 and up type 1.35', title: 'Money change',
     neg: false, exact: true, ans: 'money',
-    gen: function (r, s) { var x = lvl(r, s, MONEY); x.hint = 'Type 35 or 0.35 for 35¢'; return x; }
+    gen: function (r, s) { var x = lvl(r, s, MONEY); x.hint = hintBy(x.q, H_MONEY); return x; }
   });
 
   /* ---- m11.6 measure, time and shapes ---- */
@@ -177,7 +203,7 @@
   MATH.add({
     id: 'm11.6', world: 11, n: 6, strand: 'E', exp: 'Gr1-4 measurement: perimeter, area, elapsed time, 24-hour clock, unit conversions (cm/m, g/kg, mL/L), sides and faces of shapes (review)', title: 'Measure and time',
     neg: false, exact: true, ans: 'num',
-    gen: function (r, s) { var x = lvl(r, s, MEAS); x.hint = r.pick(['Draw it', 'Count the jumps', 'Think units']); return x; }
+    gen: function (r, s) { var x = lvl(r, s, MEAS); x.hint = hintBy(x.q, H_MEAS); return x; }
   });
 
   /* ---- m11.7 multi-step word problems (K-4, Canadian) ---- */
@@ -238,7 +264,7 @@
   MATH.add({
     id: 'm12.1', world: 12, n: 1, strand: 'C', exp: 'Gr5-8 order of operations with brackets, exponents (squares, cubes), whole numbers (grand challenge)', title: 'Order of operations',
     neg: false, exact: true, ans: 'num',
-    gen: function (r, s) { var x = lvl12(r, s, OPS); x.hint = r.pick(['Brackets first', 'Powers, then × ÷', '× ÷ before + −']); return x; }
+    gen: function (r, s) { var x = lvl12(r, s, OPS); x.hint = hintBy(x.q, H_OPS); return x; }
   });
 
   /* ---- m12.2 integers ---- */
@@ -264,7 +290,7 @@
   MATH.add({
     id: 'm12.2', world: 12, n: 2, strand: 'B', exp: 'Gr7-8 integers: add, subtract, multiply, divide, powers with negatives (answers may be negative; type the minus sign first)', title: 'Integers',
     neg: true, exact: true, ans: 'num',
-    gen: function (r, s) { var x = lvl12(r, s, INTS); x.hint = r.pick(['Use a number line', 'Same signs: positive', 'Type - first']); return x; }
+    gen: function (r, s) { var x = lvl12(r, s, INTS); x.hint = hintBy(x.q, H_INTS); return x; }
   });
 
   /* ---- m12.3 fractions, decimals and percent ---- */
@@ -284,7 +310,7 @@
   MATH.add({
     id: 'm12.3', world: 12, n: 3, strand: 'B', exp: 'Gr5-8 percent of a number, fraction and decimal to percent, sales tax 13% HST, discounts, percent change', title: 'Percent power',
     neg: false, exact: false, ans: 'num',
-    gen: function (r, s) { var x = lvl12(r, s, PCTS); x.hint = r.pick(['Find 10% first', 'Percent means out of 100', 'Halve it, halve again']); return x; }
+    gen: function (r, s) { var x = lvl12(r, s, PCTS); x.hint = hintBy(x.q, H_PCT); return x; }
   });
 
   /* ---- m12.4 equations ---- */
@@ -310,7 +336,7 @@
   MATH.add({
     id: 'm12.4', world: 12, n: 4, strand: 'C', exp: 'Gr6-8 solving one-step, two-step and multi-step equations, variables on both sides (negative solutions possible; type - first)', title: 'Solve for x',
     neg: true, exact: true, ans: 'num',
-    gen: function (r, s) { var x = lvl12(r, s, EQS); x.hint = r.pick(['Undo the last step', 'Do the same to both sides']); return x; }
+    gen: function (r, s) { var x = lvl12(r, s, EQS); x.hint = /x.*=.*x/.test(x.q) ? 'Do the same to both sides' : 'Undo the last step'; return x; }
   });
 
   /* ---- m12.5 powers, roots and factors ---- */
@@ -347,7 +373,7 @@
       var v = MATH.calc(q);
       return v != null && Math.abs(v - n) < 1e-9;
     },
-    gen: function (r, s) { var x = lvl12(r, s, POW); x.hint = r.pick(['Multiply it out', 'Which number times itself?', 'List the factors']); return x; }
+    gen: function (r, s) { var x = lvl12(r, s, POW); x.hint = hintBy(x.q, H_POW); return x; }
   });
 
   /* ---- m12.6 geometry and measurement 5-8 ---- */
@@ -378,7 +404,7 @@
   MATH.add({
     id: 'm12.6', world: 12, n: 6, strand: 'E', exp: 'Gr5-8 area of rectangle, triangle, parallelogram; volume of prisms; symmetry, translations and dilations on a grid; angle sums; circle radius/diameter, circumference with 3.14; Pythagorean triples; surface area; scale', title: 'Geometry power',
     neg: false, exact: true, ans: 'num',
-    gen: function (r, s) { var x = lvl12(r, s, GEO); x.hint = r.pick(['Draw it first', 'Pick the right formula', 'Check the units']); return x; }
+    gen: function (r, s) { var x = lvl12(r, s, GEO); x.hint = hintBy(x.q, H_GEO); return x; }
   });
 
   /* ---- m12.7 multi-step word problems and rates (5-8) ---- */
@@ -402,7 +428,7 @@
   MATH.add({
     id: 'm12.7', world: 12, n: 7, strand: 'F', exp: 'Gr5-8 multi-step problems: discounts, 13% HST, speed, unit rates, ratios, mean/range, savings plans, simple interest, tips, integer temperatures', title: 'Final word challenge',
     neg: true, exact: false, ans: 'num',
-    gen: function (r, s) { var x = lvl12(r, s, RATES); x.hint = r.pick(['Break it into steps', 'Find the rate first', 'Draw a bar model']); return x; }
+    gen: function (r, s) { var x = lvl12(r, s, RATES); x.hint = hintBy(x.q, H_RATE); return x; }
   });
 
   /* ============================================================ word templates for MATH.word (spell chain, runners) ============================================================ */

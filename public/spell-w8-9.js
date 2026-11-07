@@ -11,7 +11,7 @@ if(typeof SPELLD==='undefined')return;
 SPELLD.add({id:'s8.1',world:8,n:1,grade:'6',title:'Greek: graph, phon, tele',pattern:'Greek roots graph, phon, tele',
  exp:'Language 2023 C: word structure, Greek roots graph (write), phon (sound), tele (far); Grade 6 vocabulary, spelling by meaning and word parts.',
  words:'graph|graphs|graphic|graphics|paragraph|paragraphs|photograph|photographs|photographer|photography|autograph|autographs|telegraph|calligraphy|graphite|phone|phones|phonics|phonetic|phonetics|phonic|phoneme|phonemes|homophone|homophones|microphone|microphones|megaphone|megaphones|saxophone|xylophone|xylophones|symphony|symphonies|telephone|telephones|headphones|earphones|telegram|telegrams|television|phonograph',
- sents:{
+ sents:{'graphs':'The graphs show how plants grow each week.','graphics':'The video game has amazing graphics.','paragraphs':'Write three paragraphs about your trip.','photograph':'She took a photograph of the lake at dawn.','photographs':'We looked at old family photographs together.','photography':'Photography is her favourite hobby.','autographs':'The author signed autographs after her talk.','graphite':'Pencils are made with graphite and clay.','phone':'Please put your phone away during class.','phones':'The phones rang in the school office.','phonetics':'Phonetics teaches how letters and sounds connect.','phonic':'Phonic lessons help kids sound out words.','phonemes':'English has about forty different phonemes.','homophones':'To, too, and two are homophones.','microphones':'The singers spoke into microphones on stage.','megaphones':'The coach used megaphones at the race.','xylophones':'We played xylophones in music class.','symphonies':'The orchestra played two long symphonies.','telephones':'Old telephones had a spinning dial.','earphones':'Put on your earphones to listen quietly.','telegrams':'Telegrams were sent long before email.','television':'We watched television after school on Friday.','phonograph':'A phonograph plays music from a record.',
   "paragraph":"A paragraph usually has several sentences about one idea.",
   "photographer":"The photographer took a picture of our school.",
   "autograph":"She got an autograph from her favourite hockey player.",
@@ -36,7 +36,7 @@ SPELLD.add({id:'s8.1',world:8,n:1,grade:'6',title:'Greek: graph, phon, tele',pat
 SPELLD.add({id:'s8.2',world:8,n:2,grade:'6',title:'Greek: life, earth, time',pattern:'Greek roots bio, geo, meter, scope, chron',
  exp:'Language 2023 C: word structure, Greek roots bio (life), geo (earth), meter (measure), scope (see), chron (time); Grade 6 science and maths vocabulary.',
  words:'biology|biologist|biography|biome|biomes|biodiversity|biosphere|autobiography|geography|geographer|geographic|geology|geologist|geometry|geometric|geode|geodes|geothermal|thermometer|barometer|speedometer|odometer|perimeter|diameter|parameter|pedometer|altimeter|voltmeter|metric|telescope|microscope|periscope|kaleidoscope|microscopes|telescopes|periscopes|kaleidoscopes|scope|microscopic|chronicle|chronicles|chronological|synchronize|synchronized|chronometer',
- sents:{
+ sents:{'biomes':'Forests and deserts are two biomes.','geographer':'The geographer studied how rivers flow.','geographic':'The geographic map shows the mountains clearly.','geology':'Geology is the study of rocks and land.','geometric':'The quilt has a bold geometric pattern.','geodes':'We found geodes with crystals inside.','geothermal':'Geothermal energy comes from heat under the ground.','parameter':'One parameter of the test is the time limit.','pedometer':'My pedometer counted my steps today.','altimeter':'The pilot checked the altimeter during the flight.','voltmeter':'A voltmeter measures electric voltage in a circuit.','metric':'Canada uses the metric system for measuring.','periscope':'A submarine uses a periscope to see above water.','microscopes':'We used microscopes to see tiny cells.','telescopes':'Astronomers use telescopes to study stars.','periscopes':'Periscopes let you see over a high wall.','kaleidoscopes':'Kaleidoscopes make beautiful patterns of colour.','scope':'The scope of the science project was large.','microscopic':'Bacteria are too small to see; they are microscopic.','chronicles':'The chronicles tell the story of the old town.','synchronized':'The swimmers were synchronized perfectly.','chronometer':'A chronometer keeps very accurate time.',
   "biology":"Biology is the study of living things.",
   "biologist":"A biologist looks closely at plants and animals.",
   "biome":"A forest is a biome with many trees and animals.",
@@ -65,7 +65,7 @@ SPELLD.add({id:'s8.2',world:8,n:2,grade:'6',title:'Greek: life, earth, time',pat
 SPELLD.add({id:'s8.3',world:8,n:3,grade:'6',title:'Water, land, see, hear',pattern:'Latin roots aqua, terr, vis, aud',
  exp:'Language 2023 C: word structure, Latin roots aqua (water), terr (earth or land), vis (see), aud (hear); Grade 6 science and social studies words.',
  words:'aquarium|aquariums|aquatic|aqueduct|aquamarine|aqueous|aquifer|aquaculture|terrain|terrace|territory|terrarium|terrestrial|terrier|subterranean|extraterrestrial|mediterranean|vision|visible|invisible|visual|visualize|visibility|visitor|visitors|supervise|supervision|revise|revision|vista|visor|advisor|audio|audible|inaudible|audience|audiences|audition|auditions|auditorium|auditory|audiobook|audiovisual|audit',
- sents:{
+ sents:{'aquariums':'The aquariums are full of colourful fish.','aquamarine':'The lake looked a pretty shade of aquamarine.','aqueous':'An aqueous mixture is mostly water.','aquaculture':'Aquaculture raises fish in tanks and pens.','territory':'Wolves guard their territory in the forest.','subterranean':'Subterranean caves are cool and dark.','extraterrestrial':'Scientists search for extraterrestrial life in space.','visibility':'Fog reduced the visibility on the highway.','visitors':'Many visitors came to see the waterfall.','supervision':'Young children need adult supervision near water.','revision':'Revision helps you prepare for a test.','vista':'The hilltop gave a wide vista of the valley.','visor':'The hockey helmet has a clear visor.','inaudible':'The whisper was almost inaudible from the back.','audiences':'The audiences clapped loudly at the show.','audition':'She had an audition for the school play.','auditions':'The auditions for the choir are on Friday.','auditory':'The auditory nerve carries sound to the brain.','audiovisual':'Our class watched an audiovisual presentation about bees.','audit':'The team will audit the supply closet next week.',
   "aquarium":"An aquarium is home to many colourful fish.",
   "aquifer":"An aquifer holds water under the ground.",
   "aqueduct":"An aqueduct carries water across the land.",
@@ -95,7 +95,7 @@ SPELLD.add({id:'s8.3',world:8,n:3,grade:'6',title:'Water, land, see, hear',patte
 SPELLD.add({id:'s8.4',world:8,n:4,grade:'6',title:'Prefixes: dis, mis, anti',pattern:'Prefixes dis-, mis-, anti-, sub-, trans-',
  exp:'Language 2023 C: prefixes dis- (not, reverse), mis- (wrongly), anti- (against), sub- (under), trans- (across); spelling of prefix plus base word, Grade 6.',
  words:'disagree|disappear|disconnect|dislike|discover|disobey|disappoint|dishonest|disallow|misspell|mistake|misread|misplace|misunderstand|mislead|misbehave|mismatch|misjudge|misuse|misprint|antifreeze|antiseptic|antivirus|submarine|subway|subtract|subject|submit|subtitle|subset|substitute|subtotal|submerge|suburb|subarctic|subsequent|subdivide|transport|transfer|translate|transform|transparent|transatlantic|transit|transmit|transition|translucent|transcript|transcribe|transcontinental',
- sents:{
+ sents:{'disallow':'The referee will disallow the goal after review.','misunderstand':'Do not misunderstand my meaning, please.','misbehave':'Puppies may misbehave when they are bored.','mismatch':'The socks were a mismatch, one blue and one green.','misuse':'Never misuse scissors in the classroom.','misprint':'The book had a misprint on page five.','antiseptic':'Wipe the scrape with antiseptic and a bandage.','subject':'Science is my favourite subject this year.','submit':'Submit your essay by Friday afternoon.','subset':'A subset of the numbers is even.','substitute':'The substitute teacher read us a story.','subtotal':'The subtotal comes before the tax is added.','submerge':'Submerge the apple in cold water.','subsequent':'Subsequent days were sunny and warm.','subdivide':'We will subdivide the class into four teams.','transfer':'Transfer the water into a bigger jug.','transatlantic':'The transatlantic flight took many hours.','transit':'We take transit to school every day.','transmit':'Radios transmit sound through the air.','transition':'The move to a new school was a big transition.','translucent':'The candy is translucent, so the light shines through.','transcribe':'Transcribe the interview into written words.',
   "disagree":"We may disagree, but we can still be friends.",
   "disappear":"The puddles will disappear after the sun comes out.",
   "disconnect":"Remember to disconnect the cord before you clean.",
@@ -129,7 +129,7 @@ SPELLD.add({id:'s8.4',world:8,n:4,grade:'6',title:'Prefixes: dis, mis, anti',pat
 SPELLD.add({id:'s8.5',world:8,n:5,grade:'6',title:'Suffixes: -ity, -ence',pattern:'Suffixes -ity, -ence, -ious',
  exp:'Language 2023 C: suffixes -ity and -ence (nouns), -ious (adjectives), with spelling changes (drop final e, y to i); Grade 6 word structure.',
  words:'ability|activity|possibility|responsibility|curiosity|electricity|community|personality|capacity|quality|priority|security|humidity|simplicity|similarity|popularity|majority|velocity|density|gravity|mobility|equality|flexibility|creativity|university|clarity|productivity|existence|confidence|patience|science|sentence|presence|silence|difference|reference|residence|intelligence|sequence|experience|influence|absence|excellence|independence|tolerance|curious|serious|delicious|various|glorious|famous|previous|obvious|generous|enormous|mysterious|precious|courageous|gorgeous|hilarious|numerous|ambitious|cautious|harmonious|mischievous|spacious|fabulous|tremendous|adventurous|nutritious',
- sents:{
+ sents:{'possibility':'There is a possibility of snow tonight.','responsibility':'Caring for a pet is a big responsibility.','personality':'Our dog has a funny personality.','capacity':'The gym has a capacity of two hundred people.','priority':'Safety is our top priority on the trail.','security':'The guard provided security at the game.','humidity':'Humidity makes summer days feel sticky.','simplicity':'The simplicity of the design is appealing.','similarity':'There is a similarity between the two stories.','popularity':'The popularity of hockey is high in Canada.','majority':'The majority of students voted for the plan.','velocity':'The velocity of the ball was very high.','density':'Wood has less density than most rocks.','gravity':'Gravity pulls everything toward the ground.','mobility':'A ramp improves mobility for everyone.','equality':'Schools should promote equality for all students.','flexibility':'Yoga improves flexibility and balance.','creativity':'Your creativity shines in art class.','university':'My cousin studies at university in Ottawa.','clarity':'The clarity of the speech helped everyone understand.','productivity':'Productivity rose after the short break.','presence':'Your presence makes our class better.','residence':'The student residence is near the campus.','sequence':'Put the pictures in the correct sequence.','absence':'Her absence was noticed in class today.','excellence':'The team showed excellence in every game.','independence':'Learning to tie your shoes builds independence.','tolerance':'Tolerance helps friends get along well.','various':'Various birds visit our backyard feeder.','previous':'The previous day was rainy and cold.','gorgeous':'The sunset over the lake was gorgeous.','hilarious':'The clown act was hilarious to watch.','numerous':'Numerous trees line the park path.','ambitious':'She is ambitious about her goals this year.','cautious':'The cautious deer stayed near the trees.','harmonious':'The choir sounded harmonious and calm.','mischievous':'The mischievous kitten stole a sock.','spacious':'The gym is spacious and bright.','fabulous':'The meal was fabulous, and we loved it.',
   "ability":"Every student has the ability to learn new things.",
   "activity":"Our school has a fun activity every Friday.",
   "curiosity":"Curiosity is what makes scientists ask questions.",
@@ -166,7 +166,7 @@ SPELLD.add({id:'s8.5',world:8,n:5,grade:'6',title:'Suffixes: -ity, -ence',patter
 SPELLD.add({id:'s8.6',world:8,n:6,grade:'6',title:'Confused word pairs',pattern:'Commonly confused words',
  exp:'Language 2023 C: commonly confused homophones and near-homophones (accept/except, principal/principle, advice/advise, lose/loose), spelling by meaning; Grade 6.',
  words:'accept|except|principal|principle|advice|advise|personal|personnel|quiet|quite|lead|led|course|coarse|past|passed|hear|here|than|then|loose|lose|weather|whether|desert|dessert|brake|break|knew|new|threw|through|piece|peace|meet|meat|steal|steel|waste|waist|bare|bear|right|write|scene|seen|road|rode|wear|where',
- sents:{
+ sents:{'personnel':'The school personnel welcomed us warmly.','led':'The captain led the team onto the ice.','steal':'Watch that a seagull does not steal your fries.','steel':'The bridge is made of strong steel.',
   "accept":"Please accept the award with a smile.",
   "except":"Everyone was here except for Sam.",
   "principal":"Our principal reads the announcements each morning.",
@@ -218,7 +218,7 @@ SPELLD.add({id:'s8.6',world:8,n:6,grade:'6',title:'Confused word pairs',pattern:
 SPELLD.add({id:'s8.7',world:8,n:7,grade:'6',title:'Science and social words',pattern:'Science and social studies words',
  exp:'Language 2023 C: academic vocabulary from Grade 6 science (life systems, biodiversity, human organ systems) and social studies (Canada, communities, resources); curriculum wording to verify.',
  words:'ecosystem|habitat|species|predator|prey|producer|consumer|nutrients|oxygen|carbon|nitrogen|atmosphere|climate|erosion|glacier|sediment|volcano|continent|province|capital|citizen|democracy|parliament|government|resource|economy|settlement|migration|immigrant|culture|heritage|indigenous|treaty|prairie|tundra|wetland|boreal|photosynthesis|mineral|fossil|adaptation|camouflage|vertebrate|invertebrate|mammal|reptile|amphibian|skeleton|muscle|digestive|circulatory|respiratory|pollination|hibernate',
- sents:{
+ sents:{'producer':'A plant is a producer of its own food.','consumer':'A deer is a consumer that eats plants.','nutrients':'Plants absorb nutrients from the soil.','carbon':'Carbon is found in all living things.','nitrogen':'Nitrogen makes up most of the air we breathe.','sediment':'Sediment settled at the bottom of the lake.','vertebrate':'A fish is a vertebrate with a backbone.','invertebrate':'A worm is an invertebrate with no backbone.',
   "ecosystem":"A pond is an ecosystem with plants and animals.",
   "habitat":"A beaver builds a lodge in its habitat.",
   "species":"Each species has its own special features.",
@@ -272,7 +272,7 @@ SPELLD.add({id:'s8.7',world:8,n:7,grade:'6',title:'Science and social words',pat
 SPELLD.add({id:'s9.1',world:9,n:1,grade:'7',title:'Prefixes: in, im, il, ir',pattern:'Prefixes in-, im-, il-, ir- (not)',
  exp:'Language 2023 C: negative prefixes in-, im-, il-, ir- and their assimilated spellings (before b, m, p; before l; before r); word structure, Grade 7.',
  words:"inactive|incomplete|incorrect|indirect|inexpensive|inexact|indecisive|inconvenient|incredible|inaccurate|indefinite|independent|inexperienced|inconsistent|inefficient|insufficient|inconclusive|impatient|impolite|impure|immature|impossible|impractical|improper|imperfect|imbalance|immovable|impartial|imprecise|illegal|illogical|illegible|illuminate|illustrate|irregular|irrelevant|irresponsible|irrational|irreplaceable|irreversible|inadequate|irresistible",
- sents:{
+ sents:{'inexact':'The measurement was only inexact.','indefinite':'We will leave on an indefinite date.','inexperienced':'The inexperienced skater fell and got up.','impure':'Impure water can make you sick.','improper':'It is improper to talk during the film.','immovable':'The old oak tree was immovable in the storm.',
   "inactive":"A bear may look inactive during the winter.",
   "incomplete":"My puzzle is incomplete, with one piece missing.",
   "incorrect":"Your answer is incorrect, so try again.",
@@ -313,7 +313,7 @@ SPELLD.add({id:'s9.1',world:9,n:1,grade:'7',title:'Prefixes: in, im, il, ir',pat
 SPELLD.add({id:'s9.2',world:9,n:2,grade:'7',title:'Prefixes: ad, ac, ap, at',pattern:'Prefixes ad-, ac-, ap-, at-, as-',
  exp:'Language 2023 C: prefix ad- (to, toward) and its assimilated forms ac-, ap-, at-, as- (before c, p, t, s), with doubled consonants; Grade 7 word structure.',
  words:'address|adapt|adjust|admire|admit|advance|adverb|advertise|adopt|adjacent|adjective|adhere|adequate|advocate|accurate|accompany|accomplish|accumulate|acquire|accelerate|accustom|accessible|account|accent|appear|apply|approve|appreciate|approach|appoint|appetite|appropriate|approximate|apparent|appeal|applaud|appliance|attend|attract|attempt|attach|attention|attitude|attain|attire|assist|assemble|assign|assure|assume|associate|assorted',
- sents:{
+ sents:{'accelerate':'The car will accelerate on the highway ramp.','accustom':'It takes time to accustom yourself to a new school.','accent':'Her accent is from Newfoundland.',
   "address":"Please address the letter to your grandma.",
   "adapt":"Our team will adapt to the new rules.",
   "adjust":"Adjust your helmet before you ride your bike.",
@@ -368,7 +368,7 @@ SPELLD.add({id:'s9.2',world:9,n:2,grade:'7',title:'Prefixes: ad, ac, ap, at',pat
 SPELLD.add({id:'s9.3',world:9,n:3,grade:'7',title:'-ology, -ism, -ist',pattern:'Suffixes -ology, -ism, -ist',
  exp:'Language 2023 C: suffixes -ology (study of), -ism (belief or quality), -ist (person who); etymology families and Grade 7 academic and subject vocabulary.',
  words:'psychology|zoology|ecology|meteorology|anthropology|archaeology|technology|mythology|terminology|methodology|sociology|apology|genealogy|etymology|phonology|climatology|optimism|patriotism|heroism|tourism|journalism|idealism|magnetism|mechanism|organism|criticism|activism|pessimism|plagiarism|artist|scientist|pianist|violinist|novelist|psychologist|zoologist|ecologist|meteorologist|cyclist|tourist|florist|dentist|economist|chemist|linguist|journalist|optimist|pessimist|activist|motorist|soloist|cellist|harpist|guitarist|typist|specialist',
- sents:{
+ sents:{'phonology':'Phonology studies the sounds of a language.',
   "psychology":"Psychology is the study of how people think.",
   "zoology":"Zoology is the study of animals and how they live.",
   "ecology":"Ecology looks at how living things depend on each other.",
@@ -429,7 +429,7 @@ SPELLD.add({id:'s9.3',world:9,n:3,grade:'7',title:'-ology, -ism, -ist',pattern:'
 SPELLD.add({id:'s9.4',world:9,n:4,grade:'7',title:'Tricky homophones',pattern:'Advanced homophones',
  exp:'Language 2023 C: advanced homophones and near-homophones (council/counsel, complement/compliment, stationary/stationery, sight/site/cite), spelling by meaning; Grade 7.',
  words:'council|counsel|complement|compliment|stationary|stationery|sight|site|cite|hoard|horde|role|roll|alter|berth|birth|cereal|serial|cymbal|symbol|descent|dissent|flair|flare|foreword|forward|idle|idol|lessen|lesson|loan|lone|medal|meddle|metal|mettle|pedal|peddle|peak|peek|peer|pier|profit|reign|rein|rain|sole|soul|stile|style|straight|strait|taut|taught|vain|vein|vane|wail|whale|wary|weary|yolk|board|bored|fair|fare|flour|flower|cell|sell',
- sents:{
+ sents:{'serial':'The serial number is printed on the box.','foreword':'The author wrote a foreword for the book.','lone':'A lone wolf howled in the snow.','mettle':'Her mettle showed during the hard season.','peddle':'Street vendors peddle snacks at the fair.',
   "council":"The town council voted to build a new park.",
   "counsel":"Our coach will counsel the team after the game.",
   "compliment":"Her kind compliment made me smile.",
@@ -498,10 +498,10 @@ SPELLD.add({id:'s9.4',world:9,n:4,grade:'7',title:'Tricky homophones',pattern:'A
  }});
 
 SPELLD.add({id:'s9.5',world:9,n:5,grade:'7',title:'Academic words',pattern:'Academic vocabulary',
- exp:'Language 2023 C: Grade 7 academic vocabulary for science inquiry, data and reasoning (analyse, evidence, hypothesis); Canadian -yse spelling in analyse.',
- words:'analyse|analysis|evidence|hypothesis|experiment|variable|conclusion|observation|observe|measure|measurement|data|theory|research|investigate|investigation|procedure|control|result|compare|comparison|estimate|precise|predict|prediction|correlation|interpret|interpretation|summarize|justify|argument|evaluate|evaluation|perspective|context|define|definition|example|explain|explanation|identify|describe|method|reliable|valid|claim|source|criteria|component|factor|process|quantity|sample|survey|trend|structure|function|relationship|proportion|average',
- sents:{
-  "analyse":"Scientists analyse the data to find patterns.",
+ exp:'Language 2023 C: Grade 7 academic vocabulary for science inquiry, data and reasoning (analyze, evidence, hypothesis); Canadian -yze spelling in analyze.',
+ words:'analyze|analysis|evidence|hypothesis|experiment|variable|conclusion|observation|observe|measure|measurement|data|theory|research|investigate|investigation|procedure|control|result|compare|comparison|estimate|precise|predict|prediction|correlation|interpret|interpretation|summarize|justify|argument|evaluate|evaluation|perspective|context|define|definition|example|explain|explanation|identify|describe|method|reliable|valid|claim|source|criteria|component|factor|process|quantity|sample|survey|trend|structure|function|relationship|proportion|average',
+ sents:{'measurement':'Measurement helps us compare sizes accurately.','investigation':'Our science investigation tested plant growth.','control':'A control group helps test an idea fairly.','result':'The result of the test was clear.','comparison':'The comparison showed two clear differences.','prediction':'Make a prediction before you start the experiment.','interpretation':'My interpretation of the poem is hopeful.','evaluation':'The teacher will complete an evaluation of our work.','perspective':'Seeing things from another perspective helps.','definition':'Look up the definition in the dictionary.','explanation':'Her explanation was clear and short.','source':'A trusted book is a good source of facts.','criteria':'The criteria for the project are on the board.','process':'The process of baking bread takes time.','structure':'The structure of the story has three parts.','proportion':'Mix the paint in the right proportion.',
+  "analyze":"Scientists analyze the data to find patterns.",
   "analysis":"The analysis showed that plants grow faster in sunlight.",
   "hypothesis":"Our hypothesis is that seeds need water to grow.",
   "experiment":"Our experiment tested which paper towel soaks up the most water.",
@@ -550,7 +550,7 @@ SPELLD.add({id:'s9.5',world:9,n:5,grade:'7',title:'Academic words',pattern:'Acad
 SPELLD.add({id:'s9.6',world:9,n:6,grade:'7',title:'Often misspelled words',pattern:'Frequently misspelled words',
  exp:'Language 2023 C: high-frequency and often-misspelled Grade 7 words (silent letters, double letters, tricky vowels), with memory strategies.',
  words:'necessary|definitely|separate|rhythm|privilege|occurrence|believe|receive|february|library|pronunciation|wednesday|business|environment|height|weird|grammar|sincerely|surprise|although|until|bought|guarantee|tomorrow|vacuum|beginning|calendar|colonel|committee|decision|dilemma|exaggerate|familiar|foreign|forty|friend|hygiene|immediately|interrupt|leisure|maintenance|millennium|miniature|nuisance|occasion|opportunity|parallel|physical|probably|questionnaire|recommend|restaurant|rhyme|schedule|souvenir|successful|temperature|truly|twelfth|unnecessary',
- sents:{
+ sents:{'colonel':'The colonel is a military rank.',
   "necessary":"It is necessary to wear a helmet when cycling.",
   "definitely":"I will definitely finish my project on time.",
   "separate":"Please separate the recycling from the garbage.",
@@ -614,8 +614,8 @@ SPELLD.add({id:'s9.6',world:9,n:6,grade:'7',title:'Often misspelled words',patte
 
 SPELLD.add({id:'s9.7',world:9,n:7,grade:'7',title:'Canadian spellings',pattern:'Canadian spellings (-our, -re, -ll, -ogue)',
  exp:'Language 2023 C: Canadian spelling conventions (-our colour, -re centre, -ll travelled, -ce defence, -ogue catalogue, -ll cancelled, -ou plough); Grade 7 review.',
- words:"saviour|travelling|traveller|cancelling|fulfilment|catalogue|dialogue|analogue|monologue|greyish|prologue|epilogue|ardour|clamour|candour|valour|rancour|practise|analyse|sulphur|liquorice|tonne|kilogram|ochre|ageing|judgement|acknowledgement|travelogue|speciality|sceptre|enrol|enrolment|draught|jewellers|enrolling|skilfully|marvellously|labelling|modelling|signalling|counselling|levelling",
- sents:{
+ words:"saviour|travelling|traveller|cancelling|fulfilment|catalogue|dialogue|analogue|monologue|greyish|prologue|epilogue|ardour|clamour|candour|valour|rancour|practise|analyze|sulphur|liquorice|tonne|kilogram|ochre|ageing|judgement|acknowledgement|travelogue|speciality|sceptre|enrol|enrolment|draught|jewellers|enrolling|skilfully|marvellously|labelling|modelling|signalling|counselling|levelling",
+ sents:{'saviour':'The lifeguard was a saviour at the pool.','travelling':'We are travelling to Quebec City this summer.','cancelling':'They are cancelling the game because of rain.','greyish':'The sky looked greyish before the storm.',
   "traveller":"A traveller packs a bag for a long trip.",
   "fulfilment":"Finishing the project brought great fulfilment.",
   "catalogue":"The library catalogue helps you find books.",
@@ -630,7 +630,7 @@ SPELLD.add({id:'s9.7',world:9,n:7,grade:'7',title:'Canadian spellings',pattern:'
   "valour":"The knight showed great valour in the story.",
   "rancour":"There was no rancour after the game.",
   "practise":"We practise our spelling every day.",
-  "analyse":"Scientists analyse data to learn things.",
+  "analyze":"Scientists analyze data to learn things.",
   "sulphur":"Sulphur is a yellow element in science.",
   "liquorice":"Liquorice is a chewy black candy.",
   "tonne":"A tonne is one thousand kilograms.",

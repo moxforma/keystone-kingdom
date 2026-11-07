@@ -166,3 +166,48 @@ test('chain and word problems are correct and non-negative', () => {
     assert.ok(x.q.split(' ').length <= 12);
   }
 });
+
+/* ---- audit 3 content rules ---- */
+function allProblems(world, parts = [0, 1, 2, 3, 4, 5, 6, 7], seeds = [1, 2, 3]) {
+  const out = [];
+  for (let k = 0; k < 9; k++) for (const part of parts) for (const sd of seeds) {
+    try { for (const p of MATH.problems({ w: world, k }, part, 12, sd)) out.push(p); } catch (e) { /* lesson slot may not exist */ }
+  }
+  return out;
+}
+
+test('W1 (JK/SK) uses digits only: no number words in any problem', () => {
+  const re = /\b(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\b/i;
+  const bad = allProblems(1).filter(p => re.test(p.q)).map(p => p.q);
+  assert.deepEqual([...new Set(bad)], []);
+});
+
+test('hints match the problem: no fixed money hint, no unrelated random hints', () => {
+  const m11 = allProblems(11).filter(p => p.topic === 'm11.5');
+  assert.ok(m11.length > 20);
+  for (const p of m11) assert.ok(!/Type \d+ or/.test(p.hint), p.q + ' -> ' + p.hint);
+  const bad = [];
+  for (const p of allProblems(12).concat(allProblems(11))) {
+    const h = p.hint || '', q = p.q;
+    if (/Halve it, halve again/.test(h) && !/^25%/.test(q)) bad.push(q + ' -> ' + h);
+    if (/Count the jumps|Draw it$/.test(h)) bad.push(q + ' -> ' + h);
+    if (/Which number times itself/.test(h) && !/√/.test(q)) bad.push(q + ' -> ' + h);
+    if (/List the factors/.test(h) && !/Factors/.test(q)) bad.push(q + ' -> ' + h);
+    if (/Brackets first/.test(h) && !/\(/.test(q)) bad.push(q + ' -> ' + h);
+    if (/Find 10% first/.test(h) && !/%/.test(q)) bad.push(q + ' -> ' + h);
+  }
+  assert.deepEqual([...new Set(bad)].slice(0, 5), []);
+});
+
+test('cryptic prompts were rewritten', () => {
+  const all = allProblems(3).concat(allProblems(1));
+  for (const p of all) {
+    assert.ok(!/Most votes\?|Fewest votes\?|Place behind\?|Place in front\?/.test(p.q), p.q);
+    assert.ok(!/^(Votes|Stars|Canoes|Goals|Pucks|Apples|Leaves|Toques): /.test(p.q), p.q);
+  }
+});
+
+test('unit-conversion hints name the units of the question', () => {
+  for (const p of allProblems(11).filter(p => /^\d+ cm = _ mm$/.test(p.q))) assert.equal(p.hint, '10 mm make 1 cm');
+  for (const p of allProblems(11).filter(p => /^\d+ (m = _ cm|cm = _ m)$/.test(p.q))) assert.equal(p.hint, '100 cm make 1 m');
+});

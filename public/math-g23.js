@@ -558,7 +558,7 @@
     bars = labs.map(function (l, ii) { return { l: l, v: vals[ii] }; });
     var VW = 'votes';
     if (s === 1 || s === 5) { idx = ri(r, 0, nb - 1); return { q: labs[idx] + ' ' + VW + '?', a: S(vals[idx]), aid: { bars: bars }, eq: S(vals[idx]) }; }
-    if (s === 2) { mx = Math.max.apply(null, vals); return { q: 'Most ' + VW + '?', a: S(mx), aid: { bars: bars }, eq: S(mx) }; }
+    if (s === 2) { mx = Math.max.apply(null, vals); return { q: 'Most ' + VW + ': how many?', a: S(mx), aid: { bars: bars }, eq: S(mx) }; }
     if (s === 3) { idx = r.shuffle([0, 1, 2, 3].slice(0, nb)); a = idx[0]; b = idx[1]; if (vals[a] < vals[b]) { c = a; a = b; b = c; } return { q: 'How many more: ' + labs[a] + ' than ' + labs[b] + '?', a: S(vals[a] - vals[b]), aid: { bars: bars }, eq: vals[a] + ' ' + SUB + ' ' + vals[b] }; }
     if (s === 4) { tot = vals.reduce(function (x, y) { return x + y; }, 0); return { q: 'Total ' + VW + '?', a: S(tot), aid: { bars: bars }, eq: vals.join(' + ') }; }
     k = ri(r, 0, 2); idx = r.shuffle([0, 1, 2, 3].slice(0, nb)); a = idx[0]; b = idx[1];

@@ -443,9 +443,10 @@ const ACT={
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const f=ACT[b.dataset.act];if(f)f(b.dataset)});
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal'&&P.phase!=='done')closeModal()});
 document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&!$('#modal').hidden&&$('#fbmsg')){e.preventDefault();closeModal();return}   // Escape closes the Feedback box even with the cursor in it
  if(e.target.matches('input')){if(e.key==='Enter')ACT.saveName();return}
  if(e.ctrlKey||e.metaKey||e.altKey)return;
- if(!$('#modal').hidden){if(e.key==='Enter'||(e.key===' '&&$('#mbox .rbtns .nextbtn'))){const b=$('#mbox .rbtns .nextbtn')||$('#mbox .rbtns .btn');if(b){e.preventDefault();b.click()}}if(e.key==='Escape'&&P.phase!=='done')closeModal();return}
+ if(!$('#modal').hidden){if(e.key===' '&&!S.hero&&$('#mbox .heroes')){const hb=$('#mbox [data-act=buyHero]');if(hb){e.preventDefault();hb.click();return}}if(e.key==='Enter'||(e.key===' '&&$('#mbox .rbtns .nextbtn'))){const b=$('#mbox .rbtns .nextbtn')||$('#mbox .rbtns .btn');if(b){e.preventDefault();b.click()}}if(e.key==='Escape'&&P.phase!=='done')closeModal();return}
  if(screen!=='play'&&screen!=='game')return;
  if(e.key==='Escape'){show(screen==='game'?'arcade':'map');return}
  const caps=e.getModifierState&&e.getModifierState('CapsLock');
@@ -1875,7 +1876,7 @@ function dailyHTML(){const d=S.daily||{},mins=d.day===todayKey()?Math.floor((d.s
 const _rh20=renderHome;renderHome=function(){kkSafe(_rh20,this,[]);const g=$('#s-home .gprog');if(g&&S.name)g.insertAdjacentHTML('beforebegin',dailyHTML());
  const hb=$('#s-home .hbtns');if(hb&&!hb.querySelector('[data-act=practice]'))hb.insertAdjacentHTML('beforeend','<button class="btn alt" data-act="practice">Practice</button>')};
 /* --- 2. no-peek bonus --- */
-const _res20=results;results=function(r){kkSafe(_res20,this,[r]);if(!r.pass||P.practice||S.set.hide==='show')return;S.gems+=1;save();const b=$('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend','<div class="banner luck">No-peek +1 diamond</div>')};
+const _res20=results;results=function(r){kkSafe(_res20,this,[r]);if(!r.pass||P.practice||P.stream||S.set.hide==='show')return;S.gems+=1;save();const b=$('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend','<div class="banner luck">No-peek +1 diamond</div>')};
 /* --- 3/4. practice menu: trouble keys, letter combos, free write --- */
 const COMBOS=['th','he','in','er','an','re','on','at','en','nd','ti','es','or','te','of','ed','is','it','al','ar','st','to','nt','ng','se','ha','as','ou','io','le','ve','co','me','de','hi','ri','ro','ic','ne','ea','ra','ce','the','ing','and','ion','ent','her','for','tha','ter','was','you','ith','ver','all','wit','thi','tio'];
 let PRACT=null;
@@ -2200,7 +2201,7 @@ ACT.about=()=>{modal(`<h2>About</h2><div class="hero-mini">${zookSVG()}</div>
  <p style="margin:0">Vibecoded with help from <b>Claude</b> (Anthropic) and <b>ChatGPT</b> (OpenAI).</p>
  <p class="muted" style="margin:0">© ${Math.max(2026,new Date().getFullYear())} Andy Tsang. All rights reserved.</p>
  <div class="rbtns"><button class="btn" data-act="close">Close</button></div>`)};
-addEventListener('keydown',e=>{if(e.target&&(e.target.id==='fbmsg'||e.target.id==='fbmail'))e.stopImmediatePropagation()},true);
+addEventListener('keydown',e=>{if(e.target&&(e.target.id==='fbmsg'||e.target.id==='fbmail')){if(e.key==='Escape'){e.preventDefault();closeModal()}e.stopImmediatePropagation()}},true);
 let UID=0;function uniq(svg){const u='_'+(++UID);return svg.replace(/id="([^"]+)"/g,`id="$1${u}"`).replace(/url\(#([^)]+)\)/g,`url(#$1${u})`)}
 [['zookSVG'],['creatureSVG'],['glitchSVG'],['sceneSVG'],['pathScene']].forEach(()=>{});
 /* --- evolution progress panel (results) --- */

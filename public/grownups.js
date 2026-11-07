@@ -9,7 +9,7 @@ let GATE=0;
 const openHub=()=>{window.__gu=1;window.__clsOk=1;window.__guMode='';
  const card=(act,t,d,c)=>`<button class="guitem ${c}" data-act="${act}"><b>${t}</b><small>${d}</small></button>`;
  modal(`<h2>TEACHERS</h2><p class="muted" style="margin:0 0 10px">Settings and tools for parents and teachers.</p><div class="gugrid">
- ${card('guReport','Progress report','Speed, accuracy and tricky keys for every player','c1')}
+ ${card('guReport','Progress report','Stars, accuracy and progress in Typing, Math and Spelling for every player','c1')}
  ${card('guParent','Focus mode','Turn the arcade, outfits and other extras on or off','c2')}
  ${card('guTeach','Teacher dashboard','Make a class, assign lessons, watch progress, class races','c3')}
  ${card('guPlayers','Players','Add, switch or delete players on this device','c4')}

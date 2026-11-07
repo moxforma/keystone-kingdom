@@ -24,7 +24,8 @@ const isMath=o=>!!o&&(o.t==='mrock'||o.t==='mbridge'||((o.t==='tall'||o.t==='for
 
 /* ---------- content ---------- */
 const pure=p=>/^[\d\s+\-×x÷*\/=?().√]+$/.test(p.q)&&/[+\-×x÷*\/√=]/.test(p.q);
-const good=p=>p&&/^\d+$/.test(String(p.a))&&p.topic!=='fallback'&&String(p.q).length<=13&&String(p.q).length>0;
+const selfq=p=>{const q=String(p.q||'').trim();return pure(p)||(!p.aid&&q.length>=3&&/\d/.test(q)&&q!=='?')};   // the problem must be readable without a picture: no bare ? / Count / How many? that need the aid
+const good=p=>p&&/^\d+$/.test(String(p.a))&&p.topic!=='fallback'&&String(p.q).length<=13&&String(p.q).length>0&&selfq(p);
 const pr=p=>({q:fmt(p.q),a:String(p.a)});
 function synth(t){   // tiny safety net, never needed when the lesson pool has problems
  if(t<=1){const a=rint(1,5),b=rint(0,4);return{q:a+' + '+b,a:String(a+b)}}
@@ -51,10 +52,14 @@ function makePools(L){
  return out}
 
 /* ---------- pixel helpers ---------- */
-function sign(g,q,cx,y,st){   // problem sign, 15px tall box (y = top of the inner 13px)
+function sign(g,q,cx,y,st){   // problem sign, 15px tall box (y = top of the inner 13px). st = the problem to solve NOW: blinking frame + a bouncing arrow; the others are dimmed
  q=String(q);const w=q.length*8+6,x0=clamp(ri(cx-w/2),2,Math.max(2,C.W-w-2));
- g.fillStyle='#0b1033';g.fillRect(x0-1,y-1,w+2,15);g.fillStyle=st?'#f0c860':'#e8ecff';g.fillRect(x0,y,w,13);g.fillStyle='#ffffff';g.fillRect(x0,y,w,1);
- if(!st){g.fillStyle='#c0c8f0';g.fillRect(x0,y+12,w,1)}
+ if(st){const bl=Math.floor(performance.now()/200)%2,mx=x0+ri(w/2),by=y-9+bl;
+  g.fillStyle=bl?'#ffffff':'#ff9a3c';g.fillRect(x0-3,y-3,w+6,19);
+  g.fillStyle='#0b1033';g.fillRect(mx-4,by-1,9,1);g.fillRect(mx-3,by,7,1);g.fillRect(mx-2,by+1,5,1);g.fillRect(mx-1,by+2,3,1);g.fillRect(mx,by+3,1,1);
+  g.fillStyle='#f0c860';g.fillRect(mx-3,by,7,1);g.fillRect(mx-2,by+1,5,1);g.fillRect(mx-1,by+2,3,1);g.fillRect(mx,by+3,1,1)}
+ g.fillStyle='#0b1033';g.fillRect(x0-1,y-1,w+2,15);g.fillStyle=st?'#f0c860':'#b9c1e6';g.fillRect(x0,y,w,13);g.fillStyle=st?'#fff2b8':'#dfe4fa';g.fillRect(x0,y,w,1);
+ if(!st){g.fillStyle='#98a0cc';g.fillRect(x0,y+12,w,1)}
  RN.txt(g,q,x0+3,y+3,'#0b1033',1,'l',null)}
 function box(g,ch,x,y,st){   // answer box (same size as a keycap): 0 waiting, 1 current, 2 typed
  g.fillStyle='#0b1033';g.fillRect(x-1,y-1,14,15);g.fillStyle=st===1?'#f0c860':st===2?'#2a6a4a':'#e8ecff';g.fillRect(x,y,12,13);
@@ -73,7 +78,7 @@ SEG.mrock={
  update(o){const R=RN.R;if(R.phase!=='run'||R.fall||o.st==='done')return;const back=R.front-BW;
   if(R.front>o.x+1&&back<o.x+o.w-1&&height()<o.h-2){bonkAt(R,o,o.x-(R.L.hard?3:10));o.st='wait';o.jt=false;RN.updStrip();return}
   if(o.st==='jump'){
-   if(back>o.x+o.w){o.st='done';o.done=true;if(o.nice){R.nice++;R.gemN++;RN.popTxt('NICE!',o.x+o.w/2,GROUND-34,'#4de08a');RN.snd(988,.05,'square',.04);RN.snd(1319,.08,'square',.04,.05)}RN.updStrip()}
+   if(back>o.x+o.w){o.st='done';o.done=true;if(o.nice){R.nice++;R.gemN++;RN.popTxt('NICE!',Math.max(o.x+o.w/2,R.cam+46),GROUND-34,'#4de08a');RN.snd(988,.05,'square',.04);RN.snd(1319,.08,'square',.04,.05)}RN.updStrip()}
    else if(o.jt===false){o.st='wait';RN.updStrip()}}},
  block:o=>(o.st==='wait'&&!RN.R.L.hard)?o.x-10:null,
  draw(o,g,cam,isT){const R=RN.R,x=ri(o.x-cam);if(x<-40||x>C.W+10)return;
@@ -180,6 +185,7 @@ HK.update.push(dt=>{
  try{
   const t=RN.target();
   if(isMath(t)){const el=document.getElementById('rhint');if(el&&(hintDirty||el.innerHTML!=='')){el.innerHTML='';hintDirty=false;try{setTarget(null)}catch(e){}}}
+  renderMQ(R);
   const sp=document.getElementById('rstripIn');if(sp&&R.phase==='run'){const kids=sp.children;
    R.obs.forEach(o=>{if(!isMath(o)||o.si==null)return;
     let arr,ty;
@@ -188,6 +194,48 @@ HK.update.push(dt=>{
     for(let j=0;j<arr.length;j++){const el=kids[o.si+j];if(!el)continue;const want=arr[j]==='/'?'/':(j<ty?arr[j]:'?');if(el.textContent!==want)el.textContent=want}})}
  }catch(e){}
  return false});
+
+/* ---------- the strip under the canvas: the CURRENT problem big, answer slots filling as you type, the next one small ---------- */
+const MQCSS='#rstrip.rmq #rstripIn{visibility:hidden}#rmq{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:clamp(10px,2vw,26px);padding:0 10px;font-family:"Jersey 10",monospace;color:#fff6e0;overflow:hidden;white-space:nowrap}'
+ +'#rmq .rq{white-space:pre;font-size:clamp(30px,5.2vh,48px);line-height:1;text-shadow:3px 3px 0 #1a1030}#rmq .rmtag{font-size:clamp(16px,2.4vh,22px);color:#7fd8d0;text-shadow:2px 2px 0 #1a1030;letter-spacing:.08em}'
+ +'#rmq .rg{display:flex;align-items:center;gap:8px}#rmq .rs{display:flex;gap:5px}#rmq .rs b{display:block;min-width:.85em;height:1.05em;line-height:1.05;text-align:center;font-weight:400;font-size:clamp(30px,5.2vh,48px);color:#7fd8d0;background:#0a0f2e;border:4px solid #8a94d8;text-shadow:3px 3px 0 #1a1030;box-sizing:content-box}'
+ +'#rmq .rs b.f{border-color:#7fd884;color:#7fd884}#rmq .rs b.c{border-color:#f0c860;animation:rmqb .8s steps(2) infinite}@keyframes rmqb{50%{border-color:#2a2350}}'
+ +'#rmq .rn{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:clamp(16px,2.5vh,24px);color:#8a94d8;text-shadow:2px 2px 0 #1a1030}';
+const dsp0=q=>String(q).replace(/ - /g,' − ').replace(/ x /g,' × ');
+const dsp=q=>dsp0(q).replace(/\?/g,'_');
+const slotsOf=(a,ty,act)=>'<span class="rs">'+[...String(a)].map((c,i)=>`<b class="${i<ty?'f':(i===ty&&act?'c':'')}">${i<ty?c:''}</b>`).join('')+'</span>';
+const probOf=(q,a,ty,act)=>{const d=dsp0(q),sl=slotsOf(a,ty,act);
+ if(d.indexOf('?')>=0){const k=d.indexOf('?');return `<span class="rq">${esc(d.slice(0,k))}</span>${sl}<span class="rq">${esc(d.slice(k+1))}</span>`}   // a blank in the problem: the answer slots sit IN the blank
+ const eq=/=/.test(d)?'':'<span class="rq" style="color:#f0c860">=</span>';return `<span class="rq">${esc(d)}</span>${eq}${sl}`};
+function nextOf(R,t){const k=R.obs.indexOf(t);for(let j=k+1;j<R.obs.length;j++){const o=R.obs[j];if(!o.done&&isMath(o)){return o.t==='fork'?o.ql:o.t==='flap'?o.qs[0]:o.q}}return ''}
+let mqKey='';
+function bossMQ(){   // the Boss Test chase: blobs and weak spots carry the problems; the spell scroll is a chain / word problem
+ const b=RN.boss&&RN.boss._state&&RN.boss._state();if(!b||b.mode==='dying'||b.mode==='done')return null;
+ if(b.mode==='spell'&&b.sp&&b.sp.math){const sp=b.sp,steps=sp.math.steps;let start=0,k=0;for(;k<steps.length-1&&sp.i>=start+steps[k].a.length;k++)start+=steps[k].a.length;const st=steps[k];
+  return{h:probOf(st.q,st.a,sp.i-start,true),nx:steps.length>1?'STEP '+(k+1)+'/'+steps.length:''}}
+ const it=[].concat(b.blobs.filter(z=>z.st==='in').sort((p,q)=>p.x-q.x).map(z=>({q:z.q,ch:z.ch})),b.spots.slice().sort((p,q)=>p.l-q.l).map(z=>({q:z.q,ch:z.ch}))).filter(i=>i.q);
+ if(!it.length)return null;
+ return{h:probOf(it[0].q,it[0].ch,0,true),nx:it[1]?it[1].q:''}}
+function renderMQ(R){
+ const st=document.getElementById('rstrip');if(!st)return;
+ let el=document.getElementById('rmq'),h='',nx='';
+ if(R.phase==='run'){const t=RN.target();
+  if(t&&isMath(t)){
+   if(t.t==='mrock')h=probOf(t.q,t.a,t.st!=='wait'?1:0,t.st==='wait');
+   else if(t.t==='mbridge')h=probOf(t.q,t.a,t.typed,true);
+   else if(t.t==='tall')h=probOf(t.q,t.a||t.letters.join(''),t.k,true);
+   else if(t.t==='fork')h=`<span class="rg"><span class="rmtag">LOW</span>${probOf(t.ql,t.lo,0,false)}</span><span class="rg"><span class="rmtag">HIGH</span>${probOf(t.qh,t.hi,0,false)}</span>`;
+   else if(t.t==='flap'){const k=Math.min(t.k|0,t.n-1);h=probOf(t.qs[k],t.letters[k],0,true)}
+   nx=nextOf(R,t)}}
+ else if(R.phase==='boss'){const r=bossMQ();if(r){h=r.h;nx=r.nx}}
+ if(!h){if(el)el.style.display='none';st.classList.remove('rmq');return}
+ if(!document.getElementById('rmq-css')){const sty=document.createElement('style');sty.id='rmq-css';sty.textContent=MQCSS;document.head.appendChild(sty)}
+ if(!el){el=document.createElement('div');el.id='rmq';st.appendChild(el)}
+ const key=h+'|'+nx;
+ if(key!==mqKey||el.style.display==='none'){mqKey=key;el.innerHTML=h+(nx?`<span class="rn">${/^STEP/.test(nx)?'':'NEXT '}${esc(dsp(nx))}</span>`:'')}
+ el.style.display='flex';st.classList.add('rmq')}
+
+setInterval(()=>{try{const R=RN.R;if(R&&R.phase==='boss'&&document.getElementById('rstrip'))renderMQ(R)}catch(e){}},90);   // the boss chase skips the update hooks, so the strip is refreshed here
 
 /* ---------- build ---------- */
 function build(R){

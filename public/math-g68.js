@@ -156,7 +156,7 @@
       if (k === 'pct') return { q: p + '% of ' + base, a: String(base * p / 100) };
       if (k === 'off') {
         it = r.pick(['Jacket', 'Skates', 'Backpack', 'Hoodie', 'Kayak', 'Bike']); base = itemBase(r, it, step);
-        return { q: it + ' $' + base + ', ' + p + '% off. Pay $?', a: String(base - base * p / 100), eq: base + '-' + p + '% of ' + base, hint: 'Take off the discount' };
+        return { q: it + ' $' + base + ', ' + p + '% off. Sale price ($)?', a: String(base - base * p / 100), eq: base + '-' + p + '% of ' + base, hint: 'Take off the discount' };
       }
       if (k === 'int') {
         yr = r.int(2, 4); rt = r.pick([2, 4, 5, 10]); step = 100 / gcd(100, rt); base = step * r.int(1, Math.max(1, Math.floor(lv(s, 300, 1000) / step)));

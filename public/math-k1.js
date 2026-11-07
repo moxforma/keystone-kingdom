@@ -40,16 +40,15 @@
 
   M.add({
     id: 'm1.2', world: 1, n: 2, strand: 'B', title: 'Read the numbers', neg: false, exact: true, ans: 'num',
-    exp: 'JK/SK: recognize and match numerals and number words to 10, then to 20 (UNCERTAIN: words are Grade 1 reading, used as keyboard practice)',
+    exp: 'JK/SK: recognize and match numerals to 10, then to 20 (digits only in W1: no number words)',
     gen: function (r, s) {
       var n, pre = r.pick(['Type ', 'Find ']), lay = r.pick(['row', 'frame', 'scatter']);
+      /* digits only in the JK/SK world: kids who cannot read yet match the numeral they see (no number words) */
       if (s < 3) {
         n = r.int(1, s < 1 ? 5 : 10);
         return { q: pre + n, a: S(n), aid: odd(r, 0.6) ? { dots: [n], layout: lay } : null, eq: S(n) };
       }
-      if (s < 5) { n = r.int(1, 10); return { q: odd(r, 0.5) ? WORDS[n] : pre + WORDS[n], a: S(n), eq: S(n) }; }
-      /* number words only to ten; numerals 11-20 are typed from the numeral (no words above ten in the JK band) */
-      if (s < 7) { n = r.int(0, 20); return { q: n <= 10 ? (odd(r, 0.5) ? WORDS[n] : (odd(r, 0.5) ? pre + n : pre + WORDS[n])) : pre + n, a: S(n), eq: S(n) }; }
+      if (s < 7) { n = r.int(s < 5 ? 1 : 0, s < 5 ? 10 : 20); return { q: pre + n, a: S(n), aid: (n > 0 && odd(r, 0.3)) ? { dots: [n], layout: n > 10 ? 'frame' : lay } : null, eq: S(n) }; }
       n = r.int(11, 20);
       return { q: pre + n, a: S(n), aid: odd(r, 0.5) ? { dots: [n], layout: r.pick(['frame', 'rows']) } : null, eq: S(n) };
     }
@@ -117,7 +116,7 @@
       else if (f === 2) o = { q: t + ' = ' + a + ' + _', a: S(b) };
       else if (f === 3) o = { q: t + ' = _ + ' + a, a: S(b) };
       else o = { q: a + ' and _ make ' + t, a: S(b), eq: S(b) };
-      if (s < 5) o.aid = { dots: [a, b], layout: 'frame', obj: r.pick(['apple', 'star', 'puck', 'leaf']) };
+      if (s < 5) o.aid = { dots: [a, b], layout: 'frame', plus: true, obj: r.pick(['apple', 'star', 'puck', 'leaf']) };
       o.hint = 'Make ' + t;
       return o;
     }
@@ -147,11 +146,11 @@
     exp: 'JK/SK: sort, count and read a tally under 10 (Data literacy; tally marks are UNCERTAIN for JK, normal by Grade 1)',
     gen: function (r, s) {
       var kinds = s < 3 ? ['read'] : s < 6 ? ['read', 'more1'] : ['read', 'more1', 'to10', 'less1'], k = r.pick(kinds), n, lab;
-      lab = r.pick(['Goals', 'Votes', 'Pucks', 'Stars', 'Leaves', 'Apples', 'Canoes', 'Toques']);
-      if (k === 'read') { n = r.int(1, s < 3 ? 5 : 9); return { q: lab + '?', a: S(n), aid: { tally: n }, eq: S(n) }; }
-      if (k === 'more1') { n = r.int(1, 8); return { q: lab + ': 1 more?', a: S(n + 1), aid: { tally: n }, eq: n + ' + 1' }; }
-      if (k === 'less1') { n = r.int(2, 9); return { q: lab + ': 1 less?', a: S(n - 1), aid: { tally: n }, eq: n + ' − 1' }; }
-      n = r.int(1, 9); return { q: lab + ': to 10?', a: S(10 - n), aid: { tally: n }, eq: '10 − ' + n };
+      lab = r.pick(['goals', 'pucks', 'stars', 'leaves', 'apples', 'canoes', 'toques']);
+      if (k === 'read') { n = r.int(1, s < 3 ? 5 : 9); return { q: 'How many ' + lab + '?', a: S(n), aid: { tally: n }, eq: S(n) }; }
+      if (k === 'more1') { n = r.int(1, 8); return { q: 'Get 1 more. How many ' + lab + '?', a: S(n + 1), aid: { tally: n }, eq: n + ' + 1' }; }
+      if (k === 'less1') { n = r.int(2, 9); return { q: 'Take away 1. How many ' + lab + '?', a: S(n - 1), aid: { tally: n }, eq: n + ' − 1' }; }
+      n = r.int(1, 9); return { q: 'We need 10 ' + lab + '. How many more?', a: S(10 - n), aid: { tally: n }, eq: '10 − ' + n };
     }
   });
 
@@ -172,7 +171,7 @@
         return { q: nm + ' has ' + a + ' ' + pl(th, a) + '. Gets ' + b + ' more. How many?', a: S(a + b), eq: a + ' + ' + b };
       }
       o = { q: a + ' + ' + b, a: S(a + b), hint: 'Count on' };
-      if (s < 4 || (s < 6 && odd(r, 0.5))) o.aid = { dots: [a, b], layout: 'row' };
+      if (s < 4 || (s < 6 && odd(r, 0.5))) o.aid = { dots: [a, b], layout: 'row', plus: true };
       return o;
     }
   });
@@ -265,7 +264,7 @@
         if (k === 'bal') o = { q: a + ' + ' + b + ' = ' + c + ' + _', a: S(t - c) };
         else o = { q: a + ' + ' + b + ' = _ + ' + c, a: S(t - c) };
       }
-      if (s < 3 && k.indexOf('add') === 0) o.aid = { dots: [a, b], layout: 'row' };
+      if (s < 3 && k.indexOf('add') === 0) o.aid = { dots: [a, b], layout: 'row', plus: true };
       return o;
     }
   });
@@ -408,8 +407,8 @@
       else if (k === 'fewer') { ans = vals[1] - vals[0]; qq = head + '. ' + cats[0] + ' has how many fewer?'; }
       else if (k === 'total') { ans = vals[0] + vals[1]; qq = head + '. Total?'; }
       else if (k === 'total3') { ans = vals[0] + vals[1] + vals[2]; qq = head + '. Total?'; }
-      else if (k === 'most') { ans = Math.max.apply(null, vals); qq = head + '. Most votes?'; }
-      else { ans = Math.min.apply(null, vals); qq = head + '. Fewest votes?'; }
+      else if (k === 'most') { ans = Math.max.apply(null, vals); qq = head + '. Most: how many?'; }
+      else { ans = Math.min.apply(null, vals); qq = head + '. Fewest: how many?'; }
       return { q: qq, a: S(ans), aid: { bars: bars }, eq: S(ans) };
     }
   });
@@ -433,8 +432,8 @@
       if (odd(r, 0.3)) {
         n = r.int(4, 9); w = r.int(2, n - 1); f = r.int(0, 2);
         if (f === 0) return { q: 'Row of ' + n + '. Mia is ' + ordn(w) + ' from the left. From the right?', a: S(n - w + 1), eq: n + ' − ' + w + ' + 1', hint: 'Count from the other end' };
-        if (f === 1) return { q: cap(r.pick(['Mia', 'Leo', 'Ava', 'Sam'])) + ' is ' + ordn(w) + ' in line. Place behind?', a: S(w + 1), eq: w + ' + 1' };
-        return { q: 'Ava is ' + ordn(w) + ' in line. Place in front?', a: S(w - 1), eq: w + ' − 1' };
+        if (f === 1) return { q: cap(r.pick(['Mia', 'Leo', 'Ava', 'Sam'])) + ' is ' + ordn(w) + ' in line. Kid behind is what place?', a: S(w + 1), eq: w + ' + 1' };
+        return { q: 'Ava is ' + ordn(w) + ' in line. Kid in front is what place?', a: S(w - 1), eq: w + ' − 1' };
       }
       f = r.int(0, 3);
       if (s < 7 && f === 0) {

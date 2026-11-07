@@ -34,13 +34,15 @@ const hidden=tier=>tier>=1;                         // world 1 (tier 0) keeps wo
 /* brief look: worlds 2-3 about 2.0s + .15s/letter, worlds 4-7 1.2s + .1s/letter, worlds 8-12 .8s + .08s/letter */
 const flashDur=(tier,n)=>{const w=tier+1,L=n||4;return w<=3?2+.15*L:w<=7?1.2+.1*L:.8+.08*L};
 
+const wlen=o=>o.t==='fork'?Math.max(o.il.w.length,o.ih.w.length):o.t==='srock'?(o.word||'').length:(o.ans||'').length;
+const flashing=(o,R)=>!!o&&!!R&&o.fs!=null&&hidden(+R.L.tier||0)&&R.t-o.fs<flashDur(+R.L.tier||0,wlen(o));
 /* ================= cfg ================= */
 function cfg(i,s){
  try{if(!window.KKS||!D())return null;const sl=KKS.slot(i);if(!sl)return null;
   const tier=Math.max(0,Math.min(11,sl.w-1)),part=Math.min(7,s+(sl.g?1:0));
   let topic='';if(sl.kind==='learn'){const t=D().lesson(sl.w,sl.k);if(t&&D().topic(t.id))topic=t.id}
   return{stream:'spell',topic,tier,partS:part,keys:LETTERS,favor:'',words:.34,n:9+(s>>1)+Math.round(tier*.5),
-   v:Math.round(56*(1+.07*tier)),lv:Math.min(4,1+Math.floor(tier/3)),back:'map',gapMul:Math.max(.7,1-.03*tier),startExtra:()=>'<p style="margin:2px 0">Spell the word!</p>'}}
+   v:Math.round(56*(1+.07*tier)),lv:Math.min(4,1+Math.floor(tier/3)),back:'map',gapMul:Math.max(.7,1-.03*tier),startExtra:()=>''}}
  catch(e){console.warn('[runner-spell cfg]',e);return null}}
 function bossCfg(i){
  try{if(!window.KKS||!D())return null;const sl=KKS.slot(i);if(!sl)return null;const tier=Math.max(0,Math.min(11,sl.w-1));
@@ -89,18 +91,18 @@ function build(R){
  R.L.spBlobs=items(R,'rock',40).filter(oneLetter).filter(x=>x.show.length<=8);
  const pt=()=>towers.length?towers.shift().w:null,pb=()=>bridges.length?bridges.shift().w:null,pr=()=>rocks.length?rocks.shift():FALLBACK[Math.floor(Math.random()*FALLBACK.length)];
  const prNot=not=>{const i=rocks.findIndex(x=>!not.includes(x.ans));if(i>=0)return rocks.splice(i,1)[0];const f=FALLBACK.filter(x=>!not.includes(x.ans));return f[Math.floor(Math.random()*f.length)]};
- const box=(it,x,y,st)=>{if(!it)return;const wd=it.show.length*8+6;wordBox(RN.g,clamp(ri(x+6-wd/2),1,C.W-wd-2),y,it.show,st?1:0,rr().t)};
+ const box=(it,x,y,st,own)=>{if(!it)return;const wd=it.show.length*8+6,Rn=rr(),fl=own&&flashing(own,Rn);wordBox(RN.g,clamp(ri(x+6-wd/2),1,C.W-wd-2),y,fl?it.w:it.show,st||fl?1:0,Rn.t)};
  // FORK: LOW = a word of this lesson, HIGH = a longer word from a tier or two up (extra row of gems); the two missing letters always differ
- const behind=o=>{const t=RN.target();return !!t&&t!==o&&t.t==='fork'&&t.st==='wait'&&Math.abs(t.x-o.x)<140};   // a second fork right behind the current one: its wide words wait until the first is done
+ const behind=o=>{const t=RN.target();return !!t&&t!==o&&((t.t==='fork'&&t.st==='wait'&&Math.abs(t.x-o.x)<140)||(t.sp&&t.t!=='flap'&&Math.abs(t.x-o.x)<70))};   // another word label close by (a fork, or a rock/bridge/tower word just ahead): keep this fork's labels hidden until it is the target, so no label sits behind another one   // a second fork right behind the current one: its wide words wait until the first is done
  const mkFork=o=>{
   const lo=pr();let hs=hard.filter(x=>x.ans!==lo.ans&&x.w!==lo.w).sort((a,b)=>b.w.length-a.w.length);
   const hi=hs.length?hs[Math.floor(Math.random()*Math.min(3,hs.length))]:prNot([lo.ans]);const hx=hard.indexOf(hi);if(hx>=0)hard.splice(hx,1);
-  o.sp=1;o.lo=lo.ans;o.hi=hi.ans;o.il=lo;o.ih=hi;o.cap=(k,ch,x,y,st)=>{if(!st&&behind(o))return;box(k==='hi'?o.ih:o.il,x,y,st)};
+  o.sp=1;o.lo=lo.ans;o.hi=hi.ans;o.il=lo;o.ih=hi;o.cap=(k,ch,x,y,st)=>{if(!st&&behind(o))return;box(k==='hi'?o.ih:o.il,x,y,st,o)};
   const n=Math.floor((o.LW-24)/12);for(let j=0;j<n;j++)R.gems.push({x:o.x+o.p0+12+j*12,y:GROUND-40-19,got:0})};
  // FLAP: a missing-letter word per gap; neighbouring gaps never share a letter
  const mkFlap=o=>{
   const its=[];for(let i=0;i<o.n;i++)its.push(prNot(i?[its[i-1].ans]:[]));
-  o.sp=1;o.letters=its.map(x=>x.ans);o.its=its;o.cap=(k,ch,x,y,st)=>box(o.its[k],x,y,st)};
+  o.sp=1;o.letters=its.map(x=>x.ans);o.its=its;o.cap=(k,ch,x,y,st)=>box(o.its[k],x,y,st,null)};
  // 1) convert what the typing builders made
  for(let i=0;i<R.obs.length;i++){const o=R.obs[i];
   if(o.t==='gap'){const w=pb();if(w)mkBridge(R,i,w,hid)}
@@ -129,7 +131,7 @@ function wordBox(g,x,y,str,st,t){ // wide keycap with the gapped word
 SEG.srock={
  want:()=>'',
  done:o=>o.st!=='wait',
- strip:()=>['?'],
+ strip:o=>[o.show],
  typed:o=>o.st!=='wait'?1:0,
  key(){},
  update(o,dt){const R=rr();if(R.phase!=='run')return;const back=R.front-BW;
@@ -146,16 +148,30 @@ SEG.srock={
   let spr=null;try{spr=RN.thSprite(o.spi)}catch(e){}
   if(spr)g.drawImage(spr,ri(x-1),GROUND-spr.height+1);else{g.fillStyle='#74748e';g.fillRect(ri(x),GROUND-10,12,10)}
   if(o.st==='wait'){const n=o.show.length,wd=n*8+6,bob=isT?Math.floor(R.t*6)%2:0;
-   wordBox(g,clamp(ri(x+o.w/2-wd/2),1,C.W-wd-2),GROUND-(spr?spr.height:10)-18-bob,o.show,isT?1:0,R.t)}}
+   const fl=flashing(o,R);wordBox(g,clamp(ri(x+o.w/2-wd/2),1,C.W-wd-2),GROUND-(spr?spr.height:10)-18-bob,fl?o.word:o.show,isT||fl?1:0,R.t);
+   if(fl){const k=Math.max(0,1-(R.t-o.fs)/flashDur(+R.L.tier||0,o.word.length)),y0=GROUND-(spr?spr.height:10)-4-bob;g.fillStyle='#8ff0ff';g.fillRect(clamp(ri(x+o.w/2-wd/2),1,C.W-wd-2),y0,ri(wd*k),1)}}}
 };
 
 /* ================= keys (before the engine), speech, flash, hints ================= */
 const hiddenT=t=>t&&t.sp&&t.hid&&(t.t==='gap'||t.t==='tall');
 const accepts=(t,k)=>t.t==='srock'?(t.st==='wait'&&k===t.ans):t.t==='gap'?k===(t.hid?t.ans:t.word)[t.typed]:t.t==='fork'?(t.st==='wait'&&(k===t.hi||k===t.lo)):t.t==='flap'?(k===t.letters[t.k]||k===t.letters[t.k+1]):(t.hid?k===t.ans[t.k]:k===t.letters[t.k]);
-function say1(o,R){o.fs=R.t;o.said=1;say(o.word&&o.t==='srock'?o.word:o.ans)}
+let SPKT=0;const spoke=()=>{SPKT=performance.now()};
+function say1(o,R){o.fs=R.t;o.said=1;spoke();say(o.word&&o.t==='srock'?o.word:o.ans)}
 function peek(o,R){   // Space says the word again; on a covered bridge/tower the FIRST Space per word also re-flashes it (free in worlds 2-3, a tiny accuracy cost from world 4)
  if(o.hid&&(o.t==='gap'||o.t==='tall')&&!o.pk){o.pk=1;o.fs=R.t;if((+R.L.tier||0)>=3)R.typed++}
- say(o.t==='srock'?o.word:o.ans)}
+ spoke();say(o.t==='srock'?o.word:o.ans)}
+/* Tab = see the word again (flash) + hear it again, any time, free */
+function again(R){
+ if(R.phase==='run'){const t=RN.target();if(!t||!t.sp||!t.said||t.t==='flap')return;
+  if(hidden(+R.L.tier||0))t.fs=R.t;spoke();if(t.t!=='fork')say(t.t==='srock'?t.word:t.ans)}
+ else if(R.phase==='boss'){const b=act();if(!b)return;
+  if(b.mode==='spell'&&b.sp){spoke();say(b.sp.sent);return}
+  const a=activeBlob(b);if(a){if(!b.vis){a.fs=b.t;a.fe=0;b.dirty=true}spoke();say(a.w)}}}
+addEventListener('keydown',e=>{
+ try{if(e.key!=='Tab'||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(typeof screen==='undefined'||screen!=='runner')return;const R=rr();if(!R||!isSp(R))return;
+  const m=document.getElementById('modal');if(m&&!m.hidden)return;
+  e.preventDefault();if(!e.repeat)again(R)}catch(err){console.warn('[runner-spell tab]',err)}},true);
 HK.key.unshift(function(e){
  const R=rr();if(!R||!isSp(R)||R.phase!=='run'||R.fall)return false;
  const caps0=e.getModifierState&&e.getModifierState('CapsLock')&&!e.shiftKey;
@@ -179,7 +195,7 @@ HK.key.unshift(function(e){
   RN.updStrip();return true}
  if(t.t==='srock'){
   if(R.air)return true;
-  if(kk===t.ans){good();t.st='lo';RN.jump(t);RN.updStrip()}else{RN.miss();RN.updStrip()}
+  if(kk===t.ans){good();t.help=false;t.st='lo';RN.jump(t);RN.updStrip()}else{RN.miss();t.help=true;RN.updStrip()}
   return true}
  if(t.t==='gap'&&t.hid){
   if(kk===t.ans[t.typed]){good();t.help=false;t.typed++;t.word=t.ans.slice(0,t.typed)+'_'.repeat(t.ans.length-t.typed);
@@ -196,29 +212,84 @@ HK.key.unshift(function(e){
 {const w0=SEG.tall&&SEG.tall.want,a0=SEG.tall&&SEG.tall.acc;if(w0){SEG.tall.want=o=>o.hid?'':w0(o);SEG.tall.acc=(o,w)=>o.hid?(w?o.ans:(o.ans[o.k]||'')):(a0?a0(o,w):w0(o))}}
 /* forks and balloon sections (runner-paths.js) with missing-letter words instead of keycaps: the letter hint stays hidden */
 {const F0=SEG.fork,P0=SEG.flap;
- if(F0&&!F0._sp)SEG.fork=Object.assign({},F0,{_sp:1,want:o=>o.sp?'':F0.want(o),acc:(o,w)=>o.sp?F0.want(o):(F0.acc?F0.acc(o,w):F0.want(o)),strip:o=>o.sp?['?','/','?']:F0.strip(o)});
- if(P0&&!P0._sp)SEG.flap=Object.assign({},P0,{_sp:1,want:o=>o.sp?'':P0.want(o),acc:(o,w)=>o.sp?P0.want(o):(P0.acc?P0.acc(o,w):P0.want(o)),strip:o=>o.sp?o.letters.map(()=>'?'):P0.strip(o)})}
+ if(F0&&!F0._sp)SEG.fork=Object.assign({},F0,{_sp:1,want:o=>o.sp?'':F0.want(o),acc:(o,w)=>o.sp?F0.want(o):(F0.acc?F0.acc(o,w):F0.want(o)),strip:o=>o.sp?[o.ih.show,'/',o.il.show]:F0.strip(o)});
+ if(P0&&!P0._sp)SEG.flap=Object.assign({},P0,{_sp:1,want:o=>o.sp?'':P0.want(o),acc:(o,w)=>o.sp?P0.want(o):(P0.acc?P0.acc(o,w):P0.want(o)),strip:o=>o.sp?o.its.map(x=>x.show):P0.strip(o)})}
 {const s0=SEG.srock;s0.acc=o=>o.st==='wait'?o.ans:'';s0.smashable=o=>o.st==='wait';s0.smash=o=>{o.st='done';o.done=true;o.jt=false}}
 HK.update.push(function(dt){const R=rr();if(!isSp(R)||R.phase!=='run')return false;
  const t=RN.target();
  if(t&&t.sp&&t.t!=='fork'&&t.t!=='flap'&&t.x-R.cam<C.W-30){if(!t.said)say1(t,R)}
- if(t&&t.sp&&t.hid&&t.help&&(t.t==='gap'||t.t==='tall')){   // help after a miss: show the key and finger for this letter only
-  const c=t.t==='gap'?t.ans[t.typed]:t.ans[t.k];try{if(c){setTarget(c);const h=document.getElementById('rhint');if(h)h.innerHTML=fingerHTML(c)}else hintOff()}catch(e){}}
+ if(t&&t.sp&&t.t==='fork'&&t.x-R.cam<C.W-30&&!t.said){t.said=1;t.fs=R.t}                 // forks are not spoken, but their two words flash
+ if(t&&t.sp&&t.help&&(t.t==='gap'||t.t==='tall'||t.t==='srock')&&(t.t==='srock'||t.hid)){   // help after a miss: show the key and finger for this letter only
+  const c=t.t==='gap'?t.ans[t.typed]:t.t==='tall'?t.ans[t.k]:t.ans;try{if(c){setTarget(c);const h=document.getElementById('rhint');if(h)h.innerHTML=fingerHTML(c)}else hintOff()}catch(e){}}
  else if(t&&t.sp&&(t.t==='srock'||t.hid||t.t==='fork'||t.t==='flap'))hintOff();
+ // brake while the word is flashing so there is time to look (never a penalty)
+ const flB=!!t&&t.sp&&t.t!=='flap'&&flashing(t,R)&&t.x>R.front-BW;
+ if(flB&&!R.air){const cap=Math.max(14,R.v*.4);if(R.speed>cap)R.speed=cap}                       // (a cap on the hero's speed each frame: R.v is also scaled by runner-action)
  return false});
 
-/* flash label above bridges / towers, word label for visible mode */
+/* label above the target bridge / tower: the whole word while it flashes, then one blank per letter that fills in as you type */
+function blankBox(g,x,y,str,typedN,full,k){
+ const n=str.length,wd=n*8+8;
+ g.fillStyle='#0b1033';g.fillRect(x-1,y-1,wd+2,13);g.fillStyle='#2a1a4a';g.fillRect(x,y,wd,11);g.fillStyle=full?'#f0c860':'#6a5aa8';g.fillRect(x,y,wd,1);
+ for(let i=0;i<n;i++){if(full||i<typedN)RN.txt(g,str[i],x+4+i*8,y+1,full?'#ffffff':'#8ff0a8',1,'l',null);else{g.fillStyle='#e6dcff';g.fillRect(x+4+i*8,y+8,7,2)}}
+ if(full&&k!=null){g.fillStyle='#8ff0ff';g.fillRect(x+1,y+10,ri((wd-2)*Math.max(0,k)),1)}}
 HK.drawWorld.push(function(g,cam){const R=rr();if(!isSp(R))return;
  const t=RN.target(),tier=+R.L.tier||0;
- R.obs.forEach(o=>{if(!o.sp||(o.t!=='gap'&&o.t!=='tall')||o===undefined)return;
+ R.obs.forEach(o=>{if(!o.sp||(o.t!=='gap'&&o.t!=='tower'&&o.t!=='tall'))return;
   const x=o.x-cam;if(x<-60||x>C.W+10)return;
-  const live=o===t&&(o.t==='gap'?o.typed<o.ans.length:o.k<o.n);if(!live)return;
-  const show=!o.hid||(o.fs!=null&&R.t-o.fs<flashDur(tier,o.ans.length));if(!show)return;
+  const tn=o.t==='gap'?o.typed:o.k,live=o===t&&tn<o.ans.length;if(!live)return;
+  const fl=!o.hid||flashing(o,R);
   const word=o.ans,wd=word.length*8+8,cx=ri(x+o.w/2),yy=o.t==='gap'?GROUND-58:Math.max(14,GROUND-o.h-30);
-  const bx=clamp(cx-ri(wd/2),2,C.W-wd-2);
-  g.fillStyle='#0b1033';g.fillRect(bx-1,yy-1,wd+2,13);g.fillStyle='#2a1a4a';g.fillRect(bx,yy,wd,11);g.fillStyle='#f0c860';g.fillRect(bx,yy,wd,1);
-  RN.txt(g,word,bx+4,yy+1,'#ffffff',1,'l',null);
-  if(o.hid){const k=1-(R.t-o.fs)/flashDur(tier,o.ans.length);g.fillStyle='#8ff0ff';g.fillRect(bx+1,yy+10,ri((wd-2)*Math.max(0,k)),1)}})});
+  blankBox(g,clamp(cx-ri(wd/2),2,C.W-wd-2),yy,word,tn,fl,o.hid&&fl?1-(R.t-o.fs)/flashDur(tier,word.length):null)})});
+
+/* ---------- visual cue under the canvas: speaker (pulses when spoken) + TAB, and the sentence with the word blanked ---------- */
+function speakerImg(){const rows=['....oo......','...oGGo...c.','ooooGGo.c..c','oGGGGGo..c.c','oGGGGGo.c..c','oooGGGo..c.c','...oGGo.c..c','....oo...c..'],pal={o:'#0b1033',G:'#f0c860',c:'#fff6e0'};
+ const cv=document.createElement('canvas');cv.width=12;cv.height=8;const c=cv.getContext('2d');rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(pal[ch]){c.fillStyle=pal[ch];c.fillRect(x,y,1,1)}}));return cv.toDataURL()}
+function ensureCue(show){
+ try{let el=document.getElementById('rcue');
+  if(!el){const wrap=document.querySelector('#s-runner .strip-wrap');if(!wrap)return null;
+   if(!document.getElementById('rcueCss')){const st=document.createElement('style');st.id='rcueCss';st.textContent=`
+#rcue{display:flex;align-items:center;justify-content:center;gap:12px;min-height:40px;padding:2px 6px;visibility:hidden;font-family:'Jersey 10',monospace;font-size:clamp(22px,2.8vw,30px);letter-spacing:.06em;color:#e8e2f4;text-transform:uppercase;text-align:center;line-height:1.05}
+#rcue.on{visibility:visible}
+#rcue img{width:48px;height:32px;image-rendering:pixelated;flex:none}
+#rcue.pulse img{animation:rcuep .3s steps(2) infinite}
+@keyframes rcuep{0%{transform:scale(1)}100%{transform:scale(1.34)}}
+#rcue .tk{flex:none;display:inline-block;background:#e8ecff;color:#0b1033;border-bottom:3px solid #8f98d0;padding:4px 8px 1px;font-size:.78em;line-height:1;letter-spacing:.1em}
+#rcue .tx b{color:#f0c860;font-weight:400;letter-spacing:.12em}
+#rstripIn span.fl{color:#f0c860!important}`;document.head.appendChild(st)}
+   el=document.createElement('div');el.id='rcue';el.innerHTML='<img alt="" src="'+speakerImg()+'"><span class="tk">TAB</span><span class="tx"></span>';wrap.insertBefore(el,wrap.firstChild)}
+  el.style.display=show?'':'none';return el}catch(e){return null}}
+function blankSent(word,topic,shown){
+ try{let s=D().sentence(word,topic)||D().sentence(word);if(!s)return'';
+  const re=new RegExp('\\b'+word.replace(/[^a-z]/gi,'')+'\\b','i'),mark=shown||'_'.repeat(Math.max(3,word.length));
+  if(!re.test(s))return'';return s.replace(re,m=>'\u0001'+mark+'\u0002')}catch(e){return''}}
+let cueKey='';
+function cueSync(R){
+ const el=ensureCue(true);if(!el)return;let word=null,shown=null,dict=false;
+ if(R.phase==='run'){const t=RN.target();
+  if(t&&t.sp&&t.said&&(t.t==='srock'||t.t==='gap'||t.t==='tall')){word=t.t==='srock'?t.word:t.ans;shown=t.t==='srock'?t.show:null}}
+ else if(R.phase==='boss'){const b=act();
+  if(b&&b.mode==='spell'&&b.sp)dict=true;else if(b&&b.mode==='fly'){const a=activeBlob(b);if(a)word=a.w}}
+ const key=dict?'#dict':word?word+'|'+(shown||''):'';
+ if(key!==cueKey){cueKey=key;const tx=el.querySelector('.tx');
+  if(dict)tx.textContent='';else if(word){const s=blankSent(word,R.L.topic,shown);tx.innerHTML=s?esc(s).replace(/\u0001/g,'<b>').replace(/\u0002/g,'</b>'):''}else tx.textContent='';
+  el.classList.toggle('on',!!key)}
+ el.classList.toggle('pulse',!!key&&performance.now()-SPKT<1200);
+ if(R.phase==='run')syncStrip(R)}
+
+/* strip under the canvas: never a bare "?": the word while it flashes, then one blank per letter (typed letters fill in) */
+function dispOf(o,R){const fl=flashing(o,R);
+ if(o.t==='srock')return[o.st!=='wait'||fl?o.word:o.show];
+ if(o.t==='gap'){if(!o.hid)return[...o.word];return[...o.ans].map((c,j)=>(fl||j<o.typed)?c:'_')}
+ if(o.t==='tall'){return o.hid?[...o.ans].map((c,j)=>(fl||j<o.k)?c:'_'):[...o.letters]}
+ if(o.t==='fork'){const f=it=>fl?it.w:it.show;return[f(o.ih),'/',f(o.il)]}
+ if(o.t==='flap')return o.its.map(x=>x.show);
+ return null}
+function syncStrip(R){const sp=(document.getElementById('rstripIn')||{}).children;if(!sp)return;
+ R.obs.forEach(o=>{if(!o.sp||o.si==null)return;const d=dispOf(o,R);if(!d)return;const fl=flashing(o,R);
+  d.forEach((c,j)=>{const el=sp[o.si+j];if(!el)return;if(el.textContent!==c)el.textContent=c;const f=fl&&c!=='/';if(el.classList.contains('fl')!==f)el.classList.toggle('fl',f)})})}
+HK.drawTop.push(function(g,cam){const R=rr();if(!isSp(R)){const el=document.getElementById('rcue');if(el&&el.style.display!=='none')el.style.display='none';return}
+ try{cueSync(R)}catch(e){console.warn('[runner-spell cue]',e)}});
 
 /* ================= ambush blobs: a missing-letter word ================= */
 let blobRecent=[];
@@ -278,6 +349,7 @@ function dmg(n,kill){const b=act();if(!b||b.hp<=0)return;
  else if(!b.p2&&b.hp<=b.max*.5){b.p2=true;b.angryT=.8;const v=vgeom(b);RN.popTxt('GRR!',wx(v.sx),GROUND-v.vh-10,'#ff6b7a');RN.snd(150,.4,'sawtooth',.07);shake(3);RN.burst(v.sx,v.cy,'#ff4a4a',14,70)}}
 function die(b){if(b.mode==='dying'||b.mode==='done')return;
  b.blobs.forEach(z=>RN.burst(ri(z.x)+3,ri(z.y)+3,'#6a3fb8',6,40));b.blobs=[];b.spots=[];b.sp=null;setMode(b,'dying');b.ko=0;sfxT('super')}
+const flB=(b,z)=>!b.vis&&z.fs!=null&&b.t-z.fs<Math.min(2.4,flashDur(b.tier,z.w.length));   // the active blob's word flashes in its bubble and in the strip
 const wordLen=b=>b.blobs.reduce((a,z)=>a+z.w.length,0);
 function doThrow(b){
  const v=vgeom(b),R=RN.R,n=b.tier>=6?(b.p2?3:2):(b.tier>=2&&b.p2?2:1);
@@ -317,9 +389,9 @@ function startSpell(b,s){s.done=true;const it=pull(b,'spell'),txt=it.text||it.wo
  const showT=b.vis?999:Math.max(1.6,3.2-.12*tier),per=Math.max(.9,2.2-.1*tier);
  b.cur=s;b.sp={txt,sent:it.s||txt,i:0,t:0,final:!!s.final,showT,lim:5+txt.length*per+(b.vis?0:Math.min(showT,4))};
  b.blobs=[];b.spots=[];setMode(b,'spell');const v=vgeom(b);RN.popTxt(s.final?'FINAL SPELL!':'SPELL!',wx(v.sx),GROUND-v.vh-18,'#c9a8f0');
- RN.snd(120,.5,'sawtooth',.07);RN.snd(240,.4,'triangle',.05,.15);RN.burst(v.sx,v.cy,'#c9a8f0',14,60);setTimeout(()=>say(b.sp&&b.sp.sent||it.s),500)}
+ RN.snd(120,.5,'sawtooth',.07);RN.snd(240,.4,'triangle',.05,.15);RN.burst(v.sx,v.cy,'#c9a8f0',14,60);setTimeout(()=>{spoke();say(b.sp&&b.sp.sent||it.s)},500)}
 function spellKey(b,e){const s=b.sp;if(!s||s.state)return;
- if(e.key==='Enter'){say(s.sent);return}
+ if(e.key==='Enter'){spoke();say(s.sent);return}
  if(e.key.length!==1)return;
  const want=s.txt[s.i],caps=e.getModifierState&&e.getModifierState('CapsLock')&&!e.shiftKey,kk=caps?e.key.toLowerCase():e.key;
  if(e.key!==want&&kk!==want){RN.miss();b.laugh=.3;return}
@@ -343,7 +415,8 @@ function update(dt){const b=act();if(!b)return;const R=RN.R;if(b.mode==='done')r
  if(b.mode==='intro'){const k=Math.min(1,b.mt/.8);R.bossX=ri(b.bx0+36*(k*(2-k)));if(b.mt>=1.3){R.bossX=b.bx0+36;nextVolley(b)}}
  else if(b.mode==='wind'){if(b.angryT>0)b.mt=Math.min(b.mt,0);else if(b.mt>=b.windDur)doThrow(b)}
  else if(b.mode==='fly'){const a=activeBlob(b);
-  if(a&&b.said!==a){b.said=a;setTimeout(()=>{if(act()===b&&activeBlob(b)===a)say(a.w)},250);b.dirty=true}
+  if(a&&b.said!==a){b.said=a;a.fs=b.t;a.fe=0;b.dirty=true;setTimeout(()=>{if(act()===b&&activeBlob(b)===a){spoke();say(a.w)}},250)}
+  if(a&&a.fs!=null&&!a.fe&&!flB(b,a)){a.fe=1;b.dirty=true}
   if(!b.blobs.length){const sp=dueSpell(b);if(sp)startSpell(b,sp);else{b.throwsLeft--;if(b.throwsLeft>0){b.windDur=(b.p2?.4:.5)*b.tm;setMode(b,'wind')}else spawnSpots(b)}}}
  else if(b.mode==='weak'){const n0=b.spots.length;b.spots.forEach(s=>s.l-=dt);
   b.spots=b.spots.filter(s=>{if(s.l>0)return true;const p=spotPos(b,s);RN.burst(p.x,p.y,'#b8c0e8',6,30);return false});
@@ -369,7 +442,7 @@ function key(e){const b=act();if(!b)return;
  if(b.mode==='dying'||b.mode==='done'||b.mode==='intro')return;
  if(b.mode==='spell'){spellKey(b,e);return}
  if(b.mode==='spfail')return;
- if(e.key===' '){if(b.charge>=b.cmax){mega();flush()}else{const a=activeBlob(b);if(a)say(a.w)}return}
+ if(e.key===' '){if(b.charge>=b.cmax){mega();flush()}else{const a=activeBlob(b);if(a){spoke();say(a.w)}}return}
  if(e.key.length!==1||!/[a-zA-Z]/.test(e.key))return;
  const caps=e.getModifierState&&e.getModifierState('CapsLock')&&!e.shiftKey,kk=(caps?e.key.toLowerCase():e.key).toLowerCase(),R=RN.R;
  const a=activeBlob(b);
@@ -384,8 +457,8 @@ function key(e){const b=act();if(!b)return;
 function stripHTML(){const b=act();
  if(b&&b.mode==='spell'&&b.sp){const s=b.sp,show=b.vis||s.t<s.showT;return [...s.txt].map((c,i)=>`<span class="${c===' '?'sp':''} ${i<s.i?'ok':''}">${c===' '?'·':(i<s.i||show?esc(c):'_')}</span>`).join('')}
  const a=b&&b.mode!=='dying'&&b.mode!=='done'?activeBlob(b):null;
- if(a)return [...a.w].map((c,i)=>`<span class="${i<a.i?'ok':''}">${i<a.i||b.vis?esc(c):'_'}</span>`).join('');
- if(b&&b.spots.length)return b.spots.map(()=>'<span>?</span>').join('');
+ if(a)return [...a.w].map((c,i)=>`<span class="${i<a.i?'ok':flB(b,a)?'fl':''}">${i<a.i||b.vis||flB(b,a)?esc(c):'_'}</span>`).join('');
+ if(b&&b.spots.length)return b.spots.map(s=>`<span>${esc(s.show)}</span>`).join('');
  return '<span class="sp">·</span>'}
 function strip(){const b=act();if(!b)return{cur:-1,ch:null};
  if(b.mode==='spell'&&b.sp)return{cur:b.sp.i,ch:b.vis?b.sp.txt[b.sp.i]:null};
@@ -430,7 +503,7 @@ function top(g,cam){const b=act();if(!b||RN.R.phase!=='boss')return;const t=b.t;
  b.blobs.forEach(z=>{const sp=Math.floor(t*6+z.ph)%2?BLOB_B:BLOB_A,x=ri(z.x),y=ri(z.y);g.drawImage(sp,x,y);
   if(z.st==='in'){const n=z.w.length,wd=n*8+4,bx=clamp(x+3-ri(wd/2),1,C.W-wd-2),by=y-17-(z===act1?Math.floor(t*6)%2:0),cur=z===act1;
    g.fillStyle='#0b1033';g.fillRect(bx-1,by-1,wd+2,13);g.fillStyle=cur?'#f0c860':'#e8ecff';g.fillRect(bx,by,wd,11);
-   for(let i=0;i<n;i++){const c=z.w[i];if(i<z.i)RN.txt(g,c,bx+2+i*8,by+1,'#2a8a4a',1,'l',null);else if(b.vis)RN.txt(g,c,bx+2+i*8,by+1,'#6a6a90',1,'l',null);else{g.fillStyle='#0b1033';g.fillRect(bx+3+i*8,by+9,6,1)}}}});
+   for(let i=0;i<n;i++){const c=z.w[i];if(i<z.i)RN.txt(g,c,bx+2+i*8,by+1,'#2a8a4a',1,'l',null);else if(b.vis||flB(b,z))RN.txt(g,c,bx+2+i*8,by+1,flB(b,z)&&!b.vis?'#0b1033':'#6a6a90',1,'l',null);else{g.fillStyle='#0b1033';g.fillRect(bx+3+i*8,by+9,6,1)}}}});
  if(b.mode==='spell'&&b.sp){const v=vgeom(b),p=Math.min(1,b.mt/.9),r=3+ri(p*8),f=Math.floor(t*10)%2,ox=v.sx,oy=GROUND-v.vh-14-ri(p*4);
   disc(g,ox,oy,r+1,'#0b1033');disc(g,ox,oy,r,f?'#c9a8f0':'#8a5fd8');disc(g,ox,oy,Math.max(1,r-3),f?'#ffffff':'#e6dcff');banner(g,b)}
  if(b.mode==='spfail'&&b.fail){const f=b.fail,k=Math.min(1,f.t/.5),ox=ri(f.x+(HITX-f.x)*k),oy=ri(f.y-16+(GROUND-16-(f.y-16))*k);disc(g,ox,oy,12,'#0b1033');disc(g,ox,oy,11,'#8a5fd8');disc(g,ox,oy,8,Math.floor(t*14)%2?'#c9a8f0':'#ffffff')}
