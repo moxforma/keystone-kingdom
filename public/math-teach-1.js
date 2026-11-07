@@ -4,7 +4,7 @@
  the answer a is typed exactly as the topic expects. Ontario curriculum strategies, Canadian context. */
 (function(){var T=(window.MATH_TEACH=window.MATH_TEACH||{});
 T['m1.1']={ex:'How many dots?', a:'5', aid:{dots:[5],layout:'row'}, steps:[{t:'Touch each dot'},{t:'1, 2, 3, 4, 5'},{t:'5 dots!'}], tip:'Touch and count'};
-T['m1.2']={ex:'Type 3', a:'3', aid:{dots:[3],layout:'row'}, steps:[{t:'Look at the number: 3'},{t:'Find 3 on the keyboard'},{t:'Press 3'}], tip:'Match the number'};
+T['m1.2']={ex:'How many?', a:'4', aid:{dots:[4],layout:'row'}, steps:[{t:'Touch each dot'},{t:'Count: 1, 2, 3, 4'},{t:'Type 4'}], tip:'Count each one once'};
 T['m1.3']={ex:'1 more than 13', a:'14', aid:{dots:[13],layout:'scatter'}, steps:[{t:'Start at 13'},{t:'1 more: 14'},{t:'1 more than 13 = 14'}], tip:'Next number!'};
 T['m1.4']={ex:'Smaller: 4 or 5', a:'4', aid:{dots:[4,5],layout:'row'}, steps:[{t:'Which is less?'},{t:'Count: 4, then 5'},{t:'Smaller: 4 or 5 = 4'}], tip:'Less is first'};
 T['m1.5']={ex:'5 = 4 + _', a:'1', aid:{dots:[4,1],layout:'frame',obj:'leaf'}, steps:[{t:'4 and what makes 5?'},{t:'4 + 1 = 5'},{t:'5 = 4 + 1, so _ is 1'}], tip:'Make 5!'};

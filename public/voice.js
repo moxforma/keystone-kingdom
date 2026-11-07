@@ -20,8 +20,8 @@ function spellScore(v){const n=v.name,l=v.lang.toLowerCase().replace('_','-');le
  else if(/samantha/i.test(n))s=600;else if(/karen/i.test(n))s=590;else if(/moira/i.test(n))s=580;else if(/tessa/i.test(n))s=570;else if(/daniel/i.test(n))s=560;
  else if(/google/i.test(n))s=300;else if(/en-ca|en-us|en-gb/.test(l))s=100;else s=10;
  if(l==='en-ca')s+=60;else if(l==='en-us'||l==='en-gb')s+=20;if(v.default)s+=1;return s}
-function spellVoice(){if(!V.length)load();const want=S.set&&S.set.voiceName;if(want){const v=V.find(x=>x.name===want);if(v)return v}
- return V.slice().sort((a,b)=>spellScore(b)-spellScore(a))[0]||null}
+/* owner: use the SAME voice the game used before (the natural one, or the one picked in Settings > Voice) */
+function spellVoice(){return pick()}
 window.kkSpellVoice=spellVoice;
 let sTok=0,sTimers=[];
 function sClear(){sTok++;sTimers.forEach(clearTimeout);sTimers=[]}
@@ -40,7 +40,7 @@ window.kkSpellSay=function(parts,opts){opts=opts||{};const cb=opts.cb;
    const[t,r,pause]=ps[ix];let fin=false;
    const end=()=>{if(fin||tok!==sTok)return;fin=true;try{opts.onPart&&opts.onPart(ix)}catch(e){}
     if(ix>=ps.length-1){if(cb)cb();return}sTimers.push(setTimeout(()=>next(ix+1),pause==null?450:pause))};
-   try{const u=new SpeechSynthesisUtterance(String(t));if(v){u.voice=v;u.lang=v.lang}else u.lang='en-CA';u.rate=r||.85;u.pitch=1;u.volume=1;
+   try{const u=new SpeechSynthesisUtterance(String(t));if(v){u.voice=v;u.lang=v.lang}else u.lang='en-CA';const hu=v&&score(v)>=40;u.rate=hu?Math.max(.92,r||1):(r||.9);u.pitch=hu?1.05:1;u.volume=1;
     u.onend=end;u.onerror=end;speechSynthesis.speak(u);
     sTimers.push(setTimeout(end,7000))}catch(e){end()}};
   next(0)};

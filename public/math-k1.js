@@ -42,15 +42,18 @@
     id: 'm1.2', world: 1, n: 2, strand: 'B', title: 'Read the numbers', neg: false, exact: true, ans: 'num',
     exp: 'JK/SK: recognize and match numerals to 10, then to 20 (digits only in W1: no number words)',
     gen: function (r, s) {
-      var n, pre = r.pick(['Type ', 'Find ']), lay = r.pick(['row', 'frame', 'scatter']);
-      /* digits only in the JK/SK world: kids who cannot read yet match the numeral they see (no number words) */
-      if (s < 3) {
-        n = r.int(1, s < 1 ? 5 : 10);
-        return { q: pre + n, a: S(n), aid: odd(r, 0.6) ? { dots: [n], layout: lay } : null, eq: S(n) };
+      /* digits only in the JK/SK world. No bare "Type 7" / "Find 18": every question asks something real
+         (count the dots, what comes next, which is bigger) and the kid types the number */
+      var n, a, b, lay = r.pick(['row', 'frame', 'scatter']), kind;
+      if (s < 3) { n = r.int(1, s < 1 ? 5 : 10); return { q: 'How many?', a: S(n), aid: { dots: [n], layout: lay }, eq: S(n) }; }
+      kind = s < 7 ? r.pick(['count', 'count', 'next']) : r.pick(['count', 'next', 'next', 'big']);
+      if (kind === 'count') { n = r.int(s < 5 ? 3 : 6, s < 5 ? 10 : 20); return { q: 'How many?', a: S(n), aid: { dots: [n], layout: n > 10 ? 'frame' : lay }, eq: S(n) }; }
+      if (kind === 'next') {
+        if (s >= 7 && odd(r, 0.3)) { a = r.int(4, 20); return { q: a + ', ' + (a - 1) + ', ' + (a - 2) + ', _', a: S(a - 3), eq: S(a - 3) }; }
+        a = r.int(s < 5 ? 1 : 5, s < 5 ? 7 : 17); return { q: a + ', ' + (a + 1) + ', ' + (a + 2) + ', _', a: S(a + 3), eq: S(a + 3) };
       }
-      if (s < 7) { n = r.int(s < 5 ? 1 : 0, s < 5 ? 10 : 20); return { q: pre + n, a: S(n), aid: (n > 0 && odd(r, 0.3)) ? { dots: [n], layout: n > 10 ? 'frame' : lay } : null, eq: S(n) }; }
-      n = r.int(11, 20);
-      return { q: pre + n, a: S(n), aid: odd(r, 0.5) ? { dots: [n], layout: r.pick(['frame', 'rows']) } : null, eq: S(n) };
+      a = r.int(1, 20); do { b = r.int(1, 20); } while (b === a);
+      return { q: 'Bigger: ' + a + ' or ' + b + '?', a: S(Math.max(a, b)), eq: S(Math.max(a, b)) };
     }
   });
 
