@@ -266,7 +266,7 @@ const CSS=`<style id="mq-css">
 #mqb.ok{border-color:#7fd884}
 #mqb.side{flex-direction:row}
 #mqb.side .mqb-a{flex:1}
-#mqb.noa .mqb-t{flex:1;display:flex;align-items:center;justify-content:center}
+#mqb.noa .mqb-a{display:none}
 #arena:has(>#mqb){height:clamp(240px,calc(30vh + 58px + max(0px,(100vh - 800px)*.85)),440px);flex:none}
 .strip-wrap:has(#strip.mq) #trkP{display:none}
 #arena:has(>#mqb) .hero{left:2%;bottom:4%;width:min(14%,128px)}
@@ -402,7 +402,7 @@ function buildBoard(p){
  const ar=$('#arena');if(!ar)return;
  let bd=$('#mqb',ar);if(!bd){bd=document.createElement('div');bd.id='mqb';ar.appendChild(bd)}
  bd.className='';bd._p=p;bd.innerHTML='';
- const q=String(p.q),isQ=q.trim()==='?';
+ const q=String(p.q).replace(/(?<=[\d)%¢_?])\s+(?=[+\-−×÷*/=<>≤≥])|(?<=[+\-−×÷*/=<>≤≥(])\s+(?=[\d(\-−$_?])/g,'\u00A0'),isQ=q.trim()==='?';   /* keep an equation on one line: no wrap inside the maths, the font shrinks to fit instead */
  const t=document.createElement('div');t.className='mqb-t';if(!isQ&&/(^|[^A-Za-z0-9])_([^A-Za-z0-9]|$)/.test(q)){t.innerHTML=q.split(/(?<![A-Za-z0-9])_(?![A-Za-z0-9])/).map(esc).join('<i class="mqb-blank"></i>')}else t.textContent=isQ?'?':q;
  const ad=document.createElement('div');ad.className='mqb-a';
  bd.appendChild(t);bd.appendChild(ad);

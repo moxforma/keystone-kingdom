@@ -18,6 +18,15 @@ const LETTERS='abcdefghijklmnopqrstuvwxyz';
 const TW=28,PLANK=C.PLANK||10;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const say=t=>{try{speak(t)}catch(e){}};
+/* spoken words are core content: master SOUND setting (S.set.sound), not the narration switch. force = explicit HEAR press (speaks even with sound off). Natural voice, rate .85, pitch 1 (voice.js kkSpellSay) */
+let SPKU=0;
+function sentFor(w,topic){try{return D().sentence(w,topic)||D().sentence(w)||''}catch(e){return''}}
+function spellSay(text,o){o=o||{};const w=String(text||'');if(!w)return;
+ if(!window.kkSpellSay){if(o.force){try{speakNow(w)}catch(e){}}else say(w);return}
+ const sent=o.sent===false?'':(o.sent||(o.word?sentFor(o.word,o.topic):''));
+ const parts=sent?[[w,.8,500],[sent,.85,500],[w,.8,0]]:[[w,.8,0]];
+ SPKU=performance.now()+(sent?9000:1500);
+ window.kkSpellSay(parts,{force:o.force,cb:()=>{SPKU=performance.now()+300}})}
 const D=()=>window.SPELLD;
 const isSp=R=>!!(R&&R.L&&R.L.stream==='spell');
 const clean=w=>/^[a-z]+$/.test(w||'');
@@ -155,24 +164,25 @@ SEG.srock={
 /* ================= keys (before the engine), speech, flash, hints ================= */
 const hiddenT=t=>t&&t.sp&&t.hid&&(t.t==='gap'||t.t==='tall');
 const accepts=(t,k)=>t.t==='srock'?(t.st==='wait'&&k===t.ans):t.t==='gap'?k===(t.hid?t.ans:t.word)[t.typed]:t.t==='fork'?(t.st==='wait'&&(k===t.hi||k===t.lo)):t.t==='flap'?(k===t.letters[t.k]||k===t.letters[t.k+1]):(t.hid?k===t.ans[t.k]:k===t.letters[t.k]);
-let SPKT=0;const spoke=()=>{SPKT=performance.now()};
-function say1(o,R){o.fs=R.t;o.said=1;spoke();say(o.word&&o.t==='srock'?o.word:o.ans)}
+const spoke=()=>{};
+function say1(o,R){o.fs=R.t;o.said=1;const w=o.word&&o.t==='srock'?o.word:o.ans;spellSay(w,{word:w,topic:R.L.topic})}
 function peek(o,R){   // Space says the word again; on a covered bridge/tower the FIRST Space per word also re-flashes it (free in worlds 2-3, a tiny accuracy cost from world 4)
  if(o.hid&&(o.t==='gap'||o.t==='tall')&&!o.pk){o.pk=1;o.fs=R.t;if((+R.L.tier||0)>=3)R.typed++}
- spoke();say(o.t==='srock'?o.word:o.ans)}
+ {const w=o.t==='srock'?o.word:o.ans;spellSay(w,{word:w,topic:rr().L.topic,force:true})}}
 /* Tab = see the word again (flash) + hear it again, any time, free */
 function again(R){
  if(R.phase==='run'){const t=RN.target();if(!t||!t.sp||!t.said||t.t==='flap')return;
-  if(hidden(+R.L.tier||0))t.fs=R.t;spoke();if(t.t!=='fork')say(t.t==='srock'?t.word:t.ans)}
+  if(hidden(+R.L.tier||0))t.fs=R.t;if(t.t!=='fork'){const w=t.t==='srock'?t.word:t.ans;spellSay(w,{word:w,topic:R.L.topic,force:true})}}
  else if(R.phase==='boss'){const b=act();if(!b)return;
-  if(b.mode==='spell'&&b.sp){spoke();say(b.sp.sent);return}
-  const a=activeBlob(b);if(a){if(!b.vis){a.fs=b.t;a.fe=0;b.dirty=true}spoke();say(a.w)}}}
+  if(b.mode==='spell'&&b.sp){spellSay(b.sp.sent,{sent:false,force:true});return}
+  const a=activeBlob(b);if(a){if(!b.vis){a.fs=b.t;a.fe=0;b.dirty=true}spellSay(a.w,{word:a.w,topic:R.L.topic,force:true})}}}
 addEventListener('keydown',e=>{
- try{if(e.key!=='Tab'||e.ctrlKey||e.metaKey||e.altKey)return;
+ try{if((e.key!=='Tab'&&e.key!=='Enter')||e.ctrlKey||e.metaKey||e.altKey)return;
   if(typeof screen==='undefined'||screen!=='runner')return;const R=rr();if(!R||!isSp(R))return;
   const m=document.getElementById('modal');if(m&&!m.hidden)return;
-  e.preventDefault();if(!e.repeat)again(R)}catch(err){console.warn('[runner-spell tab]',err)}},true);
+  e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)again(R)}catch(err){console.warn('[runner-spell tab]',err)}},true);
 HK.key.unshift(function(e){
+ if(e.key==='Enter'){const R0=rr();if(R0&&isSp(R0)&&(R0.phase==='run'||R0.phase==='boss')){if(!e.repeat)again(R0);return true}}   // Enter = HEAR (same as Tab)
  const R=rr();if(!R||!isSp(R)||R.phase!=='run'||R.fall)return false;
  const caps0=e.getModifierState&&e.getModifierState('CapsLock')&&!e.shiftKey;
  const fl=R.obs.find(f=>f.t==='flap'&&f.sp&&f.st==='fly'&&f.k>=f.n);            // the last balloon letter pressed again: a free flap (runner-paths handles it)
@@ -249,15 +259,21 @@ function ensureCue(show){
  try{let el=document.getElementById('rcue');
   if(!el){const wrap=document.querySelector('#s-runner .strip-wrap');if(!wrap)return null;
    if(!document.getElementById('rcueCss')){const st=document.createElement('style');st.id='rcueCss';st.textContent=`
-#rcue{display:flex;align-items:center;justify-content:center;gap:12px;min-height:40px;padding:2px 6px;visibility:hidden;font-family:'Jersey 10',monospace;font-size:clamp(22px,2.8vw,30px);letter-spacing:.06em;color:#e8e2f4;text-transform:uppercase;text-align:center;line-height:1.05}
+#rcue{display:flex;align-items:center;justify-content:center;gap:16px;min-height:68px;margin:-6px 0 -2px;padding:0 6px;visibility:hidden;font-family:'Jersey 10',monospace;font-size:clamp(22px,2.8vw,30px);letter-spacing:.06em;color:#e8e2f4;text-transform:uppercase;text-align:center;line-height:1.05}
 #rcue.on{visibility:visible}
-#rcue img{width:48px;height:32px;image-rendering:pixelated;flex:none}
+#rcue .rhear{flex:none;display:flex;align-items:center;gap:12px;padding:6px 14px 8px;min-height:64px;border:0;border-radius:0;cursor:pointer;background:#3a2a6a;color:#fff6e0;font-family:inherit;font-size:30px;letter-spacing:.1em;line-height:1;box-shadow:0 5px 0 #0a0f2e,inset 0 0 0 3px #f0c860}
+#rcue .rhear:hover{background:#4a3a80}#rcue .rhear:focus-visible{outline:3px solid #8ff0ff}#rcue .rhear:active{transform:translateY(2px)}
+#rcue .rhear .lb{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+#rcue img{width:72px;height:48px;image-rendering:pixelated;flex:none}
 #rcue.pulse img{animation:rcuep .3s steps(2) infinite}
-@keyframes rcuep{0%{transform:scale(1)}100%{transform:scale(1.34)}}
-#rcue .tk{flex:none;display:inline-block;background:#e8ecff;color:#0b1033;border-bottom:3px solid #8f98d0;padding:4px 8px 1px;font-size:.78em;line-height:1;letter-spacing:.1em}
+#rcue.pulse .rhear{box-shadow:0 5px 0 #0a0f2e,inset 0 0 0 3px #fff6e0,0 0 0 4px #f0c860}
+@media(min-width:1700px){#rcue .rhear{min-height:88px;font-size:38px}#rcue img{width:96px;height:64px}#rcue{min-height:96px}}
+@keyframes rcuep{0%{transform:translateY(0)}100%{transform:translateY(-4px)}}
+#rcue .tk{flex:none;display:inline-block;background:#e8ecff;color:#0b1033;border-bottom:3px solid #8f98d0;padding:3px 7px 1px;font-size:16px;line-height:1;letter-spacing:.1em}
 #rcue .tx b{color:#f0c860;font-weight:400;letter-spacing:.12em}
 #rstripIn span.fl{color:#f0c860!important}`;document.head.appendChild(st)}
-   el=document.createElement('div');el.id='rcue';el.innerHTML='<img alt="" src="'+speakerImg()+'"><span class="tk">TAB</span><span class="tx"></span>';wrap.insertBefore(el,wrap.firstChild)}
+   el=document.createElement('div');el.id='rcue';el.innerHTML='<button type="button" class="rhear" aria-label="Hear the word" title="Hear it (Tab or Enter)"><img alt="" src="'+speakerImg()+'"><span class="lb">HEAR<span class="tk">TAB</span></span></button><span class="tx"></span>';wrap.insertBefore(el,wrap.firstChild);
+   el.querySelector('.rhear').addEventListener('click',ev=>{ev.preventDefault();const R=rr();if(R&&isSp(R))again(R);try{ev.currentTarget.blur()}catch(e){}})}
   el.style.display=show?'':'none';return el}catch(e){return null}}
 function blankSent(word,topic,shown){
  try{let s=D().sentence(word,topic)||D().sentence(word);if(!s)return'';
@@ -274,7 +290,7 @@ function cueSync(R){
  if(key!==cueKey){cueKey=key;const tx=el.querySelector('.tx');
   if(dict)tx.textContent='';else if(word){const s=blankSent(word,R.L.topic,shown);tx.innerHTML=s?esc(s).replace(/\u0001/g,'<b>').replace(/\u0002/g,'</b>'):''}else tx.textContent='';
   el.classList.toggle('on',!!key)}
- el.classList.toggle('pulse',!!key&&performance.now()-SPKT<1200);
+ el.classList.toggle('pulse',!!key&&performance.now()<SPKU);
  if(R.phase==='run')syncStrip(R)}
 
 /* strip under the canvas: never a bare "?": the word while it flashes, then one blank per letter (typed letters fill in) */
@@ -389,9 +405,9 @@ function startSpell(b,s){s.done=true;const it=pull(b,'spell'),txt=it.text||it.wo
  const showT=b.vis?999:Math.max(1.6,3.2-.12*tier),per=Math.max(.9,2.2-.1*tier);
  b.cur=s;b.sp={txt,sent:it.s||txt,i:0,t:0,final:!!s.final,showT,lim:5+txt.length*per+(b.vis?0:Math.min(showT,4))};
  b.blobs=[];b.spots=[];setMode(b,'spell');const v=vgeom(b);RN.popTxt(s.final?'FINAL SPELL!':'SPELL!',wx(v.sx),GROUND-v.vh-18,'#c9a8f0');
- RN.snd(120,.5,'sawtooth',.07);RN.snd(240,.4,'triangle',.05,.15);RN.burst(v.sx,v.cy,'#c9a8f0',14,60);setTimeout(()=>{spoke();say(b.sp&&b.sp.sent||it.s)},500)}
+ RN.snd(120,.5,'sawtooth',.07);RN.snd(240,.4,'triangle',.05,.15);RN.burst(v.sx,v.cy,'#c9a8f0',14,60);setTimeout(()=>{spellSay(b.sp&&b.sp.sent||it.s,{sent:false})},500)}
 function spellKey(b,e){const s=b.sp;if(!s||s.state)return;
- if(e.key==='Enter'){spoke();say(s.sent);return}
+ if(e.key==='Enter'){spellSay(s.sent,{sent:false,force:true});return}
  if(e.key.length!==1)return;
  const want=s.txt[s.i],caps=e.getModifierState&&e.getModifierState('CapsLock')&&!e.shiftKey,kk=caps?e.key.toLowerCase():e.key;
  if(e.key!==want&&kk!==want){RN.miss();b.laugh=.3;return}
@@ -415,7 +431,7 @@ function update(dt){const b=act();if(!b)return;const R=RN.R;if(b.mode==='done')r
  if(b.mode==='intro'){const k=Math.min(1,b.mt/.8);R.bossX=ri(b.bx0+36*(k*(2-k)));if(b.mt>=1.3){R.bossX=b.bx0+36;nextVolley(b)}}
  else if(b.mode==='wind'){if(b.angryT>0)b.mt=Math.min(b.mt,0);else if(b.mt>=b.windDur)doThrow(b)}
  else if(b.mode==='fly'){const a=activeBlob(b);
-  if(a&&b.said!==a){b.said=a;a.fs=b.t;a.fe=0;b.dirty=true;setTimeout(()=>{if(act()===b&&activeBlob(b)===a){spoke();say(a.w)}},250)}
+  if(a&&b.said!==a){b.said=a;a.fs=b.t;a.fe=0;b.dirty=true;setTimeout(()=>{if(act()===b&&activeBlob(b)===a){spellSay(a.w,{sent:false})}},250)}
   if(a&&a.fs!=null&&!a.fe&&!flB(b,a)){a.fe=1;b.dirty=true}
   if(!b.blobs.length){const sp=dueSpell(b);if(sp)startSpell(b,sp);else{b.throwsLeft--;if(b.throwsLeft>0){b.windDur=(b.p2?.4:.5)*b.tm;setMode(b,'wind')}else spawnSpots(b)}}}
  else if(b.mode==='weak'){const n0=b.spots.length;b.spots.forEach(s=>s.l-=dt);
@@ -442,7 +458,7 @@ function key(e){const b=act();if(!b)return;
  if(b.mode==='dying'||b.mode==='done'||b.mode==='intro')return;
  if(b.mode==='spell'){spellKey(b,e);return}
  if(b.mode==='spfail')return;
- if(e.key===' '){if(b.charge>=b.cmax){mega();flush()}else{const a=activeBlob(b);if(a){spoke();say(a.w)}}return}
+ if(e.key===' '){if(b.charge>=b.cmax){mega();flush()}else{const a=activeBlob(b);if(a){spellSay(a.w,{word:a.w,topic:RN.R.L.topic,force:true})}}return}
  if(e.key.length!==1||!/[a-zA-Z]/.test(e.key))return;
  const caps=e.getModifierState&&e.getModifierState('CapsLock')&&!e.shiftKey,kk=(caps?e.key.toLowerCase():e.key).toLowerCase(),R=RN.R;
  const a=activeBlob(b);
