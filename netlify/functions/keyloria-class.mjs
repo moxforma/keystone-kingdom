@@ -20,6 +20,9 @@ const cleanTitle = v => String(v || "").replace(/[<>]/g, "").slice(0, 60);
 const validCode = v => /^[a-z]{3}[0-9]{3}$/.test(v) && words.includes(v.slice(0, 3));
 const validPid = v => /^[a-z0-9]{6,24}$/.test(v);
 const num = (v, max) => { const n = Math.round(+v || 0); return Math.max(0, Math.min(max, n)) };
+const STREAMS = ["typing", "math", "spell"];
+const cleanStream = v => STREAMS.includes(v) ? v : "typing";
+const cleanProgs = p => { const o = {}; if (p && typeof p === "object") for (const k of ["math", "spell"]) if (typeof p[k] === "string") { const v = p[k].replace(/[^0-9:;<=>?@A-Z]/g, "").slice(0, 600); if (v) o[k] = v } return o };
 const GAMES = ["meteor", "race", "glitch", "bubble", "dig", "keeper", "bridge"];
 function cleanAsg(a) {
   const o = {};
@@ -32,8 +35,8 @@ function cleanStats(s) {
   for (const g of GAMES) if (s.arc && s.arc[g]) arc[g] = { wpm: num(s.arc[g].wpm, 300), acc: num(s.arc[g].acc, 100) };
   return { lesson: cleanTitle(s.lesson), pos: num(s.pos, 999), world: num(s.world, 99), stars: num(s.stars, 99999),
     wpm: num(s.wpm, 300), acc: num(s.acc, 100), mins: num(s.mins, 100000), arc, seen: Date.now(),
-    prog: String(s.prog || "").replace(/[^0-9:;<=>?@A-Z]/g, "").slice(0, 600), asg: cleanAsg(s.asg),
-    cur: s.cur && typeof s.cur === "object" ? { i: num(s.cur.i, 9999), at: num(s.cur.at, 9e15), n: num(s.cur.n, 99) } : null };
+    prog: String(s.prog || "").replace(/[^0-9:;<=>?@A-Z]/g, "").slice(0, 600), progs: cleanProgs(s.progs), asg: cleanAsg(s.asg),
+    cur: s.cur && typeof s.cur === "object" ? { i: num(s.cur.i, 9999), at: num(s.cur.at, 9e15), n: num(s.cur.n, 99), s: cleanStream(s.cur.s) } : null };
 }
 export const weekBoard = members => {
   const rows = [];
@@ -82,7 +85,7 @@ export default async (req, context) => {
   if (a === "board") return json({ name: meta.name, rows: weekBoard(await members()).slice(0, 60) });
   if (!(await isTeacher())) return json({ error: "Grown-ups only" }, 403);
   if (a === "dash") return json({ ...pub(), hist: meta.hist || (meta.assign ? [meta.assign] : []), members: (await members()).map(m => ({ pid: m.pid, name: m.name, joined: m.joined, stats: m.stats })) });
-  if (a === "assign") { meta.assign = b.i == null ? null : { i: num(b.i, 9999), title: cleanTitle(b.title), at: Date.now() }; if (meta.assign) meta.hist = [...(meta.hist || []), meta.assign].slice(-40); await store.setJSON("c:" + code, meta); return json(pub()) }
+  if (a === "assign") { meta.assign = b.i == null ? null : { i: num(b.i, 9999), title: cleanTitle(b.title), at: Date.now(), stream: cleanStream(b.stream) }; if (meta.assign) meta.hist = [...(meta.hist || []), meta.assign].slice(-40); await store.setJSON("c:" + code, meta); return json(pub()) }
   if (a === "lock") { const L = {}; if (b.lock && typeof b.lock === "object") for (const [k, v] of Object.entries(b.lock).slice(0, 20)) if (/^[a-z]{2,12}$/.test(k)) L[k] = v === 0 ? 0 : 1; meta.lock = L; await store.setJSON("c:" + code, meta); return json(pub()) }
   if (a === "spell") { const words = [...new Set((Array.isArray(b.words) ? b.words : []).map(w => String(w || "").replace(/[^A-Za-z'\-]/g, "").slice(0, 20)).filter(Boolean))].slice(0, 40);
     meta.spell = words.length ? { name: cleanTitle(b.name) || "Spelling list", words, at: Date.now() } : null; await store.setJSON("c:" + code, meta); return json(pub()) }

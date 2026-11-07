@@ -20,15 +20,16 @@ function tidy(){const box=$('#mbox');if(!box||!box.querySelector('.rstats'))retu
  const h3=[...box.querySelectorAll('h3')].find(h=>/your run/i.test(h.textContent));const rs=h3&&h3.nextElementSibling&&h3.nextElementSibling.classList.contains('rstats')?h3.nextElementSibling:box.querySelector('.rstats');
  if(h3)h3.remove();if(rs){rs.classList.add('oneline');rs.querySelectorAll('span').forEach(s=>{if(/words per minute/i.test(s.textContent))s.textContent='WPM'})}
  /* no-peek: say what it is */
- box.querySelectorAll('.banner,.rchip').forEach(b=>{if(/No-peek \+1/.test(b.textContent))b.textContent='No-peek bonus +1 diamond (you typed with the keyboard letters hidden)'})}
+ box.querySelectorAll('.banner,.rchip').forEach(b=>{if(P&&P.stream&&/No-peek/.test(b.textContent)){b.remove();return}if(/No-peek \+1/.test(b.textContent))b.textContent='No-peek bonus +1 diamond (you typed with the keyboard letters hidden)'})}
 const _modal=modal;modal=function(html){const r=_modal.apply(this,arguments);try{tidy();setTimeout(tidy,50);setTimeout(tidy,400)}catch(e){}return r};
 /* Keylori speaks in a bubble beside its card instead of a big heading */
 const SAY_NEW=['Yay, you saved me! Let’s be friends!','Thank you for rescuing me!','You did it! I’m free!'];
 const SAY_AGAIN=['Yay, you’re back! I missed you!','Hi again! Let’s keep typing!','I’m so happy to see you!','You’re getting faster!'];
+const SAY_AGAIN_S=['Yay, you’re back! I missed you!','Hi again! Let’s keep going!','I’m so happy to see you!','You’re getting better!'];
 const _res=results;results=function(r){const out=kkSafe(_res,this,arguments);try{if(!r||!r.pass||P.practice)return out;const box=$('#mbox'),flip=box&&box.querySelector('#flip');if(!flip)return out;
  const h2=box.querySelector('h2');if(h2&&/happy to see you/.test(h2.textContent))h2.textContent=r.lvl?'Level up!':'Great job!';
  if(!flip.parentElement.classList.contains('flipwrap')){const w=document.createElement('div');w.className='flipwrap';flip.replaceWith(w);w.appendChild(flip);
-  w.insertAdjacentHTML('beforeend',`<div class="kbubble">${esc(rand(r.evo!=null?['Look! I evolved!','Wow, I grew stronger!','Thanks to you, I evolved!']:r.newCard?SAY_NEW:SAY_AGAIN))}</div>`)}
+  w.insertAdjacentHTML('beforeend',`<div class="kbubble">${esc(rand(r.evo!=null?['Look! I evolved!','Wow, I grew stronger!','Thanks to you, I evolved!']:r.newCard?SAY_NEW:(P.stream?SAY_AGAIN_S:SAY_AGAIN)))}</div>`)}
  const wrap=box.querySelector('.flipwrap'),rc=box.querySelector('.reward-cards');if(wrap&&rc){const key=c=>(c.querySelector('.c-name')?.textContent||'')+'|'+(c.querySelector('.c-form')?.textContent||'');const fc=flip.querySelector('.cw:not(.bk)'),fk=fc?key(fc):'';
   rc.querySelectorAll('.cw').forEach(c=>{if(key(c)===fk)c.remove()});if(!rc.querySelector('.cw'))rc.remove();else if(rc.parentElement!==wrap){wrap.insertBefore(rc,wrap.querySelector('.kbubble'));wrap.classList.add('multi')}}}catch(e){}try{tidy()}catch(e){}return out};
 

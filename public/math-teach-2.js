@@ -1,0 +1,32 @@
+/* math-teach-2.js : "watch me" mini-lessons for worlds 5-8 (28 topics). Shown before each math lesson.
+   Self-registering: each entry goes into window.MATH_TEACH[topicId]. */
+(function(){var T=(window.MATH_TEACH=window.MATH_TEACH||{});
+T['m5.1']={ex:'548 + 237', a:'785', steps:[{t:'548 + 237'},{t:'Ones: 8 + 7 = 15, carry 1'},{t:'Tens: 4 + 3 + 1 = 8'},{t:'Hundreds: 5 + 2 = 7'},{t:'548 + 237 = 785'}], tip:'Carry the 1!'};
+T['m5.2']={ex:'Round 463 to nearest 10', a:'460', steps:[{t:'Round 463 to nearest 10'},{t:'Look at the ones: 3'},{t:'3 is under 5, so stay'},{t:'463 rounds to 460'}], tip:'Under 5? Stay.'};
+T['m5.3']={ex:'6 × 4', a:'24', steps:[{t:'6 × 4',aid:{dots:[4,4,4,4,4,4]}},{t:'6 equal groups of 4'},{t:'4 + 4 + 4 + 4 + 4 + 4'},{t:'6 × 4 = 24'}], tip:'Equal groups!'};
+T['m5.4']={ex:'What fraction is gold?', a:'3/4', steps:[{t:'What fraction is gold?',aid:{frac:{n:3,d:4}}},{t:'Bottom: 4 equal parts'},{t:'Top: 3 parts are gold'},{t:'Gold = 3/4 of the whole'}], tip:'Top over bottom'};
+T['m5.5']={ex:'$2.00 + 25¢ + 25¢', a:'2.50', steps:[{t:'$2.00 + 25¢ + 25¢',aid:{coins:[200,25,25]}},{t:'$2.00 + 25¢ = $2.25'},{t:'$2.25 + 25¢ = $2.50'},{t:'$2.00 + 25¢ + 25¢ = $2.50'}], tip:'Count up!'};
+T['m5.6']={ex:'Rectangle 8 cm by 6 cm. Perimeter?', a:'28', steps:[{t:'8 cm by 6 cm. Perimeter?',aid:{grid:{w:8,h:6}}},{t:'Add all 4 sides'},{t:'8 + 6 + 8 + 6 = 28 cm'}], tip:'Go around!'};
+T['m5.7']={ex:'How many more apples?', a:'3', steps:[{t:'Apples: 9. Grapes: 6',aid:{bars:[{l:'Grape',v:6},{l:'Apple',v:9}]}},{t:'Find the gap'},{t:'9 − 6 = 3 more apples'}], tip:'Subtract to compare'};
+T['m6.1']={ex:'5000 − 2167', a:'2833', steps:[{t:'5000 − 2167'},{t:'2167 + 33 = 2200'},{t:'2200 + 2800 = 5000'},{t:'33 + 2800 = 2833'},{t:'5000 − 2167 = 2833'}], tip:'Count up!'};
+T['m6.2']={ex:'7 × 8', a:'56', steps:[{t:'7 × 8'},{t:'Split 7 into 5 + 2'},{t:'5 × 8 = 40, 2 × 8 = 16'},{t:'40 + 16 = 56'},{t:'7 × 8 = 56'}], tip:'Break it apart'};
+T['m6.3']={ex:'36 × 5', a:'180', steps:[{t:'36 × 5'},{t:'Split 36 into 30 + 6'},{t:'30 × 5 = 150, 6 × 5 = 30'},{t:'150 + 30 = 180'},{t:'36 × 5 = 180'}], tip:'Split it up!'};
+T['m6.4']={ex:'23 ÷ 4', a:'5r3', steps:[{t:'23 ÷ 4'},{t:'4 fives make 20'},{t:'23 − 20 = 3 left over'},{t:'23 ÷ 4 = 5r3'}], tip:'Leftovers stay!'};
+T['m6.5']={ex:'3/5 − 1/5', a:'2/5', steps:[{t:'3/5 − 1/5',aid:{frac:{n:3,d:5}}},{t:'Bottoms match: both 5'},{t:'Take 1 away from 3'},{t:'3/5 − 1/5 = 2/5'}], tip:'Keep the bottom'};
+T['m6.6']={ex:'0.4 + 0.35', a:'0.75', steps:[{t:'0.4 + 0.35'},{t:'Line up the dots'},{t:'0.40 + 0.35'},{t:'0.4 + 0.35 = 0.75'}], tip:'Line up dots!'};
+T['m6.7']={ex:'13, 17, 21, 25, _', a:'29', steps:[{t:'13, 17, 21, 25, _'},{t:'Jump: 17 − 13 = 4'},{t:'Add 4 each time'},{t:'13, 17, 21, 25, 29'}], tip:'Find the jump'};
+T['m7.1']={ex:'3697 + 2803', a:'6500', steps:[{t:'3697 + 2803'},{t:'Round 3697 up to 3700'},{t:'Take 3 from 2803: 2800'},{t:'3700 + 2800 = 6500'},{t:'3697 + 2803 = 6500'}], tip:'Friendly numbers!'};
+T['m7.2']={ex:'336 ÷ 4', a:'84', steps:[{t:'336 ÷ 4'},{t:'300 ÷ 4 = 75'},{t:'36 ÷ 4 = 9'},{t:'75 + 9 = 84'},{t:'336 ÷ 4 = 84'}], tip:'Split and share!'};
+T['m7.3']={ex:'1/2 + 1/3', a:'5/6', steps:[{t:'1/2 + 1/3'},{t:'Bottoms match: use 6'},{t:'1/2 = 3/6, 1/3 = 2/6'},{t:'3/6 + 2/6 = 5/6'},{t:'1/2 + 1/3 = 5/6'}], tip:'Make bottoms match'};
+T['m7.4']={ex:'25% of 80', a:'20', steps:[{t:'25% of 80'},{t:'25% is the same as 1/4'},{t:'1/4 of 80 = 80 ÷ 4'},{t:'80 ÷ 4 = 20'},{t:'25% of 80 = 20'}], tip:'Quarters help!'};
+T['m7.5']={ex:'4.9 − 4.62', a:'0.28', steps:[{t:'4.9 − 4.62'},{t:'Write 4.9 as 4.90'},{t:'4.90 − 4.62 = 0.28'}], tip:'Line up dots!'};
+T['m7.6']={ex:'Triangle: 55° and 65°. Third?', a:'60', steps:[{t:'Angles: 55° and 65°'},{t:'A triangle adds to 180°'},{t:'55 + 65 = 120'},{t:'180 − 55 − 65 = 60'}], tip:'Total is 180°'};
+T['m7.7']={ex:'9 × (12 − 8)', a:'36', steps:[{t:'9 × (12 − 8)'},{t:'Brackets first: 12 − 8 = 4'},{t:'9 × 4 = 36'},{t:'9 × (12 − 8) = 36'}], tip:'Brackets first!'};
+T['m8.1']={ex:'GCF of 12 and 18', a:'6', steps:[{t:'GCF of 12 and 18'},{t:'Factors of 12: 1,2,3,4,6,12'},{t:'Factors of 18: 1,2,3,6,9,18'},{t:'Biggest shared: 6'},{t:'GCF of 12 and 18 = 6'}], tip:'Biggest shared!'};
+T['m8.2']={ex:'3/4 of 20', a:'15', steps:[{t:'3/4 of 20'},{t:'One part: 20 ÷ 4 = 5'},{t:'5 × 3 = 15'},{t:'3/4 of 20 = 15'}], tip:'Divide, then times'};
+T['m8.3']={ex:'4.36 × 100', a:'436', steps:[{t:'4.36 × 100'},{t:'Move the dot 2 places'},{t:'4.36 → 43.6 → 436'},{t:'4.36 × 100 = 436'}], tip:'Count the zeros'};
+T['m8.4']={ex:'Shirt $50. 20% off. Pay?', a:'40', steps:[{t:'Shirt $50. 20% off. Pay?'},{t:'10% of $50 = $5'},{t:'2 × $5 = $10 off'},{t:'$50 − $10 = $40'}], tip:'Find 10% first'};
+T['m8.5']={ex:'6 cats, 9 dogs. Cats:dogs?', a:'2:3', steps:[{t:'6 cats, 9 dogs. Ratio?'},{t:'Both: divide by 3'},{t:'6 ÷ 3 = 2, 9 ÷ 3 = 3'},{t:'Cats:dogs = 2:3'}], tip:'Divide both!'};
+T['m8.6']={ex:'Diameter 10 cm. Radius?', a:'5', steps:[{t:'Diameter 10 cm. Radius?'},{t:'Radius is half the width'},{t:'Radius = 10 ÷ 2 = 5'}], tip:'Halve the diameter'};
+T['m8.7']={ex:'x + 7 = 15', a:'8', steps:[{t:'x + 7 = 15'},{t:'Take 7 from both sides'},{t:'15 − 7 = 8'},{t:'x + 7 = 15, so x = 8'}], tip:'Undo the add'};
+})();

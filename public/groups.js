@@ -15,14 +15,27 @@ document.head.insertAdjacentHTML('beforeend','<style>.btn.red{background:#c83a5c
 const weekStart=()=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()};
 const lessonIdx=()=>Math.floor(nextStage()/NST);
 
+/* ---------- streams (Typing / Math / Spelling) ---------- */
+const KS=()=>window.KKS||null,curS=()=>{const k=KS();return k&&k.cur||'typing'};
+const SNAME={typing:'Typing',math:'Math',spell:'Spelling'},SIDS=['typing','math','spell'];
+const sOf=a=>a&&SIDS.includes(a.stream)?a.stream:'typing';
+/* run fn with the lesson list of stream id (restores the view afterwards) */
+function withStream(id,fn){const k=KS();if(!k||!k.enter||curS()===id)return fn();const was=curS();try{k.enter(id);return fn()}finally{try{k.enter(was)}catch(e){}}}
+const encProg=best=>(window.ORDER||LESSONS.map((_,k)=>k)).map(j=>{let n=0,st=0;for(let q=0;q<NST;q++){const b=(best||{})[j+'-'+q]||0;if(b>=1)n++;st+=Math.min(3,b)}return String.fromCharCode(48+n)+String.fromCharCode(48+st)}).join('');
+/* the Typing progress maps even while a stream view is active (S.best then points at the stream) */
+function typingView(){const k=KS();if(!k||k.cur==='typing'){return{best:S.best||{},lesson:null}}
+ let best={};try{const b=localBundle();const sv=b&&b.saves&&b.saves[PROF.cur];best=(sv&&sv.best)||{}}catch(e){}return{best,lesson:window.__kkLastTyping||null}}
 /* ---------- stats sent to the class ---------- */
-function stats(){const i=lessonIdx(),h=(S.hist||[]).slice(-8),avg=f=>h.length?Math.round(h.reduce((a,x)=>a+f(x),0)/h.length):0,ws=weekStart();
+function stats(){const TV=typingView(),TB=TV.best;const i=lessonIdx(),h=(S.hist||[]).slice(-8),avg=f=>h.length?Math.round(h.reduce((a,x)=>a+f(x),0)/h.length):0,ws=weekStart();
  if(!S.wk||S.wk.w!==ws)S.wk={w:ws,base:S.time||0};
  const arc={};(S.hs||[]).filter(x=>x.t>=ws).forEach(x=>{if(!arc[x.g]||x.wpm>arc[x.g].wpm)arc[x.g]={wpm:x.wpm,acc:x.acc}});
- const prog=(window.ORDER||LESSONS.map((_,k)=>k)).map(j=>{let n=0,st=0;for(let q=0;q<NST;q++){const b=(S.best||{})[j+'-'+q]||0;if(b>=1)n++;st+=Math.min(3,b)}return String.fromCharCode(48+n)+String.fromCharCode(48+st)}).join('');
+ const prog=encProg(TB),progs={};['math','spell'].forEach(id=>{const k=KS(),b=k&&k.cur===id?S.best:(S.streams&&S.streams[id]&&S.streams[id].best);if(b&&Object.keys(b).length)progs[id]=encProg(b)});
  const A=S.asga&&S.cls&&S.asga.code===S.cls.code?S.asga:null;
- return{lesson:`Lesson ${LNUM(i)}: ${lessonTitle(i)}`,pos:LNUM(i),world:worldOf(i),stars:Object.values(S.best||{}).reduce((a,b)=>a+b,0),wpm:avg(x=>x.w),acc:avg(x=>x.a),mins:Math.round(((S.time||0)-S.wk.base)/60),arc,prog,
-  asg:S.asgr||{},cur:A?{i:A.i,at:A.at,n:(A.st||[]).length}:null}}
+ const tl=TV.lesson||(curS()==='typing'?{lesson:`Lesson ${LNUM(i)}: ${lessonTitle(i)}`,pos:LNUM(i),world:worldOf(i)}:null);
+ const t2=tl||(()=>{const O=window.ORDER||LESSONS.map((_,k)=>k);let j=O.find(x=>{for(let q=0;q<NST;q++)if(!((TB[x+'-'+q]||0)>=1))return true;return false});if(j==null)j=O[O.length-1];return{lesson:'Lesson '+LNUM(j),pos:LNUM(j),world:worldOf(j)}})();
+ if(curS()==='typing')window.__kkLastTyping={lesson:t2.lesson,pos:t2.pos,world:t2.world};
+ return{lesson:t2.lesson,pos:t2.pos,world:t2.world,stars:Object.values(TB).reduce((a,b)=>a+b,0),wpm:avg(x=>x.w),acc:avg(x=>x.a),mins:Math.round(((S.time||0)-S.wk.base)/60),arc,prog,progs,
+  asg:S.asgr||{},cur:A?{i:A.i,at:A.at,n:(A.st||[]).length,s:sOf(A)}:null}}
 let lastRep=0;
 function report(force){if(!S.cls||(!force&&Date.now()-lastRep<15000))return;lastRep=Date.now();post('/api/class',{a:'report',code:S.cls.code,pid:pid(),name:myName(),stats:stats()}).then(info=>{CLS_INFO=info;setLock(info);homeBanner()}).catch(()=>{})}
 const _res=results;results=function(){const r=kkSafe(_res,this,arguments);setTimeout(report,1500);return r};
@@ -36,16 +49,18 @@ function setLock(i){try{window.kkClassSpell=S.cls&&i&&i.spell||null}catch(e){}co
 let CLS_INFO=null,lastInfo=0;
 function fetchInfo(){if(!S.cls||Date.now()-lastInfo<15000)return;lastInfo=Date.now();post('/api/class',{a:'info',code:S.cls.code}).then(i=>{CLS_INFO=i;setLock(i);S.cls.name=i.name;homeBanner()}).catch(e=>{if(/not found/i.test(e.message)){S.cls=null;save()}})}
 function homeBanner(){const home=$('#s-home');if(!home||home.hidden)return;home.querySelector('.clsban')?.remove();if(!S.cls||!CLS_INFO)return;const I=CLS_INFO;
- const pick=I.assign&&LESSONS[I.assign.i]?`<div class="cb-row"><span>Teacher's pick: <b>Lesson ${LNUM(I.assign.i)}: ${esc(lessonTitle(I.assign.i))}</b></span>${(()=>{const R=S.asgr&&S.asgr[I.assign.i];return R&&R.at===I.assign.at?'<span class="cb-done">Done ✓</span>':''})()}<button class="btn sm volt" data-act="clsPick" data-i="${I.assign.i}">Play</button></div>`:'';
+ const pick=I.assign&&LESSONS[I.assign.i]?`<div class="cb-row"><span>Teacher's pick: <b>${sOf(I.assign)==='typing'?`Lesson ${LNUM(I.assign.i)}: ${esc(lessonTitle(I.assign.i))}`:`${SNAME[sOf(I.assign)]} lesson ${LNUM(I.assign.i)}${I.assign.title?': '+esc(I.assign.title):''}`}</b></span>${(()=>{const R=S.asgr&&S.asgr[I.assign.i];return R&&R.at===I.assign.at?'<span class="cb-done">Done ✓</span>':''})()}<button class="btn sm volt" data-act="clsPick" data-i="${I.assign.i}" data-s="${sOf(I.assign)}">Play</button></div>`:'';
  const race=I.race?`<div class="cb-row"><span>A class race is open!</span><button class="btn sm" data-act="raceJoinCode" data-r="${esc(I.race.room)}">Join race</button></div>`:'';
  if(!pick&&!race)return;const tb=home.querySelector('.topbar');const el=document.createElement('div');el.className='clsban panel';el.innerHTML=`<div class="cb-name">${esc(I.name||'My class')}</div>${pick}${race}`;
  tb?tb.insertAdjacentElement('afterend',el):home.prepend(el)}
 /* playing the teacher's pick: stages count from when it was assigned, and the last one ends with "Lesson complete!" */
-const asgFor=()=>{const a=CLS_INFO&&CLS_INFO.assign;if(!a||!S.cls)return null;if(!S.asga||S.asga.i!==a.i||S.asga.at!==a.at||S.asga.code!==S.cls.code){S.asga={code:S.cls.code,i:a.i,at:a.at,st:[]};save()}return S.asga};
+const asgFor=()=>{const a=CLS_INFO&&CLS_INFO.assign;if(!a||!S.cls)return null;if(!S.asga||S.asga.i!==a.i||S.asga.at!==a.at||S.asga.code!==S.cls.code||sOf(S.asga)!==sOf(a)){S.asga={code:S.cls.code,i:a.i,at:a.at,stream:sOf(a),st:[]};save()}return S.asga};
 let ASG_RUN=false;
-ACT.clsPick=d=>{const i=+d.i,A=asgFor();let s=0;if(A&&A.i===i){for(;s<NST-1;s++)if(!A.st.includes(s))break}else{for(;s<NST-1;s++)if(!((S.best[i+'-'+s]||0)>=1))break}
+ACT.clsPick=d=>{const i=+d.i,sid=SIDS.includes(d.s)?d.s:'typing';
+ if(KS()&&KS().set&&(S.stream||'typing')!==sid){if(sid!=='typing'&&KS().on&&!KS().on(sid)){toast(SNAME[sid]+' is switched off for this player');return}KS().set(sid)}
+ const A=asgFor();let s=0;if(A&&A.i===i){for(;s<NST-1;s++)if(!A.st.includes(s))break}else{for(;s<NST-1;s++)if(!((S.best[i+'-'+s]||0)>=1))break}
  closeModal();startStage(i*NST+s)};
-const _ssA=startStage;startStage=function(n,mode){const r=_ssA.apply(this,arguments);try{const A=asgFor();ASG_RUN=!!(A&&typeof P!=='undefined'&&P.i===A.i&&!P.mode&&!P.practice)}catch(e){ASG_RUN=false}return r};
+const _ssA=startStage;startStage=function(n,mode){const r=_ssA.apply(this,arguments);try{const A=asgFor();ASG_RUN=!!(A&&typeof P!=='undefined'&&P.i===A.i&&curS()===sOf(A)&&!P.mode&&!P.practice)}catch(e){ASG_RUN=false}return r};
 function asgButtons(){const A=S.asga,box=document.querySelector('#mbox');if(!A||!box||!box.querySelector('.rstats')||typeof P==='undefined'||P.i!==A.i)return;
  const plays=[...box.querySelectorAll('[data-act=play]')].filter(b=>!b.closest('.stpick')&&!/again/i.test(b.textContent));
  if(A.st.length>=NST){if(box.querySelector('[data-act=asgDone]'))return;const first=plays[0];plays.forEach(b=>b.remove());
@@ -54,12 +69,12 @@ function asgButtons(){const A=S.asga,box=document.querySelector('#mbox');if(!A||
   first&&first.remove()}
  else{let nx=null;for(let q=0;q<NST;q++)if(!A.st.includes(q)){nx=q;break}if(nx!=null)plays.forEach(b=>b.dataset.n=A.i*NST+nx)}}
 const _res2=results;results=function(r){const out=kkSafe(_res2,this,arguments);try{const A=S.asga;
- if(ASG_RUN&&A&&typeof P!=='undefined'&&!P.mode&&!P.practice&&P.i===A.i&&r){
+ if(ASG_RUN&&A&&typeof P!=='undefined'&&!P.mode&&!P.practice&&P.i===A.i&&curS()===sOf(A)&&r){
   if(r.pass&&!A.st.includes(P.s)){A.st.push(P.s);save()}
   if(A.st.length>=NST){S.asgr=S.asgr||{};const prev=S.asgr[A.i];if(!prev||prev.at!==A.at){S.asgr[A.i]={at:A.at,d:Date.now(),w:r.wpm||0,a:r.acc||0};const k=Object.keys(S.asgr);if(k.length>60)delete S.asgr[k[0]];save()}}
   asgButtons();[60,300,900,1800].forEach(t=>setTimeout(()=>{if(ASG_RUN)asgButtons()},t))}}catch(e){console.warn(e)}return out};
 ACT.asgDone=()=>{try{document.activeElement&&document.activeElement.blur()}catch(e){}const A=S.asga,R=S.asgr&&A&&S.asgr[A.i];
- modal(`<div class="asgdone"><h2>Lesson complete!</h2><p class="big">Lesson ${LNUM(A.i)}: ${esc(lessonTitle(A.i))}</p>${R?`<div class="rstats2"><div><b>${R.w}</b><span>WPM</span></div><div><b>${R.a}%</b><span>Accuracy</span></div></div>`:''}
+ modal(`<div class="asgdone"><h2>Lesson complete!</h2><p class="big">Lesson ${LNUM(A.i)}: ${esc(lessonTitle(A.i))}</p>${R?`<div class="rstats2">${sOf(A)==='typing'?`<div><b>${R.w}</b><span>WPM</span></div>`:''}<div><b>${R.a}%</b><span>Accuracy</span></div></div>`:''}
  <p class="muted">Send it to your teacher, then head back to the menu.</p><div class="rbtns"><button class="btn nextbtn" data-act="asgSubmit">Submit to teacher</button></div></div>`)};
 ACT.asgSubmit=()=>{ASG_RUN=false;const b=document.querySelector('[data-act=asgSubmit]');if(b){b.disabled=true;b.textContent='Sending...'}
  const fin=ok=>{toast(ok?'Sent to your teacher!':'Saved! It will send next time you are online.');closeModal();show('home')};
@@ -147,7 +162,7 @@ ACT.clsCreate=()=>{const name=val('clsName')||'Our class';post('/api/class',{a:'
  <div class="rbtns"><button class="btn" data-act="clsDash" data-c="${r.code}">Open dashboard</button></div>`)}).catch(e=>toast(e.message))};
 ACT.clsDelAsk=d=>{const t=teach()[d.c];if(!t)return teachList();modal(`<h2>Delete ${esc(t.name)}?</h2><p>This removes the class <b>${d.c}</b> and every kid's progress in it from our server. Kids keep their own game progress. This can't be undone.</p><div class="rbtns"><button class="btn red" data-act="clsDel" data-c="${d.c}">Delete class</button><button class="btn alt" data-act="clsTeach">Cancel</button></div>`)};
 ACT.clsDel=d=>{const t=teach(),c=d.c;if(!t[c])return teachList();post('/api/class',{a:'delete',code:c,tk:t[c].tk}).catch(e=>{if(!/not found/i.test(e.message))throw e}).then(()=>{delete t[c];setTeach(t);toast('Class deleted');teachList()}).catch(e=>toast(e.message))};
-let DASH=null,RLVL='easy';
+let DASH=null,RLVL='easy',DSTR='typing';
 ACT.clsDash=d=>{const c=(d&&d.c)||DASH&&DASH.code,t=teach()[c];if(!t)return teachList();const quiet=d&&d.quiet;
  return post('/api/class',{a:'dash',code:c,tk:t.tk}).then(r=>{DASH={code:c,tk:t.tk,...r};if(!quiet||!document.querySelector('#mbox .dashv'))DVIEW=quiet?DVIEW:null;redraw();dashPoll()}).catch(e=>{if(!quiet)toast(e.message)})};
 const ago=ts=>{if(!ts)return'never';const m=Math.round((Date.now()-ts)/60000);return m<2?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago'};
@@ -159,35 +174,42 @@ function redraw(){const box=document.querySelector('#mbox .cl-scroll'),y=box?box
  DVIEW?drawKid(DVIEW):drawDash();const s2=document.getElementById('asg');if(s2&&sel!=null&&!DASH._justAssigned)s2.value=sel;DASH._justAssigned=0;
  const b2=document.querySelector('#mbox .cl-scroll');if(b2)b2.scrollTop=y;const m2=document.querySelector('#mbox');if(m2)m2.scrollTop=my}
 const asgState=(m,a)=>{const s=m.stats||{};if(!a)return null;const R=s.asg&&s.asg[a.i];if(R&&R.at===a.at)return{k:'done',t:'Done ✓',R};
- if(s.cur&&s.cur.i===a.i&&s.cur.at===a.at&&s.cur.n)return{k:'part',t:`In progress ${s.cur.n}/${NST}`};const pg=s.prog&&progOf(m)[a.i];if(pg&&pg.n>=NST)return{k:'own',t:'Done on their own'};return{k:'none',t:'Not started'}};
-const progOf=m=>{const p=(m.stats&&m.stats.prog)||'',O=window.ORDER||LESSONS.map((_,k)=>k),o={};O.forEach((i,k)=>{const c=p.charCodeAt(k*2),d=p.charCodeAt(k*2+1);o[i]={n:c>=48?c-48:0,st:d>=48?d-48:0}});return o};
+ if(s.cur&&s.cur.i===a.i&&s.cur.at===a.at&&s.cur.n)return{k:'part',t:`In progress ${s.cur.n}/${NST}`};const pg=progOf(m,sOf(a))[a.i];if(pg&&!(sOf(a)==='typing'?s.prog:(s.progs&&s.progs[sOf(a)])))return{k:'none',t:'Not started'};if(pg&&pg.n>=NST)return{k:'own',t:'Done on their own'};return{k:'none',t:'Not started'}};
+const progOf=(m,sid)=>{const p=(sid&&sid!=='typing'?(m.stats&&m.stats.progs&&m.stats.progs[sid]):(m.stats&&m.stats.prog))||'',O=window.ORDER||LESSONS.map((_,k)=>k),o={};O.forEach((i,k)=>{const c=p.charCodeAt(k*2),d=p.charCodeAt(k*2+1);o[i]={n:c>=48?c-48:0,st:d>=48?d-48:0}});return o};
+/* per-stream summary of one student from their reported progress */
+function sSum(m,sid){const pr=progOf(m,sid),O=window.ORDER||LESSONS.map((_,k)=>k),has=sid==='typing'?!!(m.stats&&m.stats.prog):!!(m.stats&&m.stats.progs&&m.stats.progs[sid]);
+ const done=O.filter(i=>pr[i].n>=NST).length,stars=O.reduce((a,i)=>a+pr[i].st,0),nx=O.find(i=>pr[i].n<NST);
+ return{has,done,stars,total:O.length,at:has?(nx==null?'All done!':`World ${worldOf(nx)} · Lesson ${LNUM(nx)}`):'–'}}
+const strTabs=()=>`<div class="seg cl-lvl cl-str" role="tablist" aria-label="Subject">${SIDS.map(id=>`<button class="${DSTR===id?'on':''}" role="tab" aria-selected="${DSTR===id}" data-act="clsStream" data-s="${id}">${SNAME[id]}</button>`).join('')}</div>`;
+ACT.clsStream=d=>{if(SIDS.includes(d.s)){DSTR=d.s;redraw()}};
 function drawDash(){const D=DASH,ms=D.members.slice().sort((a,b)=>(b.stats?.pos||0)-(a.stats?.pos||0)),A=D.assign;
- const opts=(window.ORDER||LESSONS.map((_,k)=>k)).map(i=>`<option value="${i}" ${A&&A.i===i?'selected':''}>Lesson ${LNUM(i)}: ${esc(lessonTitle(i))}</option>`).join('');
+ const AS=A&&sOf(A)===DSTR?A:null,opts=withStream(DSTR,()=>(window.ORDER||LESSONS.map((_,k)=>k)).map(i=>`<option value="${i}" ${AS&&AS.i===i?'selected':''}>Lesson ${LNUM(i)}: ${esc(lessonTitle(i))}</option>`).join(''));
  modal(`<div class="dashv"><h2>${esc(D.name)} <span class="muted" style="font-size:18px">code ${D.code}</span></h2>
- ${ms.length?`<p class="muted cl-tip">Tap a name to see all their lessons. Updates every 10 seconds.</p><div class="cl-scroll"><table class="hs-tab"><tr><th>Name</th>${A?`<th>Lesson ${LNUM(A.i)}</th>`:''}<th>Adventure at</th><th>Stars</th><th>WPM</th><th>Acc.</th><th>Mins this week</th><th>Seen</th><th></th></tr>${ms.map(m=>{const s=m.stats||{},st=asgState(m,A);return `<tr><td><button class="linkbtn cl-kid" data-act="clsKid" data-p="${m.pid}">${esc(m.name)}</button></td>${A?`<td><span class="asg-${st.k}">${st.t}</span></td>`:''}<td>${esc(s.lesson||'–')}</td><td>${s.stars??'–'}</td><td>${s.wpm??'–'}</td><td>${s.acc!=null?s.acc+'%':'–'}</td><td>${s.mins??0}</td><td>${ago(s.seen||m.joined)}</td><td><button class="cl-x" data-act="clsRemove" data-p="${m.pid}" title="Remove ${esc(m.name)}">✕</button></td></tr>`}).join('')}</table></div>`:`<p class="muted">Nobody has joined yet. Share the code <b>${D.code}</b>.</p>`}
- <div class="cl-sec"><h3>Assign a lesson</h3><div class="cl-field"><select id="asg" class="cl-in wide">${opts}</select><button class="btn sm volt" data-act="clsAssign">Assign</button>${A?'<button class="btn sm alt" data-act="clsAssign" data-clear="1">Clear</button>':''}</div>${A?`<p class="muted" style="margin:4px 0 0">Assigned now: Lesson ${LNUM(A.i)}: ${esc(A.title)} · ${ms.filter(m=>asgState(m,A).k==='done').length} of ${ms.length} done</p>`:''}</div>
- <div class="cl-sec"><h3>Class controls</h3><p class="muted" style="margin:0 0 6px;font-size:15px">Turn extras off for everyone in this class. Focus mode keeps it to typing lessons only.</p><div class="cl-btns" style="justify-content:flex-start;margin-bottom:6px"><button class="btn sm" data-act="clsLockAll" data-v="0">Focus mode: all off</button><button class="btn sm alt" data-act="clsLockAll" data-v="1">All on</button></div><div class="lockgrid">${(window.PAR_LIST||[]).map(([k,t])=>{const on=!(D.lock&&D.lock[k]===0);return `<button class="lockbtn ${on?'on':'off'}" data-act="clsLock" data-k="${k}">${esc(t)}<b>${on?'ON':'OFF'}</b></button>`}).join('')}</div></div>
+ ${strTabs()}
+ ${ms.length?`<p class="muted cl-tip">Tap a name to see all their lessons. Updates every 10 seconds.${DSTR!=='typing'?' '+SNAME[DSTR]+' speed is not measured; only stars and lessons done.':''}</p><div class="cl-scroll"><table class="hs-tab"><tr><th>Name</th>${A?`<th>${sOf(A)!=='typing'?SNAME[sOf(A)]+' ':''}Lesson ${LNUM(A.i)}</th>`:''}<th>${SNAME[DSTR]} adventure at</th><th>Stars</th>${DSTR==='typing'?'<th>WPM</th><th>Acc.</th>':'<th>Lessons done</th>'}<th>Mins this week</th><th>Seen</th><th></th></tr>${ms.map(m=>{const s=m.stats||{},st=asgState(m,A),q=DSTR==='typing'?null:sSum(m,DSTR);return `<tr><td><button class="linkbtn cl-kid" data-act="clsKid" data-p="${m.pid}">${esc(m.name)}</button></td>${A?`<td><span class="asg-${st.k}">${st.t}</span></td>`:''}<td>${DSTR==='typing'?esc(s.lesson||'–'):q.at}</td><td>${DSTR==='typing'?(s.stars??'–'):(q.has?q.stars:'–')}</td>${DSTR==='typing'?`<td>${s.wpm??'–'}</td><td>${s.acc!=null?s.acc+'%':'–'}</td>`:`<td>${q.has?q.done+'/'+q.total:'–'}</td>`}<td>${s.mins??0}</td><td>${ago(s.seen||m.joined)}</td><td><button class="cl-x" data-act="clsRemove" data-p="${m.pid}" title="Remove ${esc(m.name)}">✕</button></td></tr>`}).join('')}</table></div>`:`<p class="muted">Nobody has joined yet. Share the code <b>${D.code}</b>.</p>`}
+ <div class="cl-sec"><h3>Assign a ${DSTR==='typing'?'':SNAME[DSTR]+' '}lesson</h3><div class="cl-field"><select id="asg" class="cl-in wide">${opts}</select><button class="btn sm volt" data-act="clsAssign">Assign</button>${A?'<button class="btn sm alt" data-act="clsAssign" data-clear="1">Clear</button>':''}</div><p class="muted" style="margin:4px 0 0;font-size:15px">Appears on the student's home in ${SNAME[DSTR]} and opens that subject when they tap Play.</p>${A?`<p class="muted" style="margin:4px 0 0">Assigned now: ${SNAME[sOf(A)]} lesson ${LNUM(A.i)}: ${esc(A.title)} · ${ms.filter(m=>asgState(m,A).k==='done').length} of ${ms.length} done</p>`:''}</div>
+ <div class="cl-sec"><h3>Class controls</h3><p class="muted" style="margin:0 0 6px;font-size:15px">Turn extras off for everyone in this class. Focus mode turns the extras off in Typing, Math and Spelling alike; use the Math and Spelling switches to hide a subject.</p><div class="cl-btns" style="justify-content:flex-start;margin-bottom:6px"><button class="btn sm" data-act="clsLockAll" data-v="0">Focus mode: all off</button><button class="btn sm alt" data-act="clsLockAll" data-v="1">All on</button></div><div class="lockgrid">${(window.PAR_LIST||[]).map(([k,t])=>{const on=!(D.lock&&D.lock[k]===0);return `<button class="lockbtn ${on?'on':'off'}" data-act="clsLock" data-k="${k}">${esc(t)}<b>${on?'ON':'OFF'}</b></button>`}).join('')}</div></div>
  <div class="cl-sec"><h3>Class race</h3><div class="seg cl-lvl">${lvlsFor(true).map(([v,t])=>`<button class="${RLVL===v?'on':''}" data-act="clsLvl" data-v="${v}">${t}</button>`).join('')}</div><div class="cl-btns cl-racebtn"><button class="btn" data-act="clsRace">OPEN A CLASS RACE</button></div></div>
  <div class="rbtns"><button class="btn sm" data-act="clsRefresh">↻ Refresh</button><button class="btn sm alt" data-act="clsTeach">Back</button></div></div>`)}
 /* one student: every assignment + every lesson */
 ACT.clsRefresh=()=>{if(!DASH)return;ACT.clsDash({c:DASH.code,quiet:1}).then(()=>toast('Updated'))};
 ACT.clsKid=d=>{DVIEW=d.p;drawKid(d.p)};ACT.clsKidBack=()=>{DVIEW=null;drawDash()};
-function drawKid(p){const D=DASH,m=D.members.find(x=>x.pid===p);if(!m){DVIEW=null;return drawDash()}const s=m.stats||{},pr=progOf(m),O=window.ORDER||LESSONS.map((_,k)=>k);
+function drawKid(p){const D=DASH,m=D.members.find(x=>x.pid===p);if(!m){DVIEW=null;return drawDash()}const s=m.stats||{},pr=progOf(m,DSTR),SS=sSum(m,DSTR),O=window.ORDER||LESSONS.map((_,k)=>k);
  const hist=(D.hist&&D.hist.length?D.hist:(D.assign?[D.assign]:[])).slice().reverse();
- const rows=hist.map(a=>{const st=asgState(m,a);return `<tr><td>Lesson ${LNUM(a.i)}: ${esc(a.title||lessonTitle(a.i))}</td><td>${new Date(a.at).toLocaleDateString()}</td><td><span class="asg-${st.k}">${st.t}</span></td><td>${st.R?st.R.w:'–'}</td><td>${st.R?st.R.a+'%':'–'}</td><td>${st.R?new Date(st.R.d).toLocaleDateString():'–'}</td></tr>`}).join('');
+ const rows=hist.map(a=>{const st=asgState(m,a);return `<tr><td>${sOf(a)!=='typing'?SNAME[sOf(a)]+' ':''}Lesson ${LNUM(a.i)}: ${esc(a.title||(sOf(a)==='typing'?lessonTitle(a.i):''))}</td><td>${new Date(a.at).toLocaleDateString()}</td><td><span class="asg-${st.k}">${st.t}</span></td><td>${st.R&&sOf(a)==='typing'?st.R.w:'–'}</td><td>${st.R?st.R.a+'%':'–'}</td><td>${st.R?new Date(st.R.d).toLocaleDateString():'–'}</td></tr>`}).join('');
  const worlds={};O.forEach(i=>{const w=worldOf(i);(worlds[w]=worlds[w]||[]).push(i)});
  const done=O.filter(i=>pr[i].n>=NST).length,part=O.filter(i=>pr[i].n>0&&pr[i].n<NST).length;
- const grid=Object.entries(worlds).map(([w,ls])=>`<div class="kw"><div class="kw-h">${esc((typeof WORLDS!=='undefined'&&WORLDS[w-1]&&(WORLDS[w-1].name||WORLDS[w-1].n))||('World '+w))}</div><div class="kw-g">${ls.map(i=>{const q=pr[i],k=q.n>=NST?'done':q.n?'part':'none';return `<span class="kl kl-${k}" title="Lesson ${LNUM(i)}: ${esc(lessonTitle(i))} · ${q.n}/${NST} parts · ${q.st} stars">${LNUM(i)}</span>`}).join('')}</div></div>`).join('');
- modal(`<div class="dashv kidv"><h2>${esc(m.name)}</h2><p class="muted" style="margin-top:-6px">Adventure at ${esc(s.lesson||'–')} · ${s.wpm??'–'} WPM · ${s.acc!=null?s.acc+'%':'–'} accuracy · seen ${ago(s.seen||m.joined)}</p>
+ const grid=withStream(DSTR,()=>Object.entries(worlds).map(([w,ls])=>`<div class="kw"><div class="kw-h">${esc((typeof WORLDS!=='undefined'&&WORLDS[w-1]&&(WORLDS[w-1].name||WORLDS[w-1].n))||('World '+w))}</div><div class="kw-g">${ls.map(i=>{const q=pr[i],k=q.n>=NST?'done':q.n?'part':'none';return `<span class="kl kl-${k}" title="Lesson ${LNUM(i)}: ${esc(lessonTitle(i))} · ${q.n}/${NST} parts · ${q.st} stars">${LNUM(i)}</span>`}).join('')}</div></div>`).join(''));
+ modal(`<div class="dashv kidv"><h2>${esc(m.name)}</h2><p class="muted" style="margin-top:-6px">${DSTR==='typing'?`Adventure at ${esc(s.lesson||'–')} · ${s.wpm??'–'} WPM · ${s.acc!=null?s.acc+'%':'–'} accuracy`:`${SNAME[DSTR]}: ${SS.has?`${SS.at} · ${SS.stars} stars · ${SS.done} of ${SS.total} lessons done`:'not started yet'}`} · seen ${ago(s.seen||m.joined)}</p>${strTabs()}
  <div class="cl-sec"><h3>Assignments</h3>${rows?`<div class="cl-scroll"><table class="hs-tab"><tr><th>Lesson</th><th>Assigned</th><th>Status</th><th>WPM</th><th>Acc.</th><th>Finished</th></tr>${rows}</table></div>`:'<p class="muted">No lessons assigned yet.</p>'}</div>
  <div class="cl-sec"><h3>All lessons <span class="muted" style="font-size:15px">${done} complete · ${part} started · ${O.length-done-part} not started</span></h3>
- <div class="kleg"><span class="kl kl-done">✓</span> complete <span class="kl kl-part">½</span> started <span class="kl kl-none">·</span> not started</div>${s.prog?grid:'<p class="muted">Their lesson list shows up after they play once with the new version.</p>'}</div>
+ <div class="kleg"><span class="kl kl-done">✓</span> complete <span class="kl kl-part">½</span> started <span class="kl kl-none">·</span> not started</div>${SS.has?grid:'<p class="muted">Their lesson list shows up after they play '+(DSTR==='typing'?'once with the new version.':SNAME[DSTR]+' once.')+'</p>'}</div>
  <div class="rbtns"><button class="btn sm" data-act="clsRefresh">↻ Refresh</button><button class="btn sm alt" data-act="clsKidBack">Back to class</button></div></div>`)}
 ACT.clsLock=d=>{const D=DASH,L=Object.assign({},D.lock||{});L[d.k]=L[d.k]===0?1:0;sendLock(L)};
-ACT.clsLockAll=d=>{const L={};(window.PAR_LIST||[]).forEach(([k])=>L[k]=+d.v);sendLock(L)};
+ACT.clsLockAll=d=>{const D=DASH,L={};(window.PAR_LIST||[]).forEach(([k])=>{if(k!=='math'&&k!=='spell')L[k]=+d.v});if(D&&D.lock){['math','spell'].forEach(k=>{if(D.lock[k]===0)L[k]=0})}sendLock(L)};
 function sendLock(L){const D=DASH;post('/api/class',{a:'lock',code:D.code,tk:D.tk,lock:L}).then(r=>{Object.assign(DASH,r);toast('Saved for the class');redraw()}).catch(e=>toast(e.message))}
 ACT.clsLvl=d=>{RLVL=d.v;drawDash()};
-ACT.clsAssign=d=>{const D=DASH,i=d&&d.clear?null:+val('asg');post('/api/class',{a:'assign',code:D.code,tk:D.tk,i,title:i==null?'':lessonTitle(i)}).then(r=>{Object.assign(DASH,r);DASH._justAssigned=1;toast(i==null?'Cleared':'Assigned!');ACT.clsDash({c:D.code,quiet:1})}).catch(e=>toast(e.message))};
+ACT.clsAssign=d=>{const D=DASH,i=d&&d.clear?null:+val('asg');post('/api/class',{a:'assign',code:D.code,tk:D.tk,i,stream:DSTR,title:i==null?'':withStream(DSTR,()=>lessonTitle(i))}).then(r=>{Object.assign(DASH,r);DASH._justAssigned=1;toast(i==null?'Cleared':'Assigned!');ACT.clsDash({c:D.code,quiet:1})}).catch(e=>toast(e.message))};
 ACT.clsRemove=d=>{const D=DASH;DVIEW=null;post('/api/class',{a:'remove',code:D.code,tk:D.tk,pid:d.p}).then(()=>ACT.clsDash({c:D.code})).catch(e=>toast(e.message))};
 ACT.clsRace=()=>{const D=DASH;makeRoom(RLVL,true,room=>post('/api/class',{a:'race',code:D.code,tk:D.tk,room}).catch(()=>{}))};
 

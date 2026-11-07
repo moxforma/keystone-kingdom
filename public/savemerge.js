@@ -6,6 +6,8 @@ const TR={gold:1,diamond:2};
 const maxNum=(a,b)=>Math.max(+a||0,+b||0);
 const maxMap=(a,b)=>{const o={...(a||{})};for(const[k,v]of Object.entries(b||{}))if(typeof v==='number')o[k]=maxNum(o[k],v);else if(!(k in o))o[k]=v;return o};
 const union=(a,b)=>[...new Set([...(Array.isArray(a)?a:[]),...(Array.isArray(b)?b:[])])];
+const hiKey=e=>(e&&e.at||0)+'|'+(e&&e.score||0)+'|'+(e&&e.acc||0);
+const mergeHi=(a,b)=>{const o={};for(const g of new Set([...Object.keys(a||{}),...Object.keys(b||{})])){const seen=new Set(),l=[];for(const e of[...((a||{})[g]||[]),...((b||{})[g]||[])]){if(!e||typeof e!=='object')continue;const k=hiKey(e);if(seen.has(k))continue;seen.add(k);l.push(e)}l.sort((x,y)=>(y.score||0)-(x.score||0)||(y.acc||0)-(x.acc||0)||(x.at||0)-(y.at||0));o[g]=l.slice(0,10)}return o};
 function mergeSave(x,y){
  if(!x||typeof x!=='object')return y;if(!y||typeof y!=='object')return x;
  const [base,other]=(y.upd||0)>=(x.upd||0)?[y,x]:[x,y];
@@ -18,6 +20,9 @@ function mergeSave(x,y){
  if(base.arc||other.arc){m.arc={...maxMap(base.arc,other.arc)};if(base.arc&&base.arc.high||other.arc&&other.arc.high)m.arc.high={...((other.arc||{}).high||{}),...((base.arc||{}).high||{})}}
  if(base.daily||other.daily){m.daily={...(base.daily||{})};m.daily.best=maxNum((base.daily||{}).best,(other.daily||{}).best)}
  if(base.codeOn||other.codeOn)m.codeOn=true;
+if(base.streams||other.streams){const A=base.streams||{},B=other.streams||{};m.streams={};for(const id of new Set([...Object.keys(A),...Object.keys(B)])){const a=A[id]||{},b=B[id]||{},o={...a};
+ o.best=maxMap(a.best,b.best);o.btp=maxMap(a.btp,b.btp);o.mast=maxMap(a.mast,b.mast);for(const k of['skip','rn','done'])o[k]=maxNum(a[k],b[k]);o.runf={...(b.runf||{}),...(a.runf||{})};if(a.hi||b.hi)o.hi=mergeHi(a.hi,b.hi);m.streams[id]=o}}
+if(base.spell||other.spell){const a=base.spell||{},b=other.spell||{};m.spell={...b,...a,best2:maxMap(a.best2,b.best2),beeFl:{...(b.beeFl||{}),...(a.beeFl||{})},tricky:{...(b.tricky||{}),...(a.tricky||{})},lists:{...(b.lists||{}),...(a.lists||{})},done:maxNum(a.done,b.done)};if(a.beeFlawless||b.beeFlawless)m.spell.beeFlawless=1}
  m.upd=maxNum(base.upd,other.upd);return m}
 root.mergeSave=mergeSave;
 if(typeof mergeBundle==='function'&&typeof localBundle==='function'){const _mb=mergeBundle;mergeBundle=function(r){

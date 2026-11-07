@@ -9,7 +9,7 @@ let GATE=0;
 const openHub=()=>{window.__gu=1;window.__clsOk=1;window.__guMode='';
  const card=(act,t,d,c)=>`<button class="guitem ${c}" data-act="${act}"><b>${t}</b><small>${d}</small></button>`;
  modal(`<h2>TEACHERS</h2><p class="muted" style="margin:0 0 10px">Settings and tools for parents and teachers.</p><div class="gugrid">
- ${card('guReport','Progress report','Speed, accuracy and tricky keys for every player','c1')}
+ ${card('guReport','Progress report','Stars, accuracy and progress in Typing, Math and Spelling for every player','c1')}
  ${card('guParent','Focus mode','Turn the arcade, outfits and other extras on or off','c2')}
  ${card('guTeach','Teacher dashboard','Make a class, assign lessons, watch progress, class races','c3')}
  ${card('guPlayers','Players','Add, switch or delete players on this device','c4')}
@@ -48,6 +48,13 @@ const _rp=renderParents;renderParents=function(){try{save()}catch(e){}
   const avg=(a,f)=>a.length?Math.round(a.reduce((s,x)=>s+f(x),0)/a.length):0;
   const rows=list.map(k=>{const d=get(k),last=(d.hist||[]).slice(-10),done=Object.values(d.best||{}).filter(b=>b>=1).length;
    return `<tr class="${k===id?'on':''}"><td><b>${esc(d.name||'Player')}</b></td><td>${Math.round((d.time||0)/60)} min</td><td>${done}/${LESSONS.length*8}</td><td>${last.length?avg(last,x=>x.a)+'%':'–'}</td><td>${last.length?avg(last,x=>x.w):'–'}</td></tr>`}).join('');
+  try{const d=get(id),O=window.ORDER||LESSONS.map((_,k)=>k),SN={typing:'Typing',math:'Math',spell:'Spelling'};
+   const sum=(best)=>{best=best||{};let stars=0,done=0,nx=null;O.forEach(i=>{let n=0;for(let q=0;q<NST;q++){const b=best[i+'-'+q]||0;if(b>=1)n++;stars+=Math.min(3,b)}if(n>=NST)done++;else if(nx==null)nx=i});return{stars,done,w:nx==null?null:worldOf(nx),any:Object.keys(best).length>0}};
+   const rows2=['typing','math','spell'].map(sid=>{const sv=sid==='typing'?d.best:(d.streams&&d.streams[sid]&&d.streams[sid].best),q=sum(sv),wn=q.w==null?(q.done?'All worlds done':'–'):(q.any?`World ${q.w}: ${(WORLDS[q.w-1]||{}).name||''}`:'Not started');
+    const last=(d.hist||[]).slice(-10),wpm=sid==='typing'&&last.length?Math.round(last.reduce((a,x)=>a+x.w,0)/last.length)+' WPM':'–';
+    return `<tr data-stream="${sid}"><td><b>${SN[sid]}</b></td><td>${q.stars}</td><td>${q.done} of ${O.length}</td><td>${esc(wn)}</td><td>${wpm}</td></tr>`}).join('');
+   const host=box.querySelector('.gradebox')||box.querySelector('.topbar');
+   host.insertAdjacentHTML('afterend',`<div class="panel pbox gustreams" style="margin-bottom:12px"><h3>Progress by subject</h3><table class="guall"><tr><th>Subject</th><th>Stars</th><th>Lessons done</th><th>Current world</th><th>Speed</th></tr>${rows2}</table><p class="muted" style="margin:6px 0 0;font-size:15px">Typing speed (WPM) comes from typing rounds only. Math and Spelling count stars and lessons, never speed.</p></div>`)}catch(e){console.warn(e)}
   const nm=esc(get(id).name||'Player');
   tb.insertAdjacentHTML('afterend',`<div class="panel pbox"><h3>All players</h3><table class="guall"><tr><th>Player</th><th>Time</th><th>Levels</th><th>Accuracy</th><th>WPM</th></tr>${rows}</table>
    ${list.length>1?`<div class="gutabs">${list.map(k=>`<button class="btn sm ${k===id?'on':'alt'}" data-act="guRep" data-id="${k}">${esc(get(k).name||'Player')}</button>`).join('')}</div>`:''}</div><h2 class="gurepname">Details for ${nm}</h2>`);

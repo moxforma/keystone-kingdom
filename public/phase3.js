@@ -1,7 +1,7 @@
 /* Collection hooks (world rewards, trophy shelf, friendship) + Grown-up feature switches */
 (function(){
 /* ---------- grown-up switches ---------- */
-const PAR=[['arcade','Arcade games'],['closet','Hero Closet and outfits'],['fx','Catch and evolve animations'],['story','Story cutscenes'],['visitor','Daily visitor'],['streak','Streak rewards'],['roam','Keylori walking on the menu'],['rarity','Rare Keylori glow'],['trophies','Trophy shelf'],['friends','Friendship levels'],['challenge','Share and challenge links']];
+const PAR=[['arcade','Arcade games'],['closet','Hero Closet and outfits'],['fx','Catch and evolve animations'],['story','Story cutscenes'],['visitor','Daily visitor'],['streak','Streak rewards'],['roam','Keylori walking on the menu'],['rarity','Rare Keylori glow'],['trophies','Trophy shelf'],['friends','Friendship levels'],['challenge','Share and challenge links'],['math','Math lessons'],['spell','Spelling lessons']];
 /* a feature is on unless this player's grown-up OR their class teacher turned it off */
 const par=k=>!(S.par&&S.par[k]===0)&&!(window.CLS_LOCK&&window.CLS_LOCK[k]===0);window.parOn=par;window.PAR_LIST=PAR;
 /* worlds moved: quietly credit shards already earned */
@@ -24,11 +24,11 @@ window.parPanel=()=>parPanel();
 function parPanel(){S.par=S.par||{};
  const cls=window.CLS_LOCK&&Object.values(window.CLS_LOCK).some(v=>v===0);
  modal(`<h2>FOCUS MODE</h2><p class="muted" style="margin:0">Turn features on or off for ${esc(S.name||'this player')}.</p>
- <div class="setrow focusrow"><span>Focus mode<small class="muted" style="display:block;font-size:16px">Typing lessons only: turns every extra below off</small></span><div class="seg"><button data-act="parFocus" data-v="1">ALL OFF</button><button data-act="parFocus" data-v="0">ALL ON</button></div></div>${cls?'<p class="muted" style="margin:4px 0">Some features are turned off by your class teacher.</p>':''}
+ <div class="setrow focusrow"><span>Focus mode<small class="muted" style="display:block;font-size:16px">Turns every extra below off (the Math and Spelling switches stay as set)</small></span><div class="seg"><button data-act="parFocus" data-v="1">ALL OFF</button><button data-act="parFocus" data-v="0">ALL ON</button></div></div>${cls?'<p class="muted" style="margin:4px 0">Some features are turned off by your class teacher.</p>':''}
  ${PAR.map(([k,t])=>`<div class="setrow"><span>${t}</span><div class="seg"><button class="${par(k)?'on':''}" data-act="parSet" data-k="${k}" data-v="1">ON</button><button class="${par(k)?'':'on'}" data-act="parSet" data-k="${k}" data-v="0">OFF</button></div></div>`).join('')}
  <div class="rbtns"><button class="btn" data-act="parDone">DONE</button>${window.__gu?'<button class="btn alt" data-act="grownups">TEACHERS</button>':''}</div>`)}
 ACT.parLittle=d=>{setLittle(d.v==='1');save();applyPar();parPanel()};
-ACT.parFocus=d=>{S.par=S.par||{};PAR.forEach(([k])=>S.par[k]=d.v==='1'?0:1);save();applyPar();parPanel()};
+ACT.parFocus=d=>{S.par=S.par||{};PAR.forEach(([k])=>{if(k!=='math'&&k!=='spell')S.par[k]=d.v==='1'?0:1});save();applyPar();parPanel()};
 ACT.parSet=d=>{S.par=S.par||{};S.par[d.k]=+d.v;save();applyPar();parPanel()};
 ACT.parDone=()=>{closeModal();try{({home:renderHome,binder:renderBinder,map:renderMap}[screen]||(()=>{}))()}catch(e){}};
 const _set=ACT.settings;ACT.settings=function(){_set.apply(this,arguments);const box=$('#modal .mbox')||$('#modal');const done=box&&[...box.querySelectorAll('[data-act=close]')].pop();

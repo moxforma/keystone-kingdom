@@ -17,6 +17,7 @@ const irnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const ROCK=RUNNER.PX(["....oooo....","..ooLLHLoo..",".oLLLHHLLMo.",".oLLLLLLMMo.","oLLLLLLMMMMo","oMLLLLMMMMDo","oMMLLMMMMDDo","oMMMMMMMDDDo",".oDMMMMDDDo.","..oooooooo.."],{o:'#1e1a2a',H:'#c8c8d8',L:'#9a9ab0',M:'#74748e',D:'#55556e'});
 const ARROW=RUNNER.PX(["...Y...","..YYY..",".YYYYY.","YYYYYYY","..YYY..","..YYY.."],{Y:'#f0c860'});
 const BALLOON=RUNNER.PX(["...oooo...","..orrrro..",".orHHrrro.",".orHrrrro.",".orrrrrro.",".orrrrDro.","..orrrDo..","..oorDoo..","...oooo...","....oo...."],{o:'#4a1020',r:'#ff6b7a',H:'#ffd0d8',D:'#c8404f'});
+const capO=(o,k,ch,x,y,st)=>{if(o&&o.cap){try{return o.cap(k,ch,x,y,st)}catch(e){}}RUNNER.cap(ch,x,y,st)};   // o.cap(k,ch,x,y,st): optional drawer (Math / Spelling show a problem instead of the keycap)
 const pickKey=(keys,caps,not)=>{for(let i=0;i<40;i++){let k=keys[Math.floor(Math.random()*keys.length)];if(caps&&/[a-z]/.test(k)&&Math.random()<.15)k=k.toUpperCase();if(!not||not.every(n=>n.toLowerCase()!==k.toLowerCase()))return k}return keys[0]};
 
 /* ---------- shared helpers ---------- */
@@ -272,8 +273,8 @@ function drawFork(g,o,cam,R,isT){
   {const RK=(RUNNER.thSprite&&RUNNER.thSprite(0))||ROCK;g.drawImage(RK,Math.round(x-1),GROUND-RK.height+1)}
   if(o.st==='wait'){
     const cx=Math.round(x+o.w/2),st=isT?1:0;
-    RUNNER.cap(o.lo,cx-2,GROUND-o.h-18-bob,st);
-    RUNNER.cap(o.hi,cx-2,GROUND-o.h-42-bob,st);
+    capO(o,'lo',o.lo,cx-2,GROUND-o.h-18-bob,st);
+    capO(o,'hi',o.hi,cx-2,GROUND-o.h-42-bob,st);
     g.drawImage(ARROW,cx+1,GROUND-o.h-52-(Math.floor(R.t*4)%2));
   }
 }
@@ -285,7 +286,7 @@ function drawFlap(g,o,cam,R,isT){
   o.gaps.forEach((p,i)=>{const x=Math.round(p.x-cam);if(x<-24||x>C.W+10)return;
     const gb=p.c-gs/2,gt=p.c+gs/2,yTop=GROUND-Math.round(gt),yBot=GROUND-Math.round(gb);
     drawPipe(g,p.kind,x,0,yTop,true);drawPipe(g,p.kind,x,yBot,GROUND,false);
-    if(i>o.k&&live){const q=capPos(p,cam);RUNNER.cap(o.letters[i],q[0],q[1],0)}})}   // upcoming letters; the current one is drawn on top of the hero
+    if(i>o.k&&live){const q=capPos(p,cam);capO(o,i,o.letters[i],q[0],q[1],0)}})}   // upcoming letters; the current one is drawn on top of the hero
 HK.drawWorld.push(function(g,cam){const R=rr(),t=RUNNER.target();
   R.obs.forEach(o=>{
     if(o.t==='fork'){if(o.x+o.p0+o.LW<cam-6||o.x>cam+C.W+10)return;drawFork(g,o,cam,R,o===t)}
@@ -296,11 +297,11 @@ HK.drawTop.push(function(g,cam){const R=rr();
   if(R._pathAir){R.air=true;R._pathAir=false}
   const o=R.obs.find(f=>f.t==='flap'&&(f.st==='pre'||f.st==='fly'));if(!o)return;
   if(o.st==='pre'&&o.hold){                                                 // start delayed: the first letter waits at the right edge, where its pillar will come in
-    if(RUNNER.target()===o&&o.k<o.n)RUNNER.cap(o.letters[o.k],C.W-14,GROUND-Math.round(o.gaps[o.k].c)-6-Math.floor(R.t*6)%2,0);return}
+    if(RUNNER.target()===o&&o.k<o.n)capO(o,o.k,o.letters[o.k],C.W-14,GROUND-Math.round(o.gaps[o.k].c)-6-Math.floor(R.t*6)%2,0);return}
   if(o.k<o.n){const p=o.gaps[o.k],q=capPos(p,cam);                          // current letter: on top of everything, always inside the canvas
-    RUNNER.cap(o.letters[o.k],q[0],q[1]-(o.pulse>0?2:Math.floor(R.t*6)%2),o.st==='fly'?1:0);
+    capO(o,o.k,o.letters[o.k],q[0],q[1]-(o.pulse>0?2:Math.floor(R.t*6)%2),o.st==='fly'?1:0);
     const p2=o.gaps[o.k+1];                                                 // the next letter shows at the right edge before its pillar comes into view
-    if(o.st==='fly'&&p2&&Math.round(p2.x-cam)>C.W+10&&Math.round(p.x-cam)<C.W-30){const q2=capPos(p2,cam);RUNNER.cap(o.letters[o.k+1],q2[0],q2[1],0)}}
+    if(o.st==='fly'&&p2&&Math.round(p2.x-cam)>C.W+10&&Math.round(p.x-cam)<C.W-30){const q2=capPos(p2,cam);capO(o,o.k+1,o.letters[o.k+1],q2[0],q2[1],0)}}
   if(o.st!=='fly')return;
   const hh=heroH(),hx=RX-Math.round(BW/2),top=GROUND-hh-Math.round(height()),sw=Math.round(Math.sin(R.t*3));
   const by=Math.max(11,top-26+(Math.floor(R.t*4)%2)+(o.pulse>0?-2:0)),sl=top-(by+10);

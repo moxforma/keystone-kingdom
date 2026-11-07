@@ -36,14 +36,15 @@ function cutDraw(){const c=CUT,st=STORY[c.w-1],last=c.i>=c.lines.length-1,vk=(ty
 ACT.cutNext=()=>{const c=CUT;if(!c)return closeModal();if(c.i<c.lines.length-1){c.i++;sfx.click&&sfx.click();return cutDraw()}CUT=null;closeModal();c.done&&c.done()};
 ACT.cutSkip=()=>{const c=CUT;CUT=null;closeModal();c&&c.done&&c.done()};
 /* hooks: intro before a world's first lesson, taunt before its final boss, shard scene after winning it */
-const _ss99=startStage;startStage=function(n,mode){const args=arguments;if(mode)return _ss99.apply(this,args);const i=Math.floor(n/NST),s=n%NST,w=worldOf(i),st=storyState();
+const _ss99=startStage;startStage=function(n,mode){const args=arguments;if(mode||(window.KKS&&KKS.cur&&KKS.cur!=='typing'))return _ss99.apply(this,args);   /* Math / Spelling tell their own story (streams.js) */
+ const i=Math.floor(n/NST),s=n%NST,w=worldOf(i),st=storyState();
  if(STORY[w-1]&&!st.intro[w]){st.intro[w]=1;save();return cutscene(w,STORY[w-1].intro,'intro',()=>startStage(n,mode))}
  if(STORY[w-1]&&i===worldLast(w)&&s===7&&!st.taunt[w]){st.taunt[w]=1;save();return cutscene(w,STORY[w-1].taunt,'taunt',()=>startStage(n,mode))}
  return _ss99.apply(this,args)};
 let PENDING_OUT=null;
 const _res99=results;results=function(r){kkSafe(_res99,this,[r]);try{const st=storyState();for(let w=1;w<=STORY.length;w++)if(shardWon(w)&&!st.shard[w]){st.shard[w]=1;save();PENDING_OUT=w;
   const b=document.querySelector('#mbox .bigstars');b&&b.insertAdjacentHTML('afterend',w>10?`<div class="banner gold shardban">${esc(WORLDS[w-1]?.name||'Bonus world')} cleared!</div>`:`<div class="banner gold shardban"><img src="${shardURL(w,true)}" alt=""> You won back Keystone shard ${w}!</div>`);break}}catch(e){}};
-const _show99=show;show=function(id){_show99.apply(this,arguments);if(PENDING_OUT&&(id==='home'||id==='map')){const w=PENDING_OUT;PENDING_OUT=null;setTimeout(()=>cutscene(w,[STORY[w-1].out].concat(w>10?[]:w===10?['Thank you, hero. Every word in Keyloria is safe again.']:[`${10-shardCount()} shard${10-shardCount()===1?'':'s'} left to find. Onward!`]),'out',()=>{}),250)}};
+const _show99=show;show=function(id){_show99.apply(this,arguments);if(PENDING_OUT&&(id==='home'||id==='map')){const w=PENDING_OUT;PENDING_OUT=null;setTimeout(()=>cutscene(w,[(w===1&&window.KKS&&KKS.cur&&KKS.cur!=='typing')?'Smudge drops the first shard! Keyloria is tidy again.':STORY[w-1].out].concat(w>10?[]:w===10?['Thank you, hero. Every word in Keyloria is safe again.']:[`${10-shardCount()} shard${10-shardCount()===1?'':'s'} left to find. Onward!`]),'out',()=>{}),250)}};
 /* home: Keystone shard meter */
 const _rh99=renderHome;renderHome=function(){kkSafe(_rh99,this,[]);try{storyInit()}catch(e){}const t=$('#s-home .tcard');if(!t||!S.name||t.querySelector('.shards'))return;const n=shardCount();
  t.insertAdjacentHTML('afterbegin',`<button class="shards" data-act="storyRecap" aria-label="Keystone shards"><span class="sh-lab">Keystone ${n}/10</span><span class="sh-row">${STORY.slice(0,10).map((_,k)=>`<img src="${shardURL(k+1,shardWon(k+1))}" alt="">`).join('')}</span></button>`)};

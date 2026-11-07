@@ -59,11 +59,20 @@ function levelCfg(i,s){
  if(t>0){cfg.gapMul=Math.max(.6,1-.04*t);cfg.wmax=5+Math.floor(t/3);if(t>=6)cfg.wmin=4}
  return cfg}
 /* a runner part (2, 4, 6, 8 of a lesson) */
+const streamNow=()=>{try{return window.KKS&&KKS.cur&&KKS.cur!=='typing'?KKS.cur:null}catch(e){return null}};
+/* Math / Spelling: the stream module supplies the level (see streams.js contract); defaults fill what it leaves out */
+function streamCfg(i,s,boss){
+ let c=null;try{c=boss?KKS.bossCfg(i):KKS.runnerCfg(i,s)}catch(e){console.warn('[runner-lesson stream]',e)}
+ if(!c)return null;
+ const t=tierOf(i);
+ return Object.assign({name:title(i),keys:'',favor:'',words:0,n:12,v:Math.round(70*(1+.08*t)),lv:Math.min(5,Math.floor(t/3)),tier:t,back:'map',stream:streamNow()},c)}
 function cfgForPart(i,s){
+ if(streamNow()){const sc=streamCfg(i,s,false);return sc&&Object.assign(sc,{sub:'Part '+(s+1)+' of '+ST+' · Run',partS:s})}
  const cfg=levelCfg(i,s);if(!cfg)return null;
  return Object.assign(cfg,{sub:'Part '+(s+1)+' of '+ST+' · Run',partS:s})}
 /* the Boss Test's runner (hybrid) starts from the same numbers */
 function cfgFor(i){
+ if(streamNow()){const sc=streamCfg(i,ST-1,true);return sc&&Object.assign(sc,{favor:'',wfav:0,sub:'Practice run'})}
  const cfg=levelCfg(i,ST-1);if(!cfg)return null;
  return Object.assign(cfg,{favor:'',wfav:0,sub:'Practice run'})}
 /* ---------- recording progress (mirrors the pass/fail branch of finish() in game.js, for ONE part) ---------- */
@@ -121,7 +130,7 @@ function resultsFor(i,s,info,hy){
  }else{
   if(slowOK)h+=`<p class="note" style="margin:0">Want to go slower? Tap Slower.</p>`;
  }
- const stats=`<div class="rstats"><div><b>${o.stars} ★</b><span>Stars</span></div><div><b>${info.acc}%</b><span>Accuracy</span></div><div><b>${info.wpm}</b><span>WPM</span></div><div><b>+${o.xp}</b><span>XP</span></div><div><b>+${o.gems}</b><span>Diamonds</span></div></div>`;
+ const stats=`<div class="rstats"><div><b>${o.stars} ★</b><span>Stars</span></div><div><b>${info.acc}%</b><span>Accuracy</span></div>${streamNow()?'':`<div><b>${info.wpm}</b><span>WPM</span></div>`}<div><b>+${o.xp}</b><span>XP</span></div><div><b>+${o.gems}</b><span>Diamonds</span></div></div>`;
  let btns;
  const again=hy?'hyAgain':'runAgain',slow=hy?'hySlow':'runSlow';
  if(o.pass){const bn=nextPartN(i,s);btns=(bn!=null?`<button class="btn nextbtn" data-act="play" data-n="${bn}">Next ▸</button>`:'')+`<button class="btn alt" data-act="${again}">Play again</button><button class="btn alt" data-act="go" data-to="map">Map</button>`}
@@ -145,13 +154,15 @@ let HY=null,RL=null;   // HY = {i,n,c} the Boss Test being played (c = classic p
 const isFinal=i=>{try{return ORDER[ORDER.length-1]===i}catch(e){return false}};
 window.isHybridBossTest=i=>{try{return isBossT(i)&&enabled()&&!!cfgFor(i)}catch(e){return false}};
 const _ss=startStage;
+/* the plain (classic) part: for a Math / Spelling stream it is the stream's own classic round (streams.js), otherwise the game's startStage */
+const cls=n=>{if(streamNow()&&window.KKS.startClassic)return KKS.startClassic(n);return _ss.call(window,n)};
 startStage=function(n,mode){
  HY=null;RL=null;
  try{if(!mode&&enabled()){const i=Math.floor(n/ST),s=n%ST;
-  if(isBossT(i)){const cfg=cfgFor(i);if(cfg){try{closeModal()}catch(e){}const bn=i*ST+ST-1;HY={i,n:bn,c:null};return _ss.call(window,bn)}}   // classic boss typing first (any part of the Boss Test starts the whole thing)
+  if(isBossT(i)){const cfg=cfgFor(i);if(cfg){try{closeModal()}catch(e){}const bn=i*ST+ST-1;HY={i,n:bn,c:null};return cls(bn)}}   // classic boss typing first (any part of the Boss Test starts the whole thing)
   else if(isRunnerPart(n)){const cfg=cfgForPart(i,s);if(cfg){try{closeModal()}catch(e){}
-   if(intros(i)>0&&(S.best[i+'-0']||0)<1){RL={i,s,cfg,n};return _ss.call(window,i*ST)}   // part 1 was skipped: show the new-key intro first (normally part 1, a classic part, already did)
-   openRunner(i,s,cfg,()=>_ss.call(window,n));return}}}}catch(e){console.error('[runner-lesson]',e)}
+   if(intros(i)>0&&(S.best[i+'-0']||0)<1){RL={i,s,cfg,n};return cls(i*ST)}   // part 1 was skipped: show the new-key intro first (normally part 1, a classic part, already did)
+   openRunner(i,s,cfg,()=>cls(n));return}}}}catch(e){console.error('[runner-lesson]',e)}
  return _ss.apply(this,arguments)};
 const _br=beginRound;
 beginRound=function(){
@@ -189,9 +200,9 @@ const _fin=finish;
 finish=function(){
  try{if(HY&&typeof P!=='undefined'&&P&&P.i===HY.i&&P.n===HY.n&&!P.mode&&!P.practice&&P.phase==='play'&&screen==='play')return hybridClassicDone()}catch(e){console.error('[runner-lesson]',e);HY=null}
  return _fin.apply(this,arguments)};
-function hybridClassicDone(){
+function hybridClassicDone(ov){
  P.phase='done';clearInterval(P.idle);try{setTarget(null)}catch(e){}
- const len=P.text.length,ok=len-P.mist.size,acc=Math.round(ok/len*100),secs=(performance.now()-P.start)/1000,wpm=Math.round(len/5/Math.max(secs/60,1/60)),stars=acc>=95?3:acc>=85?2:acc>=60?1:0;
+ const len=ov?ov.len:P.text.length,ok=ov?ov.ok:len-P.mist.size,acc=Math.round(ok/Math.max(1,len)*100),secs=ov?(ov.secs||1):(performance.now()-P.start)/1000,wpm=Math.round(len/5/Math.max(secs/60,1/60)),stars=acc>=95?3:acc>=85?2:acc>=60?1:0;
  const c=HY.c={len,ok,acc,wpm,secs,stars};
  try{HY.vk=P.vkey;HY.vname=(document.querySelector('#s-play .fmeter .fname')||{}).textContent||''}catch(e){}   // the runner boss is the same Scrambler (same name, crowned like the classic boss)
  try{const v=document.getElementById('vil');v&&v.classList.add(stars?'pop':'laugh')}catch(e){}
@@ -317,4 +328,12 @@ function markQuests(){
 }
 const _rmQ=renderMap;
 renderMap=function(){const r=kkSafe(_rmQ,this,arguments);try{markQuests()}catch(e){console.warn('[runner-lesson]',e)}return r};
+
+
+/* ---------- streams hooks (Phase A): exported for streams.js and the Math / Spelling modules ---------- */
+try{window.KKS=window.KKS||{};
+ KKS.rec=record;                       // the runner twin of finish(): record(i,s,info,x) -> outcome
+ KKS.rl={enabled,cls,isRunnerPart,isBossT,cfgForPart,cfgFor};
+ /* a stream's classic Boss Test part calls this (via KKS.finishClassic) when it ends: true = the hybrid boss chase took over */
+ KKS.hybridDone=ov=>{try{if(HY&&typeof P!=='undefined'&&P&&P.i===HY.i&&P.n===HY.n&&P.phase==='play'&&screen==='play'){hybridClassicDone(ov);return true}}catch(e){console.error('[runner-lesson]',e);HY=null}return false}}catch(e){}
 })();

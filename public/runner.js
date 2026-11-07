@@ -162,6 +162,16 @@ function open(cfg){
 }
 function newRun(){fit();R=build();document.getElementById('rhud').innerHTML=hudHTML();buildStrip();fit();updStrip();refit(3)}   // measure first so W is current when the run is generated
 function startModal(){const L=level();
+ if(custom&&(custom.stream==='math'||custom.stream==='spell')){   // Math / Spelling: one short line, then Space (no key chips, no extra notes)
+  if(custom.stream==='spell'&&!document.getElementById('spexCss')){const st=document.createElement('style');st.id='spexCss';st.textContent=`.spex{display:grid;justify-items:center;gap:6px;margin:0 0 12px;font-family:'Jersey 10',monospace;text-transform:uppercase}
+  .spex .lb{position:relative;height:26px;width:90px;font-size:22px;letter-spacing:.1em;color:#f0c860}.spex .lb b{position:absolute;inset:0;text-align:center;font-weight:400}
+  .spex .wd{position:relative;height:44px;width:190px;background:#0c1238;border:3px solid #2a3270}.spex .wd i{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:34px;letter-spacing:.3em;color:#fff;opacity:0;animation:spxk 4s steps(1) infinite both}
+  .spex .lb b{opacity:0;animation:spxk 4s steps(1) infinite both}.spex .lb .t{animation-name:spxt;color:#8ff0a8}
+  .spex .wd .s1{animation-delay:-4s;color:#f0c860}.spex .wd .s2{animation-delay:-3.2s}.spex .wd .s3{animation-delay:-2.4s}.spex .wd .s4{animation-delay:-1.6s}.spex .wd .s5{animation-delay:-.8s;color:#8ff0a8}.spex .lb .l{animation-delay:-4s}.spex .lb .t{animation-delay:-4s}
+  @keyframes spxk{0%,19.9%{opacity:1}20%,100%{opacity:0}}@keyframes spxt{0%,19.9%{opacity:0}20%,100%{opacity:1}}`;document.head.appendChild(st)}
+  const spx=custom.stream==='spell'?`<div class="spex"><div class="lb"><b class="l">LOOK</b><b class="t">TYPE</b></div><div class="wd"><i class="s1">CAT</i><i class="s2">_ _ _</i><i class="s3">C _ _</i><i class="s4">C A _</i><i class="s5">C A T</i></div></div>`:'';
+  return modal(`<div data-runner="start"><h2>${esc(L.name)}</h2>${spx}<p style="margin:0 0 10px">${custom.stream==='math'?'Solve it to jump!':'Look, then type it!'}</p>
+  <div class="rbtns"><button class="btn big" data-act="runGo">Go! (SPACE)</button><button class="btn alt" data-act="go" data-to="${custom.back||'map'}">Map</button></div></div>`)}
  if(custom){const ks=[...new Set(L.keys)].slice(0,14).map(k=>`<span class="chip" style="--fc:${fc(k)}">${esc(k)}</span>`).join('');let ex='';try{ex=custom.startExtra?custom.startExtra()||'':''}catch(e){}
   return modal(`<div data-runner="start"><h2>${esc(L.name)}</h2><p style="margin:0 0 6px">Type the letter to jump!</p>
   <div class="rkeys">${ks}${L.keys.length>14?'<span class="chip">…</span>':''}</div>${ex}
@@ -178,7 +188,10 @@ function results(){
  if(custom&&custom.adjust){try{const a=custom.adjust({stars,acc,wpm,R})||{};if(a.stars!=null)stars=a.stars;if(a.acc!=null)acc=a.acc;if(a.wpm!=null)wpm=a.wpm}catch(e){console.error('[runner custom adjust]',e)}}   // adjust(info) may override stars/acc/wpm (hybrid Boss Test: combined with the classic part)
  const name=SPECIES[R.sp].n[0];const st=[1,2,3].map(k=>ICON.star.replace('<svg',`<svg class="${k<=stars?'on':''}"`)).join('');
  if(!custom&&!opt.hard&&stars>0&&opt.lv+1<LV.length)store.set('unl',Math.max(store.get('unl',1),opt.lv+2));
- const tip=(R.bonks||R.falls)?'Press the letter just before you reach it!':pick(['Keep your eyes on the screen, not your hands!','Sit up tall and relax your shoulders!','Slow is OK! Getting it right comes first.']);
+ const stm=(window.KKS&&(typeof KKS.cur==='function'?KKS.cur():KKS.cur))||'typing';
+ const tip=stm==='math'?((R.bonks||R.falls)?'Solve it before you reach it!':pick(['Count it out if you get stuck.','Check your answer before you go.','Slow is OK! Getting it right comes first.']))
+  :stm==='spell'?((R.bonks||R.falls)?'Spell it before you reach it!':pick(['Look at each letter, one by one.','Say the word in your head.','Slow is OK! Getting it right comes first.']))
+  :(R.bonks||R.falls)?'Press the letter just before you reach it!':pick(['Keep your eyes on the screen, not your hands!','Sit up tall and relax your shoulders!','Slow is OK! Getting it right comes first.']);
  const info={stars,acc,wpm,nice:R.nice,gems:R.gemN,bonks:R.bonks,falls:R.falls,best:R.best,lv:opt.lv,hard:opt.hard,R};
  let cx=null;if(custom&&custom.results){try{cx=custom.results(info)}catch(e){console.error('[runner custom results]',e)}}cx=cx||{};
  const ok=!custom||stars>0;

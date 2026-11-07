@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <script>/* old game links (race invites, challenges) still open the game */if(/[?&](race|c|ghost|mobile)=/.test(location.search))location.replace('/play/'+location.search+location.hash)</script>
-<title>Keyloria Kingdom · Typing adventure for kids and classrooms</title>
-<meta name="description" content="A free pixel-art typing adventure for kids. Learn every key, befriend Keylori, race friends live and run your typing class with a live dashboard.">
-<meta property="og:type" content="website"><meta property="og:url" content="https://keyloria.online/"><meta property="og:title" content="Keyloria Kingdom · Typing adventure for kids and classrooms"><meta property="og:description" content="A free pixel-art typing adventure for kids and classrooms."><meta property="og:image" content="https://keyloria.online/og.png?v=3"><meta name="twitter:card" content="summary_large_image">
+<title>Keyloria Kingdom · Typing, math and spelling adventure for kids</title>
+<meta name="description" content="A free pixel-art adventure for kids: typing, math and spelling in one game. Befriend Keylori, race friends live and run your class with a live dashboard. Math and spelling are mapped to the Ontario curriculum, JK to Grade 8.">
+<meta property="og:type" content="website"><meta property="og:url" content="https://keyloria.online/"><meta property="og:title" content="Keyloria Kingdom · Typing, math and spelling adventure for kids"><meta property="og:description" content="A free pixel-art adventure for kids and classrooms: typing, math and spelling in one game."><meta property="og:image" content="https://keyloria.online/og.png?v=3"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="/icon.png"><link rel="apple-touch-icon" href="/icon.png">
 <link rel="preload" href="/fonts/jersey10.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="/fonts/pressstart2p.woff" as="font" type="font/woff" crossorigin>
 <style>
@@ -219,29 +219,61 @@ footer{border-top:4px solid #241c36;padding:24px 0 40px;color:var(--mute);font-s
 nav .pbtn{white-space:nowrap}
 @media (max-width:1180px) and (min-width:701px){nav{gap:6px}nav .pbtn{font-size:19px;padding:8px 11px 10px}nav .prism .pbtn{font-size:21px;padding:9px 13px 11px}}
 @media (max-width:700px){
- nav{display:flex!important;grid-template-columns:none;gap:6px;overflow-x:auto!important;justify-content:flex-start!important;scroll-snap-type:x proximity;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:24px!important}
- nav .pbtn{white-space:nowrap!important;font-size:15px!important;padding:8px 10px 10px!important;min-height:0!important;flex:0 0 auto!important;scroll-snap-align:start}
+ nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible!important;height:auto!important;padding:6px 0 8px!important;-webkit-mask-image:none;mask-image:none}   /* wraps to two rows: every item stays visible */
+ nav .pbtn{white-space:nowrap!important;font-size:14px!important;padding:8px 4px 10px!important;min-height:0!important;text-align:center;letter-spacing:.02em}
+ html{scroll-padding-top:150px!important}
 }
 </style></head>
 <body><div class="stars"></div>
 <header id="hdr" class="showlogo showplay"><div class="mtop"><a href="/play/" class="mlogo" aria-label="Keyloria Kingdom"><img src="/site/img/logo.png" alt="Keyloria Kingdom"></a><a class="pbtn c-gold mplay" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></div><div class="wrap"><nav>
  <a class="lgl" href="/play/" aria-label="Play Keyloria Kingdom"><img class="lg" src="/site/img/logo.png" alt="Keyloria Kingdom"></a>
- <a class="pbtn c-red" href="#play" data-tab="play">How to play</a><a class="pbtn c-lav" href="#arcade" data-tab="arcade">Arcade</a><a class="pbtn c-blue" href="#spelling" data-tab="spelling">Spelling</a><a class="pbtn c-green" href="#race" data-tab="race">Multiplayer</a><a class="pbtn c-gold" href="#classroom" data-tab="classroom">For classrooms</a>
+ <a class="pbtn c-red" href="#play" data-tab="play">How to play</a><a class="pbtn c-lav" href="#arcade" data-tab="arcade">Arcade</a><a class="pbtn c-teal" href="#math" data-tab="math">Math</a><a class="pbtn c-blue" href="#spelling" data-tab="spelling">Spelling</a><a class="pbtn c-green" href="#race" data-tab="race">Multiplayer</a><a class="pbtn c-gold" href="#classroom" data-tab="classroom">For classrooms</a>
  <span class="prism hp"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span>
 </nav></div></header>
 <main>
 <div class="wrap hero">
  <div><a href="/play/"><img class="biglogo" id="biglogo" src="/site/img/logo.png" alt="Keyloria Kingdom"></a>
- <h1>Learn to type on a <em>pixel adventure</em></h1>
- <p class="lead">Kids zap Scramblers, befriend Keylori and master every key, one short lesson at a time.</p>
+ <h1>Typing, math and spelling in one <em>pixel adventure</em></h1>
+ <p class="lead">Kids zap Scramblers, befriend Keylori and grow at typing, math and spelling, one short lesson at a time. One hero, one profile, three subjects.</p>
  <div class="cta"><span class="prism"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span><a class="pbtn c-teal" href="#classroom"><img src="/site/img/ico_book.png" alt="">For classrooms</a></div>
  <p class="tiny">Free · Runs in the browser · No downloads · No ads</p>
+ <p class="tiny">Mapped to the Ontario curriculum, JK to Grade 8 · not officially endorsed</p>
  <p class="kbnote">Made to be played with a keyboard, ideally on a computer or an iPad with a keyboard.</p></div>
  <div><div class="scene"><div class="cloud" style="top:14%"></div><div class="cloud" style="top:30%;animation-delay:-9s"></div><div class="path"></div>
   <div class="strip" id="strip"></div><div class="say" id="say">Zap!</div>
   <img class="hs" src="/site/img/hero_pop.png" alt=""><div class="bar"><i id="hp" style="width:100%"></i></div><img class="vs" id="vs" src="/site/img/v_imp.png" alt=""><div class="beam" id="beam"></div></div>
   <div class="kb" id="kb"></div></div>
 </div>
+
+<section class="wrap pillars" aria-label="Three subjects">
+<style>
+.pillars{padding-top:6px;padding-bottom:30px}
+.pillars h2{font:400 18px/1.5 var(--title);text-align:center;margin:0 0 18px;color:var(--ink);text-shadow:3px 3px 0 #2a1d3e}
+.pl3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+.pil{--c:var(--teal);--c2:var(--teal2);display:block;text-decoration:none;color:var(--ink);background:var(--panel);border:4px solid var(--line);border-top:10px solid var(--c);box-shadow:0 6px 0 #0a0716;padding:18px 20px 22px;text-align:center}
+.pil.m{--c:var(--gold);--c2:var(--gold2)}.pil.s{--c:#e89ac0;--c2:#a04c78}
+.pil:hover{transform:translateY(-3px)}
+.pil img{display:block;margin:0 auto 10px;width:114px;height:84px;image-rendering:pixelated;max-width:none}
+.pil b{display:block;font:400 34px/1 var(--px);letter-spacing:.08em;color:var(--c);margin-bottom:6px}
+.pil span{font-size:24px;color:var(--mute);line-height:1.25;display:block}
+@media (max-width:700px){.pl3{grid-template-columns:1fr;gap:10px}.pil{display:grid;grid-template-columns:auto 1fr;gap:0 14px;text-align:left;align-items:center;padding:10px 14px}.pil img{grid-row:1/3;width:76px;height:56px;margin:0}.pil b{font-size:26px;margin:0}.pil span{font-size:20px}.pillars h2{font-size:14px}}
+</style>
+<h2>Type &middot; Math &middot; Spell</h2>
+<div class="pl3">
+<a class="pil" href="#play" data-tab="play"><img data-pil="typing" alt=""><b>TYPE</b><span>Learn every key, finger by finger.</span></a>
+<a class="pil m" href="#math" data-tab="math"><img data-pil="math" alt=""><b>MATH</b><span>Number sense, JK to Grade 8.</span></a>
+<a class="pil s" href="#spelling" data-tab="spelling"><img data-pil="spell" alt=""><b>SPELL</b><span>Ontario word lists, look and type.</span></a>
+</div>
+<script>
+(function(){var P={typing:['#7fe8d0','#3fa894'],math:['#f0c860','#c8981e'],spell:['#e89ac0','#a04c78']},F={'1':['.#.','##.','.#.','.#.','###'],'2':['###','..#','###','#..','###'],'3':['###','..#','.##','..#','###'],A:['.#.','#.#','###','#.#','#.#'],B:['##.','#.#','##.','#.#','##.'],C:['.##','#..','#..','#..','.##']};
+document.querySelectorAll('img[data-pil]').forEach(function(im){var id=im.dataset.pil,c=document.createElement('canvas');c.width=19;c.height=14;var g=c.getContext('2d'),cap=P[id][0],dk=P[id][1],K='#fff6e0',I='#1a1030';
+function r(x,y,w,h,f){g.fillStyle=f;g.fillRect(x,y,w,h)}
+r(0,0,19,14,I);r(1,1,17,10,cap);r(1,11,17,2,dk);r(1,1,17,1,K);[[0,0],[18,0],[0,13],[18,13]].forEach(function(p){g.clearRect(p[0],p[1],1,1)});
+if(id==='typing'){[3,6,9,12,15].forEach(function(x){r(x,3,2,2,K);r(x,5,2,1,dk)});[4,7,10,13].forEach(function(x){r(x,6,2,2,K);r(x,8,2,1,dk)});r(5,9,9,2,K);r(5,11,9,1,dk)}
+else{(id==='math'?'123':'ABC').split('').forEach(function(ch,k){F[ch].forEach(function(row,y){for(var x=0;x<3;x++)if(row[x]==='#')r(3+k*5+x,3+y,1,1,I)})})}
+im.src=c.toDataURL()})})();
+</script>
+</section>
 
 <section id="play" class="tab on"><div class="wrap">
  <div class="sec-h"><span class="tagbox" style="--c:var(--red);--c2:var(--red2)"><b><i>HOW TO PLAY</i></b></span><h2>Four steps to fast fingers</h2><p>Every lesson is a quick battle. Typing the right keys powers your hero, and true fun facts make every sentence worth reading.</p></div>
@@ -258,8 +290,17 @@ nav .pbtn{white-space:nowrap}
  <div class="arc" id="arc"></div>
 </div></section>
 
+<section id="math" class="tab"><div class="wrap">
+ <div class="sec-h"><span class="tagbox" style="--c:var(--orange);--c2:var(--orange2)"><b><i>MATH</i></b></span><h2>Practice number sense, one battle at a time</h2><p>Math is a full subject inside the same game: lessons in every world, with the same heroes, Keylori and Boss Tests. Questions are mapped to the Ontario Mathematics curriculum, JK to Grade 8. This is not an officially endorsed product.</p></div>
+ <div class="feats">
+  <div class="feat"><i class="fico" data-ico="abc"></i><h4>Ontario curriculum, JK to Grade 8</h4><p>Counting and number sense up to fractions, ratios and algebra, with Canadian money and spelling.</p></div>
+  <div class="feat"><i class="fico" data-ico="bolt"></i><h4>Battle with answers</h4><p>Type the answer to zap the Scrambler. Kids earn stars for getting it right, never for going fast.</p></div>
+  <div class="feat"><i class="fico" data-ico="chart"></i><h4>Progress for grown-ups</h4><p>The progress report shows stars, lessons done and the current world for each subject. Math never counts toward typing speed.</p></div>
+ </div>
+</div></section>
+
 <section id="spelling" class="tab"><div class="wrap">
- <div class="sec-h"><span class="tagbox" style="--c:var(--blue);--c2:var(--blue2)"><b><i>SPELLING</i></b></span><h2>Type it, spell it, beat the Bee</h2><p>Word sets for every grade from K to 8, your own weekly lists, and lists teachers send to the whole class.</p></div>
+ <div class="sec-h"><span class="tagbox" style="--c:var(--blue);--c2:var(--blue2)"><b><i>SPELLING</i></b></span><h2>Type it, spell it, beat the Bee</h2><p>Spelling is a full subject in the game: lessons in every world, Ontario-mapped word sets from JK to Grade 8, your own weekly lists, and lists teachers send to the whole class. The content is mapped to the Ontario Language curriculum; it is not officially endorsed.</p></div>
  <div class="cls">
   <div class="steps" id="steps2"></div>
   <div><div class="screen"><div class="bar"><i></i><i></i><i></i>&nbsp;keyloria.online</div>
@@ -291,7 +332,7 @@ nav .pbtn{white-space:nowrap}
 </div></section>
 
 <section id="classroom" class="tab"><div class="wrap">
- <div class="sec-h"><span class="tagbox" style="--c:var(--gold);--c2:var(--gold2)"><b><i>FOR CLASSROOMS</i></b></span><h2>Run your typing class in minutes</h2><p>No student accounts or emails. Kids join with a short code, and you see everyone's progress live on your dashboard.</p></div>
+ <div class="sec-h"><span class="tagbox" style="--c:var(--gold);--c2:var(--gold2)"><b><i>FOR CLASSROOMS</i></b></span><h2>Run your class in minutes</h2><p>No student accounts or emails. Kids join with a short code, and you see everyone's progress live on your dashboard.</p></div>
  <div class="cls">
   <div class="steps" id="steps"></div>
   <div><div class="screen"><div class="bar"><i></i><i></i><i></i>&nbsp;keyloria.online</div>
@@ -299,18 +340,18 @@ nav .pbtn{white-space:nowrap}
    <p class="cap" id="cap"></p></div>
  </div>
  <div class="feats">
-  <div class="feat"><i class="fico" data-ico="clip"></i><h4>Assign any lesson</h4><p>Pick from 117 lessons. Kids see your pick on their home screen and finish with a Submit to teacher button.</p></div>
-  <div class="feat"><i class="fico" data-ico="chart"></i><h4>Live dashboard</h4><p>Updates every 10 seconds: where each child is, stars, words per minute, accuracy and minutes this week.</p></div>
+  <div class="feat"><i class="fico" data-ico="clip"></i><h4>Assign any lesson</h4><p>Pick a Typing, Math or Spelling lesson. Kids see your pick on their home screen and finish with a Submit to teacher button.</p></div>
+  <div class="feat"><i class="fico" data-ico="chart"></i><h4>Live dashboard</h4><p>Updates every 10 seconds: where each child is, stars and lessons done in each subject, typing speed and accuracy, and minutes this week.</p></div>
   <div class="feat"><i class="fico" data-ico="grid"></i><h4>Every lesson, every child</h4><p>Tap a name to see every assignment and a map of all lessons: complete, started or not yet.</p></div>
   <div class="feat"><i class="fico" data-ico="flag"></i><h4>Class races</h4><p>Open a race for the whole room and watch progress, accuracy, time, and right and wrong keys.</p></div>
-  <div class="feat"><i class="fico" data-ico="toggle"></i><h4>Class controls</h4><p>Switch on Focus mode for the whole class: no arcade, outfits or extra animations, just typing.</p></div>
+  <div class="feat"><i class="fico" data-ico="toggle"></i><h4>Class controls</h4><p>Switch on Focus mode for the whole class: no arcade, outfits or extra animations, just lessons. Hide Math or Spelling if you only want typing.</p></div>
   <div class="feat"><i class="fico" data-ico="laptop"></i><h4>Works on school devices</h4><p>Runs in any modern browser on Chromebooks, laptops and desktops.</p></div>
  </div>
  <div class="subh"><span class="tagbox" style="--c:var(--orange);--c2:var(--orange2)"><b><i>SAFE BY DESIGN</i></b></span><p style="color:var(--mute);margin:0;font-size:26px">Built for young typists, with grown-ups in control.</p></div>
  <div class="safe">
-  <div><i class="fico" data-ico="tag"></i><h4>First names only</h4><p>Only a first name and typing stats are shared with a class. No emails, no passwords, no profiles. <a href="/privacy/" style="color:inherit">Read our privacy page</a>.</p></div>
+  <div><i class="fico" data-ico="tag"></i><h4>First names only</h4><p>Only a first name and learning stats (typing, math and spelling progress) are shared with a class. No emails, no passwords, no profiles. <a href="/privacy/" style="color:inherit">Read our privacy page</a>.</p></div>
   <div><i class="fico" data-ico="nochat"></i><h4>No chat</h4><p>Kids can't message each other or strangers. Races show names and progress, nothing else.</p></div>
-  <div><i class="fico" data-ico="target"></i><h4>Focus mode</h4><p>Parents and teachers can turn off the arcade, Hero Closet, catch and evolve animations, the Keylori walking on the menu and more, so it is strictly a learning game. Teachers can lock it for the whole class.</p></div>
+  <div><i class="fico" data-ico="target"></i><h4>Focus mode</h4><p>Parents and teachers can turn off the arcade, Hero Closet, catch and evolve animations, the Keylori walking on the menu and more, so it is strictly a learning game, and hide the Math or Spelling lessons. Teachers can lock it for the whole class.</p></div>
   <div><i class="fico" data-ico="shield"></i><h4>Grown-up check</h4><p>Settings and teacher tools sit in Teachers, behind a quick grown-up check, and only the class creator can see the dashboard.</p></div>
  </div>
 </div></section>
@@ -320,7 +361,7 @@ nav .pbtn{white-space:nowrap}
 </div></div></section>
 
 
-<div class="wrap end"><img src="/site/img/hero_pip.png" alt=""><h2>Ready to start typing?</h2><div class="cta" style="justify-content:center"><span class="prism"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span><a class="pbtn c-teal" href="#classroom"><img src="/site/img/ico_book.png" alt="">For classrooms</a></div><p class="tiny" style="margin-top:28px">Keyloria is free and ad-free. If it helps your kids or class, you can help keep it that way.</p><div class="cta" style="justify-content:center;margin-top:14px"><a class="pbtn c-red" href="https://ko-fi.com/keyloria" target="_blank" rel="noopener"><img src="/site/img/ico_cup.png" alt="">Support Keyloria</a></div></div>
+<div class="wrap end"><img src="/site/img/hero_pip.png" alt=""><h2>Ready to play?</h2><div class="cta" style="justify-content:center"><span class="prism"><a class="pbtn c-gold" href="/play/"><img src="/site/img/ico_play.png" alt="">Play free</a></span><a class="pbtn c-teal" href="#classroom"><img src="/site/img/ico_book.png" alt="">For classrooms</a></div><p class="tiny" style="margin-top:28px">Keyloria is free and ad-free. If it helps your kids or class, you can help keep it that way.</p><div class="cta" style="justify-content:center;margin-top:14px"><a class="pbtn c-red" href="https://ko-fi.com/keyloria" target="_blank" rel="noopener"><img src="/site/img/ico_cup.png" alt="">Support Keyloria</a></div></div>
 </main>
 <footer class="wrap"><div class="fbtns"><a class="fbtn f-green" href="/play/">Play now</a><a class="fbtn f-ig" href="https://www.instagram.com/keyloria.kingdom" target="_blank" rel="noopener">Instagram</a><a class="fbtn f-red" href="https://ko-fi.com/keyloria" target="_blank" rel="noopener"><img src="/site/img/ico_cup.png" alt="">Support on Ko-fi</a></div>Keyloria Kingdom<br><small class="aimade">Created with the assistance of AI · <a href="/privacy/" style="color:inherit">Privacy</a></small></footer>
 
@@ -351,7 +392,7 @@ PAL.K='#5a4a7a';
 document.querySelectorAll('.fico').forEach(el=>{const g=ICO[el.dataset.ico];if(!g)return;let r='';g.forEach((row,y)=>[...row].forEach((c,x)=>{if(PAL[c])r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${PAL[c]}"/>`}));
  el.innerHTML=`<svg viewBox="-1 -1 14 14" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`});
 /* tabs: the hero stays, the nav swaps the section below it */
-const TABS=['play','arcade','spelling','race','classroom'];
+const TABS=['play','arcade','math','spelling','race','classroom'];
 function tab(id,scroll){if(id==='safety')id='classroom';if(!TABS.includes(id))id='play';
  TABS.forEach(t=>document.getElementById(t).classList.toggle('on',t===id));
  document.querySelectorAll('nav [data-tab]').forEach(a=>a.classList.toggle('on',a.dataset.tab===id));
@@ -408,7 +449,7 @@ new IntersectionObserver(es=>{es[0].isIntersecting&&document.getElementById('cla
 
 /* spelling walkthrough */
 (function(){const ST=[
- ['Open Spelling','On the home screen',0.4,'Tap the blue <b>SPELLING</b> button on the home screen.'],
+ ['Open Spelling','On the home screen',0.4,'Tap the pink <b>SPELL</b> tile on the home screen.'],
  ['Pick your words','Grades K to 8',3.68,'Choose <b>Word Sets</b> and a grade, or a teacher list, Tricky Words or your own list.'],
  ['Choose how to play','Look, Listen or Bee',10.28,'<b>Look</b>: see it, then type it from memory. <b>Listen</b>: hear it and type it. <b>Bee Battle</b>: beat the Bee boss.'],
  ['Spell the words','Hints when you need them',14.8,'Press <b>Space</b> when ready and type the word. After a miss the next letter is shown, and the word goes to Tricky Words.'],
